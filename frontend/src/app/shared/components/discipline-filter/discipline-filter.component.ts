@@ -6,14 +6,14 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ChipComponent } from '@shared/ui';
 import { Discipline } from '@shared/models';
 
 @Component({
   selector: 'app-discipline-filter',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipComponent],
+  imports: [TranslocoPipe, ChipComponent],
   templateUrl: './discipline-filter.component.html',
 })
 export class DisciplineFilterComponent {

@@ -1,27 +1,26 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/theme.service';
-import { TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui';
 
 interface NavLink {
   path: string;
-  labelDe: string;
-  labelEn: string;
+  key: string;
 }
 
 const NAV_LINKS: NavLink[] = [
-  { path: '/events', labelDe: 'Events', labelEn: 'Events' },
-  { path: '/map', labelDe: 'Karte', labelEn: 'Map' },
+  { path: '/events', key: 'app.nav.events' },
+  { path: '/map', key: 'app.nav.map' },
 ];
 
-const AUTH_NAV: NavLink = { path: '/profile', labelDe: 'Profil', labelEn: 'Profile' };
+const AUTH_NAV: NavLink = { path: '/profile', key: 'app.nav.profile' };
 
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastContainerComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastContainerComponent, TranslocoPipe],
   templateUrl: './app-shell.component.html',
 })
 export class AppShellComponent {
@@ -34,13 +33,13 @@ export class AppShellComponent {
   protected readonly navLinks = NAV_LINKS;
   protected readonly authNav = AUTH_NAV;
 
-  protected activeLang(): string {
-    return this.transloco.getActiveLang();
-  }
-
   protected toggleLang(): void {
     const next = this.transloco.getActiveLang() === 'de' ? 'en' : 'de';
     this.transloco.setActiveLang(next);
+  }
+
+  protected activeLang(): string {
+    return this.transloco.getActiveLang();
   }
 
   protected onLogout(): void {

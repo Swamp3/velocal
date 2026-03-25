@@ -13,15 +13,15 @@
 } @else if (error()) {
   <app-empty-state
     icon="🔍"
-    title="Event nicht gefunden"
-    message="Dieses Event existiert nicht oder wurde entfernt."
+    [title]="'events.detail.notFoundTitle' | transloco"
+    [message]="'events.detail.notFoundMessage' | transloco"
   >
     <a
       routerLink="/events"
       class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]
         hover:underline"
     >
-      ← Zurück zur Übersicht
+      ← {{ 'events.detail.backToList' | transloco }}
     </a>
   </app-empty-state>
 } @else if (event(); as event) {
@@ -31,7 +31,7 @@
     class="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-text-muted)]
       hover:text-[var(--color-text)] transition-colors"
   >
-    ← Zurück zur Übersicht
+    ← {{ 'events.detail.backToList' | transloco }}
   </a>
 
   <!-- Header: discipline chip + status -->
@@ -46,9 +46,10 @@
       class="mt-4 flex items-center gap-2 rounded-[var(--radius-default)] border border-red-300
         bg-red-50 px-4 py-3 text-sm font-medium text-red-800
         dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+      role="alert"
     >
       <span class="text-lg">⚠️</span>
-      Dieses Event wurde abgesagt.
+      {{ 'events.detail.cancelled' | transloco }}
     </div>
   }
 
@@ -62,7 +63,7 @@
     <div class="flex items-start gap-3">
       <span class="mt-0.5 text-base">📅</span>
       <div>
-        <dt class="text-[var(--color-text-muted)]">Datum</dt>
+        <dt class="text-[var(--color-text-muted)]">{{ 'events.detail.date' | transloco }}</dt>
         <dd class="font-medium text-[var(--color-text)]">
           {{ event.startDate | date: 'dd.MM.yyyy' }}
           @if (event.endDate) {
@@ -75,7 +76,7 @@
     <div class="flex items-start gap-3">
       <span class="mt-0.5 text-base">📍</span>
       <div>
-        <dt class="text-[var(--color-text-muted)]">Ort</dt>
+        <dt class="text-[var(--color-text-muted)]">{{ 'events.detail.location' | transloco }}</dt>
         <dd class="font-medium text-[var(--color-text)]">
           {{ event.locationName }}
           @if (event.address) {
@@ -89,7 +90,7 @@
       <div class="flex items-start gap-3">
         <span class="mt-0.5 text-base">⏰</span>
         <div>
-          <dt class="text-[var(--color-text-muted)]">Meldeschluss</dt>
+          <dt class="text-[var(--color-text-muted)]">{{ 'events.detail.registrationDeadline' | transloco }}</dt>
           <dd class="font-medium text-[var(--color-text)]">
             {{ event.registrationDeadline | date: 'dd.MM.yyyy' }}
           </dd>
@@ -101,7 +102,7 @@
       <div class="flex items-start gap-3">
         <span class="mt-0.5 text-base">🔗</span>
         <div>
-          <dt class="text-[var(--color-text-muted)]">Externe Seite</dt>
+          <dt class="text-[var(--color-text-muted)]">{{ 'events.detail.externalUrl' | transloco }}</dt>
           <dd>
             <a
               [href]="event.externalUrl"
@@ -120,7 +121,7 @@
   <!-- Description -->
   @if (event.description) {
     <div class="mt-8">
-      <h2 class="text-lg font-semibold text-[var(--color-text)]">Beschreibung</h2>
+      <h2 class="text-lg font-semibold text-[var(--color-text)]">{{ 'events.detail.description' | transloco }}</h2>
       <p
         class="mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--color-text-muted)]"
       >{{ event.description }}</p>
@@ -142,12 +143,12 @@
         [loading]="favoriteLoading()"
         (click)="toggleFavorite()"
       >
-        {{ isFavorite() ? '★ Aus Favoriten entfernen' : '☆ Zu Favoriten hinzufügen' }}
+        {{ isFavorite() ? ('events.detail.removeFavorite' | transloco) : ('events.detail.addFavorite' | transloco) }}
       </ui-button>
     } @else {
       <a routerLink="/auth/login" class="inline-flex">
         <ui-button variant="outline">
-          ☆ Anmelden um Favoriten zu nutzen
+          ☆ {{ 'events.detail.loginToFavorite' | transloco }}
         </ui-button>
       </a>
     }

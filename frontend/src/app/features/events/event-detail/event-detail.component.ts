@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { EventService } from '@core/services/event.service';
 import { AuthService } from '@core/services/auth.service';
 import { FavoriteService } from '@core/services/favorite.service';
@@ -40,6 +41,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
   imports: [
     RouterLink,
     DatePipe,
+    TranslocoPipe,
     ButtonComponent,
     SkeletonComponent,
     DisciplineChipComponent,

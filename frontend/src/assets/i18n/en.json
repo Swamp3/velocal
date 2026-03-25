@@ -1,1 +1,131 @@
-{}
+{
+  "app": {
+    "title": "VeloCal",
+    "nav": {
+      "events": "Events",
+      "map": "Map",
+      "profile": "Profile",
+      "login": "Login",
+      "logout": "Logout"
+    }
+  },
+  "events": {
+    "search": "Search events…",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "allDisciplines": "All",
+    "noResults": "No events found",
+    "noResultsHint": "Adjust your filters or try a different search term.",
+    "distance": "{{distance}} km",
+    "distanceAway": "{{distance}} km away",
+    "eventsCount": "{{count}} Events",
+    "inRadius": "within radius",
+    "detail": {
+      "notFoundTitle": "Event not found",
+      "notFoundMessage": "This event does not exist or has been removed.",
+      "backToList": "Back to overview",
+      "cancelled": "This event has been cancelled.",
+      "date": "Date",
+      "location": "Location",
+      "registrationDeadline": "Registration Deadline",
+      "externalUrl": "External Link",
+      "description": "Description",
+      "addFavorite": "Add to favorites",
+      "removeFavorite": "Remove from favorites",
+      "loginToFavorite": "Login to use favorites",
+      "details": "Details →"
+    },
+    "status": {
+      "published": "Published",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
+  },
+  "map": {
+    "loading": "Loading events…",
+    "filter": "Filter",
+    "zoomForMore": "Zoom in to see more events",
+    "search": "Search…",
+    "geoSearch": "Radius Search",
+    "reset": "Reset",
+    "discipline": "Discipline",
+    "dateRange": "Date Range",
+    "clearFilters": "Clear filters"
+  },
+  "geo": {
+    "zip": "ZIP",
+    "zipPlaceholder": "e.g. 71522",
+    "country": "Country",
+    "radius": "Radius",
+    "myLocation": "My Location",
+    "clearGeo": "Reset radius search",
+    "denied": "Location access denied",
+    "summary": "{{total}} Events within {{radius}} km of {{zip}}",
+    "summaryNoZip": "{{total}} Events within {{radius}} km"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "createAccount": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "displayName": "Display Name",
+    "optional": "Optional",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "invalidCredentials": "Invalid credentials",
+    "loginFailed": "Login failed",
+    "emailTaken": "This email is already registered",
+    "registerFailed": "Registration failed"
+  },
+  "profile": {
+    "title": "Profile",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Your name",
+    "zip": "ZIP Code",
+    "zipPlaceholder": "e.g. 10115",
+    "country": "Country",
+    "language": "Language",
+    "save": "Save Changes",
+    "savedSuccess": "Profile saved",
+    "savedError": "Failed to save",
+    "disciplines": "Preferred Disciplines",
+    "savingPrefs": "Saving...",
+    "prefsError": "Failed to save discipline preferences",
+    "favorites": "My Favorites",
+    "removeFavorite": "Remove",
+    "loadMore": "Load more",
+    "loadingFavorites": "Loading favorites...",
+    "noFavorites": "You have no favorites yet."
+  },
+  "validation": {
+    "required": "Required",
+    "email": "Invalid email",
+    "minLength": "At least {{min}} characters",
+    "passwordMismatch": "Passwords do not match"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "toggleMenu": "Toggle menu"
+  },
+  "country": {
+    "select": "Select country...",
+    "noResults": "No countries found"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "notFoundMessage": "The requested page does not exist.",
+    "backToHome": "Back to Home",
+    "offline": "No internet connection",
+    "serverError": "Server error. Please try again later.",
+    "timeout": "The request took too long. Please try again."
+  }
+}

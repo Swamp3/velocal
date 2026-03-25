@@ -12,7 +12,7 @@
         class="size-10 animate-spin rounded-full border-4
           border-[var(--color-border)] border-t-[var(--color-primary)]"
       ></div>
-      <span class="text-sm text-[var(--color-text-muted)]">Lade Events…</span>
+      <span class="text-sm text-[var(--color-text-muted)]">{{ 'map.loading' | transloco }}</span>
     </div>
   </div>
 }
@@ -25,6 +25,8 @@
     border border-[var(--color-border)] hover:bg-[var(--color-bg-alt)]
     transition-colors cursor-pointer"
   (click)="filterPanelOpen.set(!filterPanelOpen())"
+  [attr.aria-expanded]="filterPanelOpen()"
+  [attr.aria-label]="'map.filter' | transloco"
 >
   @if (filterPanelOpen()) {
     <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -35,7 +37,7 @@
       <path stroke-linecap="round" d="M4 6h16M7 12h10M10 18h4" />
     </svg>
   }
-  <span class="max-md:sr-only">Filter</span>
+  <span class="max-md:sr-only">{{ 'map.filter' | transloco }}</span>
   @if (hasActiveFilters() && !filterPanelOpen()) {
     <span class="size-2.5 rounded-full bg-[var(--color-primary)]"></span>
   }
@@ -50,7 +52,7 @@
   >
     <span class="font-medium text-[var(--color-text)]">{{ eventCount() }}</span> Events
     @if (geoActive()) {
-      <span class="text-xs"> im Umkreis</span>
+      <span class="text-xs"> {{ 'events.inRadius' | transloco }}</span>
     }
   </div>
 }
@@ -62,7 +64,7 @@
       bg-[var(--color-bg)] px-4 py-2 text-xs text-[var(--color-text-muted)]
       shadow-md border border-[var(--color-border)]"
   >
-    Zoome näher heran für weitere Events
+    {{ 'map.zoomForMore' | transloco }}
   </div>
 }
 
@@ -79,6 +81,8 @@
       bg-[var(--color-bg)] shadow-lg border border-[var(--color-border)]
       md:top-16 md:left-4 md:w-80 md:max-h-[calc(100%-5rem)] md:rounded-[var(--radius-lg)]
       max-md:bottom-0 max-md:left-0 max-md:right-0 max-md:max-h-[70dvh] max-md:rounded-t-2xl"
+    role="dialog"
+    [attr.aria-label]="'map.filter' | transloco"
   >
     <!-- Handle bar (mobile) -->
     <div class="flex justify-center py-2 md:hidden">
@@ -98,7 +102,8 @@
           type="text"
           [value]="searchQuery()"
           (input)="onSearchInput($event)"
-          placeholder="Suche…"
+          [placeholder]="'map.search' | transloco"
+          [attr.aria-label]="'map.search' | transloco"
           class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
             bg-[var(--color-bg)] py-2 pl-9 pr-3 text-sm text-[var(--color-text)]
             placeholder:text-[var(--color-muted)]
@@ -109,7 +114,7 @@
       <!-- Geo search -->
       <div>
         <span class="mb-2 block text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-          📍 Umkreissuche
+          📍 {{ 'map.geoSearch' | transloco }}
         </span>
 
         <div class="flex gap-2">
@@ -117,7 +122,7 @@
             type="text"
             [value]="zip()"
             (input)="onZipInput($event)"
-            placeholder="PLZ"
+            [placeholder]="'geo.zip' | transloco"
             maxlength="10"
             class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
               bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
@@ -141,12 +146,13 @@
           </select>
         </div>
 
-        <div class="mt-2 flex flex-wrap gap-1">
+        <div class="mt-2 flex flex-wrap gap-1" role="radiogroup" [attr.aria-label]="'geo.radius' | transloco">
           @for (r of radiusOptions; track r) {
             <button
               [class]="radius() === r
                 ? 'rounded-[var(--radius-default)] border border-[var(--color-primary)] bg-[var(--color-primary)] px-2 py-1 text-xs font-medium text-white cursor-pointer'
                 : 'rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer'"
+              [attr.aria-pressed]="radius() === r"
               (click)="onRadiusChange(r)"
             >
               {{ r }} km
@@ -168,7 +174,7 @@
             } @else {
               <span>📍</span>
             }
-            Mein Standort
+            {{ 'geo.myLocation' | transloco }}
           </button>
 
           @if (geoActive()) {
@@ -176,13 +182,13 @@
               class="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-text)] cursor-pointer"
               (click)="clearGeoSearch()"
             >
-              Zurücksetzen
+              {{ 'map.reset' | transloco }}
             </button>
           }
         </div>
 
         @if (geolocationService.denied()) {
-          <span class="mt-1 block text-xs text-red-500">Standortzugriff verweigert</span>
+          <span class="mt-1 block text-xs text-red-500" role="alert">{{ 'geo.denied' | transloco }}</span>
         }
       </div>
 
@@ -190,7 +196,7 @@
       @if (disciplines().length) {
         <div>
           <span class="mb-2 block text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-            Disziplin
+            {{ 'map.discipline' | transloco }}
           </span>
           <app-discipline-filter
             [disciplines]="disciplines()"
@@ -203,11 +209,11 @@
       <!-- Date range -->
       <div>
         <span class="mb-2 block text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-          Zeitraum
+          {{ 'map.dateRange' | transloco }}
         </span>
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-2">
-            <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">Von</span>
+            <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'events.dateFrom' | transloco }}</span>
             <input
               type="date"
               [value]="dateFrom()"
@@ -218,7 +224,7 @@
             />
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">Bis</span>
+            <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'events.dateTo' | transloco }}</span>
             <input
               type="date"
               [value]="dateTo()"
@@ -239,7 +245,7 @@
             hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
           (click)="clearFilters()"
         >
-          Filter zurücksetzen
+          {{ 'map.clearFilters' | transloco }}
         </button>
       }
     </div>

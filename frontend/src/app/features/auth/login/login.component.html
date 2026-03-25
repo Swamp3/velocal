@@ -5,11 +5,11 @@
     class="w-full max-w-sm rounded-[var(--radius-lg)] border border-[var(--color-border)]
       bg-[var(--color-bg)] p-8 shadow-sm"
   >
-    <h1 class="mb-6 text-2xl font-bold text-[var(--color-text)]">Anmelden</h1>
+    <h1 class="mb-6 text-2xl font-bold text-[var(--color-text)]">{{ 'auth.login' | transloco }}</h1>
 
     <div class="flex flex-col gap-4">
       <ui-input
-        label="E-Mail"
+        [label]="'auth.email' | transloco"
         type="email"
         placeholder="name@example.com"
         formControlName="email"
@@ -17,7 +17,7 @@
       />
 
       <ui-input
-        label="Passwort"
+        [label]="'auth.password' | transloco"
         type="password"
         formControlName="password"
         [error]="fieldError('password')"
@@ -30,17 +30,17 @@
         [disabled]="loading()"
         class="w-full"
       >
-        Anmelden
+        {{ 'auth.login' | transloco }}
       </ui-button>
     </div>
 
     <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
-      Noch kein Konto?
+      {{ 'auth.noAccount' | transloco }}
       <a
         routerLink="/auth/register"
         class="font-medium text-[var(--color-primary)] hover:underline"
       >
-        Registrieren
+        {{ 'auth.register' | transloco }}
       </a>
     </p>
   </form>

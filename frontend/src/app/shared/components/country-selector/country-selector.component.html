@@ -4,7 +4,7 @@
       #searchInput
       type="text"
       [disabled]="isDisabled()"
-      [placeholder]="displayValue() || 'Select country...'"
+      [placeholder]="displayValue() || ('country.select' | transloco)"
       [value]="open() ? search() : ''"
       [class]="
         'w-full rounded-[var(--radius-default)] border bg-[var(--color-bg)] ' +
@@ -61,7 +61,7 @@
         </li>
       } @empty {
         <li class="px-3 py-2 text-sm text-[var(--color-muted)]">
-          No countries found
+          {{ 'country.noResults' | transloco }}
         </li>
       }
     </ul>

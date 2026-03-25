@@ -11,6 +11,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { EventService, EventSearchParams } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { AuthService } from '@core/services/auth.service';
@@ -27,6 +28,7 @@ const RADIUS_OPTIONS = [10, 25, 50, 100, 200] as const;
   selector: 'app-event-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    TranslocoPipe,
     PaginationComponent,
     SkeletonComponent,
     DisciplineFilterComponent,

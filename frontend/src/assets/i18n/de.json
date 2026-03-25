@@ -1,1 +1,131 @@
-{}
+{
+  "app": {
+    "title": "VeloCal",
+    "nav": {
+      "events": "Events",
+      "map": "Karte",
+      "profile": "Profil",
+      "login": "Anmelden",
+      "logout": "Abmelden"
+    }
+  },
+  "events": {
+    "search": "Veranstaltung suchen…",
+    "dateFrom": "Von",
+    "dateTo": "Bis",
+    "allDisciplines": "Alle",
+    "noResults": "Keine Veranstaltungen gefunden",
+    "noResultsHint": "Passe deine Filter an oder versuche einen anderen Suchbegriff.",
+    "distance": "{{distance}} km",
+    "distanceAway": "{{distance}} km entfernt",
+    "eventsCount": "{{count}} Events",
+    "inRadius": "im Umkreis",
+    "detail": {
+      "notFoundTitle": "Event nicht gefunden",
+      "notFoundMessage": "Dieses Event existiert nicht oder wurde entfernt.",
+      "backToList": "Zurück zur Übersicht",
+      "cancelled": "Dieses Event wurde abgesagt.",
+      "date": "Datum",
+      "location": "Ort",
+      "registrationDeadline": "Meldeschluss",
+      "externalUrl": "Externe Seite",
+      "description": "Beschreibung",
+      "addFavorite": "Zu Favoriten hinzufügen",
+      "removeFavorite": "Aus Favoriten entfernen",
+      "loginToFavorite": "Anmelden um Favoriten zu nutzen",
+      "details": "Details →"
+    },
+    "status": {
+      "published": "Ausgeschrieben",
+      "cancelled": "Abgesagt",
+      "completed": "Abgeschlossen"
+    }
+  },
+  "map": {
+    "loading": "Lade Events…",
+    "filter": "Filter",
+    "zoomForMore": "Zoome näher heran für weitere Events",
+    "search": "Suche…",
+    "geoSearch": "Umkreissuche",
+    "reset": "Zurücksetzen",
+    "discipline": "Disziplin",
+    "dateRange": "Zeitraum",
+    "clearFilters": "Filter zurücksetzen"
+  },
+  "geo": {
+    "zip": "PLZ",
+    "zipPlaceholder": "z.B. 71522",
+    "country": "Land",
+    "radius": "Umkreis",
+    "myLocation": "Mein Standort",
+    "clearGeo": "Umkreissuche zurücksetzen",
+    "denied": "Standortzugriff verweigert",
+    "summary": "{{total}} Events im Umkreis von {{radius}} km um {{zip}}",
+    "summaryNoZip": "{{total}} Events im Umkreis von {{radius}} km"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "createAccount": "Konto erstellen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "displayName": "Anzeigename",
+    "optional": "Optional",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "invalidCredentials": "Ungültige Anmeldedaten",
+    "loginFailed": "Anmeldung fehlgeschlagen",
+    "emailTaken": "Diese E-Mail ist bereits registriert",
+    "registerFailed": "Registrierung fehlgeschlagen"
+  },
+  "profile": {
+    "title": "Profil",
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Dein Name",
+    "zip": "PLZ",
+    "zipPlaceholder": "z.B. 10115",
+    "country": "Land",
+    "language": "Sprache",
+    "save": "Änderungen speichern",
+    "savedSuccess": "Profil gespeichert",
+    "savedError": "Fehler beim Speichern",
+    "disciplines": "Bevorzugte Disziplinen",
+    "savingPrefs": "Speichere...",
+    "prefsError": "Fehler beim Speichern der Disziplinen",
+    "favorites": "Meine Favoriten",
+    "removeFavorite": "Entfernen",
+    "loadMore": "Mehr laden",
+    "loadingFavorites": "Lade Favoriten...",
+    "noFavorites": "Du hast noch keine Favoriten."
+  },
+  "validation": {
+    "required": "Pflichtfeld",
+    "email": "Ungültige E-Mail",
+    "minLength": "Mindestens {{min}} Zeichen",
+    "passwordMismatch": "Passwörter stimmen nicht überein"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "retry": "Erneut versuchen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "switchToLight": "Zum hellen Design wechseln",
+    "switchToDark": "Zum dunklen Design wechseln",
+    "toggleMenu": "Menü umschalten"
+  },
+  "country": {
+    "select": "Land auswählen...",
+    "noResults": "Kein Land gefunden"
+  },
+  "errors": {
+    "notFound": "Seite nicht gefunden",
+    "notFoundMessage": "Die angeforderte Seite existiert nicht.",
+    "backToHome": "Zur Startseite",
+    "offline": "Keine Internetverbindung",
+    "serverError": "Serverfehler. Bitte versuche es später erneut.",
+    "timeout": "Die Anfrage hat zu lange gedauert. Bitte versuche es erneut."
+  }
+}

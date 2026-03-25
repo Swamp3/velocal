@@ -10,6 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { ToastService } from '@shared/ui';
 import { ButtonComponent, InputComponent } from '@shared/ui';
@@ -20,6 +21,7 @@ import { ButtonComponent, InputComponent } from '@shared/ui';
   imports: [
     ReactiveFormsModule,
     RouterLink,
+    TranslocoPipe,
     ButtonComponent,
     InputComponent,
   ],
@@ -30,6 +32,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly transloco = inject(TranslocoService);
 
   protected readonly loading = signal(false);
 
@@ -55,8 +58,8 @@ export class LoginComponent {
         this.loading.set(false);
         this.toast.error(
           err.status === 401
-            ? 'Ungültige Anmeldedaten'
-            : 'Anmeldung fehlgeschlagen',
+            ? this.transloco.translate('auth.invalidCredentials')
+            : this.transloco.translate('auth.loginFailed'),
         );
       },
     });
@@ -65,9 +68,9 @@ export class LoginComponent {
   protected fieldError(name: 'email' | 'password'): string {
     const ctrl = this.form.controls[name];
     if (!ctrl.touched || ctrl.valid) return '';
-    if (ctrl.hasError('required')) return 'Pflichtfeld';
-    if (ctrl.hasError('email')) return 'Ungültige E-Mail';
-    if (ctrl.hasError('minlength')) return 'Mindestens 8 Zeichen';
+    if (ctrl.hasError('required')) return this.transloco.translate('validation.required');
+    if (ctrl.hasError('email')) return this.transloco.translate('validation.email');
+    if (ctrl.hasError('minlength')) return this.transloco.translate('validation.minLength', { min: 8 });
     return '';
   }
 }

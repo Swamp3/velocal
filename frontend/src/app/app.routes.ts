@@ -20,4 +20,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/user/user.routes'),
   },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./features/not-found/not-found.component').then(
+        (m) => m.NotFoundComponent,
+      ),
+  },
 ];

@@ -4,10 +4,12 @@ import {
   computed,
   ElementRef,
   forwardRef,
+  inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const COUNTRY_CODES = [
   'AT', 'BE', 'BG', 'CH', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI',
@@ -39,9 +41,11 @@ function buildCountryList(): CountryOption[] {
       multi: true,
     },
   ],
+  imports: [TranslocoPipe],
   templateUrl: './country-selector.component.html',
 })
 export class CountrySelectorComponent implements ControlValueAccessor {
+  private readonly transloco = inject(TranslocoService);
   private readonly countries = buildCountryList();
 
   protected readonly search = signal('');

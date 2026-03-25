@@ -1,6 +1,6 @@
 <div class="space-y-8">
   <h1 class="text-2xl font-bold text-[var(--color-text)]">
-    {{ activeLang() === 'de' ? 'Profil' : 'Profile' }}
+    {{ 'profile.title' | transloco }}
   </h1>
 
   <!-- Profile Form -->
@@ -14,21 +14,21 @@
       class="space-y-5"
     >
       <ui-input
-        [label]="activeLang() === 'de' ? 'Anzeigename' : 'Display Name'"
+        [label]="'profile.displayName' | transloco"
         formControlName="displayName"
-        [placeholder]="activeLang() === 'de' ? 'Dein Name' : 'Your name'"
+        [placeholder]="'profile.displayNamePlaceholder' | transloco"
       />
 
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <ui-input
-          [label]="activeLang() === 'de' ? 'PLZ' : 'ZIP Code'"
+          [label]="'profile.zip' | transloco"
           formControlName="homeZip"
-          [placeholder]="activeLang() === 'de' ? 'z.B. 10115' : 'e.g. 10115'"
+          [placeholder]="'profile.zipPlaceholder' | transloco"
         />
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-[var(--color-text)]">
-            {{ activeLang() === 'de' ? 'Land' : 'Country' }}
+            {{ 'profile.country' | transloco }}
           </label>
           <app-country-selector formControlName="homeCountry" />
         </div>
@@ -37,7 +37,7 @@
       <!-- Language -->
       <fieldset class="space-y-2">
         <legend class="text-sm font-medium text-[var(--color-text)]">
-          {{ activeLang() === 'de' ? 'Sprache' : 'Language' }}
+          {{ 'profile.language' | transloco }}
         </legend>
         <div class="flex items-center gap-6">
           <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
@@ -62,7 +62,7 @@
       </fieldset>
 
       <ui-button type="submit" [loading]="saving()" [disabled]="profileForm.invalid" size="lg">
-        {{ activeLang() === 'de' ? 'Änderungen speichern' : 'Save Changes' }}
+        {{ 'profile.save' | transloco }}
       </ui-button>
     </form>
   </section>
@@ -73,7 +73,7 @@
       bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
     <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
-      {{ activeLang() === 'de' ? 'Bevorzugte Disziplinen' : 'Preferred Disciplines' }}
+      {{ 'profile.disciplines' | transloco }}
     </h2>
     <div class="flex flex-wrap gap-2">
       @for (d of disciplines(); track d.slug) {
@@ -88,7 +88,7 @@
     </div>
     @if (savingPrefs()) {
       <p class="mt-2 text-xs text-[var(--color-muted)]">
-        {{ activeLang() === 'de' ? 'Speichere...' : 'Saving...' }}
+        {{ 'profile.savingPrefs' | transloco }}
       </p>
     }
   </section>
@@ -99,7 +99,7 @@
       bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
     <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
-      {{ activeLang() === 'de' ? 'Meine Favoriten' : 'My Favorites' }}
+      {{ 'profile.favorites' | transloco }}
       @if (favoritesTotal() > 0) {
         <span class="ml-1 text-sm font-normal text-[var(--color-muted)]">
           ({{ favoritesTotal() }})
@@ -121,7 +121,7 @@
                 transition-colors cursor-pointer"
               (click)="onRemoveFavorite(event.id)"
             >
-              {{ activeLang() === 'de' ? '★ Entfernen' : '★ Remove' }}
+              ★ {{ 'profile.removeFavorite' | transloco }}
             </button>
           </div>
         }
@@ -134,19 +134,17 @@
             [loading]="loadingFavorites()"
             (click)="onLoadMore()"
           >
-            {{ activeLang() === 'de' ? 'Mehr laden' : 'Load more' }}
+            {{ 'profile.loadMore' | transloco }}
           </ui-button>
         </div>
       }
     } @else if (loadingFavorites()) {
       <p class="text-sm text-[var(--color-muted)]">
-        {{ activeLang() === 'de' ? 'Lade Favoriten...' : 'Loading favorites...' }}
+        {{ 'profile.loadingFavorites' | transloco }}
       </p>
     } @else {
       <p class="text-sm text-[var(--color-muted)]">
-        {{ activeLang() === 'de'
-          ? 'Du hast noch keine Favoriten.'
-          : 'You have no favorites yet.' }}
+        {{ 'profile.noFavorites' | transloco }}
       </p>
     }
   </section>

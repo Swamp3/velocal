@@ -6,7 +6,8 @@
       type="text"
       [value]="searchQuery()"
       (input)="onSearchInput($event)"
-      placeholder="Veranstaltung suchen…"
+      [placeholder]="'events.search' | transloco"
+      [attr.aria-label]="'events.search' | transloco"
       class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
         bg-[var(--color-bg)] py-2.5 pl-10 pr-4 text-sm text-[var(--color-text)]
         placeholder:text-[var(--color-muted)]
@@ -28,7 +29,7 @@
   <!-- Date range -->
   <div class="mt-4 flex flex-wrap items-center gap-3">
     <label class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-      <span>Von</span>
+      <span>{{ 'events.dateFrom' | transloco }}</span>
       <input
         type="date"
         [value]="dateFrom()"
@@ -39,7 +40,7 @@
       />
     </label>
     <label class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-      <span>Bis</span>
+      <span>{{ 'events.dateTo' | transloco }}</span>
       <input
         type="date"
         [value]="dateTo()"
@@ -58,12 +59,12 @@
   >
     <div class="flex flex-wrap items-end gap-3">
       <label class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">📍 PLZ</span>
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">📍 {{ 'geo.zip' | transloco }}</span>
         <input
           type="text"
           [value]="zip()"
           (input)="onZipInput($event)"
-          placeholder="z.B. 71522"
+          [placeholder]="'geo.zipPlaceholder' | transloco"
           maxlength="10"
           class="w-28 rounded-[var(--radius-default)] border border-[var(--color-border)]
             bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
@@ -73,7 +74,7 @@
       </label>
 
       <label class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">Land</span>
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{ 'geo.country' | transloco }}</span>
         <select
           [value]="country()"
           (change)="onCountryChange($event)"
@@ -92,13 +93,14 @@
       </label>
 
       <div class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">Umkreis</span>
-        <div class="flex gap-1">
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{ 'geo.radius' | transloco }}</span>
+        <div class="flex gap-1" role="radiogroup" [attr.aria-label]="'geo.radius' | transloco">
           @for (r of radiusOptions; track r) {
             <button
               [class]="radius() === r
                 ? 'rounded-[var(--radius-default)] border border-[var(--color-primary)] bg-[var(--color-primary)] px-2.5 py-1.5 text-xs font-medium text-white cursor-pointer'
                 : 'rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer'"
+              [attr.aria-pressed]="radius() === r"
               (click)="onRadiusChange(r)"
             >
               {{ r }} km
@@ -122,7 +124,7 @@
         } @else {
           <span>📍</span>
         }
-        Mein Standort
+        {{ 'geo.myLocation' | transloco }}
       </button>
 
       @if (geoActive()) {
@@ -130,21 +132,21 @@
           class="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-text)] cursor-pointer"
           (click)="clearGeoSearch()"
         >
-          Umkreissuche zurücksetzen
+          {{ 'geo.clearGeo' | transloco }}
         </button>
       }
 
       @if (geolocationService.denied()) {
-        <span class="text-xs text-red-500">Standortzugriff verweigert</span>
+        <span class="text-xs text-red-500" role="alert">{{ 'geo.denied' | transloco }}</span>
       }
     </div>
 
     @if (geoActive() && !loading()) {
       <div class="mt-3 text-sm text-[var(--color-text-muted)]">
         @if (zip()) {
-          {{ total() }} Events im Umkreis von {{ radius() }} km um {{ zip() }}
+          {{ 'geo.summary' | transloco: { total: total(), radius: radius(), zip: zip() } }}
         } @else {
-          {{ total() }} Events im Umkreis von {{ radius() }} km
+          {{ 'geo.summaryNoZip' | transloco: { total: total(), radius: radius() } }}
         }
       </div>
     }
@@ -178,8 +180,8 @@
     } @else if (events().length === 0) {
       <app-empty-state
         icon="🔎"
-        title="Keine Veranstaltungen gefunden"
-        message="Passe deine Filter an oder versuche einen anderen Suchbegriff."
+        [title]="'events.noResults' | transloco"
+        [message]="'events.noResultsHint' | transloco"
       />
     } @else {
       <div class="flex flex-col gap-4">

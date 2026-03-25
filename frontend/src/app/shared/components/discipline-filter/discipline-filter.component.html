@@ -1,9 +1,9 @@
-<div class="flex flex-wrap items-center gap-2">
+<div class="flex flex-wrap items-center gap-2" role="group" [attr.aria-label]="'map.discipline' | transloco">
   <ui-chip
     [selected]="noneSelected()"
     (selectedChange)="clearAll()"
   >
-    Alle
+    {{ 'events.allDisciplines' | transloco }}
   </ui-chip>
 
   @for (d of disciplines(); track d.slug) {

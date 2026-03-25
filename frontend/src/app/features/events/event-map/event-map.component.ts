@@ -14,7 +14,7 @@ import {
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, tap } from 'rxjs';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
@@ -70,7 +70,7 @@ function createHomeIcon(): L.DivIcon {
 @Component({
   selector: 'app-event-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DisciplineFilterComponent],
+  imports: [TranslocoPipe, DisciplineFilterComponent],
   templateUrl: './event-map.component.html',
   host: {
     class: 'block fixed top-14 right-0 bottom-0 left-0 z-10',
@@ -427,9 +427,12 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       const disciplineName =
         ev.discipline?.nameTranslations?.[lang] ?? ev.disciplineSlug;
 
+      const distanceLabel = this.transloco.translate('events.distanceAway', { distance: ev.distance });
       const distanceHtml = ev.distance != null
-        ? `<div style="font-size:12px;color:#2563eb;margin-top:2px;font-weight:500">${ev.distance} km entfernt</div>`
+        ? `<div style="font-size:12px;color:#2563eb;margin-top:2px;font-weight:500">${this.esc(distanceLabel)}</div>`
         : '';
+
+      const detailsLabel = this.transloco.translate('events.detail.details');
 
       marker.bindPopup(
         `<div style="font-family:system-ui,sans-serif">
@@ -437,7 +440,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
           <div style="font-size:12px;color:#6b7280;margin-top:4px">${date} · ${this.esc(ev.locationName)}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:2px">${this.esc(disciplineName)}</div>
           ${distanceHtml}
-          <a href="javascript:void(0)" class="map-evt-link" style="font-size:12px;color:#2563eb;margin-top:6px;display:inline-block;text-decoration:none;font-weight:500">Details →</a>
+          <a href="javascript:void(0)" class="map-evt-link" style="font-size:12px;color:#2563eb;margin-top:6px;display:inline-block;text-decoration:none;font-weight:500">${this.esc(detailsLabel)}</a>
         </div>`,
         { closeButton: true, minWidth: 180 },
       );

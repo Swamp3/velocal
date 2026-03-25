@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { FavoriteService } from '@core/services/favorite.service';
@@ -24,6 +24,7 @@ const FAVORITES_PAGE_SIZE = 10;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    TranslocoPipe,
     ButtonComponent,
     ChipComponent,
     InputComponent,
@@ -68,6 +69,10 @@ export class ProfileComponent implements OnInit {
     this.loadFavorites();
   }
 
+  protected activeLang(): string {
+    return this.transloco.getActiveLang();
+  }
+
   private initForm(): void {
     const user = this.auth.currentUser();
     if (!user) return;
@@ -105,19 +110,11 @@ export class ProfileComponent implements OnInit {
           this.transloco.setActiveLang(vals.preferredLocale);
         }
 
-        this.toast.success(
-          this.transloco.getActiveLang() === 'de'
-            ? 'Profil gespeichert'
-            : 'Profile saved',
-        );
+        this.toast.success(this.transloco.translate('profile.savedSuccess'));
         this.saving.set(false);
       },
       error: () => {
-        this.toast.error(
-          this.transloco.getActiveLang() === 'de'
-            ? 'Fehler beim Speichern'
-            : 'Failed to save',
-        );
+        this.toast.error(this.transloco.translate('profile.savedError'));
         this.saving.set(false);
       },
     });
@@ -144,11 +141,7 @@ export class ProfileComponent implements OnInit {
     this.userService.setDisciplinePrefs(slugs).subscribe({
       next: () => this.savingPrefs.set(false),
       error: () => {
-        this.toast.error(
-          this.transloco.getActiveLang() === 'de'
-            ? 'Fehler beim Speichern der Disziplinen'
-            : 'Failed to save discipline preferences',
-        );
+        this.toast.error(this.transloco.translate('profile.prefsError'));
         this.savingPrefs.set(false);
       },
     });
@@ -185,9 +178,5 @@ export class ProfileComponent implements OnInit {
         this.favoritesTotal.update((t) => t - 1);
       },
     });
-  }
-
-  protected activeLang(): string {
-    return this.transloco.getActiveLang();
   }
 }

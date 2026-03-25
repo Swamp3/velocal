@@ -8,7 +8,7 @@
     </a>
 
     <!-- Desktop nav -->
-    <nav class="hidden items-center gap-1 md:flex">
+    <nav class="hidden items-center gap-1 md:flex" aria-label="Main navigation">
       @for (link of navLinks; track link.path) {
         <a
           [routerLink]="link.path"
@@ -17,7 +17,7 @@
             text-[var(--color-text-muted)] hover:text-[var(--color-text)]
             hover:bg-[var(--color-bg-alt)] transition-colors"
         >
-          {{ activeLang() === 'de' ? link.labelDe : link.labelEn }}
+          {{ link.key | transloco }}
         </a>
       }
 
@@ -29,7 +29,7 @@
             text-[var(--color-text-muted)] hover:text-[var(--color-text)]
             hover:bg-[var(--color-bg-alt)] transition-colors"
         >
-          {{ activeLang() === 'de' ? authNav.labelDe : authNav.labelEn }}
+          {{ authNav.key | transloco }}
         </a>
         <button
           class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm font-medium
@@ -37,7 +37,7 @@
             hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
           (click)="onLogout()"
         >
-          {{ activeLang() === 'de' ? 'Abmelden' : 'Logout' }}
+          {{ 'app.nav.logout' | transloco }}
         </button>
       } @else {
         <a
@@ -47,7 +47,7 @@
             text-[var(--color-text-muted)] hover:text-[var(--color-text)]
             hover:bg-[var(--color-bg-alt)] transition-colors"
         >
-          {{ activeLang() === 'de' ? 'Anmelden' : 'Login' }}
+          {{ 'app.nav.login' | transloco }}
         </a>
       }
     </nav>
@@ -59,6 +59,7 @@
           border border-[var(--color-border)] text-[var(--color-text-muted)]
           hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
         (click)="toggleLang()"
+        [attr.aria-label]="activeLang() === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'"
       >
         {{ activeLang() === 'de' ? 'EN' : 'DE' }}
       </button>
@@ -68,7 +69,9 @@
         class="rounded-[var(--radius-default)] p-1.5 text-[var(--color-text-muted)]
           hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
         (click)="theme.toggle()"
-        [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        [attr.aria-label]="theme.theme() === 'dark'
+          ? ('common.switchToLight' | transloco)
+          : ('common.switchToDark' | transloco)"
       >
         @if (theme.theme() === 'dark') {
           <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -94,7 +97,8 @@
         class="rounded-[var(--radius-default)] p-1.5 text-[var(--color-text-muted)]
           hover:bg-[var(--color-bg-alt)] transition-colors md:hidden cursor-pointer"
         (click)="mobileMenuOpen.set(!mobileMenuOpen())"
-        aria-label="Toggle menu"
+        [attr.aria-label]="'common.toggleMenu' | transloco"
+        [attr.aria-expanded]="mobileMenuOpen()"
       >
         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           @if (mobileMenuOpen()) {
@@ -117,6 +121,7 @@
       class="fixed right-0 top-14 z-30 h-[calc(100dvh-3.5rem)] w-64
         border-l border-[var(--color-border)] bg-[var(--color-bg)]
         p-4 shadow-lg md:hidden"
+      aria-label="Mobile navigation"
     >
       <div class="flex flex-col gap-1">
         @for (link of navLinks; track link.path) {
@@ -127,7 +132,7 @@
               text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors"
             (click)="mobileMenuOpen.set(false)"
           >
-            {{ activeLang() === 'de' ? link.labelDe : link.labelEn }}
+            {{ link.key | transloco }}
           </a>
         }
         @if (auth.isAuthenticated()) {
@@ -138,14 +143,14 @@
               text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors"
             (click)="mobileMenuOpen.set(false)"
           >
-            {{ activeLang() === 'de' ? authNav.labelDe : authNav.labelEn }}
+            {{ authNav.key | transloco }}
           </a>
           <button
             class="rounded-[var(--radius-default)] px-3 py-2 text-sm font-medium text-left
               text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
             (click)="mobileMenuOpen.set(false); onLogout()"
           >
-            {{ activeLang() === 'de' ? 'Abmelden' : 'Logout' }}
+            {{ 'app.nav.logout' | transloco }}
           </button>
         } @else {
           <a
@@ -155,7 +160,7 @@
               text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors"
             (click)="mobileMenuOpen.set(false)"
           >
-            {{ activeLang() === 'de' ? 'Anmelden' : 'Login' }}
+            {{ 'app.nav.login' | transloco }}
           </a>
         }
       </div>
