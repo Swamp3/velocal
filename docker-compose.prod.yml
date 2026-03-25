@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      target: production
+    volumes: []
+
+  frontend:
+    build:
+      target: production
+    ports:
+      - "80:80"
+    volumes: []

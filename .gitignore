@@ -1,0 +1,62 @@
+# Node
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+out/
+tmp/
+.temp/
+temp/
+.cache/
+coverage/
+.husky/_/
+
+# Angular
+frontend/.angular/
+frontend/.output/
+frontend/.sass-cache/
+frontend/.cache/
+frontend/build/
+frontend/dist/
+
+# NestJS
+backend/.nestjs/
+backend/dist/
+backend/.cache/
+backend/coverage/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Docker artifacts
+docker-compose.override.yml
+*.local.yml
+
+# OS / Editor crap
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.idea/
+.vscode/
+*.code-workspace
+
+# Logs
+logs/
+*.log
+
+# Misc
+frontend/package-lock.json
+backend/package-lock.json
+
+# Ignore working files folder
+working-files/
