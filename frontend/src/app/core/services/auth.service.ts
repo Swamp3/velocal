@@ -40,6 +40,10 @@ export class AuthService {
     );
   }
 
+  updateCurrentUser(user: User): void {
+    this._currentUser.set(user);
+  }
+
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     this._currentUser.set(null);

@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { CyclingEvent, PaginatedResponse } from '@shared/models';
 
+export type EventSort = 'date' | 'distance' | 'name';
+
 export interface EventSearchParams {
   q?: string;
   discipline?: string;
@@ -10,6 +12,8 @@ export interface EventSearchParams {
   lng?: number;
   radius?: number;
   zip?: string;
+  country?: string;
+  sort?: EventSort;
   from?: string;
   to?: string;
   page?: number;

@@ -49,6 +49,9 @@
       shadow-md border border-[var(--color-border)]"
   >
     <span class="font-medium text-[var(--color-text)]">{{ eventCount() }}</span> Events
+    @if (geoActive()) {
+      <span class="text-xs"> im Umkreis</span>
+    }
   </div>
 }
 
@@ -74,7 +77,7 @@
   <div
     class="absolute z-[1000] overflow-y-auto
       bg-[var(--color-bg)] shadow-lg border border-[var(--color-border)]
-      md:top-16 md:left-4 md:w-72 md:max-h-[calc(100%-5rem)] md:rounded-[var(--radius-lg)]
+      md:top-16 md:left-4 md:w-80 md:max-h-[calc(100%-5rem)] md:rounded-[var(--radius-lg)]
       max-md:bottom-0 max-md:left-0 max-md:right-0 max-md:max-h-[70dvh] max-md:rounded-t-2xl"
   >
     <!-- Handle bar (mobile) -->
@@ -101,6 +104,86 @@
             placeholder:text-[var(--color-muted)]
             focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
         />
+      </div>
+
+      <!-- Geo search -->
+      <div>
+        <span class="mb-2 block text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+          📍 Umkreissuche
+        </span>
+
+        <div class="flex gap-2">
+          <input
+            type="text"
+            [value]="zip()"
+            (input)="onZipInput($event)"
+            placeholder="PLZ"
+            maxlength="10"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+          <select
+            [value]="country()"
+            (change)="onCountryChange($event)"
+            class="rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-2 py-1.5 text-sm text-[var(--color-text)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          >
+            <option value="DE">DE</option>
+            <option value="AT">AT</option>
+            <option value="CH">CH</option>
+            <option value="NL">NL</option>
+            <option value="BE">BE</option>
+            <option value="FR">FR</option>
+            <option value="LU">LU</option>
+          </select>
+        </div>
+
+        <div class="mt-2 flex flex-wrap gap-1">
+          @for (r of radiusOptions; track r) {
+            <button
+              [class]="radius() === r
+                ? 'rounded-[var(--radius-default)] border border-[var(--color-primary)] bg-[var(--color-primary)] px-2 py-1 text-xs font-medium text-white cursor-pointer'
+                : 'rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer'"
+              (click)="onRadiusChange(r)"
+            >
+              {{ r }} km
+            </button>
+          }
+        </div>
+
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <button
+            class="inline-flex items-center gap-1 rounded-[var(--radius-default)] border
+              border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1 text-xs
+              text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer
+              disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="geolocationService.loading()"
+            (click)="useMyLocation()"
+          >
+            @if (geolocationService.loading()) {
+              <span class="inline-block size-3 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></span>
+            } @else {
+              <span>📍</span>
+            }
+            Mein Standort
+          </button>
+
+          @if (geoActive()) {
+            <button
+              class="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-text)] cursor-pointer"
+              (click)="clearGeoSearch()"
+            >
+              Zurücksetzen
+            </button>
+          }
+        </div>
+
+        @if (geolocationService.denied()) {
+          <span class="mt-1 block text-xs text-red-500">Standortzugriff verweigert</span>
+        }
       </div>
 
       <!-- Disciplines -->

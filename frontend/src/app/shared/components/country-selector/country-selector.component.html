@@ -1,0 +1,69 @@
+<div class="relative">
+  <div class="relative">
+    <input
+      #searchInput
+      type="text"
+      [disabled]="isDisabled()"
+      [placeholder]="displayValue() || 'Select country...'"
+      [value]="open() ? search() : ''"
+      [class]="
+        'w-full rounded-[var(--radius-default)] border bg-[var(--color-bg)] ' +
+        'px-3 py-2 text-sm text-[var(--color-text)] ' +
+        'placeholder:text-[var(--color-muted)] ' +
+        'focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)] ' +
+        'disabled:opacity-50 disabled:cursor-not-allowed ' +
+        'border-[var(--color-border)]'
+      "
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      (input)="onSearchInput($event)"
+    />
+    @if (selectedCode() && !isDisabled()) {
+      <button
+        type="button"
+        class="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-[var(--color-muted)]
+          hover:text-[var(--color-text)] cursor-pointer"
+        (mousedown)="$event.preventDefault(); clear()"
+        tabindex="-1"
+      >
+        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </button>
+    }
+  </div>
+
+  @if (open()) {
+    <ul
+      role="listbox"
+      class="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-[var(--radius-default)]
+        border border-[var(--color-border)] bg-[var(--color-bg)]
+        shadow-[var(--shadow-elevated)] py-1"
+    >
+      @for (country of filteredCountries(); track country.code) {
+        <li
+          role="option"
+          [attr.aria-selected]="country.code === selectedCode()"
+          [class]="
+            'cursor-pointer px-3 py-2 text-sm hover:bg-[var(--color-bg-alt)] ' +
+            (country.code === selectedCode()
+              ? 'text-[var(--color-primary)] font-medium'
+              : 'text-[var(--color-text)]')
+          "
+          (mousedown)="$event.preventDefault(); selectCountry(country)"
+        >
+          {{ country.name }}
+          <span class="ml-1 text-[var(--color-muted)]">({{ country.code }})</span>
+        </li>
+      } @empty {
+        <li class="px-3 py-2 text-sm text-[var(--color-muted)]">
+          No countries found
+        </li>
+      }
+    </ul>
+  }
+</div>

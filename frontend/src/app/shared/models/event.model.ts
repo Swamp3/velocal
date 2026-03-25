@@ -17,6 +17,7 @@ export interface CyclingEvent {
   discipline: Discipline;
   disciplineSlug: string;
   createdAt: string;
+  distance?: number;
 }
 
 export type EventStatus = 'published' | 'cancelled' | 'completed';

@@ -51,10 +51,108 @@
     </label>
   </div>
 
+  <!-- Geo search -->
+  <div
+    class="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-border)]
+      bg-[var(--color-bg-card)] p-4"
+  >
+    <div class="flex flex-wrap items-end gap-3">
+      <label class="flex flex-col gap-1">
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">📍 PLZ</span>
+        <input
+          type="text"
+          [value]="zip()"
+          (input)="onZipInput($event)"
+          placeholder="z.B. 71522"
+          maxlength="10"
+          class="w-28 rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+            placeholder:text-[var(--color-muted)]
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1">
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">Land</span>
+        <select
+          [value]="country()"
+          (change)="onCountryChange($event)"
+          class="rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        >
+          <option value="DE">DE</option>
+          <option value="AT">AT</option>
+          <option value="CH">CH</option>
+          <option value="NL">NL</option>
+          <option value="BE">BE</option>
+          <option value="FR">FR</option>
+          <option value="LU">LU</option>
+        </select>
+      </label>
+
+      <div class="flex flex-col gap-1">
+        <span class="text-xs font-medium text-[var(--color-text-muted)]">Umkreis</span>
+        <div class="flex gap-1">
+          @for (r of radiusOptions; track r) {
+            <button
+              [class]="radius() === r
+                ? 'rounded-[var(--radius-default)] border border-[var(--color-primary)] bg-[var(--color-primary)] px-2.5 py-1.5 text-xs font-medium text-white cursor-pointer'
+                : 'rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer'"
+              (click)="onRadiusChange(r)"
+            >
+              {{ r }} km
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 flex flex-wrap items-center gap-3">
+      <button
+        class="inline-flex items-center gap-1.5 rounded-[var(--radius-default)] border
+          border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm
+          text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer
+          disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="geolocationService.loading()"
+        (click)="useMyLocation()"
+      >
+        @if (geolocationService.loading()) {
+          <span class="inline-block size-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></span>
+        } @else {
+          <span>📍</span>
+        }
+        Mein Standort
+      </button>
+
+      @if (geoActive()) {
+        <button
+          class="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-text)] cursor-pointer"
+          (click)="clearGeoSearch()"
+        >
+          Umkreissuche zurücksetzen
+        </button>
+      }
+
+      @if (geolocationService.denied()) {
+        <span class="text-xs text-red-500">Standortzugriff verweigert</span>
+      }
+    </div>
+
+    @if (geoActive() && !loading()) {
+      <div class="mt-3 text-sm text-[var(--color-text-muted)]">
+        @if (zip()) {
+          {{ total() }} Events im Umkreis von {{ radius() }} km um {{ zip() }}
+        } @else {
+          {{ total() }} Events im Umkreis von {{ radius() }} km
+        }
+      </div>
+    }
+  </div>
+
   <!-- Results -->
   <div class="mt-6">
     @if (loading()) {
-      <!-- Skeleton cards -->
       <div class="flex flex-col gap-4">
         @for (i of [1, 2, 3, 4, 5]; track i) {
           <div
@@ -86,11 +184,10 @@
     } @else {
       <div class="flex flex-col gap-4">
         @for (event of events(); track event.id) {
-          <app-event-card [event]="event" />
+          <app-event-card [event]="event" [distance]="event.distance" />
         }
       </div>
 
-      <!-- Pagination -->
       @if (totalPages() > 1) {
         <div class="mt-6 flex justify-center">
           <ui-pagination

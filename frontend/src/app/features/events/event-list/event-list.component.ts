@@ -11,14 +11,17 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
-
 import { EventService, EventSearchParams } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
+import { AuthService } from '@core/services/auth.service';
+import { GeolocationService } from '@core/services/geolocation.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { PaginationComponent, SkeletonComponent } from '@shared/ui';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
 import { EmptyStateComponent } from '@shared/components';
+
+const RADIUS_OPTIONS = [10, 25, 50, 100, 200] as const;
 
 @Component({
   selector: 'app-event-list',
@@ -37,6 +40,8 @@ export class EventListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
   private readonly disciplineService = inject(DisciplineService);
+  private readonly authService = inject(AuthService);
+  protected readonly geolocationService = inject(GeolocationService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly searchQuery = signal('');
@@ -46,34 +51,47 @@ export class EventListComponent implements OnInit {
   readonly page = signal(1);
   readonly limit = signal(20);
 
+  readonly zip = signal<string>('');
+  readonly country = signal<string>('DE');
+  readonly radius = signal<number>(50);
+  readonly userLat = signal<number | null>(null);
+  readonly userLng = signal<number | null>(null);
+
   readonly events = signal<CyclingEvent[]>([]);
   readonly total = signal(0);
   readonly loading = signal(false);
   readonly disciplines = signal<Discipline[]>([]);
 
-  readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.total() / this.limit())),
-  );
+  readonly radiusOptions = RADIUS_OPTIONS;
+
+  readonly geoActive = computed(() => !!this.zip() || (this.userLat() != null && this.userLng() != null));
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 
   private readonly search$ = new Subject<void>();
   private readonly searchInput$ = new Subject<string>();
+  private readonly zipInput$ = new Subject<string>();
   private skipNextUrlSync = false;
 
   constructor() {
     this.searchInput$
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((q) => {
         this.searchQuery.set(q);
         this.page.set(1);
         this.syncUrlAndFetch();
       });
 
+    this.zipInput$
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((z) => {
+        this.zip.set(z);
+        this.userLat.set(null);
+        this.userLng.set(null);
+        this.page.set(1);
+        this.syncUrlAndFetch();
+      });
+
     effect(() => {
-      // Track dependencies so effect re-runs on changes
       this.selectedDisciplines();
       this.dateFrom();
       this.dateTo();
@@ -110,11 +128,11 @@ export class EventListComponent implements OnInit {
       });
 
     this.readUrlParams();
+    this.prefillFromUser();
   }
 
   onSearchInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.searchInput$.next(value);
+    this.searchInput$.next((event.target as HTMLInputElement).value);
   }
 
   onDisciplineChange(slugs: string[]): void {
@@ -136,6 +154,60 @@ export class EventListComponent implements OnInit {
     this.page.set(p);
   }
 
+  onZipInput(event: Event): void {
+    this.zipInput$.next((event.target as HTMLInputElement).value);
+  }
+
+  onCountryChange(event: Event): void {
+    this.country.set((event.target as HTMLSelectElement).value);
+    if (this.zip()) {
+      this.page.set(1);
+      this.syncUrlAndFetch();
+    }
+  }
+
+  onRadiusChange(r: number): void {
+    this.radius.set(r);
+    if (this.geoActive()) {
+      this.page.set(1);
+      this.syncUrlAndFetch();
+    }
+  }
+
+  useMyLocation(): void {
+    this.geolocationService
+      .getCurrentPosition()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (pos) => {
+          this.userLat.set(pos.coords.latitude);
+          this.userLng.set(pos.coords.longitude);
+          this.zip.set('');
+          this.page.set(1);
+          this.syncUrlAndFetch();
+        },
+      });
+  }
+
+  clearGeoSearch(): void {
+    this.zip.set('');
+    this.userLat.set(null);
+    this.userLng.set(null);
+    this.page.set(1);
+    this.syncUrlAndFetch();
+  }
+
+  private prefillFromUser(): void {
+    const user = this.authService.currentUser();
+    if (user?.homeZip && !this.zip() && this.userLat() == null) {
+      this.zip.set(user.homeZip);
+      if (user.homeCountry) {
+        this.country.set(user.homeCountry);
+      }
+      this.syncUrlAndFetch();
+    }
+  }
+
   private readUrlParams(): void {
     const params = this.route.snapshot.queryParams;
     this.skipNextUrlSync = true;
@@ -147,6 +219,14 @@ export class EventListComponent implements OnInit {
     this.dateFrom.set(params['from'] ?? '');
     this.dateTo.set(params['to'] ?? '');
     this.page.set(params['page'] ? +params['page'] : 1);
+
+    if (params['zip']) this.zip.set(params['zip']);
+    if (params['country']) this.country.set(params['country']);
+    if (params['radius']) this.radius.set(+params['radius']);
+    if (params['lat'] && params['lng']) {
+      this.userLat.set(+params['lat']);
+      this.userLng.set(+params['lng']);
+    }
 
     this.search$.next();
   }
@@ -160,6 +240,11 @@ export class EventListComponent implements OnInit {
       from: this.dateFrom() || undefined,
       to: this.dateTo() || undefined,
       page: this.page() > 1 ? String(this.page()) : undefined,
+      zip: this.zip() || undefined,
+      country: this.zip() ? this.country() : undefined,
+      radius: this.geoActive() ? String(this.radius()) : undefined,
+      lat: this.userLat() != null ? String(this.userLat()) : undefined,
+      lng: this.userLng() != null ? String(this.userLng()) : undefined,
     };
 
     this.router.navigate([], {
@@ -172,7 +257,7 @@ export class EventListComponent implements OnInit {
   }
 
   private buildParams(): EventSearchParams {
-    return {
+    const params: EventSearchParams = {
       q: this.searchQuery() || undefined,
       discipline: this.selectedDisciplines().length
         ? this.selectedDisciplines().join(',')
@@ -182,5 +267,19 @@ export class EventListComponent implements OnInit {
       page: this.page(),
       limit: this.limit(),
     };
+
+    if (this.userLat() != null && this.userLng() != null) {
+      params.lat = this.userLat()!;
+      params.lng = this.userLng()!;
+      params.radius = this.radius();
+      params.sort = 'distance';
+    } else if (this.zip()) {
+      params.zip = this.zip();
+      params.country = this.country();
+      params.radius = this.radius();
+      params.sort = 'distance';
+    }
+
+    return params;
   }
 }

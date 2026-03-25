@@ -40,6 +40,12 @@ export class ApiService {
       .pipe(catchError((err) => this.handleError(err)));
   }
 
+  put<T>(path: string, body: unknown): Observable<T> {
+    return this.http
+      .put<T>(`${this.base}${path}`, body)
+      .pipe(catchError((err) => this.handleError(err)));
+  }
+
   delete<T>(path: string): Observable<T> {
     return this.http
       .delete<T>(`${this.base}${path}`)
