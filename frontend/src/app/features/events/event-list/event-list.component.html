@@ -1,0 +1,106 @@
+<div class="mx-auto max-w-4xl px-4 py-6">
+  <!-- Search -->
+  <div class="relative">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">🔍</span>
+    <input
+      type="text"
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      placeholder="Veranstaltung suchen…"
+      class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+        bg-[var(--color-bg)] py-2.5 pl-10 pr-4 text-sm text-[var(--color-text)]
+        placeholder:text-[var(--color-muted)]
+        focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+    />
+  </div>
+
+  <!-- Discipline filter -->
+  @if (disciplines().length) {
+    <div class="mt-4">
+      <app-discipline-filter
+        [disciplines]="disciplines()"
+        [selected]="selectedDisciplines()"
+        (selectedChange)="onDisciplineChange($event)"
+      />
+    </div>
+  }
+
+  <!-- Date range -->
+  <div class="mt-4 flex flex-wrap items-center gap-3">
+    <label class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+      <span>Von</span>
+      <input
+        type="date"
+        [value]="dateFrom()"
+        (change)="onDateFromChange($event)"
+        class="rounded-[var(--radius-default)] border border-[var(--color-border)]
+          bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+          focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+      />
+    </label>
+    <label class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+      <span>Bis</span>
+      <input
+        type="date"
+        [value]="dateTo()"
+        (change)="onDateToChange($event)"
+        class="rounded-[var(--radius-default)] border border-[var(--color-border)]
+          bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+          focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+      />
+    </label>
+  </div>
+
+  <!-- Results -->
+  <div class="mt-6">
+    @if (loading()) {
+      <!-- Skeleton cards -->
+      <div class="flex flex-col gap-4">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div
+            class="rounded-[var(--radius-lg)] border border-[var(--color-border)]
+              bg-[var(--color-bg-card)] p-4"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 space-y-2">
+                <ui-skeleton width="60%" height="1.25rem" />
+                <div class="flex gap-4">
+                  <ui-skeleton width="6rem" height="1rem" />
+                  <ui-skeleton width="8rem" height="1rem" />
+                </div>
+              </div>
+              <ui-skeleton width="5rem" height="1.5rem" rounded="full" />
+            </div>
+            <div class="mt-3">
+              <ui-skeleton width="5rem" height="1.75rem" rounded="full" />
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (events().length === 0) {
+      <app-empty-state
+        icon="🔎"
+        title="Keine Veranstaltungen gefunden"
+        message="Passe deine Filter an oder versuche einen anderen Suchbegriff."
+      />
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (event of events(); track event.id) {
+          <app-event-card [event]="event" />
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="mt-6 flex justify-center">
+          <ui-pagination
+            [total]="total()"
+            [page]="page()"
+            [limit]="limit()"
+            (pageChange)="onPageChange($event)"
+          />
+        </div>
+      }
+    }
+  </div>
+</div>

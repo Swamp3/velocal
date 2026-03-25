@@ -1,0 +1,18 @@
+<div class="flex flex-wrap items-center gap-2">
+  <ui-chip
+    [selected]="noneSelected()"
+    (selectedChange)="clearAll()"
+  >
+    Alle
+  </ui-chip>
+
+  @for (d of disciplines(); track d.slug) {
+    <ui-chip
+      [icon]="d.icon"
+      [selected]="isSelected(d.slug)"
+      (selectedChange)="toggle(d.slug)"
+    >
+      {{ translatedName(d) }}
+    </ui-chip>
+  }
+</div>
