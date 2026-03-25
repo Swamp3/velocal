@@ -58,7 +58,7 @@ export class AuthService {
     const token = this.getToken();
     if (!token) return;
 
-    this.api.get<User>('/auth/me').subscribe({
+    this.api.get<User>('/users/me').subscribe({
       next: (user) => this._currentUser.set(user),
       error: () => this.logout(),
     });

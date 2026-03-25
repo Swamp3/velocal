@@ -1,0 +1,47 @@
+<div class="flex min-h-[60vh] items-center justify-center">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="w-full max-w-sm rounded-[var(--radius-lg)] border border-[var(--color-border)]
+      bg-[var(--color-bg)] p-8 shadow-sm"
+  >
+    <h1 class="mb-6 text-2xl font-bold text-[var(--color-text)]">Anmelden</h1>
+
+    <div class="flex flex-col gap-4">
+      <ui-input
+        label="E-Mail"
+        type="email"
+        placeholder="name@example.com"
+        formControlName="email"
+        [error]="fieldError('email')"
+      />
+
+      <ui-input
+        label="Passwort"
+        type="password"
+        formControlName="password"
+        [error]="fieldError('password')"
+      />
+
+      <ui-button
+        type="submit"
+        size="lg"
+        [loading]="loading()"
+        [disabled]="loading()"
+        class="w-full"
+      >
+        Anmelden
+      </ui-button>
+    </div>
+
+    <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+      Noch kein Konto?
+      <a
+        routerLink="/auth/register"
+        class="font-medium text-[var(--color-primary)] hover:underline"
+      >
+        Registrieren
+      </a>
+    </p>
+  </form>
+</div>

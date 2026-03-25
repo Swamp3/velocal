@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/theme.service';
 import { TranslocoService } from '@jsverse/transloco';
@@ -28,6 +28,7 @@ export class AppShellComponent {
   protected readonly theme = inject(ThemeService);
   protected readonly auth = inject(AuthService);
   private readonly transloco = inject(TranslocoService);
+  private readonly router = inject(Router);
 
   protected readonly mobileMenuOpen = signal(false);
   protected readonly navLinks = NAV_LINKS;
@@ -40,5 +41,10 @@ export class AppShellComponent {
   protected toggleLang(): void {
     const next = this.transloco.getActiveLang() === 'de' ? 'en' : 'de';
     this.transloco.setActiveLang(next);
+  }
+
+  protected onLogout(): void {
+    this.auth.logout();
+    this.router.navigateByUrl('/events');
   }
 }

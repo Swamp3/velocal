@@ -31,6 +31,24 @@
         >
           {{ activeLang() === 'de' ? authNav.labelDe : authNav.labelEn }}
         </a>
+        <button
+          class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm font-medium
+            text-[var(--color-text-muted)] hover:text-[var(--color-text)]
+            hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+          (click)="onLogout()"
+        >
+          {{ activeLang() === 'de' ? 'Abmelden' : 'Logout' }}
+        </button>
+      } @else {
+        <a
+          routerLink="/auth/login"
+          routerLinkActive="text-[var(--color-primary)]"
+          class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm font-medium
+            text-[var(--color-text-muted)] hover:text-[var(--color-text)]
+            hover:bg-[var(--color-bg-alt)] transition-colors"
+        >
+          {{ activeLang() === 'de' ? 'Anmelden' : 'Login' }}
+        </a>
       }
     </nav>
 
@@ -121,6 +139,23 @@
             (click)="mobileMenuOpen.set(false)"
           >
             {{ activeLang() === 'de' ? authNav.labelDe : authNav.labelEn }}
+          </a>
+          <button
+            class="rounded-[var(--radius-default)] px-3 py-2 text-sm font-medium text-left
+              text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+            (click)="mobileMenuOpen.set(false); onLogout()"
+          >
+            {{ activeLang() === 'de' ? 'Abmelden' : 'Logout' }}
+          </button>
+        } @else {
+          <a
+            routerLink="/auth/login"
+            routerLinkActive="text-[var(--color-primary)]"
+            class="rounded-[var(--radius-default)] px-3 py-2 text-sm font-medium
+              text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            {{ activeLang() === 'de' ? 'Anmelden' : 'Login' }}
           </a>
         }
       </div>
