@@ -1,0 +1,55 @@
+<button
+  #trigger
+  type="button"
+  class="flex w-full items-center justify-between gap-2 rounded-[var(--radius-default)]
+    border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm
+    text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer"
+  [attr.aria-expanded]="open()"
+  aria-haspopup="listbox"
+  (click)="open.set(!open())"
+  (keydown)="onTriggerKeydown($event)"
+>
+  <span [class]="value() ? '' : 'text-[var(--color-muted)]'">
+    {{ selectedLabel() || placeholder() }}
+  </span>
+  <svg
+    class="size-4 shrink-0 text-[var(--color-muted)] transition-transform"
+    [class.rotate-180]="open()"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+  >
+    <path
+      fill-rule="evenodd"
+      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+      clip-rule="evenodd"
+    />
+  </svg>
+</button>
+
+@if (open()) {
+  <ul
+    role="listbox"
+    class="absolute z-40 mt-1 max-h-60 w-full overflow-auto rounded-[var(--radius-default)]
+      border border-[var(--color-border)] bg-[var(--color-bg)]
+      shadow-[var(--shadow-elevated)] py-1"
+    (keydown)="onListKeydown($event)"
+  >
+    @for (opt of options(); track opt.value) {
+      <li
+        role="option"
+        [attr.aria-selected]="opt.value === value()"
+        [class]="
+          'cursor-pointer px-3 py-2 text-sm hover:bg-[var(--color-bg-alt)] ' +
+          (opt.value === value()
+            ? 'text-[var(--color-primary)] font-medium'
+            : 'text-[var(--color-text)]')
+        "
+        tabindex="-1"
+        (click)="select(opt.value)"
+        (keydown.enter)="select(opt.value)"
+      >
+        {{ opt.label }}
+      </li>
+    }
+  </ul>
+}

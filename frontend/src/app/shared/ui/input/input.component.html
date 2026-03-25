@@ -1,0 +1,31 @@
+<div class="flex flex-col gap-1">
+  @if (label()) {
+    <label [for]="inputId()" class="text-sm font-medium text-[var(--color-text)]">
+      {{ label() }}
+    </label>
+  }
+  <div class="relative">
+    <ng-content select="[prefix]" />
+    <input
+      [id]="inputId()"
+      [type]="type()"
+      [placeholder]="placeholder()"
+      [disabled]="isDisabled()"
+      [value]="value()"
+      [class]="
+        'w-full rounded-[var(--radius-default)] border bg-[var(--color-bg)] ' +
+        'px-3 py-2 text-sm text-[var(--color-text)] ' +
+        'placeholder:text-[var(--color-muted)] ' +
+        'focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)] ' +
+        'disabled:opacity-50 disabled:cursor-not-allowed ' +
+        (error() ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)]')
+      "
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    />
+    <ng-content select="[suffix]" />
+  </div>
+  @if (error()) {
+    <p class="text-xs text-[var(--color-danger)]">{{ error() }}</p>
+  }
+</div>

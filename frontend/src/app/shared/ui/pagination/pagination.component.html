@@ -1,0 +1,35 @@
+<nav class="flex items-center gap-1" aria-label="Pagination">
+  <button
+    class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm
+      text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]
+      disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+    [disabled]="page() <= 1"
+    (click)="pageChange.emit(page() - 1)"
+  >
+    &lsaquo;
+  </button>
+
+  @for (p of pages(); track p) {
+    <button
+      [class]="
+        'rounded-[var(--radius-default)] px-3 py-1.5 text-sm cursor-pointer ' +
+        (p === page()
+          ? 'bg-[var(--color-primary)] text-white'
+          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]')
+      "
+      (click)="pageChange.emit(p)"
+    >
+      {{ p }}
+    </button>
+  }
+
+  <button
+    class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm
+      text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]
+      disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+    [disabled]="page() >= totalPages()"
+    (click)="pageChange.emit(page() + 1)"
+  >
+    &rsaquo;
+  </button>
+</nav>

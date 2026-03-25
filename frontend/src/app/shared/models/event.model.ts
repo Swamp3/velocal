@@ -1,0 +1,23 @@
+import { Discipline } from './discipline.model';
+
+export interface CyclingEvent {
+  id: string;
+  name: string;
+  description?: string;
+  startDate: string;
+  endDate?: string;
+  status: EventStatus;
+  locationName: string;
+  address?: string;
+  country?: string;
+  coordinates?: { lat: number; lng: number };
+  registrationDeadline?: string;
+  externalUrl?: string;
+  source: EventSource;
+  discipline: Discipline;
+  disciplineSlug: string;
+  createdAt: string;
+}
+
+export type EventStatus = 'published' | 'cancelled' | 'completed';
+export type EventSource = 'manual' | 'imported';

@@ -1,0 +1,10 @@
+<div class="flex flex-col items-center justify-center py-16 text-center">
+  @if (icon()) {
+    <span class="mb-4 text-5xl">{{ icon() }}</span>
+  }
+  <p class="text-lg font-medium text-[var(--color-text)]">{{ title() }}</p>
+  @if (message()) {
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ message() }}</p>
+  }
+  <ng-content />
+</div>
