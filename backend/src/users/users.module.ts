@@ -5,9 +5,13 @@ import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { UserFavorite } from './entities/user-favorite.entity';
 import { UserDisciplinePref } from './entities/user-discipline-pref.entity';
+import { EventsModule } from '../events/events.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, UserFavorite, UserDisciplinePref])],
+  imports: [
+    TypeOrmModule.forFeature([User, UserFavorite, UserDisciplinePref]),
+    EventsModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
