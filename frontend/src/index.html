@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="de" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>VeloCal</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="description" content="VeloCal — Cycling event calendar" />
+
+    <script>
+      (function () {
+        var t = localStorage.getItem('velocal-theme');
+        if (t === 'light') document.documentElement.classList.remove('dark');
+        else if (!t && window.matchMedia('(prefers-color-scheme: light)').matches)
+          document.documentElement.classList.remove('dark');
+      })();
+    </script>
+
+    <link rel="icon" href="favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>
