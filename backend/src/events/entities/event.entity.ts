@@ -66,6 +66,9 @@ export class Event {
   @Column({ nullable: true })
   externalUrl: string;
 
+  @Column({ nullable: true })
+  externalId: string;
+
   @Column({ type: 'enum', enum: EventSource, default: EventSource.MANUAL })
   source: EventSource;
 
