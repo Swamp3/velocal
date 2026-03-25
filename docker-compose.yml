@@ -44,7 +44,8 @@ services:
     ports:
       - "4200:4200"
     volumes:
-      - ./frontend/src:/app/src
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
 
