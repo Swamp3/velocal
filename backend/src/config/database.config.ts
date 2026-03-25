@@ -8,5 +8,5 @@ export default registerAs('database', () => ({
   password: process.env.DB_PASSWORD || 'velocal',
   database: process.env.DB_NAME || 'velocal',
   autoLoadEntities: true,
-  synchronize: process.env.NODE_ENV !== 'production',
+  synchronize: false,
 }));
