@@ -1,137 +1,142 @@
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
-                {{ 'calendar.title' | transloco }}
-            </h1>
-        </div>
-        <a
-            routerLink="/events"
-            class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] hover:underline"
-        >
-            <span class="material-symbols-outlined text-[18px]">list</span>
-            {{ 'calendar.viewList' | transloco }}
-        </a>
+  <!-- Header -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+        {{ 'calendar.title' | transloco }}
+      </h1>
     </div>
+    <a
+      routerLink="/events"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] hover:underline"
+    >
+      <span class="material-symbols-outlined text-[18px]">list</span>
+      {{ 'calendar.viewList' | transloco }}
+    </a>
+  </div>
 
-    <!-- Navigation bar -->
-    <div class="flex flex-wrap items-center gap-3">
-        <!-- Prev / Next -->
-        @if (!isMobile() && viewMode() === 'week') {
-            <button
-                class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
-                (click)="navigateWeek(-1)"
-                [attr.aria-label]="'calendar.prevWeek' | transloco"
-            >
-                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-            </button>
-        } @else {
-            <button
-                class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
-                (click)="navigateMonth(-1)"
-                [attr.aria-label]="'calendar.prevMonth' | transloco"
-            >
-                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-            </button>
-        }
-
-        <span class="min-w-[160px] text-center text-lg font-semibold text-[var(--color-text)]">
-            {{ monthLabel() }}
-        </span>
-
-        @if (!isMobile() && viewMode() === 'week') {
-            <button
-                class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
-                (click)="navigateWeek(1)"
-                [attr.aria-label]="'calendar.nextWeek' | transloco"
-            >
-                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-            </button>
-        } @else {
-            <button
-                class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
-                (click)="navigateMonth(1)"
-                [attr.aria-label]="'calendar.nextMonth' | transloco"
-            >
-                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-            </button>
-        }
-
-        <!-- Today button -->
-        <button
-            class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
-            (click)="goToToday()"
-        >
-            {{ 'calendar.today' | transloco }}
-        </button>
-
-        <!-- View mode toggle (desktop only) -->
-        @if (!isMobile()) {
-            <div class="ml-auto flex rounded-lg border border-[var(--color-border)] overflow-hidden">
-                <button
-                    class="px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                    [class]="viewMode() === 'month' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]'"
-                    (click)="onViewModeChange('month')"
-                >
-                    {{ 'calendar.month' | transloco }}
-                </button>
-                <button
-                    class="px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                    [class]="viewMode() === 'week' ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]'"
-                    (click)="onViewModeChange('week')"
-                >
-                    {{ 'calendar.week' | transloco }}
-                </button>
-            </div>
-        }
-    </div>
-
-    <!-- Discipline filter -->
-    @if (disciplines().length) {
-        <div class="pb-2">
-            <app-discipline-filter
-                [disciplines]="disciplines()"
-                [selected]="filterStateService.selectedDisciplines()"
-                (selectedChange)="onDisciplineChange($event)"
-            />
-        </div>
-    }
-
-    <!-- Loading skeleton -->
-    @if (loading()) {
-        <div class="grid grid-cols-7 gap-1">
-            @for (_ of [1,2,3,4,5,6,7,8,9,10,11,12,13,14]; track $index) {
-                <ui-skeleton
-                    height="80px"
-                    rounded="lg"
-                />
-            }
-        </div>
+  <!-- Navigation bar -->
+  <div class="flex flex-wrap items-center gap-3">
+    <!-- Prev / Next -->
+    @if (!isMobile() && viewMode() === 'week') {
+      <button
+        class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        (click)="navigateWeek(-1)"
+        [attr.aria-label]="'calendar.prevWeek' | transloco"
+      >
+        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+      </button>
     } @else {
-        <!-- Desktop views -->
-        @if (!isMobile()) {
-            <app-calendar-month-grid
-                [events]="eventsByDate()"
-                [currentDate]="currentDate()"
-                [viewMode]="viewMode()"
-                [selectedDay]="selectedDay()"
-                (daySelected)="onDaySelected($event)"
-            />
-        } @else {
-            <!-- Mobile: day strip + agenda -->
-            <app-calendar-day-strip
-                [currentDate]="currentDate()"
-                [eventDates]="eventDates()"
-                (dateSelected)="onStripDateSelected($event)"
-                (weekChanged)="onStripWeekChanged($event)"
-            />
-
-            <app-calendar-agenda
-                [events]="eventsByDate()"
-                [currentDate]="currentDate()"
-                [selectedDay]="selectedDay()"
-            />
-        }
+      <button
+        class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        (click)="navigateMonth(-1)"
+        [attr.aria-label]="'calendar.prevMonth' | transloco"
+      >
+        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+      </button>
     }
+
+    <span class="min-w-[160px] text-center text-lg font-semibold text-[var(--color-text)]">
+      {{ monthLabel() }}
+    </span>
+
+    @if (!isMobile() && viewMode() === 'week') {
+      <button
+        class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        (click)="navigateWeek(1)"
+        [attr.aria-label]="'calendar.nextWeek' | transloco"
+      >
+        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+      </button>
+    } @else {
+      <button
+        class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        (click)="navigateMonth(1)"
+        [attr.aria-label]="'calendar.nextMonth' | transloco"
+      >
+        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+      </button>
+    }
+
+    <!-- Today button -->
+    <button
+      class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+      (click)="goToToday()"
+    >
+      {{ 'calendar.today' | transloco }}
+    </button>
+
+    <!-- View mode toggle (desktop only) -->
+    @if (!isMobile()) {
+      <div class="ml-auto flex rounded-lg border border-[var(--color-border)] overflow-hidden">
+        <button
+          class="px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+          [class]="
+            viewMode() === 'month'
+              ? 'bg-[var(--color-primary)] text-white'
+              : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]'
+          "
+          (click)="onViewModeChange('month')"
+        >
+          {{ 'calendar.month' | transloco }}
+        </button>
+        <button
+          class="px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+          [class]="
+            viewMode() === 'week'
+              ? 'bg-[var(--color-primary)] text-white'
+              : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]'
+          "
+          (click)="onViewModeChange('week')"
+        >
+          {{ 'calendar.week' | transloco }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Discipline filter -->
+  @if (disciplines().length) {
+    <div class="pb-2">
+      <app-discipline-filter
+        [disciplines]="disciplines()"
+        [selected]="filterStateService.selectedDisciplines()"
+        (selectedChange)="onDisciplineChange($event)"
+      />
+    </div>
+  }
+
+  <!-- Loading skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-7 gap-1">
+      @for (_ of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; track $index) {
+        <ui-skeleton height="80px" rounded="lg" />
+      }
+    </div>
+  } @else {
+    <!-- Desktop views -->
+    @if (!isMobile()) {
+      <app-calendar-month-grid
+        [events]="eventsByDate()"
+        [currentDate]="currentDate()"
+        [viewMode]="viewMode()"
+        [selectedDay]="selectedDay()"
+        (daySelected)="onDaySelected($event)"
+      />
+    } @else {
+      <!-- Mobile: day strip + agenda -->
+      <app-calendar-day-strip
+        [currentDate]="currentDate()"
+        [eventDates]="eventDates()"
+        (dateSelected)="onStripDateSelected($event)"
+        (weekChanged)="onStripWeekChanged($event)"
+      />
+
+      <app-calendar-agenda
+        [events]="eventsByDate()"
+        [currentDate]="currentDate()"
+        [selectedDay]="selectedDay()"
+      />
+    }
+  }
 </div>
