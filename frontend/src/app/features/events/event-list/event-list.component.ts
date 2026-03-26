@@ -50,11 +50,20 @@ export class EventListComponent implements OnInit {
   readonly filterStateService = inject(FilterStateService);
   private readonly destroyRef = inject(DestroyRef);
 
+  private readonly today = new Date().toISOString().slice(0, 10);
+
   readonly searchQuery = signal('');
   readonly dateFrom = signal<string>('');
   readonly dateTo = signal<string>('');
   readonly page = signal(1);
   readonly limit = signal(20);
+
+  readonly futureOnly = signal(true);
+  readonly selectedYear = signal<number | null>(null);
+  readonly availableYears = computed(() => {
+    const currentYear = new Date().getFullYear();
+    return [currentYear - 1, currentYear, currentYear + 1];
+  });
 
   readonly zip = signal<string>('');
   readonly country = signal<string>('DE');
@@ -147,11 +156,44 @@ export class EventListComponent implements OnInit {
 
   onDateFromChange(event: Event): void {
     this.dateFrom.set((event.target as HTMLInputElement).value);
+    this.futureOnly.set(false);
+    this.selectedYear.set(null);
     this.page.set(1);
   }
 
   onDateToChange(event: Event): void {
     this.dateTo.set((event.target as HTMLInputElement).value);
+    this.futureOnly.set(false);
+    this.selectedYear.set(null);
+    this.page.set(1);
+  }
+
+  onFutureOnlyToggle(): void {
+    const next = !this.futureOnly();
+    this.futureOnly.set(next);
+    this.selectedYear.set(null);
+    if (next) {
+      this.dateFrom.set(this.today);
+      this.dateTo.set('');
+    } else {
+      this.dateFrom.set('');
+      this.dateTo.set('');
+    }
+    this.page.set(1);
+  }
+
+  onYearSelect(year: number): void {
+    if (this.selectedYear() === year) {
+      this.selectedYear.set(null);
+      this.futureOnly.set(true);
+      this.dateFrom.set(this.today);
+      this.dateTo.set('');
+    } else {
+      this.selectedYear.set(year);
+      this.futureOnly.set(false);
+      this.dateFrom.set(`${year}-01-01`);
+      this.dateTo.set(`${year}-12-31`);
+    }
     this.page.set(1);
   }
 
@@ -221,8 +263,22 @@ export class EventListComponent implements OnInit {
     if (params['discipline']) {
       this.filterStateService.setDisciplines(params['discipline'].split(','));
     }
-    this.dateFrom.set(params['from'] ?? '');
-    this.dateTo.set(params['to'] ?? '');
+
+    if (params['from'] || params['to']) {
+      this.dateFrom.set(params['from'] ?? '');
+      this.dateTo.set(params['to'] ?? '');
+      this.futureOnly.set(false);
+
+      const fromMatch = params['from']?.match(/^(\d{4})-01-01$/);
+      const toMatch = params['to']?.match(/^(\d{4})-12-31$/);
+      if (fromMatch && toMatch && fromMatch[1] === toMatch[1]) {
+        this.selectedYear.set(+fromMatch[1]);
+      }
+    } else {
+      this.futureOnly.set(true);
+      this.dateFrom.set(this.today);
+    }
+
     this.page.set(params['page'] ? +params['page'] : 1);
 
     if (params['zip']) this.zip.set(params['zip']);

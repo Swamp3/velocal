@@ -90,6 +90,43 @@
             class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
           />
         </label>
+
+        <div class="mt-1 flex flex-wrap items-center gap-2">
+          <button
+            [class]="
+              futureOnly()
+                ? 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] cursor-pointer transition-all duration-200'
+                : 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-muted)] hover:border-[var(--color-primary)] cursor-pointer transition-all duration-200'
+            "
+            (click)="onFutureOnlyToggle()"
+            [attr.aria-pressed]="futureOnly()"
+          >
+            @if (futureOnly()) {
+              <span class="material-symbols-outlined text-[14px]">check</span>
+            }
+            {{ 'events.futureOnly' | transloco }}
+          </button>
+
+          <div
+            class="flex gap-1.5"
+            role="radiogroup"
+            [attr.aria-label]="'events.yearFilter' | transloco"
+          >
+            @for (year of availableYears(); track year) {
+              <button
+                [class]="
+                  selectedYear() === year
+                    ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white cursor-pointer transition-all duration-200'
+                    : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer transition-all duration-200'
+                "
+                [attr.aria-pressed]="selectedYear() === year"
+                (click)="onYearSelect(year)"
+              >
+                {{ year }}
+              </button>
+            }
+          </div>
+        </div>
       </div>
 
       <!-- Geo search (right column) -->

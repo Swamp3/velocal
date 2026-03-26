@@ -103,11 +103,13 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private readonly iconCache = new Map<string, L.DivIcon>();
   private readonly mapReady = signal(false);
 
+  private readonly today = new Date().toISOString().slice(0, 10);
+
   private readonly allEvents = signal<CyclingEvent[]>([]);
   private readonly totalAvailable = signal(0);
   readonly disciplines = signal<Discipline[]>([]);
   readonly searchQuery = signal('');
-  readonly dateFrom = signal('');
+  readonly dateFrom = signal(this.today);
   readonly dateTo = signal('');
   readonly loading = signal(true);
   readonly filterPanelOpen = signal(false);
@@ -159,7 +161,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     () =>
       this.searchQuery().length > 0 ||
       this.filterStateService.selectedDisciplines().length > 0 ||
-      this.dateFrom().length > 0 ||
+      this.dateFrom() !== this.today ||
       this.dateTo().length > 0 ||
       this.geoActive(),
   );
@@ -319,7 +321,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   protected clearFilters(): void {
     this.searchQuery.set('');
     this.filterStateService.setDisciplines([]);
-    this.dateFrom.set('');
+    this.dateFrom.set(this.today);
     this.dateTo.set('');
     this.radius.set(null);
     this.clearGeoSearch();
@@ -373,8 +375,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
   private loadData(): void {
     this.loading.set(true);
+    const from = this.dateFrom();
     forkJoin({
-      events: this.eventService.getEvents({ limit: MAX_EVENTS }),
+      events: this.eventService.getEvents({ limit: MAX_EVENTS, ...(from ? { from } : {}) }),
       disciplines: this.disciplineService.getDisciplines(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))

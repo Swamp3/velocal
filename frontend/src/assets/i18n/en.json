@@ -24,6 +24,8 @@
     "distance": "{{distance}} km",
     "distanceAway": "{{distance}} km away",
     "eventsCount": "{{count}} Events",
+    "futureOnly": "Future only",
+    "yearFilter": "Filter by year",
     "inRadius": "within radius",
     "detail": {
       "notFoundTitle": "Event not found",
