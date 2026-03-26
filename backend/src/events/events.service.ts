@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Event, EventStatus } from './entities/event.entity';
+import { Event, EventSource, EventStatus } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
@@ -137,26 +141,47 @@ export class EventsService {
     return event;
   }
 
-  async create(dto: CreateEventDto): Promise<Event> {
+  async create(dto: CreateEventDto, userId?: string): Promise<Event> {
+    let coordinates = dto.coordinates;
+
+    if (!coordinates && dto.locationName) {
+      const geo = await this.geocoding.geocodeLocation(
+        dto.locationName,
+        dto.address,
+        dto.country,
+      );
+      if (geo) coordinates = geo;
+    }
+
     const entity = this.repo.create({
       ...dto,
+      source: userId ? EventSource.MANUAL : (dto.source ?? EventSource.MANUAL),
+      createdById: userId ?? undefined,
       startDate: new Date(dto.startDate),
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
       registrationDeadline: dto.registrationDeadline
         ? new Date(dto.registrationDeadline)
         : undefined,
-      coordinates: dto.coordinates
+      coordinates: coordinates
         ? {
             type: 'Point',
-            coordinates: [dto.coordinates.lng, dto.coordinates.lat],
+            coordinates: [coordinates.lng, coordinates.lat],
           }
         : undefined,
     });
     return this.repo.save(entity);
   }
 
-  async update(id: string, dto: UpdateEventDto): Promise<SerializedEvent> {
+  async update(
+    id: string,
+    dto: UpdateEventDto,
+    user?: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
+
+    if (user) {
+      this.assertOwnerOrAdmin(event, user);
+    }
 
     const partial: Partial<Event> = { ...dto } as Partial<Event>;
 
@@ -164,10 +189,21 @@ export class EventsService {
     if (dto.endDate) partial.endDate = new Date(dto.endDate);
     if (dto.registrationDeadline)
       partial.registrationDeadline = new Date(dto.registrationDeadline);
-    if (dto.coordinates) {
+
+    let coordinates = dto.coordinates;
+    if (!coordinates && dto.locationName && dto.locationName !== event.locationName) {
+      const geo = await this.geocoding.geocodeLocation(
+        dto.locationName,
+        dto.address ?? event.address,
+        dto.country ?? event.country,
+      );
+      if (geo) coordinates = geo;
+    }
+
+    if (coordinates) {
       partial.coordinates = {
         type: 'Point',
-        coordinates: [dto.coordinates.lng, dto.coordinates.lat],
+        coordinates: [coordinates.lng, coordinates.lat],
       };
     }
 
@@ -176,8 +212,26 @@ export class EventsService {
     return this.serializeEvent(saved);
   }
 
-  async remove(id: string): Promise<void> {
-    await this.repo.remove(await this.findEntity(id));
+  async remove(
+    id: string,
+    user?: { id: string; isAdmin: boolean },
+  ): Promise<void> {
+    const event = await this.findEntity(id);
+
+    if (user) {
+      this.assertOwnerOrAdmin(event, user);
+    }
+
+    await this.repo.remove(event);
+  }
+
+  private assertOwnerOrAdmin(
+    event: Event,
+    user: { id: string; isAdmin: boolean },
+  ): void {
+    if (user.isAdmin) return;
+    if (event.createdById && event.createdById === user.id) return;
+    throw new ForbiddenException('You can only modify your own events');
   }
 
   private serializeEvent(

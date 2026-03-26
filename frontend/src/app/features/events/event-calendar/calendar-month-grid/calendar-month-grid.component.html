@@ -1,0 +1,83 @@
+<!-- Week day headers -->
+<div class="grid grid-cols-7 gap-px rounded-t-xl bg-[var(--color-border)] overflow-hidden">
+    @for (day of weekDays; track day) {
+        <div class="bg-[var(--color-bg-alt)] px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            {{ day }}
+        </div>
+    }
+</div>
+
+<!-- Day cells -->
+<div class="grid grid-cols-7 gap-px bg-[var(--color-border)]" [class]="viewMode() === 'week' ? 'rounded-b-xl overflow-hidden' : 'rounded-b-xl overflow-hidden'">
+    @for (day of calendarDays(); track day.dateKey) {
+        <button
+            class="flex min-h-[100px] flex-col bg-[var(--color-bg-card)] p-1.5 text-left transition-colors hover:bg-[var(--color-bg-alt)] cursor-pointer"
+            [class.!bg-[var(--color-primary)]/5]="selectedDay() === day.dateKey"
+            [class.opacity-40]="!day.isCurrentMonth"
+            (click)="onDayClick(day)"
+        >
+            <span
+                class="mb-1 inline-flex size-7 items-center justify-center rounded-full text-sm font-medium"
+                [class]="day.isToday ? 'bg-[var(--color-primary)] text-white font-bold' : 'text-[var(--color-text)]'"
+            >
+                {{ day.dayNumber }}
+            </span>
+
+            <div class="flex flex-1 flex-col gap-0.5 overflow-hidden">
+                @for (event of day.events.slice(0, maxVisibleEvents); track event.id) {
+                    <a
+                        [routerLink]="['/events', event.id]"
+                        class="block truncate rounded px-1.5 py-0.5 text-xs font-medium leading-tight transition-colors hover:brightness-90"
+                        [style.background-color]="'var(--color-primary)'"
+                        [style.color]="'white'"
+                        [style.opacity]="0.85"
+                        [title]="event.name"
+                        (click)="$event.stopPropagation()"
+                    >
+                        {{ event.name }}
+                    </a>
+                }
+
+                @if (overflowCount(day) > 0) {
+                    <span class="px-1.5 text-xs font-medium text-[var(--color-text-muted)]">
+                        {{ 'calendar.moreEvents' | transloco: { count: overflowCount(day) } }}
+                    </span>
+                }
+            </div>
+        </button>
+    }
+</div>
+
+<!-- Expanded day detail -->
+@if (selectedDay() && selectedDayEvents().length) {
+    <div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 shadow-sm">
+        <h3 class="mb-3 text-sm font-semibold text-[var(--color-text)]">
+            {{ selectedDay() | date: 'EEEE, d. MMMM yyyy' }}
+        </h3>
+        <div class="space-y-2">
+            @for (event of selectedDayEvents(); track event.id) {
+                <a
+                    [routerLink]="['/events', event.id]"
+                    class="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-[var(--color-bg-alt)]"
+                >
+                    <div class="flex-1 min-w-0">
+                        <p class="truncate text-sm font-semibold text-[var(--color-text)]">{{ event.name }}</p>
+                        <div class="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                            <span class="inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">location_on</span>
+                                {{ event.locationName }}
+                            </span>
+                        </div>
+                    </div>
+                    <app-discipline-chip [discipline]="event.discipline" />
+                </a>
+            }
+        </div>
+    </div>
+}
+
+@if (selectedDay() && !selectedDayEvents().length) {
+    <div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 text-center">
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'calendar.noEvents' | transloco }}</p>
+    </div>
+}

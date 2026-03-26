@@ -8,6 +8,7 @@ import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-event-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'min-w-0' },
   imports: [
     RouterLink,
     DisciplineChipComponent,

@@ -124,6 +124,18 @@
       }
     </dl>
 
+    <!-- Series membership -->
+    @if (eventSeries().length > 0) {
+      <div class="mt-6 flex flex-wrap items-center gap-2">
+        <span class="text-sm text-[var(--color-text-muted)]">{{ 'series.partOf' | transloco }}:</span>
+        @for (s of eventSeries(); track s.id) {
+          <a [routerLink]="['/series', s.slug]">
+            <ui-chip>{{ s.name }}</ui-chip>
+          </a>
+        }
+      </div>
+    }
+
     <!-- Description -->
     @if (event.description) {
       <div class="mt-8">
@@ -141,8 +153,8 @@
       </div>
     }
 
-    <!-- Favorite button -->
-    <div class="mt-8">
+    <!-- Actions -->
+    <div class="mt-8 flex flex-wrap items-center gap-3">
       @if (auth.isAuthenticated()) {
         <ui-button
           [variant]="isFavorite() ? 'primary' : 'outline'"
@@ -157,6 +169,24 @@
             {{ 'events.detail.loginToFavorite' | transloco }}
           </ui-button>
         </a>
+      }
+
+      @if (canEdit()) {
+        <a [routerLink]="['/events', event.id, 'edit']" class="inline-flex">
+          <ui-button variant="outline" size="sm">
+            <span class="material-symbols-outlined text-[16px]">edit</span>
+            {{ 'event.actions.edit' | transloco }}
+          </ui-button>
+        </a>
+        <ui-button
+          variant="danger"
+          size="sm"
+          [loading]="deleteLoading()"
+          (click)="deleteEvent()"
+        >
+          <span class="material-symbols-outlined text-[16px]">delete</span>
+          {{ 'event.actions.delete' | transloco }}
+        </ui-button>
       }
     </div>
   </div>

@@ -4,6 +4,8 @@
     "nav": {
       "events": "Events",
       "map": "Karte",
+      "calendar": "Kalender",
+      "series": "Rennserien",
       "profile": "Profil",
       "login": "Anmelden",
       "logout": "Abmelden"
@@ -41,6 +43,46 @@
       "published": "Ausgeschrieben",
       "cancelled": "Abgesagt",
       "completed": "Abgeschlossen"
+    }
+  },
+  "event": {
+    "form": {
+      "createTitle": "Veranstaltung erstellen",
+      "editTitle": "Veranstaltung bearbeiten",
+      "name": "Name",
+      "namePlaceholder": "z.B. Köln Marathon 2026",
+      "description": "Beschreibung",
+      "discipline": "Disziplin",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "locationName": "Veranstaltungsort",
+      "address": "Adresse",
+      "country": "Land",
+      "coordinates": "Koordinaten",
+      "coordinatesHint": "Klicke auf die Karte oder ziehe den Marker um Koordinaten zu setzen",
+      "registrationDeadline": "Anmeldeschluss",
+      "externalUrl": "Externe URL",
+      "status": "Status",
+      "submit": "Speichern",
+      "cancel": "Abbrechen",
+      "creating": "Wird erstellt…",
+      "updating": "Wird gespeichert…",
+      "success": {
+        "create": "Veranstaltung erfolgreich erstellt",
+        "update": "Veranstaltung erfolgreich aktualisiert",
+        "delete": "Veranstaltung gelöscht"
+      },
+      "error": {
+        "create": "Fehler beim Erstellen der Veranstaltung",
+        "update": "Fehler beim Aktualisieren der Veranstaltung"
+      },
+      "delete": "Löschen",
+      "deleteConfirm": "Soll diese Veranstaltung wirklich gelöscht werden?"
+    },
+    "actions": {
+      "create": "Veranstaltung erstellen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
     }
   },
   "map": {
@@ -102,6 +144,35 @@
     "loadingFavorites": "Lade Favoriten...",
     "noFavorites": "Du hast noch keine Favoriten."
   },
+  "series": {
+    "title": "Rennserien",
+    "create": "Rennserie erstellen",
+    "editTitle": "Rennserie bearbeiten",
+    "name": "Name",
+    "description": "Beschreibung",
+    "year": "Saison",
+    "discipline": "Disziplin",
+    "events": "Veranstaltungen",
+    "eventCount": "{{count}} Rennen",
+    "stage": "Etappe {{number}}",
+    "addEvent": "Rennen hinzufügen",
+    "noEvents": "Noch keine Rennen in dieser Serie.",
+    "partOf": "Teil der Serie",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "saved": "Rennserie gespeichert",
+    "saveFailed": "Fehler beim Speichern",
+    "search": "Serie suchen…",
+    "allYears": "Alle Jahre",
+    "noResults": "Keine Rennserien gefunden",
+    "noResultsHint": "Passe deine Filter an oder erstelle eine neue Serie.",
+    "backToList": "Zurück zu Rennserien",
+    "notFoundTitle": "Serie nicht gefunden",
+    "notFoundMessage": "Diese Rennserie existiert nicht oder wurde entfernt.",
+    "imageUrl": "Bild-URL",
+    "externalUrl": "Externe Seite",
+    "externalUrlLabel": "Externe URL"
+  },
   "validation": {
     "required": "Pflichtfeld",
     "email": "Ungültige E-Mail",
@@ -122,6 +193,20 @@
   "country": {
     "select": "Land auswählen...",
     "noResults": "Kein Land gefunden"
+  },
+  "calendar": {
+    "title": "Kalender",
+    "month": "Monat",
+    "week": "Woche",
+    "today": "Heute",
+    "noEvents": "Keine Events an diesem Tag",
+    "moreEvents": "+{{count}} weitere",
+    "prevMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "prevWeek": "Vorherige Woche",
+    "nextWeek": "Nächste Woche",
+    "viewList": "Zur Listenansicht",
+    "viewCalendar": "Zur Kalenderansicht"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

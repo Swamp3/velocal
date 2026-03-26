@@ -1,0 +1,49 @@
+@if (agendaDays().length) {
+    <div class="space-y-4">
+        @for (day of agendaDays(); track day.dateKey) {
+            <div
+                [id]="'agenda-' + day.dateKey"
+                class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+                [class.ring-2]="day.dateKey === todayKey()"
+                [class.ring-[var(--color-primary)]]="day.dateKey === todayKey()"
+            >
+                <div
+                    class="rounded-t-xl border-b border-[var(--color-border)] px-4 py-2.5"
+                    [class]="day.dateKey === todayKey() ? 'bg-[var(--color-primary)]/10' : 'bg-[var(--color-bg-alt)]'"
+                >
+                    <span class="text-sm font-semibold" [class]="day.dateKey === todayKey() ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)]'">
+                        {{ day.date | date: 'EEEE, d. MMMM' }}
+                    </span>
+                </div>
+
+                <!-- Event items -->
+                <div class="divide-y divide-[var(--color-border)]">
+                    @for (event of day.events; track event.id) {
+                        <a
+                            [routerLink]="['/events', event.id]"
+                            class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-bg-alt)]"
+                        >
+                            <div class="flex-1 min-w-0">
+                                <p class="truncate text-sm font-semibold text-[var(--color-text)]">
+                                    {{ event.name }}
+                                </p>
+                                <div class="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                                    <span class="inline-flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">location_on</span>
+                                        {{ event.locationName }}
+                                    </span>
+                                </div>
+                            </div>
+                            <app-discipline-chip [discipline]="event.discipline" />
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+} @else {
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-8 text-center">
+        <span class="material-symbols-outlined mb-2 text-4xl text-[var(--color-text-muted)]">event_busy</span>
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'calendar.noEvents' | transloco }}</p>
+    </div>
+}

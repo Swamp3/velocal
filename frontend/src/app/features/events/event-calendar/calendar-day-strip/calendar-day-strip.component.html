@@ -1,0 +1,43 @@
+<div class="flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-2">
+    <!-- Prev week -->
+    <button
+        class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        (click)="prevWeek()"
+    >
+        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+    </button>
+
+    <!-- Day circles -->
+    <div class="flex flex-1 justify-around">
+        @for (day of weekDays(); track day.dateKey) {
+            <button
+                class="flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 transition-colors cursor-pointer"
+                [class]="selectedKey() === day.dateKey
+                    ? 'bg-[var(--color-primary)] text-white'
+                    : day.isToday
+                        ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]'"
+                (click)="selectDay(day)"
+            >
+                <span class="text-[10px] font-semibold uppercase leading-none">{{ day.dayLabel }}</span>
+                <span class="text-sm font-bold leading-none">{{ day.dayNumber }}</span>
+                @if (day.hasEvents) {
+                    <span
+                        class="mt-0.5 size-1 rounded-full"
+                        [class]="selectedKey() === day.dateKey ? 'bg-white' : 'bg-[var(--color-primary)]'"
+                    ></span>
+                } @else {
+                    <span class="mt-0.5 size-1"></span>
+                }
+            </button>
+        }
+    </div>
+
+    <!-- Next week -->
+    <button
+        class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        (click)="nextWeek()"
+    >
+        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+    </button>
+</div>

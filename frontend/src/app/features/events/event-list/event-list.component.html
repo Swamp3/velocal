@@ -30,6 +30,18 @@
 </div>
 
 <div class="mx-auto max-w-5xl">
+  <!-- Create event button -->
+  @if (authService.isAuthenticated()) {
+    <div class="flex justify-end mb-4">
+      <a routerLink="/events/new">
+        <ui-button size="sm">
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          {{ 'event.actions.create' | transloco }}
+        </ui-button>
+      </a>
+    </div>
+  }
+
   <!-- Discipline filter -->
   @if (disciplines().length) {
     <section>
@@ -41,154 +53,168 @@
     </section>
   }
 
-  <!-- Filters row -->
-  <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <!-- Date range -->
-    <div class="flex flex-wrap items-end gap-3">
-      <label class="flex flex-col gap-1.5">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-          'events.dateFrom' | transloco
-        }}</span>
-        <input
-          type="date"
-          [value]="dateFrom()"
-          (change)="onDateFromChange($event)"
-          class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-        />
-      </label>
-      <label class="flex flex-col gap-1.5">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-          'events.dateTo' | transloco
-        }}</span>
-        <input
-          type="date"
-          [value]="dateTo()"
-          (change)="onDateToChange($event)"
-          class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-        />
-      </label>
-    </div>
-  </div>
-
-  <!-- Geo search card -->
+  <!-- Filters card -->
   <div
     class="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)]"
   >
-    <div class="flex items-center gap-2 mb-4">
-      <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
-        >my_location</span
-      >
-      <span class="text-sm font-semibold text-[var(--color-text)]">{{
-        'geo.title' | transloco
-      }}</span>
-    </div>
-
-    <div class="flex flex-wrap items-end gap-4">
-      <label class="flex flex-col gap-1.5">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-          'geo.zip' | transloco
-        }}</span>
-        <input
-          type="text"
-          [value]="zip()"
-          (input)="onZipInput($event)"
-          [placeholder]="'geo.zipPlaceholder' | transloco"
-          maxlength="10"
-          class="w-32 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-        />
-      </label>
-
-      <label class="flex flex-col gap-1.5">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-          'geo.country' | transloco
-        }}</span>
-        <select
-          [value]="country()"
-          (change)="onCountryChange($event)"
-          class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-        >
-          <option value="DE">DE</option>
-          <option value="AT">AT</option>
-          <option value="CH">CH</option>
-          <option value="NL">NL</option>
-          <option value="BE">BE</option>
-          <option value="FR">FR</option>
-          <option value="LU">LU</option>
-        </select>
-      </label>
-
-      <div class="flex flex-col gap-1.5">
-        <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-          'geo.radius' | transloco
-        }}</span>
-        <div class="flex gap-1.5" role="radiogroup" [attr.aria-label]="'geo.radius' | transloco">
-          <button
-            [class]="
-              radius() === null
-                ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
-                : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
-            "
-            [attr.aria-pressed]="radius() === null"
-            (click)="onRadiusChange(null)"
+    <div class="flex flex-col gap-6 sm:flex-row">
+      <!-- Date filters (left column) -->
+      <div class="flex flex-col gap-3 sm:border-r sm:border-[var(--color-border)] sm:pr-6">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
+            >calendar_today</span
           >
-            {{ 'geo.all' | transloco }}
-          </button>
-          @for (r of radiusOptions; track r) {
-            <button
-              [class]="
-                radius() === r
-                  ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
-                  : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
-              "
-              [attr.aria-pressed]="radius() === r"
-              (click)="onRadiusChange(r)"
+          <span class="text-sm font-semibold text-[var(--color-text)]">{{
+            'map.dateRange' | transloco
+          }}</span>
+        </div>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+            'events.dateFrom' | transloco
+          }}</span>
+          <input
+            type="date"
+            [value]="dateFrom()"
+            (change)="onDateFromChange($event)"
+            class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+          />
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+            'events.dateTo' | transloco
+          }}</span>
+          <input
+            type="date"
+            [value]="dateTo()"
+            (change)="onDateToChange($event)"
+            class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+          />
+        </label>
+      </div>
+
+      <!-- Geo search (right column) -->
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
+            >my_location</span
+          >
+          <span class="text-sm font-semibold text-[var(--color-text)]">{{
+            'geo.title' | transloco
+          }}</span>
+        </div>
+
+        <div class="flex flex-wrap items-end gap-4">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+              'geo.zip' | transloco
+            }}</span>
+            <input
+              type="text"
+              [value]="zip()"
+              (input)="onZipInput($event)"
+              [placeholder]="'geo.zipPlaceholder' | transloco"
+              maxlength="10"
+              class="w-32 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+              'geo.country' | transloco
+            }}</span>
+            <select
+              [value]="country()"
+              (change)="onCountryChange($event)"
+              class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
             >
-              {{ r }} km
+              <option value="DE">DE</option>
+              <option value="AT">AT</option>
+              <option value="CH">CH</option>
+              <option value="NL">NL</option>
+              <option value="BE">BE</option>
+              <option value="FR">FR</option>
+              <option value="LU">LU</option>
+            </select>
+          </label>
+
+          <div class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+              'geo.radius' | transloco
+            }}</span>
+            <div
+              class="flex gap-1.5"
+              role="radiogroup"
+              [attr.aria-label]="'geo.radius' | transloco"
+            >
+              <button
+                [class]="
+                  radius() === null
+                    ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
+                    : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
+                "
+                [attr.aria-pressed]="radius() === null"
+                (click)="onRadiusChange(null)"
+              >
+                {{ 'geo.all' | transloco }}
+              </button>
+              @for (r of radiusOptions; track r) {
+                <button
+                  [class]="
+                    radius() === r
+                      ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
+                      : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
+                  "
+                  [attr.aria-pressed]="radius() === r"
+                  (click)="onRadiusChange(r)"
+                >
+                  {{ r }} km
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)]/10 px-4 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="geolocationService.loading()"
+            (click)="useMyLocation()"
+          >
+            @if (geolocationService.loading()) {
+              <span
+                class="inline-block size-4 animate-spin rounded-full border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)]"
+              ></span>
+            } @else {
+              <span class="material-symbols-outlined text-[18px]">my_location</span>
+            }
+            {{ 'geo.myLocation' | transloco }}
+          </button>
+
+          @if (geoActive()) {
+            <button
+              class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+              (click)="clearGeoSearch()"
+            >
+              {{ 'geo.clearGeo' | transloco }}
             </button>
           }
+
+          @if (geolocationService.denied()) {
+            <span class="text-xs text-[var(--color-danger)]" role="alert">{{
+              'geo.denied' | transloco
+            }}</span>
+          }
         </div>
-      </div>
-    </div>
 
-    <div class="mt-4 flex flex-wrap items-center gap-3">
-      <button
-        class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)]/10 px-4 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        [disabled]="geolocationService.loading()"
-        (click)="useMyLocation()"
-      >
-        @if (geolocationService.loading()) {
-          <span
-            class="inline-block size-4 animate-spin rounded-full border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)]"
-          ></span>
-        } @else {
-          <span class="material-symbols-outlined text-[18px]">my_location</span>
+        @if (geoActive() && !loading()) {
+          <div
+            class="mt-4 rounded-lg bg-[var(--color-primary)]/5 px-4 py-2.5 text-sm text-[var(--color-text-muted)]"
+          >
+            {{ 'geo.summary' | transloco: { total: total(), radius: radius(), zip: zip() } }}
+          </div>
         }
-        {{ 'geo.myLocation' | transloco }}
-      </button>
-
-      @if (geoActive()) {
-        <button
-          class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-          (click)="clearGeoSearch()"
-        >
-          {{ 'geo.clearGeo' | transloco }}
-        </button>
-      }
-
-      @if (geolocationService.denied()) {
-        <span class="text-xs text-[var(--color-danger)]" role="alert">{{
-          'geo.denied' | transloco
-        }}</span>
-      }
-    </div>
-
-    @if (geoActive() && !loading()) {
-      <div
-        class="mt-4 rounded-lg bg-[var(--color-primary)]/5 px-4 py-2.5 text-sm text-[var(--color-text-muted)]"
-      >
-        {{ 'geo.summary' | transloco: { total: total(), radius: radius(), zip: zip() } }}
       </div>
-    }
+    </div>
   </div>
 
   <!-- Result count -->

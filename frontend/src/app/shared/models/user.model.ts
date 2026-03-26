@@ -5,4 +5,5 @@ export interface User {
   homeZip?: string;
   homeCountry?: string;
   preferredLocale: string;
+  isAdmin?: boolean;
 }

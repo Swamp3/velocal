@@ -4,6 +4,8 @@
     "nav": {
       "events": "Events",
       "map": "Map",
+      "calendar": "Calendar",
+      "series": "Race Series",
       "profile": "Profile",
       "login": "Login",
       "logout": "Logout"
@@ -41,6 +43,46 @@
       "published": "Published",
       "cancelled": "Cancelled",
       "completed": "Completed"
+    }
+  },
+  "event": {
+    "form": {
+      "createTitle": "Create Event",
+      "editTitle": "Edit Event",
+      "name": "Name",
+      "namePlaceholder": "e.g. Cologne Marathon 2026",
+      "description": "Description",
+      "discipline": "Discipline",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "locationName": "Venue",
+      "address": "Address",
+      "country": "Country",
+      "coordinates": "Coordinates",
+      "coordinatesHint": "Click the map or drag the marker to set coordinates",
+      "registrationDeadline": "Registration Deadline",
+      "externalUrl": "External URL",
+      "status": "Status",
+      "submit": "Save",
+      "cancel": "Cancel",
+      "creating": "Creating…",
+      "updating": "Saving…",
+      "success": {
+        "create": "Event created successfully",
+        "update": "Event updated successfully",
+        "delete": "Event deleted"
+      },
+      "error": {
+        "create": "Failed to create event",
+        "update": "Failed to update event"
+      },
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this event?"
+    },
+    "actions": {
+      "create": "Create Event",
+      "edit": "Edit",
+      "delete": "Delete"
     }
   },
   "map": {
@@ -102,6 +144,35 @@
     "loadingFavorites": "Loading favorites...",
     "noFavorites": "You have no favorites yet."
   },
+  "series": {
+    "title": "Race Series",
+    "create": "Create Series",
+    "editTitle": "Edit Series",
+    "name": "Name",
+    "description": "Description",
+    "year": "Season",
+    "discipline": "Discipline",
+    "events": "Events",
+    "eventCount": "{{count}} races",
+    "stage": "Stage {{number}}",
+    "addEvent": "Add race",
+    "noEvents": "No races in this series yet.",
+    "partOf": "Part of series",
+    "edit": "Edit",
+    "delete": "Delete",
+    "saved": "Series saved",
+    "saveFailed": "Failed to save series",
+    "search": "Search series…",
+    "allYears": "All years",
+    "noResults": "No race series found",
+    "noResultsHint": "Adjust your filters or create a new series.",
+    "backToList": "Back to race series",
+    "notFoundTitle": "Series not found",
+    "notFoundMessage": "This race series does not exist or has been removed.",
+    "imageUrl": "Image URL",
+    "externalUrl": "External Link",
+    "externalUrlLabel": "External URL"
+  },
   "validation": {
     "required": "Required",
     "email": "Invalid email",
@@ -122,6 +193,20 @@
   "country": {
     "select": "Select country...",
     "noResults": "No countries found"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "month": "Month",
+    "week": "Week",
+    "today": "Today",
+    "noEvents": "No events on this day",
+    "moreEvents": "+{{count}} more",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "viewList": "List view",
+    "viewCalendar": "Calendar view"
   },
   "errors": {
     "notFound": "Page not found",

@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DisciplinesModule } from './disciplines/disciplines.module';
 import { ImportModule } from './import/import.module';
+import { SeriesModule } from './series/series.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ImportModule } from './import/import.module';
     UsersModule,
     DisciplinesModule,
     ImportModule,
+    SeriesModule,
   ],
   controllers: [AppController],
 })

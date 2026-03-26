@@ -8,7 +8,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -17,7 +17,7 @@ import { DisciplineService } from '@core/services/discipline.service';
 import { AuthService } from '@core/services/auth.service';
 import { GeolocationService } from '@core/services/geolocation.service';
 import { CyclingEvent, Discipline } from '@shared/models';
-import { PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
 import { EmptyStateComponent } from '@shared/components';
@@ -29,8 +29,10 @@ const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     TranslocoPipe,
+    RouterLink,
     PaginationComponent,
     SkeletonComponent,
+    ButtonComponent,
     DisciplineFilterComponent,
     EventCardComponent,
     EmptyStateComponent,
@@ -42,7 +44,7 @@ export class EventListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
   private readonly disciplineService = inject(DisciplineService);
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   protected readonly geolocationService = inject(GeolocationService);
   private readonly destroyRef = inject(DestroyRef);
 

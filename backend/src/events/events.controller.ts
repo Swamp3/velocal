@@ -20,8 +20,8 @@ import {
 import { EventSearchDto } from './dto/event-search.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Event } from './entities/event.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('events')
 export class EventsController {
@@ -39,8 +39,12 @@ export class EventsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() dto: CreateEventDto): Promise<Event> {
-    return this.eventsService.create(dto);
+  async create(
+    @Body() dto: CreateEventDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedEvent> {
+    const event = await this.eventsService.create(dto, user.id);
+    return this.eventsService.findOne(event.id);
   }
 
   @Patch(':id')
@@ -48,14 +52,18 @@ export class EventsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateEventDto,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
   ): Promise<SerializedEvent> {
-    return this.eventsService.update(id, dto);
+    return this.eventsService.update(id, dto, user);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return this.eventsService.remove(id);
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
+  ): Promise<void> {
+    return this.eventsService.remove(id, user);
   }
 }

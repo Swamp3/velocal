@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import type { Point } from 'geojson';
 import { Discipline } from '../../disciplines/entities/discipline.entity';
+import { User } from '../../users/entities/user.entity';
 
 export enum EventStatus {
   PUBLISHED = 'published',
@@ -78,6 +79,13 @@ export class Event {
 
   @Column({ name: 'discipline_slug' })
   disciplineSlug: string;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'created_by_id' })
+  createdBy: User;
+
+  @Column({ name: 'created_by_id', nullable: true })
+  createdById: string;
 
   @CreateDateColumn()
   createdAt: Date;

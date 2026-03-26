@@ -1,6 +1,8 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
+import { AuthService } from '@core/services/auth.service';
 import { ToastService } from '@shared/ui';
 import { catchError, throwError, retry, timer } from 'rxjs';
 
@@ -9,6 +11,7 @@ const MAX_RETRIES = 1;
 const RETRY_DELAY = 2000;
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const injector = inject(Injector);
   const toast = inject(ToastService);
   const transloco = inject(TranslocoService);
 
@@ -23,7 +26,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       },
     }),
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 0) {
+      if (error.status === 401 && !req.url.includes('/auth/')) {
+        injector.get(AuthService).logout();
+        injector.get(Router).navigate(['/auth/login']);
+      } else if (error.status === 0) {
         toast.error(transloco.translate('errors.offline'));
       } else if (error.status === 408) {
         toast.error(transloco.translate('errors.timeout'));

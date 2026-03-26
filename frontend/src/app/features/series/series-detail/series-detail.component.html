@@ -1,0 +1,142 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton width="60%" height="2rem" />
+    <div class="mt-6 space-y-3">
+      <ui-skeleton height="1.25rem" />
+      <ui-skeleton height="1.25rem" />
+      <ui-skeleton height="1.25rem" />
+    </div>
+  </div>
+} @else if (error()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="'series.notFoundTitle' | transloco"
+    [message]="'series.notFoundMessage' | transloco"
+  >
+    <a
+      routerLink="/series"
+      class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)]
+        hover:underline"
+    >
+      <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+      {{ 'series.backToList' | transloco }}
+    </a>
+  </app-empty-state>
+} @else if (series(); as s) {
+  <div class="mx-auto max-w-3xl">
+    <a
+      routerLink="/series"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
+        hover:text-[var(--color-text)] transition-colors"
+    >
+      <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+      {{ 'series.backToList' | transloco }}
+    </a>
+
+    <div class="mt-5 flex flex-wrap items-center gap-2">
+      @if (s.discipline) {
+        <app-discipline-chip [discipline]="s.discipline" />
+      }
+      @if (s.year) {
+        <span
+          class="inline-flex items-center rounded-full bg-[var(--color-bg-alt)]
+            px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+        >
+          {{ s.year }}
+        </span>
+      }
+    </div>
+
+    <h1 class="mt-3 text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+      {{ s.name }}
+    </h1>
+
+    @if (s.description) {
+      <p
+        class="mt-4 whitespace-pre-line text-sm leading-relaxed text-[var(--color-text-muted)]"
+      >{{ s.description }}</p>
+    }
+
+    <!-- Meta info -->
+    <dl
+      class="mt-6 grid gap-4 rounded-2xl border border-[var(--color-border)]
+        bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)] text-sm sm:grid-cols-2"
+    >
+      <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]">flag</span>
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'series.events' | transloco }}</dt>
+          <dd class="font-medium text-[var(--color-text)]">
+            {{ 'series.eventCount' | transloco: { count: s.events.length } }}
+          </dd>
+        </div>
+      </div>
+
+      @if (s.externalUrl) {
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]">link</span>
+          <div>
+            <dt class="text-[var(--color-text-muted)]">{{ 'series.externalUrl' | transloco }}</dt>
+            <dd>
+              <a
+                [href]="s.externalUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-medium text-[var(--color-primary)] hover:underline break-all"
+              >
+                {{ s.externalUrl }}
+              </a>
+            </dd>
+          </div>
+        </div>
+      }
+    </dl>
+
+    @if (auth.isAuthenticated()) {
+      <div class="mt-6 flex gap-2">
+        <a [routerLink]="['/series', s.slug, 'edit']">
+          <ui-button variant="outline">
+            {{ 'series.edit' | transloco }}
+          </ui-button>
+        </a>
+        <ui-button variant="outline" (click)="deleteSeries()">
+          {{ 'series.delete' | transloco }}
+        </ui-button>
+      </div>
+    }
+
+    <!-- Events list -->
+    <h2 class="mt-10 text-lg font-semibold text-[var(--color-text)]">
+      {{ 'series.events' | transloco }}
+    </h2>
+
+    @if (s.events.length === 0) {
+      <p class="mt-4 text-sm text-[var(--color-text-muted)]">
+        {{ 'series.noEvents' | transloco }}
+      </p>
+    } @else {
+      <div class="mt-4 space-y-3">
+        @for (entry of s.events; track entry.event.id) {
+          <div class="flex items-start gap-4">
+            @if (entry.stageNumber != null || entry.label) {
+              <div
+                class="flex-shrink-0 w-20 pt-5 text-sm font-medium text-[var(--color-text-muted)]"
+              >
+                @if (entry.stageNumber != null) {
+                  {{ 'series.stage' | transloco: { number: entry.stageNumber } }}
+                }
+                @if (entry.label) {
+                  <span class="block text-xs">{{ entry.label }}</span>
+                }
+              </div>
+            }
+            <div class="flex-1">
+              <app-event-card [event]="entry.event" />
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

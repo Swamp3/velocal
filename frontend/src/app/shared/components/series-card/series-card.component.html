@@ -1,0 +1,41 @@
+<a
+  [routerLink]="['/series', series().slug]"
+  class="group block rounded-2xl border border-[var(--color-border)]
+    bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)]
+    transition-all duration-200
+    hover:shadow-[var(--shadow-elevated)] hover:border-[var(--color-primary)]/30
+    hover:-translate-y-0.5
+    focus-visible:outline-2 focus-visible:outline-offset-2
+    focus-visible:outline-[var(--color-primary)]"
+>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0 flex-1">
+      <h3
+        class="truncate text-base font-semibold text-[var(--color-text)]
+          group-hover:text-[var(--color-primary)] transition-colors duration-200"
+      >
+        {{ series().name }}
+      </h3>
+
+      <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[var(--color-text-muted)]">
+        @if (series().year) {
+          <span class="inline-flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">date_range</span>
+            {{ series().year }}
+          </span>
+        }
+
+        <span class="inline-flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">flag</span>
+          {{ 'series.eventCount' | transloco: { count: series().eventCount } }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  @if (series().discipline) {
+    <div class="mt-4 flex items-center gap-2">
+      <app-discipline-chip [discipline]="series().discipline!" />
+    </div>
+  }
+</a>

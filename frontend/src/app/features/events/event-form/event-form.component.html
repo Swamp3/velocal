@@ -1,0 +1,269 @@
+<div class="mx-auto max-w-2xl">
+  <!-- Back link -->
+  <a
+    [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']"
+    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
+      hover:text-[var(--color-text)] transition-colors"
+  >
+    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+    {{ (isEdit() ? 'event.form.editTitle' : 'event.form.createTitle') | transloco }}
+  </a>
+
+  <h1 class="mt-4 text-2xl font-bold text-[var(--color-text)]">
+    {{ (isEdit() ? 'event.form.editTitle' : 'event.form.createTitle') | transloco }}
+  </h1>
+
+  @if (loading()) {
+    <div class="mt-8 flex justify-center">
+      <span
+        class="inline-block size-8 animate-spin rounded-full border-3 border-[var(--color-primary)]/30 border-t-[var(--color-primary)]"
+      ></span>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-6">
+      <!-- Name -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.name' | transloco }} *
+        </label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          [placeholder]="'event.form.namePlaceholder' | transloco"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            placeholder:text-[var(--color-muted)]
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
+        @if (hasError('name', 'required')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+        }
+        @if (hasError('name', 'minlength')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.minLength' | transloco: { min: 3 } }}</p>
+        }
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.description' | transloco }}
+        </label>
+        <textarea
+          id="description"
+          formControlName="description"
+          rows="4"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            placeholder:text-[var(--color-muted)] resize-y
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        ></textarea>
+      </div>
+
+      <!-- Discipline -->
+      <div>
+        <label for="discipline" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.discipline' | transloco }} *
+        </label>
+        <select
+          id="discipline"
+          formControlName="disciplineSlug"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] cursor-pointer
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        >
+          <option value="" disabled>–</option>
+          @for (d of disciplines(); track d.slug) {
+            <option [value]="d.slug">{{ d.nameTranslations['de'] || d.nameTranslations['en'] || d.slug }}</option>
+          }
+        </select>
+        @if (hasError('disciplineSlug', 'required')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+        }
+      </div>
+
+      <!-- Dates row -->
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="startDate" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.startDate' | transloco }} *
+          </label>
+          <input
+            id="startDate"
+            type="datetime-local"
+            formControlName="startDate"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+          @if (hasError('startDate', 'required')) {
+            <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+          }
+        </div>
+        <div>
+          <label for="endDate" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.endDate' | transloco }}
+          </label>
+          <input
+            id="endDate"
+            type="datetime-local"
+            formControlName="endDate"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
+      </div>
+
+      <!-- Location Name -->
+      <div>
+        <label for="locationName" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.locationName' | transloco }} *
+        </label>
+        <input
+          id="locationName"
+          type="text"
+          formControlName="locationName"
+          placeholder="z.B. Nürburgring, Köln Stadtwald"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            placeholder:text-[var(--color-muted)]
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
+        @if (hasError('locationName', 'required')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+        }
+      </div>
+
+      <!-- Address + Country row -->
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="address" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.address' | transloco }}
+          </label>
+          <input
+            id="address"
+            type="text"
+            formControlName="address"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.country' | transloco }}
+          </label>
+          <div class="mt-1.5">
+            <app-country-selector formControlName="country" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Coordinates -->
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.coordinates' | transloco }}
+        </label>
+        <div class="mt-1.5 grid gap-4 sm:grid-cols-2">
+          <input
+            type="number"
+            formControlName="lat"
+            placeholder="Lat"
+            step="any"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+          <input
+            type="number"
+            formControlName="lng"
+            placeholder="Lng"
+            step="any"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
+        <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+          {{ 'event.form.coordinatesHint' | transloco }}
+        </p>
+      </div>
+
+      <!-- Map picker -->
+      <app-location-picker
+        [coordinates]="mapCoordinates()"
+        (coordinatesChange)="onCoordinatesChange($event)"
+      />
+
+      <!-- Registration Deadline -->
+      <div>
+        <label for="registrationDeadline" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.registrationDeadline' | transloco }}
+        </label>
+        <input
+          id="registrationDeadline"
+          type="datetime-local"
+          formControlName="registrationDeadline"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
+      </div>
+
+      <!-- External URL -->
+      <div>
+        <label for="externalUrl" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.externalUrl' | transloco }}
+        </label>
+        <input
+          id="externalUrl"
+          type="url"
+          formControlName="externalUrl"
+          placeholder="https://"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            placeholder:text-[var(--color-muted)]
+            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
+      </div>
+
+      <!-- Status (edit only) -->
+      @if (isEdit()) {
+        <div>
+          <label for="status" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.status' | transloco }}
+          </label>
+          <select
+            id="status"
+            formControlName="status"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] cursor-pointer
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          >
+            <option value="published">{{ 'events.status.published' | transloco }}</option>
+            <option value="cancelled">{{ 'events.status.cancelled' | transloco }}</option>
+            <option value="completed">{{ 'events.status.completed' | transloco }}</option>
+          </select>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3 pt-2">
+        <ui-button type="submit" [loading]="submitting()" [disabled]="submitting()">
+          {{ (submitting()
+            ? (isEdit() ? 'event.form.updating' : 'event.form.creating')
+            : 'event.form.submit') | transloco }}
+        </ui-button>
+        <a [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']">
+          <ui-button variant="ghost" type="button">
+            {{ 'event.form.cancel' | transloco }}
+          </ui-button>
+        </a>
+      </div>
+    </form>
+  }
+</div>

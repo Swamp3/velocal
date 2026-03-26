@@ -1,7 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { CyclingEvent, PaginatedResponse } from '@shared/models';
+import {
+  CreateEventDto,
+  CyclingEvent,
+  PaginatedResponse,
+  UpdateEventDto,
+} from '@shared/models';
 
 export type EventSort = 'date' | 'distance' | 'name';
 
@@ -30,5 +35,17 @@ export class EventService {
 
   getEvent(id: string): Observable<CyclingEvent> {
     return this.api.get(`/events/${id}`);
+  }
+
+  createEvent(dto: CreateEventDto): Observable<CyclingEvent> {
+    return this.api.post('/events', dto);
+  }
+
+  updateEvent(id: string, dto: UpdateEventDto): Observable<CyclingEvent> {
+    return this.api.patch(`/events/${id}`, dto);
+  }
+
+  deleteEvent(id: string): Observable<void> {
+    return this.api.delete(`/events/${id}`);
   }
 }

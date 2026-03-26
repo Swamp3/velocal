@@ -8,14 +8,15 @@ import {
   PipeTransform,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EventService } from '@core/services/event.service';
 import { AuthService } from '@core/services/auth.service';
 import { FavoriteService } from '@core/services/favorite.service';
-import { CyclingEvent } from '@shared/models';
-import { ButtonComponent, SkeletonComponent } from '@shared/ui';
+import { SeriesService } from '@core/services/series.service';
+import { CyclingEvent, RaceSeries } from '@shared/models';
+import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import {
   DisciplineChipComponent,
   EventStatusBadgeComponent,
@@ -49,24 +50,38 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     EmptyStateComponent,
     EventMiniMapComponent,
     ExternalUrlDisplayPipe,
+    ChipComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
 export class EventDetailComponent implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
   private readonly favoriteService = inject(FavoriteService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly toast = inject(ToastService);
+  private readonly transloco = inject(TranslocoService);
 
   protected readonly event = signal<CyclingEvent | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly favoriteLoading = signal(false);
+  protected readonly deleteLoading = signal(false);
+  protected readonly eventSeries = signal<RaceSeries[]>([]);
 
   protected readonly isFavorite = computed(() => {
     const ev = this.event();
     if (!ev) return false;
     return this.favoriteService.isFavorite(ev.id);
+  });
+
+  protected readonly canEdit = computed(() => {
+    const ev = this.event();
+    const user = this.auth.currentUser();
+    if (!ev || !user) return false;
+    return ev.createdById === user.id || !!user.isAdmin;
   });
 
   ngOnInit(): void {
@@ -93,16 +108,40 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
+  protected deleteEvent(): void {
+    const ev = this.event();
+    if (!ev) return;
+
+    const msg = this.transloco.translate('event.form.deleteConfirm');
+    if (!confirm(msg)) return;
+
+    this.deleteLoading.set(true);
+    this.eventService.deleteEvent(ev.id).subscribe({
+      next: () => {
+        this.toast.success(this.transloco.translate('event.form.success.delete'));
+        this.router.navigate(['/events']);
+      },
+      error: () => this.deleteLoading.set(false),
+    });
+  }
+
   private loadEvent(id: string): void {
     this.eventService.getEvent(id).subscribe({
       next: (event) => {
         this.event.set(event);
         this.loading.set(false);
+        this.loadSeries(id);
       },
       error: () => {
         this.error.set(true);
         this.loading.set(false);
       },
+    });
+  }
+
+  private loadSeries(eventId: string): void {
+    this.seriesService.getSeriesForEvent(eventId).subscribe({
+      next: (series) => this.eventSeries.set(series),
     });
   }
 }

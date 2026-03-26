@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
+import { environment } from '@env';
 import { User } from '@shared/models';
 
 const TOKEN_KEY = 'velocal-token';
@@ -20,12 +21,19 @@ export interface RegisterDto {
 export class AuthService {
   private readonly api = inject(ApiService);
   private readonly _currentUser = signal<User | null>(null);
+  private readonly _initialized = signal(false);
+  private readonly _initPromise: Promise<void>;
 
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
+  readonly initialized = this._initialized.asReadonly();
 
   constructor() {
-    this.restoreSession();
+    this._initPromise = this.restoreSession();
+  }
+
+  whenReady(): Promise<void> {
+    return this._initPromise;
   }
 
   login(email: string, password: string): Observable<AuthResponse> {
@@ -58,13 +66,30 @@ export class AuthService {
     this._currentUser.set(res.user);
   }
 
-  private restoreSession(): void {
+  /** Uses native fetch to bypass HttpClient interceptors during APP_INITIALIZER. */
+  private async restoreSession(): Promise<void> {
     const token = this.getToken();
-    if (!token) return;
+    if (!token) {
+      this._initialized.set(true);
+      return;
+    }
 
-    this.api.get<User>('/users/me').subscribe({
-      next: (user) => this._currentUser.set(user),
-      error: () => this.logout(),
-    });
+    try {
+      const res = await fetch(`${environment.apiUrl}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        this.logout();
+        return;
+      }
+
+      const user: User = await res.json();
+      this._currentUser.set(user);
+    } catch {
+      this.logout();
+    } finally {
+      this._initialized.set(true);
+    }
   }
 }
