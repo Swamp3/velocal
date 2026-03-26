@@ -8,4 +8,5 @@ export const DISCIPLINE_SEEDS = [
   { slug: 'trial', nameTranslations: { de: 'Trial', en: 'Trial' }, icon: 'hiking', sortOrder: 7 },
   { slug: 'breitensport', nameTranslations: { de: 'Breitensport', en: 'Recreational' }, icon: 'groups', sortOrder: 8 },
   { slug: 'tt', nameTranslations: { de: 'Zeitfahren', en: 'Time Trial' }, icon: 'timer', sortOrder: 9 },
+  { slug: 'gravel', nameTranslations: { de: 'Gravel', en: 'Gravel' }, icon: 'explore', sortOrder: 10 },
 ];

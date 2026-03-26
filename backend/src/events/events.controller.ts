@@ -10,12 +10,18 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { EventsService, PaginatedEvents } from './events.service';
+import {
+  EventsService,
+  PaginatedEvents,
+  SerializedEvent,
+} from './events.service';
 import { EventSearchDto } from './dto/event-search.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('events')
 export class EventsController {
@@ -27,27 +33,27 @@ export class EventsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Event> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<SerializedEvent> {
     return this.eventsService.findOne(id);
   }
 
-  // TODO: add auth guard (W7)
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Body() dto: CreateEventDto): Promise<Event> {
     return this.eventsService.create(dto);
   }
 
-  // TODO: add admin guard (W7)
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateEventDto,
-  ): Promise<Event> {
+  ): Promise<SerializedEvent> {
     return this.eventsService.update(id, dto);
   }
 
-  // TODO: add admin guard (W7)
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.eventsService.remove(id);

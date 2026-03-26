@@ -34,6 +34,9 @@ export class User {
   })
   homeCoordinates: Point;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
   @Column({ default: 'de' })
   preferredLocale: string;
 

@@ -7,11 +7,18 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
 import { GeocodingService } from './geocoding.service';
 
+export interface SerializedEvent {
+  coordinates?: { lat: number; lng: number } | null;
+  distance?: number;
+  [key: string]: any;
+}
+
 export interface PaginatedEvents {
-  data: (Event & { distance?: number })[];
+  data: SerializedEvent[];
   total: number;
   page: number;
   limit: number;
+  center?: { lat: number; lng: number };
 }
 
 @Injectable()
@@ -58,11 +65,15 @@ export class EventsService {
     }
 
     if (hasGeo) {
-      const radiusMeters = (params.radius ?? 50) * 1000;
-      qb.andWhere(
-        'ST_DWithin(event.coordinates, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography, :radius)',
-        { lng, lat, radius: radiusMeters },
-      );
+      qb.setParameters({ lng, lat });
+
+      if (params.radius != null) {
+        const radiusMeters = params.radius * 1000;
+        qb.andWhere(
+          'ST_DWithin(event.coordinates, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography, :radiusM)',
+          { radiusM: radiusMeters },
+        );
+      }
       qb.addSelect(
         'ST_Distance(event.coordinates, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography)',
         'distance_m',
@@ -88,21 +99,37 @@ export class EventsService {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
 
-      const data = entities.map((entity, i) => ({
-        ...entity,
-        distance: raw[i]?.distance_m
-          ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
-          : undefined,
-      }));
+      const data = entities.map((entity, i) =>
+        this.serializeEvent(entity, {
+          distance: raw[i]?.distance_m
+            ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
+            : undefined,
+        }),
+      );
 
-      return { data, total, page: params.page, limit: params.limit };
+      return {
+        data,
+        total,
+        page: params.page,
+        limit: params.limit,
+        center: { lat: lat!, lng: lng! },
+      };
     }
 
     const [data, total] = await qb.getManyAndCount();
-    return { data, total, page: params.page, limit: params.limit };
+    return {
+      data: data.map((e) => this.serializeEvent(e)),
+      total,
+      page: params.page,
+      limit: params.limit,
+    };
   }
 
-  async findOne(id: string): Promise<Event> {
+  async findOne(id: string): Promise<SerializedEvent> {
+    return this.serializeEvent(await this.findEntity(id));
+  }
+
+  private async findEntity(id: string): Promise<Event> {
     const event = await this.repo.findOne({ where: { id } });
     if (!event) {
       throw new NotFoundException(`Event ${id} not found`);
@@ -128,8 +155,8 @@ export class EventsService {
     return this.repo.save(entity);
   }
 
-  async update(id: string, dto: UpdateEventDto): Promise<Event> {
-    const event = await this.findOne(id);
+  async update(id: string, dto: UpdateEventDto): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
 
     const partial: Partial<Event> = { ...dto } as Partial<Event>;
 
@@ -145,11 +172,26 @@ export class EventsService {
     }
 
     Object.assign(event, partial);
-    return this.repo.save(event);
+    const saved = await this.repo.save(event);
+    return this.serializeEvent(saved);
   }
 
   async remove(id: string): Promise<void> {
-    const event = await this.findOne(id);
-    await this.repo.remove(event);
+    await this.repo.remove(await this.findEntity(id));
+  }
+
+  private serializeEvent(
+    event: Event,
+    extra?: Record<string, unknown>,
+  ): SerializedEvent {
+    const coords = event.coordinates;
+    return {
+      ...event,
+      coordinates:
+        coords?.type === 'Point'
+          ? { lat: coords.coordinates[1], lng: coords.coordinates[0] }
+          : null,
+      ...extra,
+    };
   }
 }

@@ -17,6 +17,7 @@ export interface AuthResponse {
     email: string;
     displayName: string;
     preferredLocale: string;
+    isAdmin: boolean;
   };
 }
 
@@ -58,7 +59,7 @@ export class AuthService {
   }
 
   private buildAuthResponse(user: User): AuthResponse {
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
     return {
       accessToken: this.jwtService.sign(payload),
       user: {
@@ -66,6 +67,7 @@ export class AuthService {
         email: user.email,
         displayName: user.displayName,
         preferredLocale: user.preferredLocale,
+        isAdmin: user.isAdmin,
       },
     };
   }

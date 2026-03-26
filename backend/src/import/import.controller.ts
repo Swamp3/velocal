@@ -6,12 +6,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 import { ImportService } from './import.service';
 import { TriggerImportDto } from './dto/trigger-import.dto';
 import type { ImportResult } from './interfaces/import-source.interface';
 
 @Controller('import')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class ImportController {
   constructor(private readonly importService: ImportService) {}
 

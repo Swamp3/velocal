@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -6,6 +11,7 @@ import {
   EventSource,
   EventStatus,
 } from '../events/entities/event.entity';
+import { GeocodingService } from '../events/geocoding.service';
 import {
   ImportResult,
   ImportSource,
@@ -13,20 +19,44 @@ import {
 } from './interfaces/import-source.interface';
 import { RadNetSource } from './sources/rad-net.source';
 
+const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
+
 @Injectable()
 export class ImportService {
   private readonly logger = new Logger(ImportService.name);
   private readonly sources: ImportSource[];
+  private readonly cooldownMs: number;
+  private lastImportAt: Date | null = null;
+  private importRunning = false;
 
   constructor(
     @InjectRepository(Event)
     private readonly eventRepo: Repository<Event>,
+    private readonly config: ConfigService,
+    private readonly geocoding: GeocodingService,
     radNetSource: RadNetSource,
   ) {
     this.sources = [radNetSource];
+    this.cooldownMs =
+      (this.config.get<number>('IMPORT_COOLDOWN_MINUTES') ?? 5) * 60 * 1000 ||
+      DEFAULT_COOLDOWN_MS;
   }
 
   async runImport(sourceName?: string): Promise<ImportResult> {
+    if (this.importRunning) {
+      throw new ConflictException('An import is already running');
+    }
+
+    if (this.lastImportAt) {
+      const elapsed = Date.now() - this.lastImportAt.getTime();
+      if (elapsed < this.cooldownMs) {
+        const remainingSec = Math.ceil((this.cooldownMs - elapsed) / 1000);
+        throw new ConflictException(
+          `Import on cooldown. Try again in ${remainingSec}s`,
+        );
+      }
+    }
+
     const sources = sourceName
       ? this.sources.filter((s) => s.name === sourceName)
       : this.sources;
@@ -36,39 +66,45 @@ export class ImportService {
       return { created: 0, updated: 0, skipped: 0 };
     }
 
+    this.importRunning = true;
     let created = 0;
     let updated = 0;
     let skipped = 0;
 
-    for (const source of sources) {
-      this.logger.log(`Running import for source: ${source.name}`);
+    try {
+      for (const source of sources) {
+        this.logger.log(`Running import for source: ${source.name}`);
 
-      const rawEvents = await source.fetch();
-      this.logger.log(
-        `Source ${source.name} returned ${rawEvents.length} events`,
-      );
+        const rawEvents = await source.fetch();
+        this.logger.log(
+          `Source ${source.name} returned ${rawEvents.length} events`,
+        );
 
-      for (const raw of rawEvents) {
-        const result = await this.upsertEvent(raw);
-        switch (result) {
-          case 'created':
-            created++;
-            break;
-          case 'updated':
-            updated++;
-            break;
-          case 'skipped':
-            skipped++;
-            break;
+        for (const raw of rawEvents) {
+          const result = await this.upsertEvent(raw);
+          switch (result) {
+            case 'created':
+              created++;
+              break;
+            case 'updated':
+              updated++;
+              break;
+            case 'skipped':
+              skipped++;
+              break;
+          }
         }
+
+        this.logger.log(
+          `Source ${source.name} complete: ${created} created, ${updated} updated, ${skipped} skipped`,
+        );
       }
 
-      this.logger.log(
-        `Source ${source.name} complete: ${created} created, ${updated} updated, ${skipped} skipped`,
-      );
+      return { created, updated, skipped };
+    } finally {
+      this.importRunning = false;
+      this.lastImportAt = new Date();
     }
-
-    return { created, updated, skipped };
   }
 
   getSourceNames(): string[] {
@@ -135,6 +171,7 @@ export class ImportService {
   ): Promise<'updated' | 'skipped'> {
     const status = this.mapStatus(raw.status);
     let changed = false;
+    let locationChanged = false;
 
     if (existing.name !== raw.name) {
       existing.name = raw.name;
@@ -143,6 +180,7 @@ export class ImportService {
     if (existing.locationName !== raw.locationName) {
       existing.locationName = raw.locationName;
       changed = true;
+      locationChanged = true;
     }
     if (existing.status !== status) {
       existing.status = status;
@@ -164,6 +202,25 @@ export class ImportService {
       existing.externalUrl = raw.externalUrl;
       changed = true;
     }
+    if (raw.address && existing.address !== raw.address) {
+      existing.address = raw.address;
+      changed = true;
+    }
+
+    const addressChanged = raw.address && existing.address !== raw.address;
+    const needsGeocode =
+      !existing.coordinates || locationChanged || addressChanged;
+
+    if (needsGeocode) {
+      const coords = await this.resolveCoordinates(raw);
+      if (coords) {
+        existing.coordinates = {
+          type: 'Point',
+          coordinates: [coords.lng, coords.lat],
+        } as any;
+        changed = true;
+      }
+    }
 
     if (!changed) return 'skipped';
 
@@ -173,6 +230,7 @@ export class ImportService {
 
   private async createEvent(raw: RawEvent): Promise<'created'> {
     const status = this.mapStatus(raw.status);
+    const coords = await this.resolveCoordinates(raw);
 
     const event = this.eventRepo.create({
       name: raw.name,
@@ -183,10 +241,9 @@ export class ImportService {
       locationName: raw.locationName,
       address: raw.address,
       country: raw.country ?? 'DE',
-      coordinates:
-        raw.lat != null && raw.lng != null
-          ? { type: 'Point', coordinates: [raw.lng, raw.lat] }
-          : undefined,
+      coordinates: coords
+        ? { type: 'Point', coordinates: [coords.lng, coords.lat] }
+        : undefined,
       registrationDeadline: raw.registrationDeadline,
       externalUrl: raw.externalUrl,
       externalId: raw.externalId,
@@ -196,6 +253,28 @@ export class ImportService {
 
     await this.eventRepo.save(event);
     return 'created';
+  }
+
+  private async resolveCoordinates(
+    raw: RawEvent,
+  ): Promise<{ lat: number; lng: number } | null> {
+    if (raw.lat != null && raw.lng != null) {
+      return { lat: raw.lat, lng: raw.lng };
+    }
+
+    const result = await this.geocoding.geocodeLocation(
+      raw.locationName,
+      raw.address,
+      raw.country,
+    );
+
+    if (result) {
+      this.logger.debug(
+        `Geocoded "${raw.locationName}" → ${result.lat}, ${result.lng}`,
+      );
+    }
+
+    return result;
   }
 
   private mapStatus(status: string): EventStatus {

@@ -9,4 +9,6 @@ export default registerAs('database', () => ({
   database: process.env.DB_NAME || 'velocal',
   autoLoadEntities: true,
   synchronize: false,
+  migrationsRun: true,
+  migrations: ['dist/migrations/*.js'],
 }));

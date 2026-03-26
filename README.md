@@ -102,6 +102,7 @@ velocal/
 | trial | Trial | Trial |
 | breitensport | Breitensport | Recreational |
 | tt | Zeitfahren | Time Trial |
+| gravel | Gravel | Gravel |
 
 ## Key Features
 
@@ -126,7 +127,7 @@ velocal/
 | PATCH | `/api/users/me` | Update profile |
 | POST | `/api/users/me/favorites/:eventId` | Add favorite |
 | DELETE | `/api/users/me/favorites/:eventId` | Remove favorite |
-| POST | `/api/import/trigger` | Trigger event import (admin) |
+| POST | `/api/import/trigger` | Trigger event import (admin only) |
 
 ## Production
 
@@ -149,6 +150,9 @@ This builds optimized images (Angular AOT + nginx, NestJS compiled) and serves t
 | `DB_NAME` | `velocal` | Database name |
 | `JWT_SECRET` | — | Secret for signing JWTs |
 | `JWT_EXPIRATION` | `7d` | Token expiration |
+| `ADMIN_EMAIL` | `admin@velocal.dev` | Seeded admin account email |
+| `ADMIN_PASSWORD` | `admin1234` | Seeded admin account password |
+| `IMPORT_COOLDOWN_MINUTES` | `5` | Minimum minutes between imports |
 
 ## License
 
