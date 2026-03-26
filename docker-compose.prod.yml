@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
       target: production
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       DB_HOST: postgres
@@ -30,6 +30,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-velocal}
       DB_NAME: velocal
       JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-7d}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@velocal.dev}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
+      IMPORT_COOLDOWN_MINUTES: ${IMPORT_COOLDOWN_MINUTES:-5}
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,7 +51,7 @@ services:
       dockerfile: Dockerfile
       target: production
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT:-80}:80"
     depends_on:
       backend:
         condition: service_healthy

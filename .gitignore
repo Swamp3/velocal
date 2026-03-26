@@ -58,5 +58,8 @@ logs/
 frontend/package-lock.json
 backend/package-lock.json
 
+# Backups
+backups/
+
 # Ignore working files folder
 working-files/
