@@ -80,3 +80,68 @@ select {
     color-scheme: dark;
   }
 }
+
+.ql-toolbar.ql-snow {
+  border-color: var(--color-border);
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: var(--color-bg-alt);
+}
+
+.ql-container.ql-snow {
+  border-color: var(--color-border);
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: var(--color-bg);
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  min-height: 250px;
+}
+
+.ql-editor {
+  min-height: 250px;
+}
+
+.ql-editor.ql-blank::before {
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+.ql-snow .ql-stroke {
+  stroke: var(--color-text-muted);
+}
+
+.ql-snow .ql-fill {
+  fill: var(--color-text-muted);
+}
+
+.ql-snow .ql-picker-label {
+  color: var(--color-text-muted);
+}
+
+.ql-snow .ql-picker-options {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+.ql-snow .ql-active .ql-stroke,
+.ql-snow button:hover .ql-stroke {
+  stroke: var(--color-primary);
+}
+
+.ql-snow .ql-active .ql-fill,
+.ql-snow button:hover .ql-fill {
+  fill: var(--color-primary);
+}
+
+.map-clickable {
+  cursor: crosshair !important;
+
+  .leaflet-marker-icon {
+    cursor: grab;
+  }
+
+  .leaflet-popup,
+  .leaflet-control {
+    cursor: auto;
+  }
+}

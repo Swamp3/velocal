@@ -153,6 +153,18 @@
       </div>
     }
 
+    <!-- Linked posts -->
+    @if (linkedPosts().length > 0) {
+      <div class="mt-8">
+        <h2 class="text-lg font-semibold text-[var(--color-text)]">News zu diesem Event</h2>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          @for (post of linkedPosts(); track post.id) {
+            <app-news-card [post]="post" />
+          }
+        </div>
+      </div>
+    }
+
     <!-- Actions -->
     <div class="mt-8 flex flex-wrap items-center gap-3">
       @if (auth.isAuthenticated()) {

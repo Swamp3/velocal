@@ -1,0 +1,66 @@
+<a
+  [routerLink]="['/news', post().slug]"
+  class="group block rounded-2xl border p-5 shadow-[var(--shadow-card)]
+    transition-all duration-200
+    hover:shadow-[var(--shadow-elevated)] hover:-translate-y-0.5
+    focus-visible:outline-2 focus-visible:outline-offset-2
+    focus-visible:outline-[var(--color-primary)]"
+  [class]="pinned()
+    ? 'border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5 hover:border-[var(--color-primary)]/50'
+    : 'border-[var(--color-border)] bg-[var(--color-bg-card)] hover:border-[var(--color-primary)]/30'"
+>
+  @if (pinned()) {
+    <div class="mb-2 inline-flex items-center gap-1 rounded-full bg-[var(--color-primary)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)]">
+      <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1">push_pin</span>
+      {{ 'news.pinned' | transloco }}
+    </div>
+  }
+
+  <h3
+    class="font-semibold text-[var(--color-text)]
+      group-hover:text-[var(--color-primary)] transition-colors duration-200 line-clamp-2"
+    [class]="pinned() ? 'text-lg' : 'text-base'"
+  >
+    {{ post().title }}
+  </h3>
+
+  <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[var(--color-text-muted)]">
+    @if (post().publishedAt) {
+      <span class="inline-flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+        {{ post().publishedAt | date: 'dd.MM.yyyy' }}
+      </span>
+    }
+    <span class="inline-flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">person</span>
+      {{ post().author.displayName }}
+    </span>
+  </div>
+
+  <p class="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)] line-clamp-3">
+    {{ post().excerpt }}
+  </p>
+
+  @if (post().tags.length > 0) {
+    <div class="mt-3 flex flex-wrap gap-1.5">
+      @for (tag of post().tags; track tag) {
+        <ui-chip>{{ tag }}</ui-chip>
+      }
+    </div>
+  }
+
+  @if (post().event) {
+    <div class="mt-3 flex items-center gap-1.5 text-xs text-[var(--color-primary)]">
+      <span class="material-symbols-outlined text-[14px]">link</span>
+      {{ post().event!.name }}
+    </div>
+  }
+
+  <span
+    class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]
+      group-hover:underline"
+  >
+    {{ 'news.readMore' | transloco }}
+    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+  </span>
+</a>

@@ -11,6 +11,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { FavoriteService } from '@core/services/favorite.service';
+import { FilterStateService } from '@core/services/filter-state.service';
 import { UserService } from '@core/services/user.service';
 import { ToastService } from '@shared/ui';
 import { ButtonComponent, ChipComponent, InputComponent } from '@shared/ui';
@@ -39,6 +40,7 @@ export class ProfileComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly disciplineService = inject(DisciplineService);
   private readonly favoriteService = inject(FavoriteService);
+  private readonly filterStateService = inject(FilterStateService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
 
@@ -139,7 +141,10 @@ export class ProfileComponent implements OnInit {
 
     this.savingPrefs.set(true);
     this.userService.setDisciplinePrefs(slugs).subscribe({
-      next: () => this.savingPrefs.set(false),
+      next: () => {
+        this.filterStateService.onUserPrefsSaved(slugs);
+        this.savingPrefs.set(false);
+      },
       error: () => {
         this.toast.error(this.transloco.translate('profile.prefsError'));
         this.savingPrefs.set(false);

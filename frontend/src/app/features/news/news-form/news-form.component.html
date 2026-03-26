@@ -1,0 +1,111 @@
+@if (loading()) {
+  <div class="mx-auto max-w-2xl text-center py-12 text-[var(--color-text-muted)]">
+    {{ 'common.loading' | transloco }}
+  </div>
+} @else {
+  <div class="mx-auto max-w-2xl">
+    <!-- Back link -->
+    <a
+      routerLink="/news"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
+        hover:text-[var(--color-text)] transition-colors"
+    >
+      <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+      {{ 'news.backToList' | transloco }}
+    </a>
+
+    <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
+      {{ (isEdit() ? 'news.edit' : 'news.create') | transloco }}
+    </h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-5">
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          {{ 'news.form.title' | transloco }}
+        </label>
+        <ui-input id="title" formControlName="title" />
+      </div>
+
+      <!-- Body -->
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          {{ 'news.form.body' | transloco }}
+        </label>
+        <quill-editor
+          formControlName="body"
+          [modules]="quillModules"
+          theme="snow"
+          [placeholder]="'news.form.bodyPlaceholder' | transloco"
+        />
+      </div>
+
+      <!-- Tags -->
+      <div>
+        <label for="tags" class="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          {{ 'news.form.tags' | transloco }}
+        </label>
+        <ui-input id="tags" formControlName="tags" [placeholder]="'news.form.tags' | transloco" />
+      </div>
+
+      <!-- Event ID -->
+      <div>
+        <label for="eventId" class="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          {{ 'news.form.event' | transloco }}
+        </label>
+        <ui-input
+          id="eventId"
+          formControlName="eventId"
+          [placeholder]="'news.form.eventPlaceholder' | transloco"
+        />
+      </div>
+
+      <!-- Status -->
+      <div>
+        <label for="status" class="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+          {{ 'news.form.status' | transloco }}
+        </label>
+        <select
+          id="status"
+          formControlName="status"
+          class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]
+            px-4 py-2.5 text-sm text-[var(--color-text)]
+            focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]
+            focus:outline-none transition-colors"
+        >
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+
+      <!-- Pin -->
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          formControlName="isPinned"
+          class="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)]
+            focus:ring-[var(--color-primary)]"
+        />
+        <span class="text-sm font-medium text-[var(--color-text)]">
+          {{ 'news.form.pin' | transloco }}
+        </span>
+      </label>
+
+      <!-- Actions -->
+      <div class="flex flex-wrap items-center gap-3 pt-2">
+        <ui-button type="submit" variant="primary" [loading]="submitting()">
+          {{ 'news.form.submit' | transloco }}
+        </ui-button>
+        <ui-button type="button" variant="outline" (click)="saveDraft()" [loading]="submitting()">
+          {{ 'news.form.saveDraft' | transloco }}
+        </ui-button>
+        <a routerLink="/news" class="inline-flex">
+          <ui-button type="button" variant="outline">
+            {{ 'common.cancel' | transloco }}
+          </ui-button>
+        </a>
+      </div>
+    </form>
+  </div>
+}

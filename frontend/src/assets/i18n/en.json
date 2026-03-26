@@ -8,7 +8,8 @@
       "series": "Race Series",
       "profile": "Profile",
       "login": "Login",
-      "logout": "Logout"
+      "logout": "Logout",
+      "news": "News"
     }
   },
   "events": {
@@ -94,7 +95,8 @@
     "reset": "Reset",
     "discipline": "Discipline",
     "dateRange": "Date Range",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "clickToPlace": "Click the map to set location"
   },
   "geo": {
     "title": "Location Search",
@@ -207,6 +209,34 @@
     "nextWeek": "Next week",
     "viewList": "List view",
     "viewCalendar": "Calendar view"
+  },
+  "news": {
+    "title": "News",
+    "subtitle": "Latest from the cycling world",
+    "readMore": "Read more",
+    "publishedAt": "Published on {{date}}",
+    "by": "by {{author}}",
+    "tags": "Tags",
+    "noResults": "No posts found",
+    "backToList": "Back to news",
+    "create": "Create post",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this post?",
+    "pinned": "Pinned",
+    "linkedEvent": "Linked event",
+    "form": {
+      "title": "Title",
+      "body": "Content",
+      "bodyPlaceholder": "Write your post…",
+      "tags": "Tags (comma-separated)",
+      "event": "Linked event",
+      "eventPlaceholder": "Enter event ID…",
+      "status": "Status",
+      "submit": "Publish",
+      "saveDraft": "Save as draft",
+      "pin": "Pin post"
+    }
   },
   "errors": {
     "notFound": "Page not found",

@@ -199,6 +199,12 @@
         @if (geolocationService.denied()) {
           <span class="mt-1 block text-xs text-red-500" role="alert">{{ 'geo.denied' | transloco }}</span>
         }
+
+        @if (!geoActive()) {
+          <span class="mt-2 block text-xs text-[var(--color-text-muted)] italic">
+            {{ 'map.clickToPlace' | transloco }}
+          </span>
+        }
       </div>
 
       <!-- Disciplines -->
@@ -209,7 +215,7 @@
           </span>
           <app-discipline-filter
             [disciplines]="disciplines()"
-            [selected]="selectedDisciplines()"
+            [selected]="filterStateService.selectedDisciplines()"
             (selectedChange)="onDisciplineChange($event)"
           />
         </div>

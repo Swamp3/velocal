@@ -47,7 +47,7 @@
     <section>
       <app-discipline-filter
         [disciplines]="disciplines()"
-        [selected]="selectedDisciplines()"
+        [selected]="filterStateService.selectedDisciplines()"
         (selectedChange)="onDisciplineChange($event)"
       />
     </section>

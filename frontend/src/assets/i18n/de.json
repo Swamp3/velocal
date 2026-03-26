@@ -8,7 +8,8 @@
       "series": "Rennserien",
       "profile": "Profil",
       "login": "Anmelden",
-      "logout": "Abmelden"
+      "logout": "Abmelden",
+      "news": "News"
     }
   },
   "events": {
@@ -94,7 +95,8 @@
     "reset": "Zurücksetzen",
     "discipline": "Disziplin",
     "dateRange": "Zeitraum",
-    "clearFilters": "Filter zurücksetzen"
+    "clearFilters": "Filter zurücksetzen",
+    "clickToPlace": "Auf die Karte klicken, um Standort zu setzen"
   },
   "geo": {
     "title": "Umkreissuche",
@@ -207,6 +209,34 @@
     "nextWeek": "Nächste Woche",
     "viewList": "Zur Listenansicht",
     "viewCalendar": "Zur Kalenderansicht"
+  },
+  "news": {
+    "title": "Neuigkeiten",
+    "subtitle": "Aktuelles aus der Radsport-Welt",
+    "readMore": "Weiterlesen",
+    "publishedAt": "Veröffentlicht am {{date}}",
+    "by": "von {{author}}",
+    "tags": "Tags",
+    "noResults": "Keine Beiträge gefunden",
+    "backToList": "Zurück zu den News",
+    "create": "Beitrag erstellen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleteConfirm": "Soll dieser Beitrag wirklich gelöscht werden?",
+    "pinned": "Angepinnt",
+    "linkedEvent": "Verknüpftes Event",
+    "form": {
+      "title": "Titel",
+      "body": "Inhalt",
+      "bodyPlaceholder": "Schreibe deinen Beitrag…",
+      "tags": "Tags (kommagetrennt)",
+      "event": "Verknüpftes Event",
+      "eventPlaceholder": "Event-ID eingeben…",
+      "status": "Status",
+      "submit": "Veröffentlichen",
+      "saveDraft": "Als Entwurf speichern",
+      "pin": "Beitrag anpinnen"
+    }
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

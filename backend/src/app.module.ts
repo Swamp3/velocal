@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { DisciplinesModule } from './disciplines/disciplines.module';
 import { ImportModule } from './import/import.module';
 import { SeriesModule } from './series/series.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SeriesModule } from './series/series.module';
     DisciplinesModule,
     ImportModule,
     SeriesModule,
+    PostsModule,
   ],
   controllers: [AppController],
 })

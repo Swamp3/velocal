@@ -5,6 +5,7 @@ import { Subject, switchMap, tap } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { EventService, EventSearchParams } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
+import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { SkeletonComponent } from '@shared/ui';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
@@ -21,13 +22,13 @@ import { CalendarDayStripComponent } from './calendar-day-strip/calendar-day-str
 export class EventCalendarComponent implements OnInit {
     private readonly eventService = inject(EventService);
     private readonly disciplineService = inject(DisciplineService);
+    readonly filterStateService = inject(FilterStateService);
     private readonly destroyRef = inject(DestroyRef);
 
     readonly currentDate = signal(new Date());
     readonly viewMode = signal<'month' | 'week'>('month');
     readonly events = signal<CyclingEvent[]>([]);
     readonly loading = signal(false);
-    readonly selectedDisciplines = signal<string[]>([]);
     readonly disciplines = signal<Discipline[]>([]);
     readonly isMobile = signal(false);
     readonly selectedDay = signal<string | null>(null);
@@ -73,7 +74,7 @@ export class EventCalendarComponent implements OnInit {
         effect(() => {
             this.currentDate();
             this.viewMode();
-            this.selectedDisciplines();
+            this.filterStateService.selectedDisciplines();
             this.isMobile();
             this.fetch$.next();
         });
@@ -96,7 +97,7 @@ export class EventCalendarComponent implements OnInit {
                         from: this.toISODate(range.from),
                         to: this.toISODate(range.to),
                         limit: 500,
-                        discipline: this.selectedDisciplines().length ? this.selectedDisciplines().join(',') : undefined,
+                        discipline: this.filterStateService.selectedDisciplines().length ? this.filterStateService.selectedDisciplines().join(',') : undefined,
                     };
                     return this.eventService.getEvents(params);
                 }),
@@ -132,7 +133,7 @@ export class EventCalendarComponent implements OnInit {
     }
 
     onDisciplineChange(slugs: string[]): void {
-        this.selectedDisciplines.set(slugs);
+        this.filterStateService.setDisciplines(slugs);
     }
 
     onDaySelected(date: string): void {

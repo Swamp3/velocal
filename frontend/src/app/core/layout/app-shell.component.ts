@@ -11,6 +11,7 @@ interface NavLink {
 }
 
 const NAV_LINKS: NavLink[] = [
+  { path: '/news', key: 'app.nav.news' },
   { path: '/events', key: 'app.nav.events' },
   { path: '/calendar', key: 'app.nav.calendar' },
   { path: '/map', key: 'app.nav.map' },

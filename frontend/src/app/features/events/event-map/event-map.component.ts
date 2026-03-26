@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import * as L from 'leaflet';
 
@@ -20,6 +20,7 @@ import { EventService } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { AuthService } from '@core/services/auth.service';
 import { GeolocationService } from '@core/services/geolocation.service';
+import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { DisciplineFilterComponent } from '@shared/components';
 
@@ -90,6 +91,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private readonly disciplineService = inject(DisciplineService);
   private readonly authService = inject(AuthService);
   protected readonly geolocationService = inject(GeolocationService);
+  readonly filterStateService = inject(FilterStateService);
   private readonly transloco = inject(TranslocoService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -105,7 +107,6 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private readonly totalAvailable = signal(0);
   readonly disciplines = signal<Discipline[]>([]);
   readonly searchQuery = signal('');
-  readonly selectedDisciplines = signal<string[]>([]);
   readonly dateFrom = signal('');
   readonly dateTo = signal('');
   readonly loading = signal(true);
@@ -134,7 +135,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       );
     }
 
-    const discs = this.selectedDisciplines();
+    const discs = this.filterStateService.selectedDisciplines();
     if (discs.length > 0) {
       events = events.filter((e) => discs.includes(e.disciplineSlug));
     }
@@ -157,7 +158,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   readonly hasActiveFilters = computed(
     () =>
       this.searchQuery().length > 0 ||
-      this.selectedDisciplines().length > 0 ||
+      this.filterStateService.selectedDisciplines().length > 0 ||
       this.dateFrom().length > 0 ||
       this.dateTo().length > 0 ||
       this.geoActive(),
@@ -165,6 +166,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
   private readonly geoSearch$ = new Subject<void>();
   private readonly zipInput$ = new Subject<string>();
+  private reverseGeocodeSub?: Subscription;
 
   private readonly geoCenter = signal<{ lat: number; lng: number } | null>(null);
 
@@ -203,7 +205,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
           const q = this.searchQuery().trim();
           if (q) params['q'] = q;
 
-          const discs = this.selectedDisciplines();
+          const discs = this.filterStateService.selectedDisciplines();
           if (discs.length) params['discipline'] = discs.join(',');
 
           const from = this.dateFrom();
@@ -243,7 +245,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   }
 
   protected onDisciplineChange(slugs: string[]): void {
-    this.selectedDisciplines.set(slugs);
+    this.filterStateService.setDisciplines(slugs);
     if (this.geoActive()) this.triggerGeoSearch();
     else this.refreshMap();
   }
@@ -287,6 +289,25 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       });
   }
 
+  protected onMapClick(latlng: L.LatLng): void {
+    const { lat, lng } = latlng;
+    this.userLat.set(lat);
+    this.userLng.set(lng);
+    this.zip.set('');
+    this.geoCenter.set({ lat, lng });
+    this.updateGeoOverlays();
+    this.triggerGeoSearch();
+
+    this.reverseGeocodeSub?.unsubscribe();
+    this.reverseGeocodeSub = this.geolocationService
+      .reverseGeocode(lat, lng)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result.zip) this.zip.set(result.zip);
+        if (result.country) this.country.set(result.country);
+      });
+  }
+
   protected clearGeoSearch(): void {
     this.zip.set('');
     this.userLat.set(null);
@@ -297,7 +318,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
   protected clearFilters(): void {
     this.searchQuery.set('');
-    this.selectedDisciplines.set([]);
+    this.filterStateService.setDisciplines([]);
     this.dateFrom.set('');
     this.dateTo.set('');
     this.radius.set(null);
@@ -340,6 +361,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       spiderfyOnMaxZoom: true,
     });
     this.map.addLayer(this.clusterGroup);
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => this.onMapClick(e.latlng));
+    this.map.getContainer().classList.add('map-clickable');
 
     this.destroyRef.onDestroy(() => this.map?.remove());
 
@@ -388,8 +412,15 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       }).addTo(this.map);
     }
 
-    this.homeMarker = L.marker([center.lat, center.lng], { icon: createHomeIcon() })
-      .addTo(this.map);
+    this.homeMarker = L.marker([center.lat, center.lng], {
+      icon: createHomeIcon(),
+      draggable: true,
+    }).addTo(this.map);
+
+    this.homeMarker.on('dragend', () => {
+      const pos = this.homeMarker!.getLatLng();
+      this.onMapClick(pos);
+    });
 
     if (this.radiusCircle) {
       this.map.fitBounds(this.radiusCircle.getBounds(), { padding: [30, 30] });

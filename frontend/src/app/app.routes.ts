@@ -20,6 +20,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/series/series.routes'),
   },
   {
+    path: 'news',
+    loadChildren: () => import('./features/news/news.routes'),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes'),
   },

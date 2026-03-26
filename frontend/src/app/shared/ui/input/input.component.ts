@@ -18,6 +18,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     },
   ],
   templateUrl: './input.component.html',
+  host: { class: 'block' },
 })
 export class InputComponent implements ControlValueAccessor {
   readonly label = input('');

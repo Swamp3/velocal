@@ -16,6 +16,7 @@ import { EventService, EventSearchParams } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { AuthService } from '@core/services/auth.service';
 import { GeolocationService } from '@core/services/geolocation.service';
+import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
@@ -46,10 +47,10 @@ export class EventListComponent implements OnInit {
   private readonly disciplineService = inject(DisciplineService);
   protected readonly authService = inject(AuthService);
   protected readonly geolocationService = inject(GeolocationService);
+  readonly filterStateService = inject(FilterStateService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly searchQuery = signal('');
-  readonly selectedDisciplines = signal<string[]>([]);
   readonly dateFrom = signal<string>('');
   readonly dateTo = signal<string>('');
   readonly page = signal(1);
@@ -96,7 +97,7 @@ export class EventListComponent implements OnInit {
       });
 
     effect(() => {
-      this.selectedDisciplines();
+      this.filterStateService.selectedDisciplines();
       this.dateFrom();
       this.dateTo();
       this.page();
@@ -140,7 +141,7 @@ export class EventListComponent implements OnInit {
   }
 
   onDisciplineChange(slugs: string[]): void {
-    this.selectedDisciplines.set(slugs);
+    this.filterStateService.setDisciplines(slugs);
     this.page.set(1);
   }
 
@@ -217,9 +218,9 @@ export class EventListComponent implements OnInit {
     this.skipNextUrlSync = true;
 
     this.searchQuery.set(params['q'] ?? '');
-    this.selectedDisciplines.set(
-      params['discipline'] ? params['discipline'].split(',') : [],
-    );
+    if (params['discipline']) {
+      this.filterStateService.setDisciplines(params['discipline'].split(','));
+    }
     this.dateFrom.set(params['from'] ?? '');
     this.dateTo.set(params['to'] ?? '');
     this.page.set(params['page'] ? +params['page'] : 1);
@@ -238,8 +239,8 @@ export class EventListComponent implements OnInit {
   private syncUrlAndFetch(): void {
     const queryParams: Record<string, string | undefined> = {
       q: this.searchQuery() || undefined,
-      discipline: this.selectedDisciplines().length
-        ? this.selectedDisciplines().join(',')
+      discipline: this.filterStateService.selectedDisciplines().length
+        ? this.filterStateService.selectedDisciplines().join(',')
         : undefined,
       from: this.dateFrom() || undefined,
       to: this.dateTo() || undefined,
@@ -263,8 +264,8 @@ export class EventListComponent implements OnInit {
   private buildParams(): EventSearchParams {
     const params: EventSearchParams = {
       q: this.searchQuery() || undefined,
-      discipline: this.selectedDisciplines().length
-        ? this.selectedDisciplines().join(',')
+      discipline: this.filterStateService.selectedDisciplines().length
+        ? this.filterStateService.selectedDisciplines().join(',')
         : undefined,
       from: this.dateFrom() || undefined,
       to: this.dateTo() || undefined,

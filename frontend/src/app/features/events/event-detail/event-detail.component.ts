@@ -15,13 +15,15 @@ import { EventService } from '@core/services/event.service';
 import { AuthService } from '@core/services/auth.service';
 import { FavoriteService } from '@core/services/favorite.service';
 import { SeriesService } from '@core/services/series.service';
-import { CyclingEvent, RaceSeries } from '@shared/models';
+import { PostService } from '@core/services/post.service';
+import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import {
   DisciplineChipComponent,
   EventStatusBadgeComponent,
   EmptyStateComponent,
   EventMiniMapComponent,
+  NewsCardComponent,
 } from '@shared/components';
 
 @Pipe({ name: 'externalUrlDisplay' })
@@ -51,6 +53,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     EventMiniMapComponent,
     ExternalUrlDisplayPipe,
     ChipComponent,
+    NewsCardComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -61,6 +64,7 @@ export class EventDetailComponent implements OnInit {
   private readonly eventService = inject(EventService);
   private readonly favoriteService = inject(FavoriteService);
   private readonly seriesService = inject(SeriesService);
+  private readonly postService = inject(PostService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
 
@@ -70,6 +74,7 @@ export class EventDetailComponent implements OnInit {
   protected readonly favoriteLoading = signal(false);
   protected readonly deleteLoading = signal(false);
   protected readonly eventSeries = signal<RaceSeries[]>([]);
+  protected readonly linkedPosts = signal<PostListItem[]>([]);
 
   protected readonly isFavorite = computed(() => {
     const ev = this.event();
@@ -131,6 +136,7 @@ export class EventDetailComponent implements OnInit {
         this.event.set(event);
         this.loading.set(false);
         this.loadSeries(id);
+        this.loadLinkedPosts(id);
       },
       error: () => {
         this.error.set(true);
@@ -142,6 +148,12 @@ export class EventDetailComponent implements OnInit {
   private loadSeries(eventId: string): void {
     this.seriesService.getSeriesForEvent(eventId).subscribe({
       next: (series) => this.eventSeries.set(series),
+    });
+  }
+
+  private loadLinkedPosts(eventId: string): void {
+    this.postService.getPosts({ eventId, limit: 5 }).subscribe({
+      next: (res) => this.linkedPosts.set(res.data),
     });
   }
 }
