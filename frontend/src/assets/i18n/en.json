@@ -10,6 +10,8 @@
     }
   },
   "events": {
+    "title": "Find Cycling Events",
+    "subtitle": "Discover races, tours and cycling events near you",
     "search": "Search events…",
     "dateFrom": "From",
     "dateTo": "To",
@@ -53,15 +55,16 @@
     "clearFilters": "Clear filters"
   },
   "geo": {
+    "title": "Location Search",
     "zip": "ZIP",
     "zipPlaceholder": "e.g. 71522",
     "country": "Country",
     "radius": "Radius",
     "myLocation": "My Location",
     "clearGeo": "Reset radius search",
+    "all": "All",
     "denied": "Location access denied",
-    "summary": "{{total}} Events within {{radius}} km of {{zip}}",
-    "summaryNoZip": "{{total}} Events within {{radius}} km"
+    "summary": "{{total}} Events with the filter"
   },
   "auth": {
     "login": "Login",

@@ -22,7 +22,7 @@ import { DisciplineFilterComponent } from '@shared/components/discipline-filter/
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
 import { EmptyStateComponent } from '@shared/components';
 
-const RADIUS_OPTIONS = [10, 25, 50, 100, 200] as const;
+const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
 
 @Component({
   selector: 'app-event-list',
@@ -55,7 +55,7 @@ export class EventListComponent implements OnInit {
 
   readonly zip = signal<string>('');
   readonly country = signal<string>('DE');
-  readonly radius = signal<number>(50);
+  readonly radius = signal<number | null>(null);
   readonly userLat = signal<number | null>(null);
   readonly userLng = signal<number | null>(null);
 
@@ -168,7 +168,7 @@ export class EventListComponent implements OnInit {
     }
   }
 
-  onRadiusChange(r: number): void {
+  onRadiusChange(r: number | null): void {
     this.radius.set(r);
     if (this.geoActive()) {
       this.page.set(1);
@@ -224,7 +224,7 @@ export class EventListComponent implements OnInit {
 
     if (params['zip']) this.zip.set(params['zip']);
     if (params['country']) this.country.set(params['country']);
-    if (params['radius']) this.radius.set(+params['radius']);
+    if (params['radius']) this.radius.set(+params['radius'] || null);
     if (params['lat'] && params['lng']) {
       this.userLat.set(+params['lat']);
       this.userLng.set(+params['lng']);
@@ -244,7 +244,7 @@ export class EventListComponent implements OnInit {
       page: this.page() > 1 ? String(this.page()) : undefined,
       zip: this.zip() || undefined,
       country: this.zip() ? this.country() : undefined,
-      radius: this.geoActive() ? String(this.radius()) : undefined,
+      radius: this.geoActive() && this.radius() != null ? String(this.radius()) : undefined,
       lat: this.userLat() != null ? String(this.userLat()) : undefined,
       lng: this.userLng() != null ? String(this.userLng()) : undefined,
     };
@@ -273,12 +273,12 @@ export class EventListComponent implements OnInit {
     if (this.userLat() != null && this.userLng() != null) {
       params.lat = this.userLat()!;
       params.lng = this.userLng()!;
-      params.radius = this.radius();
+      if (this.radius() != null) params.radius = this.radius()!;
       params.sort = 'distance';
     } else if (this.zip()) {
       params.zip = this.zip();
       params.country = this.country();
-      params.radius = this.radius();
+      if (this.radius() != null) params.radius = this.radius()!;
       params.sort = 'distance';
     }
 

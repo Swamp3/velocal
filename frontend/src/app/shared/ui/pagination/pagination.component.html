@@ -1,22 +1,23 @@
 <nav class="flex items-center gap-1" aria-label="Pagination">
   <button
-    class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm
+    class="rounded-lg px-3 py-2 text-sm font-medium
       text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]
-      disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+      disabled:opacity-40 disabled:pointer-events-none cursor-pointer
+      transition-all duration-200"
     [disabled]="page() <= 1"
     (click)="pageChange.emit(page() - 1)"
     aria-label="Previous page"
   >
-    &lsaquo;
+    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
   </button>
 
   @for (p of pages(); track p) {
     <button
       [class]="
-        'rounded-[var(--radius-default)] px-3 py-1.5 text-sm cursor-pointer ' +
+        'rounded-lg px-3.5 py-2 text-sm font-medium cursor-pointer transition-all duration-200 ' +
         (p === page()
-          ? 'bg-[var(--color-primary)] text-white'
-          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]')
+          ? 'bg-[var(--color-primary)] text-white shadow-sm'
+          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]')
       "
       [attr.aria-current]="p === page() ? 'page' : null"
       (click)="pageChange.emit(p)"
@@ -26,13 +27,14 @@
   }
 
   <button
-    class="rounded-[var(--radius-default)] px-3 py-1.5 text-sm
+    class="rounded-lg px-3 py-2 text-sm font-medium
       text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]
-      disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+      disabled:opacity-40 disabled:pointer-events-none cursor-pointer
+      transition-all duration-200"
     [disabled]="page() >= totalPages()"
     (click)="pageChange.emit(page() + 1)"
     aria-label="Next page"
   >
-    &rsaquo;
+    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
   </button>
 </nav>

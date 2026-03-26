@@ -1,10 +1,15 @@
-<div class="flex flex-col items-center justify-center py-16 text-center">
+<div class="flex flex-col items-center justify-center rounded-2xl bg-[var(--color-bg-alt)]/50 py-20 text-center">
   @if (icon()) {
-    <span class="mb-4 text-5xl">{{ icon() }}</span>
+    <div
+      class="mb-5 flex size-16 items-center justify-center rounded-2xl
+        bg-[var(--color-primary)]/10"
+    >
+      <span class="material-symbols-outlined text-[32px] text-[var(--color-primary)]">{{ icon() }}</span>
+    </div>
   }
-  <p class="text-lg font-medium text-[var(--color-text)]">{{ title() }}</p>
+  <p class="text-lg font-semibold text-[var(--color-text)]">{{ title() }}</p>
   @if (message()) {
-    <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ message() }}</p>
+    <p class="mt-2 max-w-sm text-sm text-[var(--color-text-muted)]">{{ message() }}</p>
   }
   <ng-content />
 </div>

@@ -10,6 +10,8 @@
     }
   },
   "events": {
+    "title": "Radsport-Events finden",
+    "subtitle": "Entdecke Rennen, Touren und Radsport-Events in deiner Nähe",
     "search": "Veranstaltung suchen…",
     "dateFrom": "Von",
     "dateTo": "Bis",
@@ -53,15 +55,16 @@
     "clearFilters": "Filter zurücksetzen"
   },
   "geo": {
+    "title": "Umkreissuche",
     "zip": "PLZ",
     "zipPlaceholder": "z.B. 71522",
     "country": "Land",
     "radius": "Umkreis",
     "myLocation": "Mein Standort",
     "clearGeo": "Umkreissuche zurücksetzen",
+    "all": "Alle",
     "denied": "Standortzugriff verweigert",
-    "summary": "{{total}} Events im Umkreis von {{radius}} km um {{zip}}",
-    "summaryNoZip": "{{total}} Events im Umkreis von {{radius}} km"
+    "summary": "{{total}} Events mit dem Filter"
   },
   "auth": {
     "login": "Anmelden",

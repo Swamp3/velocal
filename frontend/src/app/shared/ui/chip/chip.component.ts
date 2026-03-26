@@ -21,15 +21,16 @@ export class ChipComponent {
 
   protected readonly classes = computed(() => {
     const base =
-      'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm ' +
-      'font-medium cursor-pointer select-none transition-colors ' +
+      'inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm ' +
+      'font-medium cursor-pointer select-none transition-all duration-200 ' +
       'focus-visible:outline-2 focus-visible:outline-offset-2 ' +
       'focus-visible:outline-[var(--color-primary)]';
 
     return this.selected()
-      ? `${base} bg-[var(--color-primary)] text-white`
-      : `${base} bg-[var(--color-bg-alt)] text-[var(--color-text-muted)] ` +
-          'border border-[var(--color-border)] hover:border-[var(--color-primary)]';
+      ? `${base} bg-[var(--color-primary)] text-white shadow-[var(--shadow-glow)]`
+      : `${base} bg-[var(--color-bg-card)] text-[var(--color-text-muted)] ` +
+          'border border-[var(--color-border)] hover:border-[var(--color-primary)] ' +
+          'hover:text-[var(--color-primary)] hover:shadow-sm';
   });
 
   protected toggle(): void {

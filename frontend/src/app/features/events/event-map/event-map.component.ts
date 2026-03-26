@@ -4,7 +4,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
   inject,
   OnInit,
@@ -16,7 +15,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, tap } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import * as L from 'leaflet';
-import 'leaflet.markercluster';
 
 import { EventService } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
@@ -25,10 +23,19 @@ import { GeolocationService } from '@core/services/geolocation.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { DisciplineFilterComponent } from '@shared/components';
 
+function normalizeCoords(coords: any): { lat: number; lng: number } | null {
+  if (!coords) return null;
+  if (typeof coords.lat === 'number' && typeof coords.lng === 'number') return coords;
+  if (coords.type === 'Point' && Array.isArray(coords.coordinates)) {
+    return { lat: coords.coordinates[1], lng: coords.coordinates[0] };
+  }
+  return null;
+}
+
 const EUROPE_CENTER: L.LatLngExpression = [51.1657, 10.4515];
 const DEFAULT_ZOOM = 5;
 const MAX_EVENTS = 5000;
-const RADIUS_OPTIONS = [10, 25, 50, 100, 200] as const;
+const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
 
 const DISCIPLINE_COLORS: Record<string, string> = {
   strasse: '#4CAF50',
@@ -40,6 +47,7 @@ const DISCIPLINE_COLORS: Record<string, string> = {
   trial: '#607D8B',
   breitensport: '#00BCD4',
   tt: '#F44336',
+  gravel: '#8D6E63',
 };
 
 function disciplineColor(slug: string): string {
@@ -92,7 +100,6 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private homeMarker?: L.Marker;
   private readonly iconCache = new Map<string, L.DivIcon>();
   private readonly mapReady = signal(false);
-  private markerRebuildTimer?: ReturnType<typeof setTimeout>;
 
   private readonly allEvents = signal<CyclingEvent[]>([]);
   private readonly totalAvailable = signal(0);
@@ -106,7 +113,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
   readonly zip = signal('');
   readonly country = signal('DE');
-  readonly radius = signal<number>(50);
+  readonly radius = signal<number | null>(null);
   readonly userLat = signal<number | null>(null);
   readonly userLng = signal<number | null>(null);
 
@@ -114,9 +121,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   readonly geoActive = computed(() => !!this.zip() || (this.userLat() != null && this.userLng() != null));
 
   readonly filteredEvents = computed(() => {
-    if (this.geoActive()) return this.allEvents().filter((e) => e.coordinates);
+    if (this.geoActive()) return this.allEvents().filter((e) => normalizeCoords(e.coordinates));
 
-    let events = this.allEvents().filter((e) => e.coordinates);
+    let events = this.allEvents().filter((e) => normalizeCoords(e.coordinates));
 
     const q = this.searchQuery().toLowerCase().trim();
     if (q) {
@@ -159,14 +166,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private readonly geoSearch$ = new Subject<void>();
   private readonly zipInput$ = new Subject<string>();
 
-  constructor() {
-    effect(() => {
-      if (!this.mapReady()) return;
-      const events = this.filteredEvents();
-      clearTimeout(this.markerRebuildTimer);
-      this.markerRebuildTimer = setTimeout(() => this.rebuildMarkers(events), 50);
-    });
+  private readonly geoCenter = signal<{ lat: number; lng: number } | null>(null);
 
+  constructor() {
     this.zipInput$
       .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((z) => {
@@ -195,7 +197,8 @@ export class EventMapComponent implements OnInit, AfterViewInit {
             params['zip'] = this.zip();
             params['country'] = this.country();
           }
-          params['radius'] = this.radius();
+          const r = this.radius();
+          if (r != null) params['radius'] = r;
 
           const q = this.searchQuery().trim();
           if (q) params['q'] = q;
@@ -217,8 +220,10 @@ export class EventMapComponent implements OnInit, AfterViewInit {
         next: (res) => {
           this.allEvents.set(res.data);
           this.totalAvailable.set(res.total);
+          this.geoCenter.set(res.center ?? null);
           this.loading.set(false);
           this.updateGeoOverlays();
+          this.refreshMap();
         },
         error: () => this.loading.set(false),
       });
@@ -229,17 +234,18 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.mapReady.set(true);
   }
 
   protected onSearchInput(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
     if (this.geoActive()) this.triggerGeoSearch();
+    else this.refreshMap();
   }
 
   protected onDisciplineChange(slugs: string[]): void {
     this.selectedDisciplines.set(slugs);
     if (this.geoActive()) this.triggerGeoSearch();
+    else this.refreshMap();
   }
 
   protected onDateChange(field: 'from' | 'to', event: Event): void {
@@ -247,6 +253,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     if (field === 'from') this.dateFrom.set(value);
     else this.dateTo.set(value);
     if (this.geoActive()) this.triggerGeoSearch();
+    else this.refreshMap();
   }
 
   protected onZipInput(event: Event): void {
@@ -258,7 +265,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     if (this.zip()) this.triggerGeoSearch();
   }
 
-  protected onRadiusChange(r: number): void {
+  protected onRadiusChange(r: number | null): void {
     this.radius.set(r);
     if (this.geoActive()) this.triggerGeoSearch();
   }
@@ -269,8 +276,11 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (pos) => {
-          this.userLat.set(pos.coords.latitude);
-          this.userLng.set(pos.coords.longitude);
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          this.userLat.set(lat);
+          this.userLng.set(lng);
+          this.geoCenter.set({ lat, lng });
           this.zip.set('');
           this.triggerGeoSearch();
         },
@@ -290,6 +300,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     this.selectedDisciplines.set([]);
     this.dateFrom.set('');
     this.dateTo.set('');
+    this.radius.set(null);
     this.clearGeoSearch();
   }
 
@@ -306,7 +317,10 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     this.geoSearch$.next();
   }
 
-  private initMap(): void {
+  private async initMap(): Promise<void> {
+    (window as any)['L'] = L;
+    await import('leaflet.markercluster');
+
     this.map = L.map(this.mapEl().nativeElement, {
       center: EUROPE_CENTER,
       zoom: DEFAULT_ZOOM,
@@ -324,14 +338,13 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       showCoverageOnHover: false,
       maxClusterRadius: 50,
       spiderfyOnMaxZoom: true,
-      chunkedLoading: true,
     });
     this.map.addLayer(this.clusterGroup);
 
-    this.destroyRef.onDestroy(() => {
-      clearTimeout(this.markerRebuildTimer);
-      this.map?.remove();
-    });
+    this.destroyRef.onDestroy(() => this.map?.remove());
+
+    this.mapReady.set(true);
+    this.refreshMap();
   }
 
   private loadData(): void {
@@ -346,8 +359,10 @@ export class EventMapComponent implements OnInit, AfterViewInit {
           this.allEvents.set(events.data);
           this.totalAvailable.set(events.total);
           this.disciplines.set(disciplines);
+          this.geoCenter.set(null);
           this.loading.set(false);
           this.removeGeoOverlays();
+          this.refreshMap();
         },
         error: () => this.loading.set(false),
       });
@@ -358,40 +373,29 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
     this.removeGeoOverlays();
 
-    const events = this.allEvents();
-    if (events.length === 0) return;
+    const center = this.geoCenter();
+    if (!center) return;
 
-    let centerLat: number | undefined;
-    let centerLng: number | undefined;
-
-    if (this.userLat() != null && this.userLng() != null) {
-      centerLat = this.userLat()!;
-      centerLng = this.userLng()!;
-    } else if (events.length > 0) {
-      const withCoords = events.filter((e) => e.coordinates);
-      if (withCoords.length > 0) {
-        const latSum = withCoords.reduce((s, e) => s + e.coordinates!.lat, 0);
-        const lngSum = withCoords.reduce((s, e) => s + e.coordinates!.lng, 0);
-        centerLat = latSum / withCoords.length;
-        centerLng = lngSum / withCoords.length;
-      }
+    const r = this.radius();
+    if (r != null) {
+      this.radiusCircle = L.circle([center.lat, center.lng], {
+        radius: r * 1000,
+        color: '#2563eb',
+        fillColor: '#2563eb',
+        fillOpacity: 0.06,
+        weight: 2,
+        dashArray: '6 4',
+      }).addTo(this.map);
     }
 
-    if (centerLat == null || centerLng == null) return;
-
-    this.radiusCircle = L.circle([centerLat, centerLng], {
-      radius: this.radius() * 1000,
-      color: '#2563eb',
-      fillColor: '#2563eb',
-      fillOpacity: 0.06,
-      weight: 2,
-      dashArray: '6 4',
-    }).addTo(this.map);
-
-    this.homeMarker = L.marker([centerLat, centerLng], { icon: createHomeIcon() })
+    this.homeMarker = L.marker([center.lat, center.lng], { icon: createHomeIcon() })
       .addTo(this.map);
 
-    this.map.fitBounds(this.radiusCircle.getBounds(), { padding: [30, 30] });
+    if (this.radiusCircle) {
+      this.map.fitBounds(this.radiusCircle.getBounds(), { padding: [30, 30] });
+    } else {
+      this.map.setView([center.lat, center.lng], 8);
+    }
   }
 
   private removeGeoOverlays(): void {
@@ -405,6 +409,21 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private refreshMap(): void {
+    if (!this.mapReady()) return;
+    this.rebuildMarkers(this.filteredEvents());
+    if (!this.geoActive()) this.fitToMarkers();
+  }
+
+  private fitToMarkers(): void {
+    if (!this.map || !this.clusterGroup) return;
+
+    const bounds = this.clusterGroup.getBounds();
+    if (bounds.isValid()) {
+      this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+    }
+  }
+
   private rebuildMarkers(events: CyclingEvent[]): void {
     if (!this.clusterGroup) return;
     this.clusterGroup.clearLayers();
@@ -413,10 +432,11 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     const markers: L.Marker[] = [];
 
     for (const ev of events) {
-      if (!ev.coordinates) continue;
+      const coords = normalizeCoords(ev.coordinates);
+      if (!coords) continue;
 
       const icon = this.getIcon(ev.disciplineSlug);
-      const marker = L.marker([ev.coordinates.lat, ev.coordinates.lng], { icon });
+      const marker = L.marker([coords.lat, coords.lng], { icon });
 
       const date = new Date(ev.startDate).toLocaleDateString('de-DE', {
         day: '2-digit',
