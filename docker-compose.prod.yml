@@ -52,6 +52,9 @@ services:
       target: production
     ports:
       - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - default
+      - caddy
     depends_on:
       backend:
         condition: service_healthy
@@ -64,3 +67,7 @@ services:
 
 volumes:
   pgdata:
+
+networks:
+  caddy:
+    external: true
