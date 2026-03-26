@@ -1,34 +1,3 @@
-<!-- Hero search section -->
-<div
-  class="-mx-4 -mt-8 mb-8 px-4 pb-8 pt-10 sm:-mx-6 sm:px-6"
-  [style.background]="'var(--gradient-hero-subtle)'"
->
-  <div class="mx-auto max-w-3xl text-center">
-    <h1 class="text-2xl font-bold tracking-tight text-[var(--color-text)] sm:text-3xl">
-      {{ 'events.title' | transloco }}
-    </h1>
-    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
-      {{ 'events.subtitle' | transloco }}
-    </p>
-
-    <!-- Search input -->
-    <div class="relative mt-6">
-      <span
-        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[var(--color-text-muted)]"
-        >search</span
-      >
-      <input
-        type="text"
-        [value]="searchQuery()"
-        (input)="onSearchInput($event)"
-        [placeholder]="'events.search' | transloco"
-        [attr.aria-label]="'events.search' | transloco"
-        class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-3.5 pl-12 pr-4 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-[var(--shadow-card)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-      />
-    </div>
-  </div>
-</div>
-
 <div class="mx-auto max-w-5xl">
   <!-- Create event button -->
   @if (authService.isAuthenticated()) {
@@ -42,216 +11,264 @@
     </div>
   }
 
-  <!-- Discipline filter -->
-  @if (disciplines().length) {
-    <section>
-      <app-discipline-filter
-        [disciplines]="disciplines()"
-        [selected]="filterStateService.selectedDisciplines()"
-        (selectedChange)="onDisciplineChange($event)"
-      />
-    </section>
-  }
-
-  <!-- Filters card -->
+  <!-- Collapsible filters panel -->
   <div
-    class="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)]"
+    class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)]"
   >
-    <div class="flex flex-col gap-6 sm:flex-row">
-      <!-- Date filters (left column) -->
-      <div class="flex flex-col gap-3 sm:border-r sm:border-[var(--color-border)] sm:pr-6">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
-            >calendar_today</span
+    <!-- Panel header / toggle -->
+    <button
+      class="flex w-full items-center justify-between px-5 py-4 cursor-pointer"
+      (click)="filterPanelOpen.set(!filterPanelOpen())"
+      [attr.aria-expanded]="filterPanelOpen()"
+    >
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]">tune</span>
+        <span class="text-sm font-semibold text-[var(--color-text)]">
+          {{ 'events.filter' | transloco }}
+        </span>
+        @if (!filterPanelOpen() && activeFilterCount() > 0) {
+          <span
+            class="flex size-5 items-center justify-center rounded-full bg-[var(--color-primary)] text-[11px] font-bold text-white"
           >
-          <span class="text-sm font-semibold text-[var(--color-text)]">{{
-            'map.dateRange' | transloco
-          }}</span>
-        </div>
-        <label class="flex flex-col gap-1.5">
-          <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-            'events.dateFrom' | transloco
-          }}</span>
-          <input
-            type="date"
-            [value]="dateFrom()"
-            (change)="onDateFromChange($event)"
-            class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-          />
-        </label>
-        <label class="flex flex-col gap-1.5">
-          <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-            'events.dateTo' | transloco
-          }}</span>
-          <input
-            type="date"
-            [value]="dateTo()"
-            (change)="onDateToChange($event)"
-            class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-          />
-        </label>
-
-        <div class="mt-1 flex flex-wrap items-center gap-2">
-          <button
-            [class]="
-              futureOnly()
-                ? 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] cursor-pointer transition-all duration-200'
-                : 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-muted)] hover:border-[var(--color-primary)] cursor-pointer transition-all duration-200'
-            "
-            (click)="onFutureOnlyToggle()"
-            [attr.aria-pressed]="futureOnly()"
-          >
-            @if (futureOnly()) {
-              <span class="material-symbols-outlined text-[14px]">check</span>
-            }
-            {{ 'events.futureOnly' | transloco }}
-          </button>
-
-          <div
-            class="flex gap-1.5"
-            role="radiogroup"
-            [attr.aria-label]="'events.yearFilter' | transloco"
-          >
-            @for (year of availableYears(); track year) {
-              <button
-                [class]="
-                  selectedYear() === year
-                    ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white cursor-pointer transition-all duration-200'
-                    : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer transition-all duration-200'
-                "
-                [attr.aria-pressed]="selectedYear() === year"
-                (click)="onYearSelect(year)"
-              >
-                {{ year }}
-              </button>
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- Geo search (right column) -->
-      <div class="flex-1">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
-            >my_location</span
-          >
-          <span class="text-sm font-semibold text-[var(--color-text)]">{{
-            'geo.title' | transloco
-          }}</span>
-        </div>
-
-        <div class="flex flex-wrap items-end gap-4">
-          <label class="flex flex-col gap-1.5">
-            <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-              'geo.zip' | transloco
-            }}</span>
-            <input
-              type="text"
-              [value]="zip()"
-              (input)="onZipInput($event)"
-              [placeholder]="'geo.zipPlaceholder' | transloco"
-              maxlength="10"
-              class="w-32 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-            />
-          </label>
-
-          <label class="flex flex-col gap-1.5">
-            <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-              'geo.country' | transloco
-            }}</span>
-            <select
-              [value]="country()"
-              (change)="onCountryChange($event)"
-              class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
-            >
-              <option value="DE">DE</option>
-              <option value="AT">AT</option>
-              <option value="CH">CH</option>
-              <option value="NL">NL</option>
-              <option value="BE">BE</option>
-              <option value="FR">FR</option>
-              <option value="LU">LU</option>
-            </select>
-          </label>
-
-          <div class="flex flex-col gap-1.5">
-            <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
-              'geo.radius' | transloco
-            }}</span>
-            <div
-              class="flex gap-1.5"
-              role="radiogroup"
-              [attr.aria-label]="'geo.radius' | transloco"
-            >
-              <button
-                [class]="
-                  radius() === null
-                    ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
-                    : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
-                "
-                [attr.aria-pressed]="radius() === null"
-                (click)="onRadiusChange(null)"
-              >
-                {{ 'geo.all' | transloco }}
-              </button>
-              @for (r of radiusOptions; track r) {
-                <button
-                  [class]="
-                    radius() === r
-                      ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
-                      : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
-                  "
-                  [attr.aria-pressed]="radius() === r"
-                  (click)="onRadiusChange(r)"
-                >
-                  {{ r }} km
-                </button>
-              }
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)]/10 px-4 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            [disabled]="geolocationService.loading()"
-            (click)="useMyLocation()"
-          >
-            @if (geolocationService.loading()) {
-              <span
-                class="inline-block size-4 animate-spin rounded-full border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)]"
-              ></span>
-            } @else {
-              <span class="material-symbols-outlined text-[18px]">my_location</span>
-            }
-            {{ 'geo.myLocation' | transloco }}
-          </button>
-
-          @if (geoActive()) {
-            <button
-              class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-              (click)="clearGeoSearch()"
-            >
-              {{ 'geo.clearGeo' | transloco }}
-            </button>
-          }
-
-          @if (geolocationService.denied()) {
-            <span class="text-xs text-[var(--color-danger)]" role="alert">{{
-              'geo.denied' | transloco
-            }}</span>
-          }
-        </div>
-
-        @if (geoActive() && !loading()) {
-          <div
-            class="mt-4 rounded-lg bg-[var(--color-primary)]/5 px-4 py-2.5 text-sm text-[var(--color-text-muted)]"
-          >
-            {{ 'geo.summary' | transloco: { total: total(), radius: radius(), zip: zip() } }}
-          </div>
+            {{ activeFilterCount() }}
+          </span>
         }
       </div>
-    </div>
+      <span
+        class="material-symbols-outlined text-[20px] text-[var(--color-text-muted)] transition-transform duration-200"
+        [class.rotate-180]="filterPanelOpen()"
+      >
+        expand_more
+      </span>
+    </button>
+
+    @if (filterPanelOpen()) {
+      <div class="border-t border-[var(--color-border)] px-5 pb-5 pt-4">
+        <!-- Search input -->
+        <div class="relative mb-5">
+          <span
+            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[var(--color-text-muted)]"
+            >search</span
+          >
+          <input
+            type="text"
+            [value]="searchQuery()"
+            (input)="onSearchInput($event)"
+            [placeholder]="'events.search' | transloco"
+            [attr.aria-label]="'events.search' | transloco"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] py-3 pl-12 pr-4 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+          />
+        </div>
+
+        <!-- Discipline filter -->
+        @if (disciplines().length) {
+          <div class="mb-5">
+            <app-discipline-filter
+              [disciplines]="disciplines()"
+              [selected]="filterStateService.selectedDisciplines()"
+              (selectedChange)="onDisciplineChange($event)"
+            />
+          </div>
+        }
+
+        <!-- Date + Geo filters -->
+        <div class="flex flex-col gap-6 sm:flex-row">
+          <!-- Date filters -->
+          <div class="flex flex-col gap-3 sm:border-r sm:border-[var(--color-border)] sm:pr-6">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
+                >calendar_today</span
+              >
+              <span class="text-sm font-semibold text-[var(--color-text)]">{{
+                'map.dateRange' | transloco
+              }}</span>
+            </div>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+                'events.dateFrom' | transloco
+              }}</span>
+              <input
+                type="date"
+                [value]="dateFrom()"
+                (change)="onDateFromChange($event)"
+                class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+                'events.dateTo' | transloco
+              }}</span>
+              <input
+                type="date"
+                [value]="dateTo()"
+                (change)="onDateToChange($event)"
+                class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+              />
+            </label>
+
+            <div class="mt-1 flex flex-wrap items-center gap-2">
+              <button
+                [class]="
+                  futureOnly()
+                    ? 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] cursor-pointer transition-all duration-200'
+                    : 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-muted)] hover:border-[var(--color-primary)] cursor-pointer transition-all duration-200'
+                "
+                (click)="onFutureOnlyToggle()"
+                [attr.aria-pressed]="futureOnly()"
+              >
+                @if (futureOnly()) {
+                  <span class="material-symbols-outlined text-[14px]">check</span>
+                }
+                {{ 'events.futureOnly' | transloco }}
+              </button>
+
+              <div
+                class="flex gap-1.5"
+                role="radiogroup"
+                [attr.aria-label]="'events.yearFilter' | transloco"
+              >
+                @for (year of availableYears(); track year) {
+                  <button
+                    [class]="
+                      selectedYear() === year
+                        ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white cursor-pointer transition-all duration-200'
+                        : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer transition-all duration-200'
+                    "
+                    [attr.aria-pressed]="selectedYear() === year"
+                    (click)="onYearSelect(year)"
+                  >
+                    {{ year }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Geo search -->
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
+                >my_location</span
+              >
+              <span class="text-sm font-semibold text-[var(--color-text)]">{{
+                'geo.title' | transloco
+              }}</span>
+            </div>
+
+            <div class="flex flex-wrap items-end gap-4">
+              <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+                  'geo.zip' | transloco
+                }}</span>
+                <input
+                  type="text"
+                  [value]="zip()"
+                  (input)="onZipInput($event)"
+                  [placeholder]="'geo.zipPlaceholder' | transloco"
+                  maxlength="10"
+                  class="w-32 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+                />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+                  'geo.country' | transloco
+                }}</span>
+                <select
+                  [value]="country()"
+                  (change)="onCountryChange($event)"
+                  class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+                >
+                  <option value="DE">DE</option>
+                  <option value="AT">AT</option>
+                  <option value="CH">CH</option>
+                  <option value="NL">NL</option>
+                  <option value="BE">BE</option>
+                  <option value="FR">FR</option>
+                  <option value="LU">LU</option>
+                </select>
+              </label>
+
+              <div class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
+                  'geo.radius' | transloco
+                }}</span>
+                <div
+                  class="flex gap-1.5"
+                  role="radiogroup"
+                  [attr.aria-label]="'geo.radius' | transloco"
+                >
+                  <button
+                    [class]="
+                      radius() === null
+                        ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
+                        : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
+                    "
+                    [attr.aria-pressed]="radius() === null"
+                    (click)="onRadiusChange(null)"
+                  >
+                    {{ 'geo.all' | transloco }}
+                  </button>
+                  @for (r of radiusOptions; track r) {
+                    <button
+                      [class]="
+                        radius() === r
+                          ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
+                          : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
+                      "
+                      [attr.aria-pressed]="radius() === r"
+                      (click)="onRadiusChange(r)"
+                    >
+                      {{ r }} km
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)]/10 px-4 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="geolocationService.loading()"
+                (click)="useMyLocation()"
+              >
+                @if (geolocationService.loading()) {
+                  <span
+                    class="inline-block size-4 animate-spin rounded-full border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)]"
+                  ></span>
+                } @else {
+                  <span class="material-symbols-outlined text-[18px]">my_location</span>
+                }
+                {{ 'geo.myLocation' | transloco }}
+              </button>
+
+              @if (geoActive()) {
+                <button
+                  class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+                  (click)="clearGeoSearch()"
+                >
+                  {{ 'geo.clearGeo' | transloco }}
+                </button>
+              }
+
+              @if (geolocationService.denied()) {
+                <span class="text-xs text-[var(--color-danger)]" role="alert">{{
+                  'geo.denied' | transloco
+                }}</span>
+              }
+            </div>
+
+            @if (geoActive() && !loading()) {
+              <div
+                class="mt-4 rounded-lg bg-[var(--color-primary)]/5 px-4 py-2.5 text-sm text-[var(--color-text-muted)]"
+              >
+                {{ 'geo.summary' | transloco: { total: total(), radius: radius(), zip: zip() } }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
   </div>
 
   <!-- Result count -->

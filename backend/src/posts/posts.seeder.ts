@@ -30,6 +30,7 @@ export class PostSeeder implements OnModuleInit {
       slug: 'willkommen-bei-velocal',
       authorId: admin.id,
       status: PostStatus.PUBLISHED,
+      isPinned: true,
       publishedAt: new Date(),
       body: WELCOME_POST_BODY,
       tags: [

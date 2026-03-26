@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_dev:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U velocal"]
       interval: 5s
@@ -52,4 +52,4 @@ services:
       - backend
 
 volumes:
-  pgdata:
+  pgdata_dev:

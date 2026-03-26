@@ -77,9 +77,19 @@ export class EventListComponent implements OnInit {
   readonly disciplines = signal<Discipline[]>([]);
 
   readonly radiusOptions = RADIUS_OPTIONS;
+  readonly filterPanelOpen = signal(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches);
 
   readonly geoActive = computed(() => !!this.zip() || (this.userLat() != null && this.userLng() != null));
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
+  readonly activeFilterCount = computed(() => {
+    let count = 0;
+    if (this.searchQuery()) count++;
+    if (this.filterStateService.selectedDisciplines().length) count++;
+    if (this.geoActive()) count++;
+    if (this.selectedYear()) count++;
+    if (!this.futureOnly() && (this.dateFrom() || this.dateTo())) count++;
+    return count;
+  });
 
   private readonly search$ = new Subject<void>();
   private readonly searchInput$ = new Subject<string>();

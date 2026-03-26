@@ -58,10 +58,12 @@ function disciplineColor(slug: string): string {
 function createDisciplineIcon(color: string): L.DivIcon {
   return L.divIcon({
     className: '',
-    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -10],
+    html: `<div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
+      <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>
+    </div>`,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -14],
   });
 }
 
