@@ -17,6 +17,8 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/material-symbols-outlined": "^5.2.38",
     "@jsverse/transloco": "^8.2.1",
     "@tailwindcss/typography": "^0.5.19",
     "leaflet": "^1.9.4",

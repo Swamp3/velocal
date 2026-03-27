@@ -26,6 +26,12 @@ importers:
       '@angular/router':
         specifier: ^21.2.0
         version: 21.2.5(@angular/common@21.2.5(@angular/core@21.2.5(@angular/compiler@21.2.5)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.5(@angular/compiler@21.2.5)(rxjs@7.8.2))(@angular/platform-browser@21.2.5(@angular/common@21.2.5(@angular/core@21.2.5(@angular/compiler@21.2.5)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.5(@angular/compiler@21.2.5)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@fontsource-variable/inter':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/material-symbols-outlined':
+        specifier: ^5.2.38
+        version: 5.2.38
       '@jsverse/transloco':
         specifier: ^8.2.1
         version: 8.2.1(@angular/core@21.2.5(@angular/compiler@21.2.5)(rxjs@7.8.2))(rxjs@7.8.2)(typescript@5.9.3)
@@ -588,6 +594,12 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@fontsource-variable/inter@5.2.8':
+    resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
+
+  '@fontsource-variable/material-symbols-outlined@5.2.38':
+    resolution: {integrity: sha512-Lr3jb8KYexdMo9rkeM46HXCboObrMWAR+ojSbN8UEY9slsme6D6ZSWeyKtdcMnqrBNr923BmjEVnEO78L+te1g==}
 
   '@gar/promise-retry@1.0.3':
     resolution: {integrity: sha512-GmzA9ckNokPypTg10pgpeHNQe7ph+iIKKmhKu3Ob9ANkswreCx7R3cKmY781K8QK3AqVL3xVh9A42JvIAbkkSA==}
@@ -3533,6 +3545,10 @@ snapshots:
     optional: true
 
   '@exodus/bytes@1.15.0': {}
+
+  '@fontsource-variable/inter@5.2.8': {}
+
+  '@fontsource-variable/material-symbols-outlined@5.2.38': {}
 
   '@gar/promise-retry@1.0.3': {}
 
