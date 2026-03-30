@@ -1,4 +1,5 @@
-import 'dotenv/config';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+require('dotenv').config({ path: '../.env' });
 import { DataSource } from 'typeorm';
 import { Event } from '../events/entities/event.entity';
 import { Discipline } from '../disciplines/entities/discipline.entity';
