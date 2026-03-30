@@ -44,6 +44,6 @@ pnpm start
 | `DB_NAME`                 | `velocal`              |                            |
 | `JWT_SECRET`              | `dev-secret-change-me` | **Change in production**   |
 | `JWT_EXPIRATION`          | `7d`                   | Any `ms`-compatible string |
-| `ADMIN_EMAIL`             | `admin@velocal.dev`    | Seeded admin email         |
+| `ADMIN_EMAIL`             | `admin@velocal.cc`    | Seeded admin email         |
 | `ADMIN_PASSWORD`          | `admin1234`            | Seeded admin password      |
 | `IMPORT_COOLDOWN_MINUTES` | `5`                    | Min minutes between imports|

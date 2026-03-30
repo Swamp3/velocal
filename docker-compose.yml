@@ -30,7 +30,7 @@ services:
       DB_PASSWORD: velocal
       DB_NAME: velocal
       JWT_SECRET: dev-secret-change-me
-      ADMIN_EMAIL: admin@velocal.dev
+      ADMIN_EMAIL: admin@velocal.cc
       ADMIN_PASSWORD: admin1234
     depends_on:
       postgres:

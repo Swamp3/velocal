@@ -17,6 +17,7 @@ import {
   ImportSource,
   RawEvent,
 } from './interfaces/import-source.interface';
+import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
@@ -35,8 +36,9 @@ export class ImportService {
     private readonly config: ConfigService,
     private readonly geocoding: GeocodingService,
     radNetSource: RadNetSource,
+    raceResultSource: RaceResultSource,
   ) {
-    this.sources = [radNetSource];
+    this.sources = [radNetSource, raceResultSource];
     this.cooldownMs =
       (this.config.get<number>('IMPORT_COOLDOWN_MINUTES') ?? 5) * 60 * 1000 ||
       DEFAULT_COOLDOWN_MS;

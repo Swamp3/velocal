@@ -110,7 +110,7 @@ export class RadNetSource implements ImportSource {
   private async fetchPage(url: string): Promise<string> {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'VeloCal/1.0 (https://velocal.dev)',
+        'User-Agent': 'VeloCal/1.0 (https://velocal.cc)',
         Accept: 'text/html',
         'Accept-Language': 'de-DE,de;q=0.9',
       },

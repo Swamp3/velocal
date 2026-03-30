@@ -39,7 +39,7 @@ export class GeocodingService {
       const res = await fetch(
         `${GeocodingService.NOMINATIM_URL}?${params.toString()}`,
         {
-          headers: { 'User-Agent': 'VeloCal/1.0 (https://velocal.dev)' },
+          headers: { 'User-Agent': 'VeloCal/1.0 (https://velocal.cc)' },
         },
       );
 
@@ -94,7 +94,7 @@ export class GeocodingService {
       const res = await fetch(
         `${GeocodingService.NOMINATIM_URL}?${params.toString()}`,
         {
-          headers: { 'User-Agent': 'VeloCal/1.0 (https://velocal.dev)' },
+          headers: { 'User-Agent': 'VeloCal/1.0 (https://velocal.cc)' },
         },
       );
 
@@ -148,7 +148,7 @@ export class GeocodingService {
       const res = await fetch(
         `${GeocodingService.NOMINATIM_URL}?${params.toString()}`,
         {
-          headers: { 'User-Agent': 'VeloCal/1.0 (https://velocal.dev)' },
+          headers: { 'User-Agent': 'VeloCal/1.0 (https://velocal.cc)' },
         },
       );
 

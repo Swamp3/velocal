@@ -11,7 +11,7 @@
 
 - Full event info (dates, location, status, discipline, registration deadline)
 - Mini-map showing event location (if coordinates available)
-- External link to source (e.g. rad-net.de)
+- External link to source (e.g. rad-net.de, my.raceresult.com)
 
 ## Map view (`/map`)
 

@@ -31,7 +31,7 @@ services:
       DB_NAME: velocal
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-7d}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@velocal.dev}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@velocal.cc}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
       IMPORT_COOLDOWN_MINUTES: ${IMPORT_COOLDOWN_MINUTES:-5}
     depends_on:

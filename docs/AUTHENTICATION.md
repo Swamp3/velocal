@@ -6,7 +6,7 @@ A default admin is seeded on every startup (skipped if the email already exists)
 
 | Field    | Default             | Env override     |
 | -------- | ------------------- | ---------------- |
-| Email    | `admin@velocal.dev` | `ADMIN_EMAIL`    |
+| Email    | `admin@velocal.cc` | `ADMIN_EMAIL`    |
 | Password | `admin1234`         | `ADMIN_PASSWORD` |
 
 **Change these in production** via environment variables or `backend/.env`.

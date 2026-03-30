@@ -150,7 +150,7 @@ This builds optimized images (Angular AOT + nginx, NestJS compiled) and serves t
 | `DB_NAME` | `velocal` | Database name |
 | `JWT_SECRET` | — | Secret for signing JWTs |
 | `JWT_EXPIRATION` | `7d` | Token expiration |
-| `ADMIN_EMAIL` | `admin@velocal.dev` | Seeded admin account email |
+| `ADMIN_EMAIL` | `admin@velocal.cc` | Seeded admin account email |
 | `ADMIN_PASSWORD` | `admin1234` | Seeded admin account password |
 | `IMPORT_COOLDOWN_MINUTES` | `5` | Minimum minutes between imports |
 

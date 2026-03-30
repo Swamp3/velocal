@@ -16,7 +16,7 @@ export class AdminSeeder implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const email = this.config.get<string>('ADMIN_EMAIL', 'admin@velocal.dev');
+    const email = this.config.get<string>('ADMIN_EMAIL', 'admin@velocal.cc');
     const password = this.config.get<string>('ADMIN_PASSWORD', 'admin1234');
 
     const existing = await this.userRepo.findOneBy({ email });

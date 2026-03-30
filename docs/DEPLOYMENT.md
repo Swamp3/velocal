@@ -13,7 +13,7 @@ Edit `.env` with production values:
 | `DB_PASSWORD`             | `velocal`            | **Change** — database password                         |
 | `JWT_SECRET`              | *(none)*             | **Required** — generate with `openssl rand -base64 32` |
 | `JWT_EXPIRATION`          | `7d`                 | Token lifetime (`ms`-compatible string)                |
-| `ADMIN_EMAIL`             | `admin@velocal.dev`  | Seeded admin account email                             |
+| `ADMIN_EMAIL`             | `admin@velocal.cc`  | Seeded admin account email                             |
 | `ADMIN_PASSWORD`          | `admin1234`          | **Change** — seeded admin password                     |
 | `IMPORT_COOLDOWN_MINUTES` | `5`                  | Min minutes between import triggers                    |
 | `FRONTEND_PORT`           | `80`                 | Host port for the frontend (nginx)                     |
