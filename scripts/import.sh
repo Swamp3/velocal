@@ -2,7 +2,7 @@
 set -euo pipefail
 
 API_BASE="${API_BASE:-http://localhost:3000/api}"
-CONTAINER="${CONTAINER:-velocal-backend-1}"
+CONTAINER="${CONTAINER:-velocal-backend}"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'

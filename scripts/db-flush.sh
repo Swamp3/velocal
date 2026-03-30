@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CONTAINER="${CONTAINER:-velocal-postgres-1}"
+CONTAINER="${CONTAINER:-velocal-postgres}"
 DB_USER="${DB_USER:-velocal}"
 DB_NAME="${DB_NAME:-velocal}"
 
@@ -49,7 +49,7 @@ docker exec "$CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "
 echo -e "${GREEN}✓${NC} All tables dropped."
 echo ""
 echo -e "${CYAN}▸${NC} Restarting backend to re-run migrations and seeders..."
-docker restart "${CONTAINER/postgres/backend}" > /dev/null 2>&1 || true
+docker restart "velocal-backend" > /dev/null 2>&1 || true
 
 echo -e "${GREEN}✓${NC} Done. Backend will recreate the schema on startup."
 echo ""
