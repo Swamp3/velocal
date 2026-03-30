@@ -20,8 +20,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "${BACKEND_PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       DB_HOST: postgres
@@ -50,8 +48,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "${FRONTEND_PORT:-8080}:80"
     networks:
       - default
       - caddy
