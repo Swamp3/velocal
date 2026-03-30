@@ -53,6 +53,12 @@ services:
       - /app/node_modules
     depends_on:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4200 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 volumes:
   pgdata_dev:
