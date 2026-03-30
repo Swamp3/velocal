@@ -34,6 +34,9 @@ services:
       JWT_SECRET: dev-secret-change-me
       ADMIN_EMAIL: admin@velocal.cc
       ADMIN_PASSWORD: admin1234
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@velocal.cc}
+      SENDGRID_FROM_NAME: ${SENDGRID_FROM_NAME:-VeloCal}
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,38 +1,125 @@
 <div class="flex min-h-[60vh] items-center justify-center">
-  <form
-    [formGroup]="form"
-    (ngSubmit)="onSubmit()"
+  <div
     class="w-full max-w-sm rounded-[var(--radius-lg)] border border-[var(--color-border)]
       bg-[var(--color-bg)] p-8 shadow-sm"
   >
     <h1 class="mb-6 text-2xl font-bold text-[var(--color-text)]">{{ 'auth.login' | transloco }}</h1>
 
-    <div class="flex flex-col gap-4">
-      <ui-input
-        [label]="'auth.email' | transloco"
-        type="email"
-        placeholder="name@example.com"
-        formControlName="email"
-        [error]="fieldError('email')"
-      />
+    <!-- Step 1: Enter email -->
+    @if (view() === 'email') {
+      <form [formGroup]="emailForm" (ngSubmit)="sendOtp()" class="flex flex-col gap-4">
+        <ui-input
+          [label]="'auth.email' | transloco"
+          type="email"
+          placeholder="name@example.com"
+          formControlName="email"
+          [error]="emailError()"
+        />
 
-      <ui-input
-        [label]="'auth.password' | transloco"
-        type="password"
-        formControlName="password"
-        [error]="fieldError('password')"
-      />
+        <ui-button
+          type="submit"
+          size="lg"
+          [loading]="loading()"
+          [disabled]="loading()"
+          class="w-full"
+        >
+          {{ 'auth.sendCode' | transloco }}
+        </ui-button>
+      </form>
 
-      <ui-button
-        type="submit"
-        size="lg"
-        [loading]="loading()"
-        [disabled]="loading()"
-        class="w-full"
+      <button
+        type="button"
+        (click)="showPasswordLogin()"
+        class="mt-4 block w-full text-center text-sm text-[var(--color-text-muted)]
+          hover:text-[var(--color-text)] transition-colors"
       >
-        {{ 'auth.login' | transloco }}
-      </ui-button>
-    </div>
+        {{ 'auth.usePassword' | transloco }}
+      </button>
+    }
+
+    <!-- Step 2: Enter OTP code -->
+    @if (view() === 'otp') {
+      <form [formGroup]="otpForm" (ngSubmit)="verifyOtp()" class="flex flex-col gap-4">
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ 'auth.otpSentTo' | transloco }}
+          <span class="font-medium text-[var(--color-text)]">{{ otpEmail() }}</span>
+        </p>
+
+        <ui-otp-input formControlName="code" (completed)="onOtpCompleted($event)" />
+
+        <ui-button
+          type="submit"
+          size="lg"
+          [loading]="loading()"
+          [disabled]="loading() || otpForm.invalid"
+          class="w-full"
+        >
+          {{ 'auth.verify' | transloco }}
+        </ui-button>
+
+        <div class="flex items-center justify-between text-sm">
+          <button
+            type="button"
+            (click)="resendOtp()"
+            [disabled]="resendCooldown() > 0"
+            class="text-[var(--color-primary)] hover:underline disabled:opacity-50 disabled:no-underline"
+          >
+            @if (resendCooldown() > 0) {
+              {{ 'auth.resendIn' | transloco:{ seconds: resendCooldown() } }}
+            } @else {
+              {{ 'auth.resend' | transloco }}
+            }
+          </button>
+
+          <button
+            type="button"
+            (click)="showOtpLogin()"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          >
+            {{ 'auth.changeEmail' | transloco }}
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Password fallback -->
+    @if (view() === 'password') {
+      <form [formGroup]="passwordForm" (ngSubmit)="loginWithPassword()" class="flex flex-col gap-4">
+        <ui-input
+          [label]="'auth.email' | transloco"
+          type="email"
+          placeholder="name@example.com"
+          formControlName="email"
+          [error]="passwordFieldError('email')"
+        />
+
+        <ui-input
+          [label]="'auth.password' | transloco"
+          type="password"
+          formControlName="password"
+          [error]="passwordFieldError('password')"
+        />
+
+        <ui-button
+          type="submit"
+          size="lg"
+          [loading]="loading()"
+          [disabled]="loading()"
+          class="w-full"
+        >
+          {{ 'auth.login' | transloco }}
+        </ui-button>
+      </form>
+
+      <button
+        type="button"
+        (click)="showOtpLogin()"
+        class="mt-4 block w-full text-center text-sm text-[var(--color-text-muted)]
+          hover:text-[var(--color-text)] transition-colors"
+      >
+        {{ 'auth.useOtp' | transloco }}
+      </button>
+    }
 
     <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
       {{ 'auth.noAccount' | transloco }}
@@ -43,5 +130,5 @@
         {{ 'auth.register' | transloco }}
       </a>
     </p>
-  </form>
+  </div>
 </div>

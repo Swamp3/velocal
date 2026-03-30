@@ -139,7 +139,19 @@
     "invalidCredentials": "Ungültige Anmeldedaten",
     "loginFailed": "Anmeldung fehlgeschlagen",
     "emailTaken": "Diese E-Mail ist bereits registriert",
-    "registerFailed": "Registrierung fehlgeschlagen"
+    "registerFailed": "Registrierung fehlgeschlagen",
+    "sendCode": "Code senden",
+    "verify": "Bestätigen",
+    "otpSentTo": "Gib den 6-stelligen Code ein, gesendet an",
+    "otpInvalid": "Ungültiger oder abgelaufener Code",
+    "otpSendFailed": "Code konnte nicht gesendet werden. Versuche es erneut.",
+    "otpCooldown": "Bitte warte, bevor du einen neuen Code anforderst",
+    "otpResent": "Code erneut gesendet",
+    "resend": "Code erneut senden",
+    "resendIn": "Erneut senden in {{seconds}}s",
+    "changeEmail": "E-Mail ändern",
+    "usePassword": "Stattdessen mit Passwort anmelden",
+    "useOtp": "Stattdessen mit E-Mail-Code anmelden"
   },
   "profile": {
     "title": "Profil",

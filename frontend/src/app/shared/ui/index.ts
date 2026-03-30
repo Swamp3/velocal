@@ -10,3 +10,4 @@ export {
   DropdownComponent,
   type DropdownOption,
 } from './dropdown/dropdown.component';
+export { OtpInputComponent } from './otp-input/otp-input.component';

@@ -139,7 +139,19 @@
     "invalidCredentials": "Invalid credentials",
     "loginFailed": "Login failed",
     "emailTaken": "This email is already registered",
-    "registerFailed": "Registration failed"
+    "registerFailed": "Registration failed",
+    "sendCode": "Send Code",
+    "verify": "Verify",
+    "otpSentTo": "Enter the 6-digit code sent to",
+    "otpInvalid": "Invalid or expired code",
+    "otpSendFailed": "Failed to send code. Try again.",
+    "otpCooldown": "Please wait before requesting another code",
+    "otpResent": "Code resent",
+    "resend": "Resend code",
+    "resendIn": "Resend in {{seconds}}s",
+    "changeEmail": "Change email",
+    "usePassword": "Sign in with password instead",
+    "useOtp": "Sign in with email code instead"
   },
   "profile": {
     "title": "Profile",

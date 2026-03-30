@@ -14,8 +14,11 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   passwordHash: string;
+
+  @Column({ default: false })
+  emailVerified: boolean;
 
   @Column({ nullable: true })
   displayName: string;

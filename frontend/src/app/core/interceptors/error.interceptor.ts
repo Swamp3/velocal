@@ -15,9 +15,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService);
   const transloco = inject(TranslocoService);
 
+  const isMutation = req.method !== 'GET';
+
   return next(req).pipe(
     retry({
-      count: MAX_RETRIES,
+      count: isMutation ? 0 : MAX_RETRIES,
       delay: (error: HttpErrorResponse) => {
         if (RETRYABLE_STATUS.has(error.status)) {
           return timer(RETRY_DELAY);

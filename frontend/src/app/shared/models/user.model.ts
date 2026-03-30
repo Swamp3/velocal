@@ -6,4 +6,5 @@ export interface User {
   homeCountry?: string;
   preferredLocale: string;
   isAdmin?: boolean;
+  emailVerified?: boolean;
 }
