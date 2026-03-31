@@ -3,6 +3,7 @@ set -euo pipefail
 
 API_BASE="${API_BASE:-http://localhost:3000/api}"
 CONTAINER="${CONTAINER:-velocal-backend}"
+SOURCE="${1:-}"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -20,6 +21,9 @@ echo ""
 echo -e "${CYAN}VeloCal Import${NC}"
 echo "─────────────────────────"
 echo -e "  API: ${DIM}${API_BASE}${NC}"
+if [[ -n "$SOURCE" ]]; then
+  echo -e "  Source: ${CYAN}${SOURCE}${NC}"
+fi
 echo ""
 
 read -rp "Email: " EMAIL
@@ -73,15 +77,21 @@ if docker inspect "$CONTAINER" &>/dev/null; then
   CAN_READ_LOGS=1
 fi
 
-# ── Trigger all sources in one call ────────────
-info "Triggering import (all sources)..."
+# ── Trigger import ─────────────────────────────
+if [[ -n "$SOURCE" ]]; then
+  IMPORT_BODY="{\"source\":\"${SOURCE}\"}"
+  info "Triggering import (source: ${SOURCE})..."
+else
+  IMPORT_BODY='{}'
+  info "Triggering import (all sources)..."
+fi
 START=$(date +%s)
 
 IMPORT_RAW=$(curl -s -w "\n%{http_code}" \
   -X POST "${API_BASE}/import/trigger" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d '{}')
+  -d "$IMPORT_BODY")
 
 END=$(date +%s)
 ELAPSED=$((END - START))

@@ -39,11 +39,37 @@ Fetches events from the [Race Result](https://my.raceresult.com) JSON API.
 
 ## Triggering an import
 
-There is **no automatic scheduler** — import is triggered manually via the API. Only **admin** users can trigger it (the import controller is protected by both `JwtAuthGuard` and `AdminGuard`).
+There is **no automatic scheduler** — import is triggered manually. Only **admin** users can trigger it (the import controller is protected by both `JwtAuthGuard` and `AdminGuard`).
 
-**Step 1:** Log in as the admin user (default: `admin@velocal.cc` / `admin1234`).
+### Import script (recommended)
 
-**Step 2:** Trigger the import:
+The easiest way to run an import is the interactive shell script:
+
+```bash
+# Run all sources
+./scripts/import.sh
+
+# Run a specific source
+./scripts/import.sh race-result
+./scripts/import.sh rad-net
+```
+
+It prompts for admin credentials, logs in, triggers the import, and prints a summary with created/updated/skipped counts. If the result looks wrong (0/0/0), it automatically tails the backend container logs for errors.
+
+Environment variables:
+
+| Variable    | Default                      | Description              |
+|-------------|------------------------------|--------------------------|
+| `API_BASE`  | `http://localhost:3000/api`  | Backend API base URL     |
+| `CONTAINER` | `velocal-backend`            | Docker container for log tailing |
+
+Example targeting production with a specific source:
+
+```bash
+API_BASE=https://velocal.cc/api CONTAINER=velocal-backend-1 ./scripts/import.sh race-result
+```
+
+### curl (manual)
 
 ```bash
 # Import from rad-net specifically
@@ -111,4 +137,4 @@ To protect against external rate limits, the import has a **cooldown period** (d
 - rad-net events won't have geo-coordinates unless geocoded (rad-net listings don't include lat/lng)
 - Race-result events **do** have coordinates directly from the API
 - Re-running the import is safe — duplicates are detected and existing data is updated if changed
-- There is no frontend UI for triggering imports; use curl, Postman, or any HTTP client
+- There is no frontend UI for triggering imports; use `./scripts/import.sh`, curl, or any HTTP client
