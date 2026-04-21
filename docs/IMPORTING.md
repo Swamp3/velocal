@@ -39,7 +39,7 @@ Fetches events from the [Race Result](https://my.raceresult.com) JSON API.
 
 ## Triggering an import
 
-There is **no automatic scheduler** — import is triggered manually. Only **admin** users can trigger it (the import controller is protected by both `JwtAuthGuard` and `AdminGuard`).
+Import is triggered manually by default, but a cron-based weekly scheduler is available (see [Scheduling](#scheduling-automatic-imports)). Only **admin** users can trigger it (the import controller is protected by both `JwtAuthGuard` and `AdminGuard`).
 
 ### Import script (recommended)
 
@@ -54,14 +54,16 @@ The easiest way to run an import is the interactive shell script:
 ./scripts/import.sh rad-net
 ```
 
-It prompts for admin credentials, logs in, triggers the import, and prints a summary with created/updated/skipped counts. If the result looks wrong (0/0/0), it automatically tails the backend container logs for errors.
+It prompts for admin credentials, logs in, starts an import job, streams the backend container logs live while polling the job, and prints a summary with created/updated/skipped counts when the job finishes.
 
 Environment variables:
 
-| Variable    | Default                      | Description              |
-|-------------|------------------------------|--------------------------|
-| `API_BASE`  | `http://localhost:3000/api`  | Backend API base URL     |
-| `CONTAINER` | `velocal-backend`            | Docker container for log tailing |
+| Variable        | Default                      | Description                                      |
+|-----------------|------------------------------|--------------------------------------------------|
+| `API_BASE`      | `http://localhost:3000/api`  | Backend API base URL                             |
+| `CONTAINER`     | `velocal-backend`            | Docker container for log tailing (skipped if not found locally) |
+| `POLL_INTERVAL` | `2`                          | Seconds between job status polls                 |
+| `POLL_TIMEOUT`  | `1800`                       | Max seconds to wait for the job to finish        |
 
 Example targeting production with a specific source:
 
@@ -71,14 +73,16 @@ API_BASE=https://velocal.cc/api CONTAINER=velocal-backend-1 ./scripts/import.sh 
 
 ### curl (manual)
 
+Imports run asynchronously as **jobs**. `POST /import/trigger` returns `202 Accepted` immediately with a `jobId`; poll `GET /import/jobs/:id` until `status` is `completed` or `failed`. This avoids nginx/proxy gateway timeouts on long-running imports (rad-net can take ~45s).
+
 ```bash
-# Import from rad-net specifically
+# Start a job for rad-net
 curl -X POST http://localhost:3000/api/import/trigger \
   -H 'Authorization: Bearer eyJhbG...' \
   -H 'Content-Type: application/json' \
   -d '{ "source": "rad-net" }'
 
-# Import from race-result specifically
+# Start a job for race-result
 curl -X POST http://localhost:3000/api/import/trigger \
   -H 'Authorization: Bearer eyJhbG...' \
   -H 'Content-Type: application/json' \
@@ -91,19 +95,48 @@ curl -X POST http://localhost:3000/api/import/trigger \
   -d '{}'
 ```
 
-**Response:**
+**Trigger response (HTTP 202):**
 
 ```json
 {
-  "created": 342,
-  "updated": 15,
-  "skipped": 8
+  "id": "b3f1a2c8-...",
+  "source": "rad-net",
+  "status": "running",
+  "startedAt": "2026-04-21T12:00:00.000Z",
+  "finishedAt": null,
+  "result": null,
+  "error": null
 }
 ```
 
-- `created` — new events added
-- `updated` — existing imported events with changed data
-- `skipped` — events already up to date or manually created events that match
+**Poll job status:**
+
+```bash
+curl http://localhost:3000/api/import/jobs/b3f1a2c8-... \
+  -H 'Authorization: Bearer eyJhbG...'
+```
+
+**Completed job:**
+
+```json
+{
+  "id": "b3f1a2c8-...",
+  "source": "rad-net",
+  "status": "completed",
+  "startedAt": "2026-04-21T12:00:00.000Z",
+  "finishedAt": "2026-04-21T12:00:45.000Z",
+  "result": { "created": 342, "updated": 15, "skipped": 8 },
+  "error": null
+}
+```
+
+- `status` — `running`, `completed`, or `failed`
+- `result.created` — new events added
+- `result.updated` — existing imported events with changed data
+- `result.skipped` — events already up to date or manually created events that match
+- `error` — set when `status` is `failed`
+
+Only the most recent 20 jobs are retained in memory; older job ids return `404`.
 
 ## Listing available sources
 
@@ -128,7 +161,8 @@ Manually created events are never overwritten.
 
 To protect against external rate limits, the import has a **cooldown period** (default: 5 minutes). If you trigger an import before the cooldown expires, the API returns `409 Conflict` with the remaining wait time.
 
-- Only one import can run at a time (concurrent requests are rejected)
+- Only one import can run at a time; triggering while a job is `running` returns `409`
+- Cooldown starts when the previous job finishes (completed or failed)
 - Configure via `IMPORT_COOLDOWN_MINUTES` env var
 
 ## Notes

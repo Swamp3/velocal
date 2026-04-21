@@ -14,5 +14,6 @@
 | DELETE | `/api/users/me/favorites/:eventId` | JWT      | Remove favorite                |
 | GET    | `/api/users/me/discipline-prefs`   | JWT      | Get discipline preferences     |
 | PUT    | `/api/users/me/discipline-prefs`   | JWT      | Set discipline preferences     |
-| POST   | `/api/import/trigger`              | Admin    | Trigger event import           |
+| POST   | `/api/import/trigger`              | Admin    | Start import job (202, returns job) |
+| GET    | `/api/import/jobs/:id`             | Admin    | Poll import job status         |
 | GET    | `/api/import/sources`              | Admin    | List registered import sources |

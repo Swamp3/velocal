@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import {
   Event,
@@ -21,6 +22,19 @@ import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
+const MAX_JOB_HISTORY = 20;
+
+export type ImportJobStatus = 'running' | 'completed' | 'failed';
+
+export interface ImportJob {
+  id: string;
+  source: string | null;
+  status: ImportJobStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  result: ImportResult | null;
+  error: string | null;
+}
 
 @Injectable()
 export class ImportService {
@@ -29,6 +43,7 @@ export class ImportService {
   private readonly cooldownMs: number;
   private lastImportAt: Date | null = null;
   private importRunning = false;
+  private readonly jobs = new Map<string, ImportJob>();
 
   constructor(
     @InjectRepository(Event)
@@ -44,7 +59,7 @@ export class ImportService {
       DEFAULT_COOLDOWN_MS;
   }
 
-  async runImport(sourceName?: string): Promise<ImportResult> {
+  startImport(sourceName?: string): ImportJob {
     if (this.importRunning) {
       throw new ConflictException('An import is already running');
     }
@@ -59,16 +74,44 @@ export class ImportService {
       }
     }
 
-    const sources = sourceName
-      ? this.sources.filter((s) => s.name === sourceName)
+    const job: ImportJob = {
+      id: randomUUID(),
+      source: sourceName ?? null,
+      status: 'running',
+      startedAt: new Date().toISOString(),
+      finishedAt: null,
+      result: null,
+      error: null,
+    };
+
+    this.jobs.set(job.id, job);
+    this.trimJobHistory();
+    this.importRunning = true;
+
+    void this.executeImport(job);
+
+    return job;
+  }
+
+  getJob(id: string): ImportJob | null {
+    return this.jobs.get(id) ?? null;
+  }
+
+  getSourceNames(): string[] {
+    return this.sources.map((s) => s.name);
+  }
+
+  private async executeImport(job: ImportJob): Promise<void> {
+    const sources = job.source
+      ? this.sources.filter((s) => s.name === job.source)
       : this.sources;
 
     if (sources.length === 0) {
-      this.logger.warn(`No import source found for: ${sourceName}`);
-      return { created: 0, updated: 0, skipped: 0 };
+      this.logger.warn(`No import source found for: ${job.source}`);
+      this.finishJob(job, { created: 0, updated: 0, skipped: 0 });
+      return;
     }
 
-    this.importRunning = true;
     let created = 0;
     let updated = 0;
     let skipped = 0;
@@ -102,15 +145,37 @@ export class ImportService {
         );
       }
 
-      return { created, updated, skipped };
-    } finally {
-      this.importRunning = false;
-      this.lastImportAt = new Date();
+      this.finishJob(job, { created, updated, skipped });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Import job ${job.id} failed: ${message}`);
+      this.failJob(job, message);
     }
   }
 
-  getSourceNames(): string[] {
-    return this.sources.map((s) => s.name);
+  private finishJob(job: ImportJob, result: ImportResult): void {
+    job.status = 'completed';
+    job.result = result;
+    job.finishedAt = new Date().toISOString();
+    this.importRunning = false;
+    this.lastImportAt = new Date();
+  }
+
+  private failJob(job: ImportJob, error: string): void {
+    job.status = 'failed';
+    job.error = error;
+    job.finishedAt = new Date().toISOString();
+    this.importRunning = false;
+    this.lastImportAt = new Date();
+  }
+
+  private trimJobHistory(): void {
+    if (this.jobs.size <= MAX_JOB_HISTORY) return;
+    const excess = this.jobs.size - MAX_JOB_HISTORY;
+    const keys = Array.from(this.jobs.keys()).slice(0, excess);
+    for (const key of keys) {
+      this.jobs.delete(key);
+    }
   }
 
   private async upsertEvent(
