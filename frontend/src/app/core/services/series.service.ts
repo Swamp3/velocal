@@ -1,11 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { PaginatedResponse, RaceSeries, RaceSeriesDetail } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import {
-  PaginatedResponse,
-  RaceSeries,
-  RaceSeriesDetail,
-} from '@shared/models';
 
 export interface SeriesSearchParams {
   q?: string;
@@ -19,9 +15,7 @@ export interface SeriesSearchParams {
 export class SeriesService {
   private readonly api = inject(ApiService);
 
-  getSeries(
-    params: SeriesSearchParams = {},
-  ): Observable<PaginatedResponse<RaceSeries>> {
+  getSeries(params: SeriesSearchParams = {}): Observable<PaginatedResponse<RaceSeries>> {
     return this.api.get('/series', params as Record<string, string | number | boolean>);
   }
 

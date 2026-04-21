@@ -1,6 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
 import {
   CreatePostDto,
   PaginatedResponse,
@@ -8,6 +6,8 @@ import {
   PostListItem,
   UpdatePostDto,
 } from '@shared/models';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 
 export interface PostSearchParams {
   q?: string;

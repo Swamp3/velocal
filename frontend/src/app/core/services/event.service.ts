@@ -1,12 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { CreateEventDto, CyclingEvent, PaginatedResponse, UpdateEventDto } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import {
-  CreateEventDto,
-  CyclingEvent,
-  PaginatedResponse,
-  UpdateEventDto,
-} from '@shared/models';
 
 export type EventSort = 'date' | 'distance' | 'name';
 

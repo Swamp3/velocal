@@ -4,6 +4,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/theme.service';
 import { ToastContainerComponent } from '@shared/ui';
+import { version as APP_VERSION } from '../../../../package.json';
 
 interface NavLink {
   path: string;
@@ -35,6 +36,7 @@ export class AppShellComponent {
   protected readonly mobileMenuOpen = signal(false);
   protected readonly navLinks = NAV_LINKS;
   protected readonly authNav = AUTH_NAV;
+  protected readonly appVersion = APP_VERSION;
 
   protected toggleLang(): void {
     const next = this.transloco.getActiveLang() === 'de' ? 'en' : 'de';

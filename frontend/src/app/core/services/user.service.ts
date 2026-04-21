@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { CyclingEvent, User } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { CyclingEvent, User } from '@shared/models';
 
 export interface UpdateProfileDto {
   displayName?: string;
@@ -35,10 +35,7 @@ export class UserService {
     });
   }
 
-  getFavorites(
-    page = 1,
-    limit = 10,
-  ): Observable<{ data: FavoriteEntry[]; total: number }> {
+  getFavorites(page = 1, limit = 10): Observable<{ data: FavoriteEntry[]; total: number }> {
     return this.api.get('/users/me/favorites', { page, limit });
   }
 }

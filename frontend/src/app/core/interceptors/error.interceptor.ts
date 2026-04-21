@@ -1,10 +1,10 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
+import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from '@shared/ui';
-import { catchError, throwError, retry, timer } from 'rxjs';
+import { catchError, retry, throwError, timer } from 'rxjs';
 
 const RETRYABLE_STATUS = new Set([0, 408, 429, 502, 503, 504]);
 const MAX_RETRIES = 1;

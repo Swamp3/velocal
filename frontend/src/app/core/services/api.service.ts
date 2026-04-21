@@ -1,8 +1,8 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { environment } from '@env';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '@env';
 
 export interface ApiError {
   status: number;
@@ -23,9 +23,9 @@ export class ApiService {
         }
       });
     }
-    return this.http.get<T>(`${this.base}${path}`, { params: httpParams }).pipe(
-      catchError((err) => this.handleError(err)),
-    );
+    return this.http
+      .get<T>(`${this.base}${path}`, { params: httpParams })
+      .pipe(catchError((err) => this.handleError(err)));
   }
 
   post<T>(path: string, body: unknown): Observable<T> {

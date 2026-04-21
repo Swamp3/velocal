@@ -34,15 +34,13 @@ export class FavoriteService {
   }
 
   loadFavorites(): void {
-    this.api
-      .get<{ data: { eventId: string }[] }>('/users/me/favorites', { limit: 200 })
-      .subscribe({
-        next: (res) => {
-          this._favoriteIds.set(new Set(res.data.map((f) => f.eventId)));
-        },
-        error: () => {
-          // Not authenticated or failed — keep empty
-        },
-      });
+    this.api.get<{ data: { eventId: string }[] }>('/users/me/favorites', { limit: 200 }).subscribe({
+      next: (res) => {
+        this._favoriteIds.set(new Set(res.data.map((f) => f.eventId)));
+      },
+      error: () => {
+        // Not authenticated or failed — keep empty
+      },
+    });
   }
 }

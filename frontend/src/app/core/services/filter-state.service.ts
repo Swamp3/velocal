@@ -12,9 +12,7 @@ export class FilterStateService {
   private readonly _override = signal<string[] | null>(null);
   private readonly _userPrefs = signal<string[]>([]);
 
-  readonly selectedDisciplines = computed(() =>
-    this._override() ?? this._userPrefs(),
-  );
+  readonly selectedDisciplines = computed(() => this._override() ?? this._userPrefs());
 
   constructor() {
     this.loadFromStorage();

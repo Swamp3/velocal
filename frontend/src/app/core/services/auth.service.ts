@@ -1,8 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
-import { ApiService } from './api.service';
 import { environment } from '@env';
 import { User } from '@shared/models';
+import { Observable, tap } from 'rxjs';
+import { ApiService } from './api.service';
 
 const TOKEN_KEY = 'velocal-token';
 
@@ -37,15 +37,15 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.api.post<AuthResponse>('/auth/login', { email, password }).pipe(
-      tap((res) => this.setSession(res)),
-    );
+    return this.api
+      .post<AuthResponse>('/auth/login', { email, password })
+      .pipe(tap((res) => this.setSession(res)));
   }
 
   register(data: RegisterDto): Observable<AuthResponse> {
-    return this.api.post<AuthResponse>('/auth/register', data).pipe(
-      tap((res) => this.setSession(res)),
-    );
+    return this.api
+      .post<AuthResponse>('/auth/register', data)
+      .pipe(tap((res) => this.setSession(res)));
   }
 
   updateCurrentUser(user: User): void {

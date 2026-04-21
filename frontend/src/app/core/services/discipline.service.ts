@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { Discipline } from '@shared/models';
 import { Observable, shareReplay } from 'rxjs';
 import { ApiService } from './api.service';
-import { Discipline } from '@shared/models';
 
 @Injectable({ providedIn: 'root' })
 export class DisciplineService {
