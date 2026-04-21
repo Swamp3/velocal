@@ -138,6 +138,38 @@ curl http://localhost:3000/api/import/jobs/b3f1a2c8-... \
 
 Only the most recent 20 jobs are retained in memory; older job ids return `404`.
 
+## Scheduling automatic imports
+
+`scripts/setup-import-cron.sh` installs a cron entry that runs `scripts/import-cron.sh` on a schedule (default: **every Saturday at 23:00 local time**).
+
+```bash
+./scripts/setup-import-cron.sh            # interactive setup
+./scripts/setup-import-cron.sh --show     # show current config + crontab entry
+./scripts/setup-import-cron.sh --remove   # remove the crontab entry
+```
+
+The setup prompts for admin email/password, API base URL, optional source, and the cron schedule, then:
+
+1. Writes credentials to `~/.config/velocal/import-cron.env` with `chmod 600`.
+2. Installs a crontab entry tagged `# velocal-import-cron` that sources that env file and runs `scripts/import-cron.sh`.
+3. Appends output to `<project>/logs/import-cron.log`.
+
+`scripts/import-cron.sh` is a non-interactive variant of `import.sh`: it reads `VELOCAL_EMAIL` / `VELOCAL_PASSWORD` (and optional `API_BASE`, `VELOCAL_SOURCE`) from the environment or the file pointed to by `VELOCAL_CRON_ENV`, logs timestamped lines, and exits non-zero on failure. You can also run it ad-hoc:
+
+```bash
+VELOCAL_CRON_ENV=~/.config/velocal/import-cron.env ./scripts/import-cron.sh
+```
+
+Overrides supported by the setup script (env vars):
+
+| Variable        | Default                                       | Description                              |
+|-----------------|-----------------------------------------------|------------------------------------------|
+| `CRON_SCHEDULE` | `0 23 * * 6`                                  | Cron expression (Saturday 23:00)         |
+| `CRON_CONFIG`   | `~/.config/velocal/import-cron.env`           | Path to the generated credentials file   |
+| `CRON_LOG`      | `<project>/logs/import-cron.log`              | Where cron output is appended            |
+
+> On macOS, cron may need Full Disk Access for the `cron` binary in System Settings → Privacy & Security. On Linux servers running Docker, schedule from the host (not inside the container) so the job survives restarts.
+
 ## Listing available sources
 
 ```bash
