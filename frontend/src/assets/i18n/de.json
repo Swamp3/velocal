@@ -26,6 +26,7 @@
     "eventsCount": "{{count}} Events",
     "futureOnly": "Nur zukünftige",
     "yearFilter": "Nach Jahr filtern",
+    "filter": "Filter",
     "inRadius": "im Umkreis",
     "detail": {
       "notFoundTitle": "Event nicht gefunden",
@@ -244,7 +245,7 @@
     "notFound": "Seite nicht gefunden",
     "notFoundMessage": "Die angeforderte Seite existiert nicht.",
     "backToHome": "Zur Startseite",
-    "offline": "Keine Internetverbindung",
+    "offline": "Keine Serververbindung",
     "serverError": "Serverfehler. Bitte versuche es später erneut.",
     "timeout": "Die Anfrage hat zu lange gedauert. Bitte versuche es erneut."
   }

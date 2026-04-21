@@ -8,20 +8,20 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { EventService, EventSearchParams } from '@core/services/event.service';
-import { DisciplineService } from '@core/services/discipline.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import { GeolocationService } from '@core/services/geolocation.service';
+import { DisciplineService } from '@core/services/discipline.service';
+import { EventSearchParams, EventService } from '@core/services/event.service';
 import { FilterStateService } from '@core/services/filter-state.service';
-import { CyclingEvent, Discipline } from '@shared/models';
-import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { GeolocationService } from '@core/services/geolocation.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { EmptyStateComponent } from '@shared/components';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
-import { EmptyStateComponent } from '@shared/components';
+import { CyclingEvent, Discipline } from '@shared/models';
+import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
 
 const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
 
@@ -77,9 +77,13 @@ export class EventListComponent implements OnInit {
   readonly disciplines = signal<Discipline[]>([]);
 
   readonly radiusOptions = RADIUS_OPTIONS;
-  readonly filterPanelOpen = signal(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches);
+  readonly filterPanelOpen = signal(
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
 
-  readonly geoActive = computed(() => !!this.zip() || (this.userLat() != null && this.userLng() != null));
+  readonly geoActive = computed(
+    () => !!this.zip() || (this.userLat() != null && this.userLng() != null),
+  );
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
   readonly activeFilterCount = computed(() => {
     let count = 0;
