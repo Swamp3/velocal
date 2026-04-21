@@ -140,18 +140,30 @@ Only the most recent 20 jobs are retained in memory; older job ids return `404`.
 
 ## Scheduling automatic imports
 
-`scripts/setup-import-cron.sh` installs a cron entry that runs `scripts/import-cron.sh` on a schedule (default: **every Saturday at 23:00 local time**).
+`scripts/setup-import-cron.sh` installs a scheduled job that runs `scripts/import-cron.sh` (default: **every Saturday at 23:00 local time**). It supports three backends and auto-detects the best one available:
+
+| Backend   | Platform      | Location                                                 |
+|-----------|---------------|----------------------------------------------------------|
+| `systemd` | Linux         | `~/.config/systemd/user/velocal-import.{service,timer}`  |
+| `launchd` | macOS         | `~/Library/LaunchAgents/cc.velocal.import.plist`         |
+| `cron`    | any POSIX     | user crontab (tagged `# velocal-import-cron`)            |
+
+**Detection order**: `systemd` → `launchd` → `cron`. Force a specific backend with a flag.
 
 ```bash
-./scripts/setup-import-cron.sh            # interactive setup
-./scripts/setup-import-cron.sh --show     # show current config + crontab entry
-./scripts/setup-import-cron.sh --remove   # remove the crontab entry
+./scripts/setup-import-cron.sh                # interactive install, auto-detected backend
+./scripts/setup-import-cron.sh --systemd      # force systemd (Linux)
+./scripts/setup-import-cron.sh --launchd      # force launchd (macOS)
+./scripts/setup-import-cron.sh --cron         # force cron
+./scripts/setup-import-cron.sh --show         # show config + status for every available backend
+./scripts/setup-import-cron.sh --remove       # remove from every backend
+./scripts/setup-import-cron.sh --run-now      # trigger the import once (outside the schedule)
 ```
 
-The setup prompts for admin email/password, API base URL, optional source, and the cron schedule, then:
+The setup prompts for admin email/password, API base URL, optional source, day of week, and time, then:
 
-1. Writes credentials to `~/.config/velocal/import-cron.env` with `chmod 600`.
-2. Installs a crontab entry tagged `# velocal-import-cron` that sources that env file and runs `scripts/import-cron.sh`.
+1. Writes credentials and schedule to `~/.config/velocal/import-cron.env` with `chmod 600`.
+2. Installs a timer/agent/crontab entry for the chosen backend, pointing at `scripts/import-cron.sh` with `VELOCAL_CRON_ENV` set to the config file.
 3. Appends output to `<project>/logs/import-cron.log`.
 
 `scripts/import-cron.sh` is a non-interactive variant of `import.sh`: it reads `VELOCAL_EMAIL` / `VELOCAL_PASSWORD` (and optional `API_BASE`, `VELOCAL_SOURCE`) from the environment or the file pointed to by `VELOCAL_CRON_ENV`, logs timestamped lines, and exits non-zero on failure. You can also run it ad-hoc:
@@ -162,13 +174,20 @@ VELOCAL_CRON_ENV=~/.config/velocal/import-cron.env ./scripts/import-cron.sh
 
 Overrides supported by the setup script (env vars):
 
-| Variable        | Default                                       | Description                              |
-|-----------------|-----------------------------------------------|------------------------------------------|
-| `CRON_SCHEDULE` | `0 23 * * 6`                                  | Cron expression (Saturday 23:00)         |
-| `CRON_CONFIG`   | `~/.config/velocal/import-cron.env`           | Path to the generated credentials file   |
-| `CRON_LOG`      | `<project>/logs/import-cron.log`              | Where cron output is appended            |
+| Variable        | Default                                       | Description                                                |
+|-----------------|-----------------------------------------------|------------------------------------------------------------|
+| `SCHEDULER`     | auto                                          | Force backend (`cron`, `systemd`, `launchd`)               |
+| `SCHEDULE_DAY`  | `Sat`                                         | Day of week (`Sun`..`Sat`)                                 |
+| `SCHEDULE_TIME` | `23:00`                                       | Local time in `HH:MM` (24h)                                |
+| `CRON_SCHEDULE` | *(unset)*                                     | Raw cron expression — cron backend only, overrides DAY/TIME|
+| `CRON_CONFIG`   | `~/.config/velocal/import-cron.env`           | Path to the generated credentials file                     |
+| `CRON_LOG`      | `<project>/logs/import-cron.log`              | Where job output is appended                               |
 
-> On macOS, cron may need Full Disk Access for the `cron` binary in System Settings → Privacy & Security. On Linux servers running Docker, schedule from the host (not inside the container) so the job survives restarts.
+> **systemd**: the timer runs only while your user session is active. Run `sudo loginctl enable-linger $USER` on the host to keep it running after logout (the install script warns if lingering is off).
+>
+> **launchd**: the LaunchAgent runs when the user is logged in (GUI or SSH session with a loaded user context). For headless macOS servers that run without a login session, use a LaunchDaemon instead — not currently automated; install the generated plist under `/Library/LaunchDaemons/` with `sudo`.
+>
+> **cron**: on macOS, cron may need Full Disk Access granted to `/usr/sbin/cron` in System Settings → Privacy & Security. On Linux servers running Docker, schedule from the host (not inside the container) so the job survives container restarts.
 
 ## Listing available sources
 
