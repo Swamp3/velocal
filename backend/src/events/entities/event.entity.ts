@@ -70,6 +70,9 @@ export class Event {
   @Column({ nullable: true })
   externalId: string;
 
+  @Column({ nullable: true })
+  imageUrl: string;
+
   @Column({ type: 'enum', enum: EventSource, default: EventSource.MANUAL })
   source: EventSource;
 

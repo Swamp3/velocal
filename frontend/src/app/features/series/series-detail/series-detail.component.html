@@ -34,6 +34,21 @@
       {{ 'series.backToList' | transloco }}
     </a>
 
+    @if (s.imageUrl) {
+      <div
+        class="mt-5 overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)]
+          bg-[var(--color-bg-alt)]"
+      >
+        <img
+          [src]="s.imageUrl"
+          [alt]="s.name"
+          class="block h-auto max-h-[420px] w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    }
+
     <div class="mt-5 flex flex-wrap items-center gap-2">
       @if (s.discipline) {
         <app-discipline-chip [discipline]="s.discipline" />

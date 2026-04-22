@@ -13,6 +13,7 @@ export interface CyclingEvent {
   coordinates?: { lat: number; lng: number };
   registrationDeadline?: string;
   externalUrl?: string;
+  imageUrl?: string;
   source: EventSource;
   discipline: Discipline;
   disciplineSlug: string;

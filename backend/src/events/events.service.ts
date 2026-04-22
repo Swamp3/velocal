@@ -10,6 +10,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
 import { GeocodingService } from './geocoding.service';
+import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 
 export interface SerializedEvent {
   coordinates?: { lat: number; lng: number } | null;
@@ -31,6 +32,7 @@ export class EventsService {
     @InjectRepository(Event)
     private readonly repo: Repository<Event>,
     private readonly geocoding: GeocodingService,
+    private readonly uploads: UploadsService,
   ) {}
 
   async findAll(params: EventSearchDto): Promise<PaginatedEvents> {
@@ -222,7 +224,36 @@ export class EventsService {
       this.assertOwnerOrAdmin(event, user);
     }
 
+    // Best-effort cleanup — removing the event row has to succeed either way.
+    await this.uploads.remove('events', event.id);
     await this.repo.remove(event);
+  }
+
+  async setImage(
+    id: string,
+    file: UploadedFile,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    this.assertOwnerOrAdmin(event, user);
+
+    const url = await this.uploads.save('events', event.id, file);
+    event.imageUrl = url;
+    const saved = await this.repo.save(event);
+    return this.serializeEvent(saved);
+  }
+
+  async removeImage(
+    id: string,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    this.assertOwnerOrAdmin(event, user);
+
+    await this.uploads.remove('events', event.id);
+    event.imageUrl = null as unknown as string;
+    const saved = await this.repo.save(event);
+    return this.serializeEvent(saved);
   }
 
   private assertOwnerOrAdmin(

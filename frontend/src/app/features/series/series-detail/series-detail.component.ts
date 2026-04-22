@@ -1,22 +1,16 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { SeriesService } from '@core/services/series.service';
 import { AuthService } from '@core/services/auth.service';
 import { SeoService } from '@core/services/seo.service';
-import { RaceSeriesDetail } from '@shared/models';
-import { ButtonComponent, SkeletonComponent } from '@shared/ui';
+import { SeriesService } from '@core/services/series.service';
+import { TranslocoPipe } from '@jsverse/transloco';
 import {
   DisciplineChipComponent,
   EmptyStateComponent,
   EventCardComponent,
 } from '@shared/components';
+import { RaceSeriesDetail } from '@shared/models';
+import { ButtonComponent, SkeletonComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-series-detail',
@@ -61,9 +55,10 @@ export class SeriesDetailComponent implements OnInit {
 
   private applySeo(s: RaceSeriesDetail): void {
     const url = this.seo.pageUrl(`/series/${s.slug}`);
-    const image = this.seo.absolute(s.imageUrl ?? '/icon-512.png');
-    const description =
-      (s.description ?? `${s.eventCount} events${s.year ? ` · ${s.year}` : ''}`).slice(0, 260);
+    const image = this.seo.ogImage(s.imageUrl);
+    const description = (
+      s.description ?? `${s.eventCount} events${s.year ? ` · ${s.year}` : ''}`
+    ).slice(0, 260);
 
     const itemListElement = (s.events ?? [])
       .map((entry, i) => {
@@ -83,7 +78,12 @@ export class SeriesDetailComponent implements OnInit {
           {
             '@type': 'BreadcrumbList',
             itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Series', item: this.seo.pageUrl('/series') },
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Series',
+                item: this.seo.pageUrl('/series'),
+              },
               { '@type': 'ListItem', position: 2, name: s.name, item: url },
             ],
           },

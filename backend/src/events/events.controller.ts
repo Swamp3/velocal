@@ -6,12 +6,17 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseFilePipeBuilder,
   ParseUUIDPipe,
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Express } from 'express';
 import {
   EventsService,
   PaginatedEvents,
@@ -22,6 +27,11 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+
+const imagePipe = new ParseFilePipeBuilder()
+  .addFileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ })
+  .addMaxSizeValidator({ maxSize: 10 * 1024 * 1024 })
+  .build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST });
 
 @Controller('events')
 export class EventsController {
@@ -65,5 +75,25 @@ export class EventsController {
     @CurrentUser() user: { id: string; isAdmin: boolean },
   ): Promise<void> {
     return this.eventsService.remove(id, user);
+  }
+
+  @Post(':id/image')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  uploadImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile(imagePipe) file: Express.Multer.File,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    return this.eventsService.setImage(id, file, user);
+  }
+
+  @Delete(':id/image')
+  @UseGuards(JwtAuthGuard)
+  deleteImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    return this.eventsService.removeImage(id, user);
   }
 }

@@ -66,6 +66,8 @@
       "coordinatesHint": "Klicke auf die Karte oder ziehe den Marker um Koordinaten zu setzen",
       "registrationDeadline": "Anmeldeschluss",
       "externalUrl": "Externe URL",
+      "image": "Titelbild",
+      "imageHint": "Wird oben auf der Event-Seite und als Vorschau in sozialen Netzwerken angezeigt.",
       "status": "Status",
       "submit": "Speichern",
       "cancel": "Abbrechen",
@@ -174,7 +176,7 @@
     "backToList": "Zurück zu Rennserien",
     "notFoundTitle": "Serie nicht gefunden",
     "notFoundMessage": "Diese Rennserie existiert nicht oder wurde entfernt.",
-    "imageUrl": "Bild-URL",
+    "image": "Titelbild",
     "externalUrl": "Externe Seite",
     "externalUrlLabel": "Externe URL"
   },
@@ -236,6 +238,7 @@
       "event": "Verknüpftes Event",
       "eventPlaceholder": "Event-ID eingeben…",
       "status": "Status",
+      "image": "Titelbild",
       "submit": "Veröffentlichen",
       "saveDraft": "Als Entwurf speichern",
       "pin": "Beitrag anpinnen"

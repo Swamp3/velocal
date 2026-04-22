@@ -52,6 +52,9 @@ export class Post {
   @Column({ name: 'is_pinned', default: false })
   isPinned: boolean;
 
+  @Column({ nullable: true })
+  imageUrl: string;
+
   @Column({ type: 'timestamptz', nullable: true })
   publishedAt: Date;
 

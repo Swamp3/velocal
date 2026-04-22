@@ -79,6 +79,22 @@
         </select>
       </div>
 
+      <!-- Hero image (edit only — post id is needed to upload against) -->
+      @if (isEdit()) {
+        <div>
+          <label class="block text-sm font-medium text-[var(--color-text)] mb-1.5">
+            {{ 'news.form.image' | transloco }}
+          </label>
+          <app-image-upload
+            [imageUrl]="imageUrl()"
+            [uploadFn]="uploadImageFn"
+            [deleteFn]="deleteImageFn"
+            [disabled]="submitting()"
+            (imageChange)="imageUrl.set($event)"
+          />
+        </div>
+      }
+
       <!-- Pin -->
       <label class="flex items-center gap-3 cursor-pointer">
         <input

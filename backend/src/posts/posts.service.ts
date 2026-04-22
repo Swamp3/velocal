@@ -6,6 +6,7 @@ import { PostTag } from './entities/post-tag.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostSearchDto } from './dto/post-search.dto';
+import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 
 export interface SerializedPost {
   id: string;
@@ -17,6 +18,7 @@ export interface SerializedPost {
   status: PostStatus;
   isPinned: boolean;
   tags: string[];
+  imageUrl: string | null;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -40,6 +42,7 @@ export class PostsService {
     private readonly repo: Repository<Post>,
     @InjectRepository(PostTag)
     private readonly tagRepo: Repository<PostTag>,
+    private readonly uploads: UploadsService,
   ) {}
 
   async findAll(params: PostSearchDto, isAdmin = false): Promise<PaginatedPosts> {
@@ -154,7 +157,27 @@ export class PostsService {
   async remove(id: string): Promise<void> {
     const post = await this.repo.findOneBy({ id });
     if (!post) throw new NotFoundException(`Post ${id} not found`);
+    await this.uploads.remove('posts', post.id);
     await this.repo.remove(post);
+  }
+
+  async setImage(id: string, file: UploadedFile): Promise<SerializedPost> {
+    const post = await this.repo.findOneBy({ id });
+    if (!post) throw new NotFoundException(`Post ${id} not found`);
+
+    post.imageUrl = await this.uploads.save('posts', post.id, file);
+    await this.repo.save(post);
+    return this.findBySlug(post.slug);
+  }
+
+  async removeImage(id: string): Promise<SerializedPost> {
+    const post = await this.repo.findOneBy({ id });
+    if (!post) throw new NotFoundException(`Post ${id} not found`);
+
+    await this.uploads.remove('posts', post.id);
+    post.imageUrl = null as unknown as string;
+    await this.repo.save(post);
+    return this.findBySlug(post.slug);
   }
 
   async getAllTags(): Promise<string[]> {
@@ -182,6 +205,7 @@ export class PostsService {
       status: post.status,
       isPinned: post.isPinned,
       tags: post.tags?.map((t) => t.tag) ?? [],
+      imageUrl: post.imageUrl ?? null,
       publishedAt: post.publishedAt?.toISOString() ?? null,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),

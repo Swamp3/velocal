@@ -11,7 +11,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { QuillEditorComponent } from 'ngx-quill';
 import { PostService } from '@core/services/post.service';
+import { UploadService } from '@core/services/upload.service';
 import { CreatePostDto, Post, PostStatus } from '@shared/models';
+import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
 
 @Component({
@@ -24,6 +26,7 @@ import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
     QuillEditorComponent,
     ButtonComponent,
     InputComponent,
+    ImageUploadComponent,
   ],
   templateUrl: './news-form.component.html',
 })
@@ -32,14 +35,21 @@ export class NewsFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly postService = inject(PostService);
+  private readonly uploadService = inject(UploadService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
 
   protected readonly existingPost = signal<Post | null>(null);
   protected readonly loading = signal(false);
   protected readonly submitting = signal(false);
+  protected readonly imageUrl = signal<string | null>(null);
 
   protected readonly isEdit = computed(() => this.existingPost() !== null);
+
+  protected readonly uploadImageFn = (file: File) =>
+    this.uploadService.uploadPostImage(this.existingPost()!.id, file);
+  protected readonly deleteImageFn = () =>
+    this.uploadService.deletePostImage(this.existingPost()!.id);
 
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(300)]],
@@ -75,6 +85,7 @@ export class NewsFormComponent implements OnInit {
             status: post.status,
             isPinned: post.isPinned,
           });
+          this.imageUrl.set(post.imageUrl ?? null);
           this.loading.set(false);
         },
         error: () => {

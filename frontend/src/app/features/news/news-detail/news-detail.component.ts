@@ -1,4 +1,4 @@
-import { isPlatformBrowser } from '@angular/common';
+import { DatePipe, isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,16 +8,15 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { PostService } from '@core/services/post.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
+import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { EmptyStateComponent } from '@shared/components';
 import { Post } from '@shared/models';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
-import { EmptyStateComponent } from '@shared/components';
 
 @Component({
   selector: 'app-news-detail',
@@ -92,7 +91,7 @@ export class NewsDetailComponent implements OnInit {
 
   private applySeo(post: Post): void {
     const url = this.seo.pageUrl(`/news/${post.slug}`);
-    const image = this.seo.absolute('/icon-512.png');
+    const image = this.seo.ogImage(post.imageUrl);
     const description = this.stripHtml(post.body).slice(0, 200);
 
     this.seo.setMeta({

@@ -39,6 +39,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/src:/app/src
+      - ./backend/uploads:/app/uploads
 
   frontend:
     container_name: velocal-dev-frontend

@@ -1,0 +1,79 @@
+<div class="space-y-3">
+  <div
+    class="relative block w-full overflow-hidden rounded-[var(--radius-default)]
+      border-2 border-dashed transition-colors"
+    [class.border-\[var\(--color-primary\)\]]="dragging()"
+    [class.bg-\[var\(--color-bg-alt\)\]]="dragging()"
+    [class.border-\[var\(--color-border\)\]]="!dragging()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    @if (displayUrl()) {
+      <img
+        [src]="displayUrl()"
+        alt=""
+        class="block h-56 w-full object-cover"
+      />
+    } @else {
+      <label
+        class="flex h-56 w-full cursor-pointer flex-col items-center justify-center gap-2
+          text-sm text-[var(--color-text-muted)]"
+      >
+        <span class="material-symbols-outlined text-4xl">add_photo_alternate</span>
+        <span>Drop an image here or click to choose</span>
+        <span class="text-xs">JPEG, PNG, or WebP · up to 10 MB</span>
+        <input
+          type="file"
+          [accept]="accept"
+          class="sr-only"
+          [disabled]="disabled() || loading()"
+          (change)="onFileSelected($event)"
+        />
+      </label>
+    }
+
+    @if (loading()) {
+      <div
+        class="absolute inset-0 flex items-center justify-center bg-black/40 text-white"
+      >
+        <span
+          class="size-8 animate-spin rounded-full border-2 border-white border-t-transparent"
+        ></span>
+      </div>
+    }
+  </div>
+
+  @if (displayUrl() && !loading()) {
+    <div class="flex items-center gap-2">
+      <label class="inline-flex">
+        <input
+          type="file"
+          [accept]="accept"
+          class="sr-only"
+          [disabled]="disabled()"
+          (change)="onFileSelected($event)"
+        />
+        <span
+          class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-default)]
+            border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)]
+            hover:bg-[var(--color-bg-alt)]"
+          [class.pointer-events-none]="disabled()"
+          [class.opacity-50]="disabled()"
+        >
+          Replace image
+        </span>
+      </label>
+      @if (deleteFn()) {
+        <ui-button
+          variant="ghost"
+          size="md"
+          [disabled]="disabled()"
+          (click)="remove()"
+        >
+          Remove
+        </ui-button>
+      }
+    </div>
+  }
+</div>

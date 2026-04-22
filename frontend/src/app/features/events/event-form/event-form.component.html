@@ -231,6 +231,27 @@
         />
       </div>
 
+      <!-- Hero image (edit only — needs a stable id to upload against) -->
+      @if (isEdit()) {
+        <div>
+          <label class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.image' | transloco }}
+          </label>
+          <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+            {{ 'event.form.imageHint' | transloco }}
+          </p>
+          <div class="mt-2">
+            <app-image-upload
+              [imageUrl]="imageUrl()"
+              [uploadFn]="uploadImageFn"
+              [deleteFn]="deleteImageFn"
+              [disabled]="submitting()"
+              (imageChange)="imageUrl.set($event)"
+            />
+          </div>
+        </div>
+      }
+
       <!-- Status (edit only) -->
       @if (isEdit()) {
         <div>

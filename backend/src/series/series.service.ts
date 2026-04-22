@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { UpdateSeriesDto } from './dto/update-series.dto';
 import { AddSeriesEventDto } from './dto/add-series-event.dto';
 import { UpdateSeriesEventDto } from './dto/update-series-event.dto';
 import { SeriesSearchDto } from './dto/series-search.dto';
+import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 
 export interface SerializedSeries {
   id: string;
@@ -40,6 +42,7 @@ export class SeriesService {
     private readonly repo: Repository<RaceSeries>,
     @InjectRepository(RaceSeriesEvent)
     private readonly seriesEventRepo: Repository<RaceSeriesEvent>,
+    private readonly uploads: UploadsService,
   ) {}
 
   async findAll(params: SeriesSearchDto): Promise<PaginatedSeries> {
@@ -125,8 +128,17 @@ export class SeriesService {
     return { ...this.serialize(saved), eventCount: 0 };
   }
 
-  async update(id: string, dto: UpdateSeriesDto): Promise<SerializedSeries> {
+  async update(
+    id: string,
+    dto: UpdateSeriesDto,
+    user?: { id: string; isAdmin: boolean },
+  ): Promise<SerializedSeries> {
     const series = await this.findEntity(id);
+
+    if (user) {
+      this.assertOwnerOrAdmin(series, user);
+    }
+
     Object.assign(series, dto);
 
     if (dto.name != null || dto.year !== undefined) {
@@ -144,8 +156,53 @@ export class SeriesService {
     return { ...this.serialize(saved), eventCount: count };
   }
 
-  async remove(id: string): Promise<void> {
-    await this.repo.remove(await this.findEntity(id));
+  async remove(
+    id: string,
+    user?: { id: string; isAdmin: boolean },
+  ): Promise<void> {
+    const series = await this.findEntity(id);
+    if (user) {
+      this.assertOwnerOrAdmin(series, user);
+    }
+    await this.uploads.remove('series', series.id);
+    await this.repo.remove(series);
+  }
+
+  async setImage(
+    id: string,
+    file: UploadedFile,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedSeries> {
+    const series = await this.findEntity(id);
+    this.assertOwnerOrAdmin(series, user);
+
+    series.imageUrl = await this.uploads.save('series', series.id, file);
+    const saved = await this.repo.save(series);
+    const count = await this.seriesEventRepo.count({ where: { seriesId: id } });
+    return { ...this.serialize(saved), eventCount: count };
+  }
+
+  async removeImage(
+    id: string,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedSeries> {
+    const series = await this.findEntity(id);
+    this.assertOwnerOrAdmin(series, user);
+
+    await this.uploads.remove('series', series.id);
+    series.imageUrl = null as unknown as string;
+    const saved = await this.repo.save(series);
+    const count = await this.seriesEventRepo.count({ where: { seriesId: id } });
+    return { ...this.serialize(saved), eventCount: count };
+  }
+
+  private assertOwnerOrAdmin(
+    series: RaceSeries,
+    user: { id: string; isAdmin: boolean },
+  ): void {
+    if (user.isAdmin) return;
+    if (series.createdById && series.createdById === user.id) return;
+    throw new ForbiddenException('You can only modify your own series');
   }
 
   async addEvent(seriesId: string, dto: AddSeriesEventDto): Promise<void> {

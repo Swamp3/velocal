@@ -12,6 +12,7 @@ import { ImportModule } from './import/import.module';
 import { SeriesModule } from './series/series.module';
 import { PostsModule } from './posts/posts.module';
 import { SeoModule } from './seo/seo.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SeoModule } from './seo/seo.module';
     SeriesModule,
     PostsModule,
     SeoModule,
+    UploadsModule,
   ],
   controllers: [AppController],
 })

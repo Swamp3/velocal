@@ -35,6 +35,21 @@
       {{ 'news.backToList' | transloco }}
     </a>
 
+    @if (post.imageUrl) {
+      <div
+        class="mt-5 overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)]
+          bg-[var(--color-bg-alt)]"
+      >
+        <img
+          [src]="post.imageUrl"
+          [alt]="post.title"
+          class="block h-auto max-h-[420px] w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    }
+
     <!-- Title -->
     <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
       {{ post.title }}

@@ -17,9 +17,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { EventService } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { AuthService } from '@core/services/auth.service';
+import { UploadService } from '@core/services/upload.service';
 import { ButtonComponent, ToastService } from '@shared/ui';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
+import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { CyclingEvent, Discipline } from '@shared/models';
 
 @Component({
@@ -32,6 +34,7 @@ import { CyclingEvent, Discipline } from '@shared/models';
     ButtonComponent,
     CountrySelectorComponent,
     LocationPickerComponent,
+    ImageUploadComponent,
   ],
   templateUrl: './event-form.component.html',
 })
@@ -42,6 +45,7 @@ export class EventFormComponent implements OnInit {
   private readonly disciplineService = inject(DisciplineService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly uploadService = inject(UploadService);
 
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly loading = signal(false);
@@ -49,6 +53,15 @@ export class EventFormComponent implements OnInit {
   protected readonly eventId = signal<string | null>(null);
   protected readonly isEdit = computed(() => this.eventId() !== null);
   protected readonly mapCoordinates = signal<{ lat: number; lng: number } | null>(null);
+  protected readonly imageUrl = signal<string | null>(null);
+
+  // Bound to `<app-image-upload [uploadFn] [deleteFn]>`. We declare them as
+  // arrow-function properties so `this.eventId()` resolves at call time
+  // (the edit page always has an id by the time the user picks a file).
+  protected readonly uploadImageFn = (file: File) =>
+    this.uploadService.uploadEventImage(this.eventId()!, file);
+  protected readonly deleteImageFn = () =>
+    this.uploadService.deleteEventImage(this.eventId()!);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', {
@@ -173,6 +186,7 @@ export class EventFormComponent implements OnInit {
     if (event.coordinates) {
       this.mapCoordinates.set(event.coordinates);
     }
+    this.imageUrl.set(event.imageUrl ?? null);
     this.loading.set(false);
   }
 

@@ -6,12 +6,17 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseFilePipeBuilder,
   ParseUUIDPipe,
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Express } from 'express';
 import { PostsService, PaginatedPosts, SerializedPost } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -19,6 +24,11 @@ import { PostSearchDto } from './dto/post-search.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+
+const imagePipe = new ParseFilePipeBuilder()
+  .addFileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ })
+  .addMaxSizeValidator({ maxSize: 10 * 1024 * 1024 })
+  .build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST });
 
 @Controller('posts')
 export class PostsController {
@@ -62,5 +72,21 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.postsService.remove(id);
+  }
+
+  @Post(':id/image')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  uploadImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile(imagePipe) file: Express.Multer.File,
+  ): Promise<SerializedPost> {
+    return this.postsService.setImage(id, file);
+  }
+
+  @Delete(':id/image')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  deleteImage(@Param('id', ParseUUIDPipe) id: string): Promise<SerializedPost> {
+    return this.postsService.removeImage(id);
   }
 }

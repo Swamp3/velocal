@@ -29,6 +29,7 @@ backend/.nestjs/
 backend/dist/
 backend/.cache/
 backend/coverage/
+backend/uploads/
 
 # Env
 .env

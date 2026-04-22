@@ -12,13 +12,22 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SeriesService } from '@core/services/series.service';
 import { DisciplineService } from '@core/services/discipline.service';
+import { UploadService } from '@core/services/upload.service';
 import { Discipline, RaceSeriesDetail } from '@shared/models';
+import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-series-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe, ButtonComponent, InputComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslocoPipe,
+    ButtonComponent,
+    InputComponent,
+    ImageUploadComponent,
+  ],
   templateUrl: './series-form.component.html',
 })
 export class SeriesFormComponent implements OnInit {
@@ -27,6 +36,7 @@ export class SeriesFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly seriesService = inject(SeriesService);
   private readonly disciplineService = inject(DisciplineService);
+  private readonly uploadService = inject(UploadService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
   private readonly destroyRef = inject(DestroyRef);
@@ -34,14 +44,19 @@ export class SeriesFormComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly isEdit = signal(false);
+  protected readonly imageUrl = signal<string | null>(null);
   private editId = '';
+
+  protected readonly uploadImageFn = (file: File) =>
+    this.uploadService.uploadSeriesImage(this.editId, file);
+  protected readonly deleteImageFn = () =>
+    this.uploadService.deleteSeriesImage(this.editId);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     description: [''],
     year: [null as number | null],
     disciplineSlug: [''],
-    imageUrl: [''],
     externalUrl: [''],
   });
 
@@ -75,7 +90,6 @@ export class SeriesFormComponent implements OnInit {
       description: raw.description || undefined,
       year: raw.year ?? undefined,
       disciplineSlug: raw.disciplineSlug || undefined,
-      imageUrl: raw.imageUrl || undefined,
       externalUrl: raw.externalUrl || undefined,
     };
 
@@ -110,9 +124,9 @@ export class SeriesFormComponent implements OnInit {
       description: s.description ?? '',
       year: s.year ?? null,
       disciplineSlug: s.discipline?.slug ?? '',
-      imageUrl: s.imageUrl ?? '',
       externalUrl: s.externalUrl ?? '',
     });
+    this.imageUrl.set(s.imageUrl ?? null);
     this.loading.set(false);
   }
 }

@@ -21,7 +21,7 @@ export interface SeoMeta {
 
 const SITE_NAME = 'VeloCal';
 const TITLE_SUFFIX = ' — VeloCal';
-const DEFAULT_IMAGE = '/icon-512.png';
+const DEFAULT_IMAGE = '/meta-fallback.png';
 const DEFAULT_DESCRIPTION = 'VeloCal — Cycling event calendar';
 const JSON_LD_ID = 'seo-jsonld';
 /** Safety net when no SITE_URL is provided (should not happen in prod). */
@@ -95,6 +95,17 @@ export class SeoService {
     if (/^https?:\/\//.test(url)) return url;
     const base = this.siteUrl || FALLBACK_ORIGIN;
     return url.startsWith('/') ? `${base}${url}` : `${base}/${url}`;
+  }
+
+  /**
+   * Rewrites an uploaded hero URL (`/api/uploads/events/.../hero.webp?v=…`)
+   * into its `og.jpg` sibling for social-card meta. Falls back to the static
+   * `/meta-fallback.png` when no entity image is set.
+   */
+  ogImage(heroUrl: string | null | undefined): string {
+    if (!heroUrl) return this.absolute(DEFAULT_IMAGE);
+    const jpg = heroUrl.replace(/\/hero\.webp(\?|$)/, '/og.jpg$1');
+    return this.absolute(jpg);
   }
 
   private setCanonical(url?: string): void {

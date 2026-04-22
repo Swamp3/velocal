@@ -8,6 +8,7 @@ export interface Post {
   status: PostStatus;
   isPinned: boolean;
   tags: string[];
+  imageUrl?: string | null;
   publishedAt: string | null;
   createdAt: string;
 }

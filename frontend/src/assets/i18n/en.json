@@ -66,6 +66,8 @@
       "coordinatesHint": "Click the map or drag the marker to set coordinates",
       "registrationDeadline": "Registration Deadline",
       "externalUrl": "External URL",
+      "image": "Cover image",
+      "imageHint": "Shown at the top of the event page and as the preview when shared on social media.",
       "status": "Status",
       "submit": "Save",
       "cancel": "Cancel",
@@ -174,7 +176,7 @@
     "backToList": "Back to race series",
     "notFoundTitle": "Series not found",
     "notFoundMessage": "This race series does not exist or has been removed.",
-    "imageUrl": "Image URL",
+    "image": "Cover image",
     "externalUrl": "External Link",
     "externalUrlLabel": "External URL"
   },
@@ -236,6 +238,7 @@
       "event": "Linked event",
       "eventPlaceholder": "Enter event ID…",
       "status": "Status",
+      "image": "Cover image",
       "submit": "Publish",
       "saveDraft": "Save as draft",
       "pin": "Pin post"

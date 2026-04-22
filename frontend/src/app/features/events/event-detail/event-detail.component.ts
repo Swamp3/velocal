@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,23 +10,22 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { EventService } from '@core/services/event.service';
 import { AuthService } from '@core/services/auth.service';
+import { EventService } from '@core/services/event.service';
 import { FavoriteService } from '@core/services/favorite.service';
-import { SeriesService } from '@core/services/series.service';
 import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
-import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
-import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { SeriesService } from '@core/services/series.service';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   DisciplineChipComponent,
-  EventStatusBadgeComponent,
   EmptyStateComponent,
   EventMiniMapComponent,
+  EventStatusBadgeComponent,
   NewsCardComponent,
 } from '@shared/components';
+import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
+import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
 
 @Pipe({ name: 'externalUrlDisplay' })
@@ -158,9 +158,8 @@ export class EventDetailComponent implements OnInit {
     const coords = normalizeCoords(event.coordinates);
     const lang = this.transloco.getActiveLang();
     const url = this.seo.pageUrl(`/events/${event.id}`);
-    const image = this.seo.absolute('/icon-512.png');
-    const disciplineName =
-      event.discipline?.nameTranslations?.[lang] ?? event.disciplineSlug;
+    const image = this.seo.ogImage(event.imageUrl);
+    const disciplineName = event.discipline?.nameTranslations?.[lang] ?? event.disciplineSlug;
 
     const dateLabel = this.formatEventDate(event.startDate, event.endDate, lang);
     const venue = event.locationName ?? '';

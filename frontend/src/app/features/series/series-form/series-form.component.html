@@ -72,11 +72,20 @@
       </div>
     </div>
 
-    <ui-input
-      [label]="'series.imageUrl' | transloco"
-      type="url"
-      formControlName="imageUrl"
-    />
+    @if (isEdit()) {
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+          {{ 'series.image' | transloco }}
+        </label>
+        <app-image-upload
+          [imageUrl]="imageUrl()"
+          [uploadFn]="uploadImageFn"
+          [deleteFn]="deleteImageFn"
+          [disabled]="loading()"
+          (imageChange)="imageUrl.set($event)"
+        />
+      </div>
+    }
 
     <ui-input
       [label]="'series.externalUrlLabel' | transloco"

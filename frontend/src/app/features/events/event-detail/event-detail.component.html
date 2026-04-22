@@ -37,6 +37,21 @@
       {{ 'events.detail.backToList' | transloco }}
     </a>
 
+    @if (event.imageUrl) {
+      <div
+        class="mt-5 overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)]
+          bg-[var(--color-bg-alt)]"
+      >
+        <img
+          [src]="event.imageUrl"
+          [alt]="event.name"
+          class="block h-auto max-h-[420px] w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    }
+
     <!-- Header: discipline chip + status -->
     <div class="mt-5 flex flex-wrap items-center gap-2">
       <app-discipline-chip [discipline]="event.discipline" />
