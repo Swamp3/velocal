@@ -26,13 +26,16 @@ RUN pnpm install --frozen-lockfile --prod
 FROM node:24-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=4000
+# Bind to :80 so the prod image is a drop-in replacement for the old nginx
+# container — existing Caddy routes (`reverse_proxy velocal-frontend:80`) keep
+# working after the SSR migration without needing a caddy config change.
+ENV PORT=80
 
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist/velocal ./dist/velocal
 COPY --from=build /app/package.json ./package.json
 
-EXPOSE 4000
+EXPOSE 80
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -qO- http://localhost:4000/healthz || exit 1
+  CMD wget -qO- http://localhost:80/healthz || exit 1
 CMD ["node", "dist/velocal/server/server.mjs"]

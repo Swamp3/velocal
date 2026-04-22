@@ -54,7 +54,7 @@ services:
       target: production
     environment:
       NODE_ENV: production
-      PORT: 4000
+      PORT: 80
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-3000}
       SITE_URL: ${SITE_URL:-https://velocal.cc}
       NG_ALLOWED_HOSTS: ${NG_ALLOWED_HOSTS:-velocal.cc,www.velocal.cc,localhost}
@@ -65,7 +65,7 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/healthz || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/healthz || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
