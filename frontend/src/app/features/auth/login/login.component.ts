@@ -12,8 +12,14 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
-import { ToastService } from '@shared/ui';
-import { ButtonComponent, InputComponent } from '@shared/ui';
+import {
+  ButtonComponent,
+  InputComponent,
+  OtpInputComponent,
+  ToastService,
+} from '@shared/ui';
+
+type AuthView = 'email' | 'otp' | 'password';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +30,7 @@ import { ButtonComponent, InputComponent } from '@shared/ui';
     TranslocoPipe,
     ButtonComponent,
     InputComponent,
+    OtpInputComponent,
   ],
   templateUrl: './login.component.html',
 })
@@ -34,26 +41,119 @@ export class LoginComponent {
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
 
+  protected readonly view = signal<AuthView>('email');
   protected readonly loading = signal(false);
+  protected readonly otpEmail = signal('');
+  protected readonly resendCooldown = signal(0);
 
-  protected readonly form = this.fb.nonNullable.group({
+  protected readonly emailForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
+
+  protected readonly otpForm = this.fb.nonNullable.group({
+    code: ['', [Validators.required, Validators.minLength(6)]],
+  });
+
+  protected readonly passwordForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
-  protected onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  private resendTimer: ReturnType<typeof setInterval> | null = null;
+
+  protected sendOtp(): void {
+    if (this.loading()) return;
+    if (this.emailForm.invalid) {
+      this.emailForm.markAllAsTouched();
       return;
     }
 
     this.loading.set(true);
-    const { email, password } = this.form.getRawValue();
+    const email = this.emailForm.getRawValue().email;
+
+    this.auth.requestOtp(email).subscribe({
+      next: () => {
+        this.otpEmail.set(email);
+        this.view.set('otp');
+        this.loading.set(false);
+        this.startCooldown();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toast.error(
+          err.status === 401
+            ? this.transloco.translate('auth.otpCooldown')
+            : this.transloco.translate('auth.otpSendFailed'),
+        );
+      },
+    });
+  }
+
+  protected verifyOtp(): void {
+    if (this.loading() || this.otpForm.invalid) return;
+
+    this.loading.set(true);
+    const code = this.otpForm.getRawValue().code;
+
+    this.auth.verifyOtp(this.otpEmail(), code).subscribe({
+      next: () => this.router.navigateByUrl('/events'),
+      error: (err) => {
+        this.loading.set(false);
+        this.toast.error(
+          err.status === 401
+            ? this.transloco.translate('auth.otpInvalid')
+            : this.transloco.translate('auth.loginFailed'),
+        );
+      },
+    });
+  }
+
+  protected onOtpCompleted(code: string): void {
+    this.otpForm.controls.code.setValue(code);
+    this.verifyOtp();
+  }
+
+  protected resendOtp(): void {
+    if (this.loading() || this.resendCooldown() > 0) return;
+
+    this.loading.set(true);
+    this.auth.requestOtp(this.otpEmail()).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.startCooldown();
+        this.toast.success(this.transloco.translate('auth.otpResent'));
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.error(this.transloco.translate('auth.otpSendFailed'));
+      },
+    });
+  }
+
+  protected showPasswordLogin(): void {
+    this.view.set('password');
+    const email = this.emailForm.getRawValue().email || this.otpEmail();
+    if (email) {
+      this.passwordForm.controls.email.setValue(email);
+    }
+  }
+
+  protected showOtpLogin(): void {
+    this.view.set('email');
+  }
+
+  protected loginWithPassword(): void {
+    if (this.loading()) return;
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    const { email, password } = this.passwordForm.getRawValue();
 
     this.auth.login(email, password).subscribe({
-      next: () => {
-        this.router.navigateByUrl('/events');
-      },
+      next: () => this.router.navigateByUrl('/events'),
       error: (err) => {
         this.loading.set(false);
         this.toast.error(
@@ -65,12 +165,33 @@ export class LoginComponent {
     });
   }
 
-  protected fieldError(name: 'email' | 'password'): string {
-    const ctrl = this.form.controls[name];
+  protected emailError(): string {
+    const ctrl = this.emailForm.controls.email;
+    if (!ctrl.touched || ctrl.valid) return '';
+    if (ctrl.hasError('required')) return this.transloco.translate('validation.required');
+    if (ctrl.hasError('email')) return this.transloco.translate('validation.email');
+    return '';
+  }
+
+  protected passwordFieldError(name: 'email' | 'password'): string {
+    const ctrl = this.passwordForm.controls[name];
     if (!ctrl.touched || ctrl.valid) return '';
     if (ctrl.hasError('required')) return this.transloco.translate('validation.required');
     if (ctrl.hasError('email')) return this.transloco.translate('validation.email');
     if (ctrl.hasError('minlength')) return this.transloco.translate('validation.minLength', { min: 8 });
     return '';
+  }
+
+  private startCooldown(): void {
+    if (this.resendTimer) clearInterval(this.resendTimer);
+    this.resendCooldown.set(60);
+    this.resendTimer = setInterval(() => {
+      const next = this.resendCooldown() - 1;
+      this.resendCooldown.set(next);
+      if (next <= 0 && this.resendTimer) {
+        clearInterval(this.resendTimer);
+        this.resendTimer = null;
+      }
+    }, 1000);
   }
 }

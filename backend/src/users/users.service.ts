@@ -33,6 +33,10 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
+  async update(user: User): Promise<User> {
+    return this.userRepository.save(user);
+  }
+
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
     const user = await this.userRepository.findOneByOrFail({ id: userId });
 

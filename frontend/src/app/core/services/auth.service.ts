@@ -69,6 +69,16 @@ export class AuthService {
       .pipe(tap((res) => this.setSession(res)));
   }
 
+  requestOtp(email: string): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>('/auth/request-otp', { email });
+  }
+
+  verifyOtp(email: string, code: string): Observable<AuthResponse> {
+    return this.api.post<AuthResponse>('/auth/verify-otp', { email, code }).pipe(
+      tap((res) => this.setSession(res)),
+    );
+  }
+
   updateCurrentUser(user: User): void {
     this._currentUser.set(user);
   }

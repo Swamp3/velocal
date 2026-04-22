@@ -6,6 +6,11 @@ import { Discipline } from '../disciplines/entities/discipline.entity';
 import { User } from '../users/entities/user.entity';
 import { UserFavorite } from '../users/entities/user-favorite.entity';
 import { UserDisciplinePref } from '../users/entities/user-discipline-pref.entity';
+import { RaceSeries } from '../series/entities/race-series.entity';
+import { RaceSeriesEvent } from '../series/entities/race-series-event.entity';
+import { Post } from '../posts/entities/post.entity';
+import { PostTag } from '../posts/entities/post-tag.entity';
+import { OtpToken } from '../auth/entities/otp-token.entity';
 
 export default new DataSource({
   type: 'postgres',
@@ -14,6 +19,17 @@ export default new DataSource({
   username: process.env.DB_USER || 'velocal',
   password: process.env.DB_PASSWORD || 'velocal',
   database: process.env.DB_NAME || 'velocal',
-  entities: [Event, Discipline, User, UserFavorite, UserDisciplinePref],
+  entities: [
+    Event,
+    Discipline,
+    User,
+    UserFavorite,
+    UserDisciplinePref,
+    RaceSeries,
+    RaceSeriesEvent,
+    Post,
+    PostTag,
+    OtpToken,
+  ],
   migrations: ['src/migrations/*.ts'],
 });

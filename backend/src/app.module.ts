@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
+import sendgridConfig from './config/sendgrid.config';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -18,7 +19,8 @@ import { UploadsModule } from './uploads/uploads.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtConfig],
+      envFilePath: '../.env',
+      load: [databaseConfig, jwtConfig, sendgridConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
