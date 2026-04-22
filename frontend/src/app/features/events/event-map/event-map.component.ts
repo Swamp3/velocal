@@ -1,3 +1,4 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -7,6 +8,7 @@ import {
   ElementRef,
   inject,
   OnInit,
+  PLATFORM_ID,
   signal,
   viewChild,
 } from '@angular/core';
@@ -14,7 +16,8 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import * as L from 'leaflet';
+import type * as LeafletNS from 'leaflet';
+import type {} from 'leaflet.markercluster';
 
 import { EventService } from '@core/services/event.service';
 import { DisciplineService } from '@core/services/discipline.service';
@@ -23,17 +26,9 @@ import { GeolocationService } from '@core/services/geolocation.service';
 import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { DisciplineFilterComponent } from '@shared/components';
+import { normalizeCoords } from '@shared/utils/coords';
 
-function normalizeCoords(coords: any): { lat: number; lng: number } | null {
-  if (!coords) return null;
-  if (typeof coords.lat === 'number' && typeof coords.lng === 'number') return coords;
-  if (coords.type === 'Point' && Array.isArray(coords.coordinates)) {
-    return { lat: coords.coordinates[1], lng: coords.coordinates[0] };
-  }
-  return null;
-}
-
-const EUROPE_CENTER: L.LatLngExpression = [51.1657, 10.4515];
+const EUROPE_CENTER: LeafletNS.LatLngExpression = [51.1657, 10.4515];
 const DEFAULT_ZOOM = 5;
 const MAX_EVENTS = 5000;
 const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
@@ -55,29 +50,6 @@ function disciplineColor(slug: string): string {
   return DISCIPLINE_COLORS[slug] ?? '#6B7280';
 }
 
-function createDisciplineIcon(color: string): L.DivIcon {
-  return L.divIcon({
-    className: '',
-    html: `<div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
-      <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>
-    </div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -14],
-  });
-}
-
-function createHomeIcon(): L.DivIcon {
-  return L.divIcon({
-    className: '',
-    html: `<div style="width:24px;height:24px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2L3 9v11a2 2 0 002 2h4v-7h6v7h4a2 2 0 002-2V9l-9-7z"/></svg>
-    </div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-}
-
 @Component({
   selector: 'app-event-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,13 +68,15 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   readonly filterStateService = inject(FilterStateService);
   private readonly transloco = inject(TranslocoService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private readonly mapEl = viewChild.required<ElementRef<HTMLElement>>('mapContainer');
-  private map?: L.Map;
-  private clusterGroup?: L.MarkerClusterGroup;
-  private radiusCircle?: L.Circle;
-  private homeMarker?: L.Marker;
-  private readonly iconCache = new Map<string, L.DivIcon>();
+  private L?: typeof LeafletNS;
+  private map?: LeafletNS.Map;
+  private clusterGroup?: LeafletNS.MarkerClusterGroup;
+  private radiusCircle?: LeafletNS.Circle;
+  private homeMarker?: LeafletNS.Marker;
+  private readonly iconCache = new Map<string, LeafletNS.DivIcon>();
   private readonly mapReady = signal(false);
 
   private readonly today = new Date().toISOString().slice(0, 10);
@@ -239,6 +213,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    if (!this.isBrowser) return;
     this.initMap();
   }
 
@@ -293,7 +268,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       });
   }
 
-  protected onMapClick(latlng: L.LatLng): void {
+  protected onMapClick(latlng: LeafletNS.LatLng): void {
     const { lat, lng } = latlng;
     this.userLat.set(lat);
     this.userLng.set(lng);
@@ -343,7 +318,12 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   }
 
   private async initMap(): Promise<void> {
-    (window as any)['L'] = L;
+    const L = await import('leaflet');
+    this.L = L;
+    // leaflet.markercluster is not an ES module — it attaches to whatever
+    // `L` it finds on `window`, so we have to publish the dynamic import
+    // onto the global before loading it.
+    (window as unknown as { L: typeof LeafletNS })['L'] = L;
     await import('leaflet.markercluster');
 
     this.map = L.map(this.mapEl().nativeElement, {
@@ -366,7 +346,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     });
     this.map.addLayer(this.clusterGroup);
 
-    this.map.on('click', (e: L.LeafletMouseEvent) => this.onMapClick(e.latlng));
+    this.map.on('click', (e: LeafletNS.LeafletMouseEvent) => this.onMapClick(e.latlng));
     this.map.getContainer().classList.add('map-clickable');
 
     this.destroyRef.onDestroy(() => this.map?.remove());
@@ -398,7 +378,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   }
 
   private updateGeoOverlays(): void {
-    if (!this.map) return;
+    if (!this.map || !this.L) return;
 
     this.removeGeoOverlays();
 
@@ -407,7 +387,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
     const r = this.radius();
     if (r != null) {
-      this.radiusCircle = L.circle([center.lat, center.lng], {
+      this.radiusCircle = this.L.circle([center.lat, center.lng], {
         radius: r * 1000,
         color: '#2563eb',
         fillColor: '#2563eb',
@@ -417,8 +397,8 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       }).addTo(this.map);
     }
 
-    this.homeMarker = L.marker([center.lat, center.lng], {
-      icon: createHomeIcon(),
+    this.homeMarker = this.L.marker([center.lat, center.lng], {
+      icon: this.createHomeIcon(),
       draggable: true,
     }).addTo(this.map);
 
@@ -461,18 +441,18 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   }
 
   private rebuildMarkers(events: CyclingEvent[]): void {
-    if (!this.clusterGroup) return;
+    if (!this.clusterGroup || !this.L) return;
     this.clusterGroup.clearLayers();
 
     const lang = this.transloco.getActiveLang();
-    const markers: L.Marker[] = [];
+    const markers: LeafletNS.Marker[] = [];
 
     for (const ev of events) {
       const coords = normalizeCoords(ev.coordinates);
       if (!coords) continue;
 
       const icon = this.getIcon(ev.disciplineSlug);
-      const marker = L.marker([coords.lat, coords.lng], { icon });
+      const marker = this.L.marker([coords.lat, coords.lng], { icon });
 
       const date = new Date(ev.startDate).toLocaleDateString('de-DE', {
         day: '2-digit',
@@ -518,13 +498,36 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     this.clusterGroup.addLayers(markers);
   }
 
-  private getIcon(slug: string): L.DivIcon {
+  private getIcon(slug: string): LeafletNS.DivIcon {
     let icon = this.iconCache.get(slug);
     if (!icon) {
-      icon = createDisciplineIcon(disciplineColor(slug));
+      icon = this.createDisciplineIcon(disciplineColor(slug));
       this.iconCache.set(slug, icon);
     }
     return icon;
+  }
+
+  private createDisciplineIcon(color: string): LeafletNS.DivIcon {
+    return this.L!.divIcon({
+      className: '',
+      html: `<div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
+        <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>
+      </div>`,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -14],
+    });
+  }
+
+  private createHomeIcon(): LeafletNS.DivIcon {
+    return this.L!.divIcon({
+      className: '',
+      html: `<div style="width:24px;height:24px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2L3 9v11a2 2 0 002 2h4v-7h6v7h4a2 2 0 002-2V9l-9-7z"/></svg>
+      </div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
   }
 
   private esc(text: string): string {

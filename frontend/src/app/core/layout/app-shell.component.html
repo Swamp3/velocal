@@ -32,28 +32,30 @@
 
       <div class="mx-2 h-5 w-px bg-[var(--color-border)]"></div>
 
-      @if (auth.isAuthenticated()) {
-        <a
-          [routerLink]="authNav.path"
-          routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-          class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-        >
-          {{ authNav.key | transloco }}
-        </a>
-        <button
-          class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
-          (click)="onLogout()"
-        >
-          {{ 'app.nav.logout' | transloco }}
-        </button>
-      } @else {
-        <a
-          routerLink="/auth/login"
-          routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-          class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all duration-200"
-        >
-          {{ 'app.nav.login' | transloco }}
-        </a>
+      @if (auth.hydrated()) {
+        @if (auth.isAuthenticated()) {
+          <a
+            [routerLink]="authNav.path"
+            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+          >
+            {{ authNav.key | transloco }}
+          </a>
+          <button
+            class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
+            (click)="onLogout()"
+          >
+            {{ 'app.nav.logout' | transloco }}
+          </button>
+        } @else {
+          <a
+            routerLink="/auth/login"
+            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all duration-200"
+          >
+            {{ 'app.nav.login' | transloco }}
+          </a>
+        }
       }
     </nav>
 
@@ -150,30 +152,32 @@
 
         <div class="my-2 h-px bg-[var(--color-border)]"></div>
 
-        @if (auth.isAuthenticated()) {
-          <a
-            [routerLink]="authNav.path"
-            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-            (click)="mobileMenuOpen.set(false)"
-          >
-            {{ authNav.key | transloco }}
-          </a>
-          <button
-            class="rounded-lg px-4 py-2.5 text-sm font-medium text-left text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
-            (click)="mobileMenuOpen.set(false); onLogout()"
-          >
-            {{ 'app.nav.logout' | transloco }}
-          </button>
-        } @else {
-          <a
-            routerLink="/auth/login"
-            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all duration-200"
-            (click)="mobileMenuOpen.set(false)"
-          >
-            {{ 'app.nav.login' | transloco }}
-          </a>
+        @if (auth.hydrated()) {
+          @if (auth.isAuthenticated()) {
+            <a
+              [routerLink]="authNav.path"
+              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+              class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              {{ authNav.key | transloco }}
+            </a>
+            <button
+              class="rounded-lg px-4 py-2.5 text-sm font-medium text-left text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
+              (click)="mobileMenuOpen.set(false); onLogout()"
+            >
+              {{ 'app.nav.logout' | transloco }}
+            </button>
+          } @else {
+            <a
+              routerLink="/auth/login"
+              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+              class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all duration-200"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              {{ 'app.nav.login' | transloco }}
+            </a>
+          }
         }
       </div>
     </nav>

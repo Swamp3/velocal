@@ -16,6 +16,7 @@ import { AuthService } from '@core/services/auth.service';
 import { FavoriteService } from '@core/services/favorite.service';
 import { SeriesService } from '@core/services/series.service';
 import { PostService } from '@core/services/post.service';
+import { SeoService } from '@core/services/seo.service';
 import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import {
@@ -25,6 +26,7 @@ import {
   EventMiniMapComponent,
   NewsCardComponent,
 } from '@shared/components';
+import { normalizeCoords } from '@shared/utils/coords';
 
 @Pipe({ name: 'externalUrlDisplay' })
 export class ExternalUrlDisplayPipe implements PipeTransform {
@@ -65,6 +67,7 @@ export class EventDetailComponent implements OnInit {
   private readonly favoriteService = inject(FavoriteService);
   private readonly seriesService = inject(SeriesService);
   private readonly postService = inject(PostService);
+  private readonly seo = inject(SeoService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
 
@@ -135,14 +138,97 @@ export class EventDetailComponent implements OnInit {
       next: (event) => {
         this.event.set(event);
         this.loading.set(false);
+        this.applySeo(event);
         this.loadSeries(id);
         this.loadLinkedPosts(id);
       },
       error: () => {
         this.error.set(true);
         this.loading.set(false);
+        this.seo.setMeta({
+          title: this.transloco.translate('event.notFound'),
+          description: '',
+          noindex: true,
+        });
       },
     });
+  }
+
+  private applySeo(event: CyclingEvent): void {
+    const coords = normalizeCoords(event.coordinates);
+    const lang = this.transloco.getActiveLang();
+    const url = this.seo.pageUrl(`/events/${event.id}`);
+    const image = this.seo.absolute('/icon-512.png');
+    const disciplineName =
+      event.discipline?.nameTranslations?.[lang] ?? event.disciplineSlug;
+
+    const dateLabel = this.formatEventDate(event.startDate, event.endDate, lang);
+    const venue = event.locationName ?? '';
+    const shortDesc =
+      [disciplineName, dateLabel, venue].filter(Boolean).join(' · ').slice(0, 260) ||
+      (event.description ?? '').slice(0, 200);
+
+    const jsonLd: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'SportsEvent',
+      name: event.name,
+      description: shortDesc,
+      startDate: event.startDate,
+      endDate: event.endDate ?? event.startDate,
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      ...(url ? { url } : {}),
+      image,
+      organizer: { '@type': 'Organization', name: 'VeloCal', url: this.seo.siteUrl || undefined },
+      ...(event.externalUrl
+        ? {
+            offers: {
+              '@type': 'Offer',
+              url: event.externalUrl,
+              availability: 'https://schema.org/InStock',
+            },
+          }
+        : {}),
+      ...(venue
+        ? {
+            location: {
+              '@type': 'Place',
+              name: venue,
+              ...(event.address ? { address: event.address } : {}),
+              ...(coords
+                ? {
+                    geo: {
+                      '@type': 'GeoCoordinates',
+                      latitude: coords.lat,
+                      longitude: coords.lng,
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    };
+
+    this.seo.setMeta({
+      title: event.name,
+      description: shortDesc,
+      url,
+      image,
+      type: 'event',
+      jsonLd,
+    });
+  }
+
+  private formatEventDate(start: string, end: string | null | undefined, lang: string): string {
+    const locale = lang === 'en' ? 'en-GB' : 'de-DE';
+    const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+    try {
+      const s = new Date(start).toLocaleDateString(locale, opts);
+      if (!end || end === start) return s;
+      return `${s} – ${new Date(end).toLocaleDateString(locale, opts)}`;
+    } catch {
+      return start;
+    }
   }
 
   private loadSeries(eventId: string): void {

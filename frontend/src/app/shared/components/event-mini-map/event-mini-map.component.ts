@@ -1,3 +1,4 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -7,21 +8,10 @@ import {
   inject,
   input,
   OnChanges,
+  PLATFORM_ID,
   viewChild,
 } from '@angular/core';
-import * as L from 'leaflet';
-
-// Fix default marker icon paths broken by bundlers
-const iconDefault = L.icon({
-  iconUrl: 'assets/marker-icon.png',
-  iconRetinaUrl: 'assets/marker-icon-2x.png',
-  shadowUrl: 'assets/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-L.Marker.prototype.options.icon = iconDefault;
+import type * as LeafletNS from 'leaflet';
 
 const DEFAULT_ZOOM = 13;
 
@@ -40,20 +30,42 @@ export class EventMiniMapComponent implements AfterViewInit, OnChanges {
 
   private readonly mapContainer = viewChild.required<ElementRef<HTMLElement>>('mapContainer');
   private readonly destroyRef = inject(DestroyRef);
-  private map?: L.Map;
-  private marker?: L.Marker;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private map?: LeafletNS.Map;
+  private marker?: LeafletNS.Marker;
+  private initPromise?: Promise<void>;
 
   ngAfterViewInit(): void {
-    this.initMap();
+    if (!this.isBrowser) return;
+    this.initPromise = this.initMap().catch((err) => {
+      console.error('Failed to initialize event mini map', err);
+    });
   }
 
   ngOnChanges(): void {
     if (this.map) {
       this.updateMap();
+    } else if (this.initPromise) {
+      this.initPromise.then(() => {
+        if (this.map) this.updateMap();
+      });
     }
   }
 
-  private initMap(): void {
+  private async initMap(): Promise<void> {
+    const L = await import('leaflet');
+
+    const iconDefault = L.icon({
+      iconUrl: 'assets/marker-icon.png',
+      iconRetinaUrl: 'assets/marker-icon-2x.png',
+      shadowUrl: 'assets/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41],
+    });
+    L.Marker.prototype.options.icon = iconDefault;
+
     const { lat, lng } = this.coordinates();
 
     this.map = L.map(this.mapContainer().nativeElement, {

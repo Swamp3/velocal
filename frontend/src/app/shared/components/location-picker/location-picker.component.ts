@@ -1,3 +1,4 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -8,21 +9,12 @@ import {
   input,
   OnChanges,
   output,
+  PLATFORM_ID,
   viewChild,
 } from '@angular/core';
-import * as L from 'leaflet';
+import type * as LeafletNS from 'leaflet';
 
-const iconDefault = L.icon({
-  iconUrl: 'assets/marker-icon.png',
-  iconRetinaUrl: 'assets/marker-icon-2x.png',
-  shadowUrl: 'assets/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-const DEFAULT_CENTER: L.LatLngExpression = [51.1657, 10.4515]; // Germany center
+const DEFAULT_CENTER: LeafletNS.LatLngExpression = [51.1657, 10.4515];
 const DEFAULT_ZOOM = 6;
 const MARKER_ZOOM = 13;
 
@@ -42,24 +34,47 @@ export class LocationPickerComponent implements AfterViewInit, OnChanges {
 
   private readonly mapContainer = viewChild.required<ElementRef<HTMLElement>>('mapContainer');
   private readonly destroyRef = inject(DestroyRef);
-  private map?: L.Map;
-  private marker?: L.Marker;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private L?: typeof LeafletNS;
+  private iconDefault?: LeafletNS.Icon;
+  private map?: LeafletNS.Map;
+  private marker?: LeafletNS.Marker;
   private skipNextUpdate = false;
+  private initPromise?: Promise<void>;
 
   ngAfterViewInit(): void {
-    this.initMap();
+    if (!this.isBrowser) return;
+    this.initPromise = this.initMap().catch((err) => {
+      console.error('Failed to initialize location picker map', err);
+    });
   }
 
   ngOnChanges(): void {
-    if (this.map && !this.skipNextUpdate) {
-      this.updateMarker();
+    if (this.map) {
+      if (!this.skipNextUpdate) this.updateMarker();
+    } else if (this.initPromise && !this.skipNextUpdate) {
+      this.initPromise.then(() => {
+        if (this.map) this.updateMarker();
+      });
     }
     this.skipNextUpdate = false;
   }
 
-  private initMap(): void {
+  private async initMap(): Promise<void> {
+    const L = await import('leaflet');
+    this.L = L;
+    this.iconDefault = L.icon({
+      iconUrl: 'assets/marker-icon.png',
+      iconRetinaUrl: 'assets/marker-icon-2x.png',
+      shadowUrl: 'assets/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41],
+    });
+
     const coords = this.coordinates();
-    const center = coords ? [coords.lat, coords.lng] as L.LatLngExpression : DEFAULT_CENTER;
+    const center = coords ? ([coords.lat, coords.lng] as LeafletNS.LatLngExpression) : DEFAULT_CENTER;
     const zoom = coords ? MARKER_ZOOM : DEFAULT_ZOOM;
 
     this.map = L.map(this.mapContainer().nativeElement, {
@@ -73,11 +88,9 @@ export class LocationPickerComponent implements AfterViewInit, OnChanges {
       attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
 
-    if (coords) {
-      this.addMarker(coords.lat, coords.lng);
-    }
+    if (coords) this.addMarker(coords.lat, coords.lng);
 
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
+    this.map.on('click', (e: LeafletNS.LeafletMouseEvent) => {
       const { lat, lng } = e.latlng;
       this.addMarker(lat, lng);
       this.emitCoordinates(lat, lng);
@@ -87,10 +100,11 @@ export class LocationPickerComponent implements AfterViewInit, OnChanges {
   }
 
   private addMarker(lat: number, lng: number): void {
+    if (!this.L || !this.map || !this.iconDefault) return;
     if (this.marker) {
       this.marker.setLatLng([lat, lng]);
     } else {
-      this.marker = L.marker([lat, lng], { icon: iconDefault, draggable: true }).addTo(this.map!);
+      this.marker = this.L.marker([lat, lng], { icon: this.iconDefault, draggable: true }).addTo(this.map);
       this.marker.on('dragend', () => {
         const pos = this.marker!.getLatLng();
         this.emitCoordinates(pos.lat, pos.lng);

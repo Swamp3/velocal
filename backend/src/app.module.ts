@@ -11,6 +11,7 @@ import { DisciplinesModule } from './disciplines/disciplines.module';
 import { ImportModule } from './import/import.module';
 import { SeriesModule } from './series/series.module';
 import { PostsModule } from './posts/posts.module';
+import { SeoModule } from './seo/seo.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PostsModule } from './posts/posts.module';
     ImportModule,
     SeriesModule,
     PostsModule,
+    SeoModule,
   ],
   controllers: [AppController],
 })

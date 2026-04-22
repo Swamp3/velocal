@@ -34,6 +34,7 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@velocal.cc}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
       IMPORT_COOLDOWN_MINUTES: ${IMPORT_COOLDOWN_MINUTES:-5}
+      SITE_URL: ${SITE_URL:-https://velocal.cc}
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,6 +52,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-3000}
+      SITE_URL: ${SITE_URL:-https://velocal.cc}
+      NG_ALLOWED_HOSTS: ${NG_ALLOWED_HOSTS:-velocal.cc,www.velocal.cc,localhost}
     networks:
       - default
       - caddy
@@ -58,11 +65,11 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/healthz || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 20s
     restart: unless-stopped
 
 volumes:
