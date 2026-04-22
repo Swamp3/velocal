@@ -35,6 +35,9 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
       IMPORT_COOLDOWN_MINUTES: ${IMPORT_COOLDOWN_MINUTES:-5}
       SITE_URL: ${SITE_URL:-https://velocal.cc}
+    networks:
+      - default
+      - caddy
     depends_on:
       postgres:
         condition: service_healthy
