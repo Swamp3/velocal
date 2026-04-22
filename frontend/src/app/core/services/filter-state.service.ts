@@ -1,4 +1,5 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { computed, effect, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
 
@@ -8,6 +9,7 @@ const STORAGE_KEY = 'velocal-discipline-filter';
 export class FilterStateService {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private readonly _override = signal<string[] | null>(null);
   private readonly _userPrefs = signal<string[]>([]);
@@ -58,6 +60,7 @@ export class FilterStateService {
   }
 
   private loadFromStorage(): void {
+    if (!this.isBrowser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -72,6 +75,7 @@ export class FilterStateService {
   }
 
   private persistToStorage(slugs: string[]): void {
+    if (!this.isBrowser) return;
     if (slugs.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(slugs));
     } else {

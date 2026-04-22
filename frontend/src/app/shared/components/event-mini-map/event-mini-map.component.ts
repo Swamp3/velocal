@@ -53,7 +53,10 @@ export class EventMiniMapComponent implements AfterViewInit, OnChanges {
   }
 
   private async initMap(): Promise<void> {
-    const L = await import('leaflet');
+    const leafletMod = await import('leaflet');
+    const L =
+      ((leafletMod as unknown as { default?: typeof LeafletNS }).default ??
+        (leafletMod as unknown as typeof LeafletNS));
 
     const iconDefault = L.icon({
       iconUrl: 'assets/marker-icon.png',

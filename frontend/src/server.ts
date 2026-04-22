@@ -55,10 +55,13 @@ app.get('/robots.txt', (_req, res) => {
     .send(body);
 });
 
+// `app.use('/api', ...)` strips the mount path before handing off to the
+// middleware, so we re-anchor the upstream target at `/api` to preserve the
+// full path (backend mounts every controller under `/api`).
 app.use(
   '/api',
   createProxyMiddleware({
-    target: backendUrl,
+    target: `${backendUrl}/api`,
     changeOrigin: true,
     xfwd: true,
     proxyTimeout: 300_000,

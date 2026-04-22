@@ -318,7 +318,13 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   }
 
   private async initMap(): Promise<void> {
-    const L = await import('leaflet');
+    // Leaflet is UMD/CJS; esbuild wraps its exports under `.default` in the
+    // prod build, while the dev server hands back the real namespace. Unwrap
+    // so `L.extend`, `L.LayerGroup`, etc. exist in both builds.
+    const leafletMod = await import('leaflet');
+    const L =
+      ((leafletMod as unknown as { default?: typeof LeafletNS }).default ??
+        (leafletMod as unknown as typeof LeafletNS));
     this.L = L;
     // leaflet.markercluster is not an ES module — it attaches to whatever
     // `L` it finds on `window`, so we have to publish the dynamic import
