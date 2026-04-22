@@ -20,7 +20,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   DisciplineChipComponent,
   EmptyStateComponent,
-  EventMiniMapComponent,
+  EventDetailMapComponent,
   EventStatusBadgeComponent,
   NewsCardComponent,
 } from '@shared/components';
@@ -52,7 +52,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     DisciplineChipComponent,
     EventStatusBadgeComponent,
     EmptyStateComponent,
-    EventMiniMapComponent,
+    EventDetailMapComponent,
     ExternalUrlDisplayPipe,
     ChipComponent,
     NewsCardComponent,

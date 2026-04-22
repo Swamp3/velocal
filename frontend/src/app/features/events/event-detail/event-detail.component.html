@@ -161,10 +161,14 @@
       </div>
     }
 
-    <!-- Mini map -->
+    <!-- Mini map (click to expand into interactive dialog) -->
     @if (event.coordinates) {
       <div class="mt-8 overflow-hidden rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-card)]">
-        <app-event-mini-map [coordinates]="event.coordinates" />
+        <app-event-detail-map
+          [coordinates]="event.coordinates"
+          [eventId]="event.id"
+          [locationName]="event.locationName"
+        />
       </div>
     }
 

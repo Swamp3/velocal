@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { SeoService } from '@core/services/seo.service';
 import { ThemeService } from '@core/theme.service';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui';
+import { filter } from 'rxjs';
 import { version as APP_VERSION } from '../../../../package.json';
 
 interface NavLink {
@@ -19,7 +19,7 @@ const NAV_LINKS: NavLink[] = [
   { path: '/events', key: 'app.nav.events' },
   { path: '/calendar', key: 'app.nav.calendar' },
   { path: '/map', key: 'app.nav.map' },
-  { path: '/series', key: 'app.nav.series' },
+  // { path: '/series', key: 'app.nav.series' },
 ];
 
 const AUTH_NAV: NavLink = { path: '/profile', key: 'app.nav.profile' };

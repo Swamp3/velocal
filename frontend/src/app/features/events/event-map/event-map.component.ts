@@ -12,7 +12,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -61,6 +61,7 @@ function disciplineColor(slug: string): string {
 })
 export class EventMapComponent implements OnInit, AfterViewInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly eventService = inject(EventService);
   private readonly disciplineService = inject(DisciplineService);
   private readonly authService = inject(AuthService);
@@ -77,7 +78,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private radiusCircle?: LeafletNS.Circle;
   private homeMarker?: LeafletNS.Marker;
   private readonly iconCache = new Map<string, LeafletNS.DivIcon>();
+  private readonly markerById = new Map<string, LeafletNS.Marker>();
   private readonly mapReady = signal(false);
+  private pendingFocusEventId: string | null = null;
 
   private readonly today = new Date().toISOString().slice(0, 10);
 
@@ -207,6 +210,8 @@ export class EventMapComponent implements OnInit, AfterViewInit {
         },
         error: () => this.loading.set(false),
       });
+
+    this.pendingFocusEventId = this.route.snapshot.queryParamMap.get('focusEvent');
 
     this.loadData();
     this.prefillFromUser();
@@ -434,7 +439,25 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private refreshMap(): void {
     if (!this.mapReady()) return;
     this.rebuildMarkers(this.filteredEvents());
-    if (!this.geoActive()) this.fitToMarkers();
+
+    const focused = this.applyPendingFocus();
+    if (!focused && !this.geoActive()) this.fitToMarkers();
+  }
+
+  private applyPendingFocus(): boolean {
+    const id = this.pendingFocusEventId;
+    if (!id || !this.map) return false;
+
+    const marker = this.markerById.get(id);
+    if (!marker) return false;
+
+    this.pendingFocusEventId = null;
+    this.map.setView(marker.getLatLng(), 13, { animate: false });
+    // Ensure marker is visible (spiderfy if clustered) then open popup.
+    this.clusterGroup?.zoomToShowLayer(marker, () => {
+      marker.openPopup();
+    });
+    return true;
   }
 
   private fitToMarkers(): void {
@@ -449,6 +472,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   private rebuildMarkers(events: CyclingEvent[]): void {
     if (!this.clusterGroup || !this.L) return;
     this.clusterGroup.clearLayers();
+    this.markerById.clear();
 
     const lang = this.transloco.getActiveLang();
     const markers: LeafletNS.Marker[] = [];
@@ -459,6 +483,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
 
       const icon = this.getIcon(ev.disciplineSlug);
       const marker = this.L.marker([coords.lat, coords.lng], { icon });
+      this.markerById.set(ev.id, marker);
 
       const date = new Date(ev.startDate).toLocaleDateString('de-DE', {
         day: '2-digit',

@@ -41,7 +41,17 @@
       "addFavorite": "Add to favorites",
       "removeFavorite": "Remove from favorites",
       "loginToFavorite": "Login to use favorites",
-      "details": "Details →"
+      "details": "Details →",
+      "map": {
+        "title": "Event location",
+        "dialogLabel": "Event location map",
+        "expand": "Expand map",
+        "tapToExplore": "Tap to explore",
+        "openGoogle": "Open in Google Maps",
+        "openApple": "Open in Apple Maps",
+        "openOsm": "Open in OpenStreetMap",
+        "showOnFullMap": "Show on full map"
+      }
     },
     "status": {
       "published": "Published",
@@ -192,6 +202,7 @@
     "retry": "Try again",
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "back": "Back",
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode",
