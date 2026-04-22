@@ -58,7 +58,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 80
-      BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-3000}
+      # Backend always listens on :3000 inside its container; this is an
+      # in-network hop, not a host-port mapping, so don't pull from `BACKEND_PORT`.
+      BACKEND_INTERNAL_URL: http://backend:3000
       SITE_URL: ${SITE_URL:-https://velocal.cc}
       NG_ALLOWED_HOSTS: ${NG_ALLOWED_HOSTS:-velocal.cc,www.velocal.cc,localhost}
     networks:
