@@ -149,7 +149,7 @@
             id="startDate"
             type="text"
             formControlName="startDate"
-            placeholder="TT.MM.JJJJ"
+            [placeholder]="dateInputPlaceholder()"
             maxlength="10"
             class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
@@ -178,7 +178,7 @@
             id="endDate"
             type="text"
             formControlName="endDate"
-            placeholder="TT.MM.JJJJ"
+            [placeholder]="dateInputPlaceholder()"
             maxlength="10"
             class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
@@ -284,7 +284,7 @@
             id="registrationDeadline"
             type="text"
             formControlName="registrationDeadline"
-            placeholder="TT.MM.JJJJ"
+            [placeholder]="dateInputPlaceholder()"
             maxlength="10"
             class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />

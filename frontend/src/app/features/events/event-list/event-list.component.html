@@ -89,9 +89,9 @@
               }}</span>
               <input
                 type="text"
-                [value]="toDisplayDate(dateFrom())"
+                [value]="displayDateFrom()"
                 (change)="onDateFromChange($event)"
-                placeholder="TT.MM.JJJJ"
+                [placeholder]="dateInputPlaceholder()"
                 maxlength="10"
                 class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums shadow-sm placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
               />
@@ -102,9 +102,9 @@
               }}</span>
               <input
                 type="text"
-                [value]="toDisplayDate(dateTo())"
+                [value]="displayDateTo()"
                 (change)="onDateToChange($event)"
-                placeholder="TT.MM.JJJJ"
+                [placeholder]="dateInputPlaceholder()"
                 maxlength="10"
                 class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums shadow-sm placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
               />

@@ -21,6 +21,8 @@ import { DisciplineFilterComponent } from '@shared/components/discipline-filter/
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
+import { LocaleService } from '@core/services/locale.service';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
 
 const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
@@ -48,6 +50,7 @@ export class EventListComponent implements OnInit {
   protected readonly authService = inject(AuthService);
   protected readonly geolocationService = inject(GeolocationService);
   readonly filterStateService = inject(FilterStateService);
+  private readonly localeService = inject(LocaleService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly today = new Date().toISOString().slice(0, 10);
@@ -55,6 +58,9 @@ export class EventListComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly dateFrom = signal<string>('');
   readonly dateTo = signal<string>('');
+  protected readonly displayDateFrom = computed(() => toDisplayDate(this.dateFrom(), this.localeService.locale()));
+  protected readonly displayDateTo = computed(() => toDisplayDate(this.dateTo(), this.localeService.locale()));
+  protected readonly dateInputPlaceholder = computed(() => datePlaceholder(this.localeService.locale()));
   readonly page = signal(1);
   readonly limit = signal(20);
 
@@ -168,22 +174,9 @@ export class EventListComponent implements OnInit {
     this.page.set(1);
   }
 
-  /** DD.MM.YYYY → YYYY-MM-DD */
-  private parseDisplayDate(display: string): string {
-    const m = display.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-    return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
-  }
-
-  /** YYYY-MM-DD → DD.MM.YYYY */
-  protected toDisplayDate(iso: string): string {
-    if (!iso) return '';
-    const [y, m, d] = iso.split('-');
-    return `${d}.${m}.${y}`;
-  }
-
   onDateFromChange(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.dateFrom.set(this.parseDisplayDate(raw));
+    this.dateFrom.set(parseDisplayDate(raw, this.localeService.locale()));
     this.futureOnly.set(false);
     this.selectedYear.set(null);
     this.page.set(1);
@@ -191,7 +184,7 @@ export class EventListComponent implements OnInit {
 
   onDateToChange(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.dateTo.set(this.parseDisplayDate(raw));
+    this.dateTo.set(parseDisplayDate(raw, this.localeService.locale()));
     this.futureOnly.set(false);
     this.selectedYear.set(null);
     this.page.set(1);

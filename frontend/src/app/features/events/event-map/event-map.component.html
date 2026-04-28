@@ -231,9 +231,9 @@
             <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'events.dateFrom' | transloco }}</span>
             <input
               type="text"
-              [value]="toDisplayDate(dateFrom())"
+              [value]="displayDateFrom()"
               (change)="onDateChange('from', $event)"
-              placeholder="TT.MM.JJJJ"
+              [placeholder]="dateInputPlaceholder()"
               maxlength="10"
               class="min-w-0 flex-1 rounded-[var(--radius-default)] border border-[var(--color-border)]
                 bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)] tabular-nums
@@ -245,9 +245,9 @@
             <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'events.dateTo' | transloco }}</span>
             <input
               type="text"
-              [value]="toDisplayDate(dateTo())"
+              [value]="displayDateTo()"
               (change)="onDateChange('to', $event)"
-              placeholder="TT.MM.JJJJ"
+              [placeholder]="dateInputPlaceholder()"
               maxlength="10"
               class="min-w-0 flex-1 rounded-[var(--radius-default)] border border-[var(--color-border)]
                 bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)] tabular-nums

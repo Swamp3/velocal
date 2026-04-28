@@ -27,7 +27,7 @@ import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { DisciplineFilterComponent } from '@shared/components';
 import { normalizeCoords } from '@shared/utils/coords';
-import { formatTime } from '@shared/utils/event-date';
+import { formatTime, toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 
 const EUROPE_CENTER: LeafletNS.LatLngExpression = [51.1657, 10.4515];
@@ -93,6 +93,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   readonly searchQuery = signal('');
   readonly dateFrom = signal(this.today);
   readonly dateTo = signal('');
+  protected readonly displayDateFrom = computed(() => toDisplayDate(this.dateFrom(), this.localeService.locale()));
+  protected readonly displayDateTo = computed(() => toDisplayDate(this.dateTo(), this.localeService.locale()));
+  protected readonly dateInputPlaceholder = computed(() => datePlaceholder(this.localeService.locale()));
   readonly loading = signal(true);
   readonly filterPanelOpen = signal(false);
 
@@ -237,22 +240,9 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     else this.refreshMap();
   }
 
-  /** DD.MM.YYYY → YYYY-MM-DD */
-  private parseDisplayDate(display: string): string {
-    const m = display.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-    return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
-  }
-
-  /** YYYY-MM-DD → DD.MM.YYYY */
-  protected toDisplayDate(iso: string): string {
-    if (!iso) return '';
-    const [y, m, d] = iso.split('-');
-    return `${d}.${m}.${y}`;
-  }
-
   protected onDateChange(field: 'from' | 'to', event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    const value = this.parseDisplayDate(raw);
+    const value = parseDisplayDate(raw, this.localeService.locale());
     if (field === 'from') this.dateFrom.set(value);
     else this.dateTo.set(value);
     if (this.geoActive()) this.triggerGeoSearch();

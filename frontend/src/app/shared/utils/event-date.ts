@@ -1,3 +1,25 @@
+/** YYYY-MM-DD → localized display string */
+export function toDisplayDate(iso: string, locale: 'de' | 'en' = 'de'): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return locale === 'en' ? `${m}/${d}/${y}` : `${d}.${m}.${y}`;
+}
+
+/** Localized display string → YYYY-MM-DD (or empty on invalid input) */
+export function parseDisplayDate(display: string, locale: 'de' | 'en' = 'de'): string {
+  if (locale === 'en') {
+    const m = display.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    return m ? `${m[3]}-${m[1]}-${m[2]}` : '';
+  }
+  const m = display.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+}
+
+/** Placeholder for the date input */
+export function datePlaceholder(locale: 'de' | 'en' = 'de'): string {
+  return locale === 'en' ? 'MM/DD/YYYY' : 'TT.MM.JJJJ';
+}
+
 /**
  * Returns true when the ISO datetime has a non-midnight time component,
  * i.e. the event has a meaningful start time worth displaying.

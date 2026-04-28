@@ -19,6 +19,8 @@ import { ImageUploadComponent } from '@shared/components/image-upload/image-uplo
 import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
+import { toDisplayDate as toDisplayDateUtil, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
+import { LocaleService } from '@core/services/locale.service';
 
 @Component({
   selector: 'app-event-form',
@@ -43,9 +45,11 @@ export class EventFormComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly uploadService = inject(UploadService);
   private readonly transloco = inject(TranslocoService);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly loading = signal(false);
+  protected readonly dateInputPlaceholder = computed(() => datePlaceholder(this.localeService.locale()));
   protected readonly submitting = signal(false);
   protected readonly eventId = signal<string | null>(null);
   protected readonly isEdit = computed(() => this.eventId() !== null);
@@ -231,7 +235,8 @@ export class EventFormComponent implements OnInit {
   private toDateString(iso: string): string {
     const d = new Date(iso);
     const pad = (n: number) => String(n).padStart(2, '0');
-    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+    const isoDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return toDisplayDateUtil(isoDate, this.localeService.locale());
   }
 
   /** 'HH:mm' or '' if midnight */
@@ -242,13 +247,11 @@ export class EventFormComponent implements OnInit {
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
-  /** Parses DD.MM.YYYY to YYYY-MM-DD. */
   private parseDate(display: string): string {
-    const [dd, mm, yyyy] = display.split('.');
-    return `${yyyy}-${mm}-${dd}`;
+    return parseDisplayDate(display, this.localeService.locale());
   }
 
-  /** Combines a display date (DD.MM.YYYY) and optional time (HH:mm) into an ISO string. */
+
   private combineDatetime(date: string, time: string): string {
     const iso = this.parseDate(date);
     if (time) {
