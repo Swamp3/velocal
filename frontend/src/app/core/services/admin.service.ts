@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { PaginatedResponse } from '@shared/models';
+import { CyclingEvent, PaginatedResponse } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
@@ -71,4 +71,24 @@ export class AdminService {
   toggleUserRole(id: string): Observable<AdminUser> {
     return this.api.patch<AdminUser>(`/admin/users/${id}/role`, {});
   }
+
+  // --- Missing Data ---
+
+  getMissingData(
+    params: MissingDataSearchParams = {},
+  ): Observable<PaginatedResponse<CyclingEvent & { missingFields: string[] }>> {
+    return this.api.get('/admin/events/missing-data', params as Record<string, string | number | boolean>);
+  }
+
+  getMissingDataStats(): Observable<Record<string, number>> {
+    return this.api.get<Record<string, number>>('/admin/events/missing-data/stats');
+  }
+}
+
+export type MissingDataType = 'url' | 'address' | 'coordinates' | 'description';
+
+export interface MissingDataSearchParams {
+  type?: MissingDataType;
+  page?: number;
+  limit?: number;
 }

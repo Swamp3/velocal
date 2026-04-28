@@ -284,7 +284,8 @@
     "title": "Admin",
     "nav": {
       "imports": "Importe",
-      "users": "Benutzer"
+      "users": "Benutzer",
+      "missingData": "Datenqualität"
     },
     "imports": {
       "title": "Import-Status",
@@ -337,6 +338,35 @@
         "role": "Rolle",
         "verified": "Verifiziert",
         "registered": "Registriert",
+        "actions": "Aktionen"
+      }
+    },
+    "missingData": {
+      "title": "Datenqualität",
+      "subtitle": "Zukünftige Events mit fehlenden oder unvollständigen Daten.",
+      "empty": "Alle Events sind vollständig",
+      "emptyHint": "Keine zukünftigen Events mit fehlenden Daten für diesen Filter gefunden.",
+      "totalCount": "{{count}} Events mit fehlenden Daten",
+      "edit": "Bearbeiten",
+      "tab": {
+        "all": "Alle",
+        "url": "Ohne URL",
+        "address": "Ohne Adresse",
+        "coordinates": "Ohne Koordinaten",
+        "description": "Ohne Beschreibung"
+      },
+      "field": {
+        "url": "URL",
+        "address": "Adresse",
+        "coordinates": "Koordinaten",
+        "description": "Beschreibung"
+      },
+      "col": {
+        "event": "Veranstaltung",
+        "date": "Datum",
+        "discipline": "Disziplin",
+        "location": "Ort",
+        "missing": "Fehlende Felder",
         "actions": "Aktionen"
       }
     }

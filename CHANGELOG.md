@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Add-to-calendar button** — export events to Google Calendar, Apple Calendar (ICS), and Outlook from the event detail page.
 - **Per-user locale settings** — preferred language stored per user, German date/time formatting throughout the app.
 - **Image uploads** — hero image upload for events and posts with Sharp-based processing.
+- **Admin section** — new `/admin` area with collapsible sidebar, admin-only route guard, and lazy-loaded routes. Visible only to admin users in the main nav.
+- **Import status dashboard** — admin page at `/admin/imports` showing import job history with status badges, event counts, duration, error logs, manual trigger button, and 10s auto-refresh.
+- **User management** — admin page at `/admin/users` with paginated, searchable user table, role filter, and admin role toggle with confirmation dialog. Self-role-change blocked on both frontend and backend.
 
 ### Changed
 

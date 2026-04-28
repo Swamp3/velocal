@@ -284,7 +284,8 @@
     "title": "Admin",
     "nav": {
       "imports": "Imports",
-      "users": "Users"
+      "users": "Users",
+      "missingData": "Data Quality"
     },
     "imports": {
       "title": "Import Status",
@@ -337,6 +338,35 @@
         "role": "Role",
         "verified": "Verified",
         "registered": "Registered",
+        "actions": "Actions"
+      }
+    },
+    "missingData": {
+      "title": "Data Quality",
+      "subtitle": "Future events with missing or incomplete data.",
+      "empty": "All events are complete",
+      "emptyHint": "No future events with missing data found for this filter.",
+      "totalCount": "{{count}} events with missing data",
+      "edit": "Edit",
+      "tab": {
+        "all": "All",
+        "url": "Missing URL",
+        "address": "Missing Address",
+        "coordinates": "Missing Coordinates",
+        "description": "Missing Description"
+      },
+      "field": {
+        "url": "URL",
+        "address": "Address",
+        "coordinates": "Coordinates",
+        "description": "Description"
+      },
+      "col": {
+        "event": "Event",
+        "date": "Date",
+        "discipline": "Discipline",
+        "location": "Location",
+        "missing": "Missing Fields",
         "actions": "Actions"
       }
     }

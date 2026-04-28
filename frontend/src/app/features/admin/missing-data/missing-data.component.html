@@ -1,0 +1,198 @@
+<!-- Header -->
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-[var(--color-text)]">
+    {{ 'admin.missingData.title' | transloco }}
+  </h1>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+    {{ 'admin.missingData.subtitle' | transloco }}
+  </p>
+</div>
+
+<!-- Stats cards -->
+@if (stats(); as s) {
+  @if (s['url'] !== undefined) {
+    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      @for (field of ['url', 'address', 'coordinates', 'description']; track field) {
+        <button
+          class="rounded-xl border border-[var(--color-border)] p-4 text-left transition-all hover:border-[var(--color-primary)]/50 hover:shadow-sm cursor-pointer"
+          [class.!border-[var(--color-primary)]]="activeTab() === field"
+          [class.ring-1]="activeTab() === field"
+          [class.ring-[var(--color-primary)]]="activeTab() === field"
+          (click)="onTabChange($any(field))"
+        >
+          <div class="text-2xl font-bold tabular-nums text-[var(--color-text)]">
+            {{ s[field] || 0 }}
+          </div>
+          <div class="mt-1 text-xs text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.field.' + field | transloco }}
+          </div>
+        </button>
+      }
+    </div>
+  }
+}
+
+<!-- Filter tabs -->
+<div class="mb-5 flex items-center gap-1 overflow-x-auto rounded-lg border border-[var(--color-border)] p-0.5">
+  @for (tab of tabOptions; track tab) {
+    <button
+      [class]="
+        'shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ' +
+        (activeTab() === tab
+          ? 'bg-[var(--color-primary)] text-white shadow-sm'
+          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]')
+      "
+      (click)="onTabChange(tab)"
+    >
+      {{ 'admin.missingData.tab.' + tab | transloco }}
+    </button>
+  }
+</div>
+
+<!-- Loading skeleton -->
+@if (loading()) {
+  <div class="space-y-3">
+    @for (_ of [1, 2, 3, 4]; track $index) {
+      <div class="flex items-center gap-4 rounded-xl border border-[var(--color-border)] p-4">
+        <div class="flex-1 space-y-2">
+          <ui-skeleton class="h-4 w-48" />
+          <ui-skeleton class="h-3 w-32" />
+        </div>
+        <ui-skeleton class="h-6 w-16" />
+        <ui-skeleton class="h-6 w-16" />
+      </div>
+    }
+  </div>
+} @else if (events().length === 0) {
+  <!-- Empty state -->
+  <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] py-16">
+    <span
+      class="material-symbols-outlined mb-3 text-4xl text-[var(--color-text-muted)]/50"
+      style="font-variation-settings: 'FILL' 0"
+    >check_circle</span>
+    <p class="text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.missingData.empty' | transloco }}
+    </p>
+    <p class="mt-1 text-xs text-[var(--color-text-muted)]/70">
+      {{ 'admin.missingData.emptyHint' | transloco }}
+    </p>
+  </div>
+} @else {
+  <!-- Table (desktop) -->
+  <div class="hidden overflow-hidden rounded-xl border border-[var(--color-border)] md:block">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]/50">
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.col.event' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.col.date' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.col.discipline' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.col.location' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.col.missing' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.missingData.col.actions' | transloco }}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[var(--color-border)]">
+        @for (event of events(); track event.id) {
+          <tr class="hover:bg-[var(--color-bg-alt)]/30 transition-colors">
+            <td class="px-4 py-3">
+              <a
+                [routerLink]="['/events', event.id]"
+                class="font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors"
+              >{{ event.name }}</a>
+            </td>
+            <td class="px-4 py-3 text-[var(--color-text-muted)] whitespace-nowrap">
+              {{ event.startDate | date:'mediumDate' }}
+            </td>
+            <td class="px-4 py-3 text-[var(--color-text-muted)]">
+              {{ disciplineName(event.discipline) }}
+            </td>
+            <td class="px-4 py-3 text-[var(--color-text-muted)]">
+              {{ event.locationName || '—' }}
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap gap-1">
+                @for (field of event.missingFields; track field) {
+                  <ui-badge [variant]="fieldVariant(field)">
+                    {{ 'admin.missingData.field.' + field | transloco }}
+                  </ui-badge>
+                }
+              </div>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <a
+                [routerLink]="['/events', event.id, 'edit']"
+                class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+              >
+                <span class="material-symbols-outlined text-[16px]">edit</span>
+                {{ 'admin.missingData.edit' | transloco }}
+              </a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cards (mobile) -->
+  <div class="flex flex-col gap-3 md:hidden">
+    @for (event of events(); track event.id) {
+      <div class="rounded-xl border border-[var(--color-border)] p-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <a
+              [routerLink]="['/events', event.id]"
+              class="font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors"
+            >{{ event.name }}</a>
+            <div class="mt-1 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+              <span>{{ event.startDate | date:'mediumDate' }}</span>
+              <span>·</span>
+              <span>{{ event.locationName || '—' }}</span>
+            </div>
+          </div>
+          <a
+            [routerLink]="['/events', event.id, 'edit']"
+            class="shrink-0 rounded-lg p-1.5 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </a>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-1">
+          @for (field of event.missingFields; track field) {
+            <ui-badge [variant]="fieldVariant(field)">
+              {{ 'admin.missingData.field.' + field | transloco }}
+            </ui-badge>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (total() > limit()) {
+    <div class="mt-6 flex justify-center">
+      <ui-pagination
+        [total]="total()"
+        [page]="page()"
+        [limit]="limit()"
+        (pageChange)="onPageChange($event)"
+      />
+    </div>
+  }
+
+  <!-- Total count -->
+  <p class="mt-4 text-center text-xs text-[var(--color-text-muted)]">
+    {{ 'admin.missingData.totalCount' | transloco: { count: total() } }}
+  </p>
+}

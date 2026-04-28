@@ -9,6 +9,10 @@ import { Event, EventSource, EventStatus } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
+import {
+  AdminMissingDataDto,
+  MissingDataType,
+} from './dto/admin-missing-data.dto';
 import { GeocodingService } from './geocoding.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 
@@ -254,6 +258,92 @@ export class EventsService {
     event.imageUrl = null as unknown as string;
     const saved = await this.repo.save(event);
     return this.serializeEvent(saved);
+  }
+
+  async findMissingData(dto: AdminMissingDataDto): Promise<PaginatedEvents> {
+    const qb = this.repo
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.discipline', 'discipline')
+      .andWhere('event.startDate >= NOW()');
+
+    switch (dto.type) {
+      case MissingDataType.URL:
+        qb.andWhere(
+          "(event.externalUrl IS NULL OR event.externalUrl = '')",
+        );
+        break;
+      case MissingDataType.ADDRESS:
+        qb.andWhere(
+          "(event.address IS NULL OR event.address = '')",
+        );
+        break;
+      case MissingDataType.COORDINATES:
+        qb.andWhere('event.coordinates IS NULL');
+        break;
+      case MissingDataType.DESCRIPTION:
+        qb.andWhere(
+          "(event.description IS NULL OR event.description = '')",
+        );
+        break;
+      default:
+        qb.andWhere(
+          "((event.externalUrl IS NULL OR event.externalUrl = '') " +
+            "OR (event.address IS NULL OR event.address = '') " +
+            'OR event.coordinates IS NULL ' +
+            "OR (event.description IS NULL OR event.description = ''))",
+        );
+    }
+
+    qb.orderBy('event.startDate', 'ASC');
+
+    const page = dto.page ?? 1;
+    const limit = dto.limit ?? 20;
+    qb.skip((page - 1) * limit).take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data: data.map((e) => ({
+        ...this.serializeEvent(e),
+        missingFields: this.detectMissing(e),
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async getMissingDataStats(): Promise<Record<string, number>> {
+    const future = this.repo
+      .createQueryBuilder('e')
+      .andWhere('e.startDate >= NOW()');
+
+    const [url, address, coordinates, description] = await Promise.all([
+      future
+        .clone()
+        .andWhere("(e.externalUrl IS NULL OR e.externalUrl = '')")
+        .getCount(),
+      future
+        .clone()
+        .andWhere("(e.address IS NULL OR e.address = '')")
+        .getCount(),
+      future.clone().andWhere('e.coordinates IS NULL').getCount(),
+      future
+        .clone()
+        .andWhere("(e.description IS NULL OR e.description = '')")
+        .getCount(),
+    ]);
+
+    return { url, address, coordinates, description };
+  }
+
+  private detectMissing(event: Event): string[] {
+    const missing: string[] = [];
+    if (!event.externalUrl) missing.push('url');
+    if (!event.address) missing.push('address');
+    if (!event.coordinates) missing.push('coordinates');
+    if (!event.description) missing.push('description');
+    return missing;
   }
 
   private assertOwnerOrAdmin(
