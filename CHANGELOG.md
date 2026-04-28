@@ -4,6 +4,27 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] — 2026-04-28
+
+### Added
+
+- **Profanity filter** — server-side bad word detection using `@2toad/profanity` (German + English) with custom blocklist. Applied via `@CheckBadWords` decorator on events, posts, and series mutation endpoints. Returns 422 with field-level violations; frontend shows inline errors and toast.
+- **Add-to-calendar button** — export events to Google Calendar, Apple Calendar (ICS), and Outlook from the event detail page.
+- **Per-user locale settings** — preferred language stored per user, German date/time formatting throughout the app.
+- **Image uploads** — hero image upload for events and posts with Sharp-based processing.
+
+### Changed
+
+- **Event form layout** — save/cancel buttons moved to page header for better UX.
+- **Event detail layout** — action buttons (favorite, edit, delete) moved to top-right next to back link.
+- **`ui-button` component** — added `form` input to support external form submission.
+- **`ApiService` error handling** — error responses now preserve full body for structured error handling (e.g. content policy violations).
+
+### Fixed
+
+- **SendGrid configuration** — corrected `.env.example` and config setup.
+- **Docker production config** — fixed backend internal URL and added missing networks.
+
 ## [0.2.0] — 2026-04-28
 
 ### Added
