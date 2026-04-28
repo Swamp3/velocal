@@ -283,7 +283,8 @@
   "admin": {
     "title": "Admin",
     "nav": {
-      "imports": "Importe"
+      "imports": "Importe",
+      "users": "Benutzer"
     },
     "imports": {
       "title": "Import-Status",
@@ -309,6 +310,34 @@
         "updated": "Aktualisiert",
         "skipped": "Übersprungen",
         "total": "Gesamt"
+      }
+    },
+    "users": {
+      "title": "Benutzer",
+      "subtitle": "Registrierte Benutzer und Admin-Rollen verwalten.",
+      "search": "Nach Name oder E-Mail suchen…",
+      "empty": "Keine Benutzer gefunden",
+      "totalCount": "{{count}} Benutzer insgesamt",
+      "admin": "Admin",
+      "user": "Benutzer",
+      "you": "Du",
+      "makeAdmin": "Admin machen",
+      "removeAdmin": "Admin entfernen",
+      "confirm": "Bestätigen",
+      "confirmGrant": "Admin gewähren?",
+      "confirmRemove": "Admin entfernen?",
+      "role": {
+        "all": "Alle",
+        "admin": "Admins",
+        "user": "Benutzer"
+      },
+      "col": {
+        "user": "Benutzer",
+        "email": "E-Mail",
+        "role": "Rolle",
+        "verified": "Verifiziert",
+        "registered": "Registriert",
+        "actions": "Aktionen"
       }
     }
   },

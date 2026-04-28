@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
+import { AdminUsersController } from './admin-users.controller';
 import { UsersService } from './users.service';
 import { AdminSeeder } from './admin.seeder';
 import { User } from './entities/user.entity';
@@ -13,7 +14,7 @@ import { EventsModule } from '../events/events.module';
     TypeOrmModule.forFeature([User, UserFavorite, UserDisciplinePref]),
     EventsModule,
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, AdminUsersController],
   providers: [UsersService, AdminSeeder],
   exports: [UsersService],
 })

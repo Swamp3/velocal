@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { PaginatedResponse } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
@@ -14,9 +15,29 @@ export interface ImportJob {
   error: string | null;
 }
 
+export interface AdminUser {
+  id: string;
+  email: string;
+  displayName: string | null;
+  isAdmin: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+}
+
+export interface AdminUserSearchParams {
+  q?: string;
+  role?: 'admin' | 'user';
+  page?: number;
+  limit?: number;
+  sort?: 'createdAt' | 'email' | 'displayName';
+  order?: 'ASC' | 'DESC';
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly api = inject(ApiService);
+
+  // --- Imports ---
 
   getImportJobs(): Observable<ImportJob[]> {
     return this.api.get<ImportJob[]>('/import/jobs');
@@ -32,5 +53,22 @@ export class AdminService {
 
   getImportSources(): Observable<string[]> {
     return this.api.get<string[]>('/import/sources');
+  }
+
+  // --- Users ---
+
+  getUsers(params: AdminUserSearchParams = {}): Observable<PaginatedResponse<AdminUser>> {
+    return this.api.get<PaginatedResponse<AdminUser>>(
+      '/admin/users',
+      params as Record<string, string | number | boolean>,
+    );
+  }
+
+  getUser(id: string): Observable<AdminUser> {
+    return this.api.get<AdminUser>(`/admin/users/${id}`);
+  }
+
+  toggleUserRole(id: string): Observable<AdminUser> {
+    return this.api.patch<AdminUser>(`/admin/users/${id}/role`, {});
   }
 }

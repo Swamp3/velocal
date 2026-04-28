@@ -10,6 +10,7 @@ interface AdminNavItem {
 
 const NAV_ITEMS: AdminNavItem[] = [
   { path: 'imports', key: 'admin.nav.imports', icon: 'cloud_sync' },
+  { path: 'users', key: 'admin.nav.users', icon: 'group' },
 ];
 
 @Component({

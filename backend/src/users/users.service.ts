@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { UserFavorite } from './entities/user-favorite.entity';
 import { UserDisciplinePref } from './entities/user-discipline-pref.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AdminUserSearchDto } from './dto/admin-user-search.dto';
 import { GeocodingService } from '../events/geocoding.service';
 
 @Injectable()
@@ -34,6 +35,51 @@ export class UsersService {
   }
 
   async update(user: User): Promise<User> {
+    return this.userRepository.save(user);
+  }
+
+  async adminList(dto: AdminUserSearchDto) {
+    const qb = this.userRepository
+      .createQueryBuilder('u')
+      .select([
+        'u.id',
+        'u.email',
+        'u.displayName',
+        'u.isAdmin',
+        'u.emailVerified',
+        'u.createdAt',
+      ]);
+
+    if (dto.q) {
+      qb.andWhere(
+        '(u.displayName ILIKE :q OR u.email ILIKE :q)',
+        { q: `%${dto.q}%` },
+      );
+    }
+
+    if (dto.role === 'admin') {
+      qb.andWhere('u.isAdmin = true');
+    } else if (dto.role === 'user') {
+      qb.andWhere('u.isAdmin = false');
+    }
+
+    const sort = dto.sort ?? 'createdAt';
+    const order = dto.order ?? 'DESC';
+    qb.orderBy(`u.${sort}`, order);
+
+    const page = dto.page ?? 1;
+    const limit = dto.limit ?? 20;
+    qb.skip((page - 1) * limit).take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return { data, total, page, limit };
+  }
+
+  async toggleAdmin(userId: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('User not found');
+    user.isAdmin = !user.isAdmin;
     return this.userRepository.save(user);
   }
 
