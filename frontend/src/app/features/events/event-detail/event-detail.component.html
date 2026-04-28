@@ -27,15 +27,56 @@
   </app-empty-state>
 } @else if (event(); as event) {
   <div class="mx-auto max-w-3xl">
-    <!-- Back link -->
-    <a
-      routerLink="/events"
-      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
-        hover:text-[var(--color-text)] transition-colors"
-    >
-      <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-      {{ 'events.detail.backToList' | transloco }}
-    </a>
+    <!-- Top bar: back link + actions -->
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <a
+          routerLink="/events"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
+            hover:text-[var(--color-text)] transition-colors"
+        >
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+          {{ 'events.detail.backToList' | transloco }}
+        </a>
+      </div>
+
+      <div class="flex items-center gap-2">
+        @if (auth.isAuthenticated()) {
+          <ui-button
+            size="sm"
+            [variant]="isFavorite() ? 'primary' : 'outline'"
+            [loading]="favoriteLoading()"
+            (click)="toggleFavorite()"
+          >
+            {{ isFavorite() ? ('events.detail.removeFavorite' | transloco) : ('events.detail.addFavorite' | transloco) }}
+          </ui-button>
+        } @else {
+          <a routerLink="/auth/login" class="inline-flex">
+            <ui-button variant="outline" size="sm">
+              {{ 'events.detail.loginToFavorite' | transloco }}
+            </ui-button>
+          </a>
+        }
+
+        @if (canEdit()) {
+          <a [routerLink]="['/events', event.id, 'edit']" class="inline-flex">
+            <ui-button variant="outline" size="sm">
+              <span class="material-symbols-outlined text-[16px]">edit</span>
+              {{ 'event.actions.edit' | transloco }}
+            </ui-button>
+          </a>
+          <ui-button
+            variant="danger"
+            size="sm"
+            [loading]="deleteLoading()"
+            (click)="deleteEvent()"
+          >
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+            {{ 'event.actions.delete' | transloco }}
+          </ui-button>
+        }
+      </div>
+    </div>
 
     @if (event.imageUrl) {
       <div
@@ -195,41 +236,5 @@
       </div>
     }
 
-    <!-- Actions -->
-    <div class="mt-8 flex flex-wrap items-center gap-3">
-      @if (auth.isAuthenticated()) {
-        <ui-button
-          [variant]="isFavorite() ? 'primary' : 'outline'"
-          [loading]="favoriteLoading()"
-          (click)="toggleFavorite()"
-        >
-          {{ isFavorite() ? ('events.detail.removeFavorite' | transloco) : ('events.detail.addFavorite' | transloco) }}
-        </ui-button>
-      } @else {
-        <a routerLink="/auth/login" class="inline-flex">
-          <ui-button variant="outline">
-            {{ 'events.detail.loginToFavorite' | transloco }}
-          </ui-button>
-        </a>
-      }
-
-      @if (canEdit()) {
-        <a [routerLink]="['/events', event.id, 'edit']" class="inline-flex">
-          <ui-button variant="outline" size="sm">
-            <span class="material-symbols-outlined text-[16px]">edit</span>
-            {{ 'event.actions.edit' | transloco }}
-          </ui-button>
-        </a>
-        <ui-button
-          variant="danger"
-          size="sm"
-          [loading]="deleteLoading()"
-          (click)="deleteEvent()"
-        >
-          <span class="material-symbols-outlined text-[16px]">delete</span>
-          {{ 'event.actions.delete' | transloco }}
-        </ui-button>
-      }
-    </div>
   </div>
 }

@@ -1,17 +1,46 @@
 <div class="mx-auto max-w-2xl">
   <!-- Back link -->
-  <a
-    [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']"
-    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
-      hover:text-[var(--color-text)] transition-colors"
-  >
-    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-    {{ (isEdit() ? 'event.form.editTitle' : 'event.form.createTitle') | transloco }}
-  </a>
+  <div class="flex items-center justify-between">
+    <div>
+      <a
+        [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+      >
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {{ (isEdit() ? 'event.form.editTitle' : 'event.form.createTitle') | transloco }}
+      </a>
+    </div>
+    @if (!loading()) {
+      <div class="flex items-center gap-3">
+        <a [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']">
+          <ui-button variant="ghost" type="button">
+            {{ 'event.form.cancel' | transloco }}
+          </ui-button>
+        </a>
+        <ui-button
+          type="submit"
+          form="eventForm"
+          [loading]="submitting()"
+          [disabled]="submitting()"
+        >
+          {{
+            (submitting()
+              ? isEdit()
+                ? 'event.form.updating'
+                : 'event.form.creating'
+              : 'event.form.submit'
+            ) | transloco
+          }}
+        </ui-button>
+      </div>
+    }
+  </div>
 
-  <h1 class="mt-4 text-2xl font-bold text-[var(--color-text)]">
-    {{ (isEdit() ? 'event.form.editTitle' : 'event.form.createTitle') | transloco }}
-  </h1>
+  <div class="mt-4 flex items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-[var(--color-text)]">
+      {{ (isEdit() ? 'event.form.editTitle' : 'event.form.createTitle') | transloco }}
+    </h1>
+  </div>
 
   @if (loading()) {
     <div class="mt-8 flex justify-center">
@@ -20,7 +49,7 @@
       ></span>
     </div>
   } @else {
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-6">
+    <form id="eventForm" [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-6">
       <!-- Name -->
       <div>
         <label for="name" class="block text-sm font-medium text-[var(--color-text)]">
@@ -31,16 +60,22 @@
           type="text"
           formControlName="name"
           [placeholder]="'event.form.namePlaceholder' | transloco"
-          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-            placeholder:text-[var(--color-muted)]
-            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
         />
         @if (hasError('name', 'required')) {
-          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.required' | transloco }}
+          </p>
         }
         @if (hasError('name', 'minlength')) {
-          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.minLength' | transloco: { min: 3 } }}</p>
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.minLength' | transloco: { min: 3 } }}
+          </p>
+        }
+        @if (hasError('name', 'badWord')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.badWord' | transloco }}
+          </p>
         }
       </div>
 
@@ -53,12 +88,32 @@
           id="description"
           formControlName="description"
           rows="4"
-          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-            placeholder:text-[var(--color-muted)] resize-y
-            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-y focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
         ></textarea>
+        @if (hasError('description', 'badWord')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.badWord' | transloco }}
+          </p>
+        }
       </div>
+
+      <!-- Status (edit only) -->
+      @if (isEdit()) {
+        <div>
+          <label for="status" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'event.form.status' | transloco }}
+          </label>
+          <select
+            id="status"
+            formControlName="status"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] cursor-pointer focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          >
+            <option value="published">{{ 'events.status.published' | transloco }}</option>
+            <option value="cancelled">{{ 'events.status.cancelled' | transloco }}</option>
+            <option value="completed">{{ 'events.status.completed' | transloco }}</option>
+          </select>
+        </div>
+      }
 
       <!-- Discipline -->
       <div>
@@ -68,17 +123,19 @@
         <select
           id="discipline"
           formControlName="disciplineSlug"
-          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] cursor-pointer
-            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] cursor-pointer focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
         >
           <option value="" disabled>–</option>
           @for (d of disciplines(); track d.slug) {
-            <option [value]="d.slug">{{ d.nameTranslations['de'] || d.nameTranslations['en'] || d.slug }}</option>
+            <option [value]="d.slug">
+              {{ d.nameTranslations['de'] || d.nameTranslations['en'] || d.slug }}
+            </option>
           }
         </select>
         @if (hasError('disciplineSlug', 'required')) {
-          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.required' | transloco }}
+          </p>
         }
       </div>
 
@@ -94,24 +151,20 @@
             formControlName="startDate"
             placeholder="TT.MM.JJJJ"
             maxlength="10"
-            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
           <input
             type="text"
             formControlName="startTime"
             placeholder="HH:mm"
             maxlength="5"
-            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
         @if (hasError('startDate', 'required')) {
-          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.required' | transloco }}
+          </p>
         }
       </div>
 
@@ -127,20 +180,14 @@
             formControlName="endDate"
             placeholder="TT.MM.JJJJ"
             maxlength="10"
-            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
           <input
             type="text"
             formControlName="endTime"
             placeholder="HH:mm"
             maxlength="5"
-            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
       </div>
@@ -155,13 +202,17 @@
           type="text"
           formControlName="locationName"
           placeholder="z.B. Nürburgring, Köln Stadtwald"
-          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-            placeholder:text-[var(--color-muted)]
-            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
         />
         @if (hasError('locationName', 'required')) {
-          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.required' | transloco }}
+          </p>
+        }
+        @if (hasError('locationName', 'badWord')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">
+            {{ 'validation.badWord' | transloco }}
+          </p>
         }
       </div>
 
@@ -175,10 +226,7 @@
             id="address"
             type="text"
             formControlName="address"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
         <div>
@@ -202,20 +250,14 @@
             formControlName="lat"
             placeholder="Lat"
             step="any"
-            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
           <input
             type="number"
             formControlName="lng"
             placeholder="Lng"
             step="any"
-            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
         <p class="mt-1 text-xs text-[var(--color-text-muted)]">
@@ -231,7 +273,10 @@
 
       <!-- Registration Deadline -->
       <div>
-        <label for="registrationDeadline" class="block text-sm font-medium text-[var(--color-text)]">
+        <label
+          for="registrationDeadline"
+          class="block text-sm font-medium text-[var(--color-text)]"
+        >
           {{ 'event.form.registrationDeadline' | transloco }}
         </label>
         <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-2">
@@ -241,20 +286,14 @@
             formControlName="registrationDeadline"
             placeholder="TT.MM.JJJJ"
             maxlength="10"
-            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
           <input
             type="text"
             formControlName="registrationDeadlineTime"
             placeholder="HH:mm"
             maxlength="5"
-            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
-              placeholder:text-[var(--color-muted)]
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
       </div>
@@ -269,10 +308,7 @@
           type="url"
           formControlName="externalUrl"
           placeholder="https://"
-          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-            placeholder:text-[var(--color-muted)]
-            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
         />
       </div>
 
@@ -296,40 +332,6 @@
           </div>
         </div>
       }
-
-      <!-- Status (edit only) -->
-      @if (isEdit()) {
-        <div>
-          <label for="status" class="block text-sm font-medium text-[var(--color-text)]">
-            {{ 'event.form.status' | transloco }}
-          </label>
-          <select
-            id="status"
-            formControlName="status"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] cursor-pointer
-              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
-          >
-            <option value="published">{{ 'events.status.published' | transloco }}</option>
-            <option value="cancelled">{{ 'events.status.cancelled' | transloco }}</option>
-            <option value="completed">{{ 'events.status.completed' | transloco }}</option>
-          </select>
-        </div>
-      }
-
-      <!-- Actions -->
-      <div class="flex items-center gap-3 pt-2">
-        <ui-button type="submit" [loading]="submitting()" [disabled]="submitting()">
-          {{ (submitting()
-            ? (isEdit() ? 'event.form.updating' : 'event.form.creating')
-            : 'event.form.submit') | transloco }}
-        </ui-button>
-        <a [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']">
-          <ui-button variant="ghost" type="button">
-            {{ 'event.form.cancel' | transloco }}
-          </ui-button>
-        </a>
-      </div>
     </form>
   }
 </div>

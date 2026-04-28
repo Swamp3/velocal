@@ -15,6 +15,7 @@ export class ButtonComponent {
   readonly loading = input(false);
   readonly disabled = input(false);
   readonly type = input<'button' | 'submit' | 'reset'>('button');
+  readonly form = input<string>();
 
   protected readonly classes = computed(() => {
     const base =
