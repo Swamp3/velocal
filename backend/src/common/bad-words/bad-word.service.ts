@@ -24,6 +24,7 @@ export class BadWordService {
     });
 
     this.loadCustomWords();
+    this.loadWhitelist();
   }
 
   checkFields(
@@ -52,6 +53,12 @@ export class BadWordService {
       .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  private loadWhitelist(): void {
+    const falsePositives = ['fehler'];
+    this.profanity.whitelist.addWords(falsePositives);
+    this.logger.log(`Whitelisted ${falsePositives.length} false-positive words`);
   }
 
   /** Load extra words/phrases from blocklist.json on top of built-in lists */

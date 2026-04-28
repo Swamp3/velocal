@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Admin section** — new `/admin` area with collapsible sidebar, admin-only route guard, and lazy-loaded routes. Visible only to admin users in the main nav.
 - **Import status dashboard** — admin page at `/admin/imports` showing import job history with status badges, event counts, duration, error logs, manual trigger button, and 10s auto-refresh.
 - **User management** — admin page at `/admin/users` with paginated, searchable user table, role filter, and admin role toggle with confirmation dialog. Self-role-change blocked on both frontend and backend.
+- **Data quality dashboard** — admin page at `/admin/missing-data` listing future events with incomplete fields (URL, address, coordinates, description). Stat cards, filter tabs, and direct edit links for quick triage.
 
 ### Changed
 
@@ -27,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **SendGrid configuration** — corrected `.env.example` and config setup.
 - **Docker production config** — fixed backend internal URL and added missing networks.
+- **Docker hot reload** — backend TypeScript watcher now uses polling (`dynamicPriorityPolling`) to reliably detect file changes through Docker bind mounts on macOS.
 
 ## [0.2.0] — 2026-04-28
 
