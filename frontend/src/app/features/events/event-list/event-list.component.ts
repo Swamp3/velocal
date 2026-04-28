@@ -168,15 +168,30 @@ export class EventListComponent implements OnInit {
     this.page.set(1);
   }
 
+  /** DD.MM.YYYY → YYYY-MM-DD */
+  private parseDisplayDate(display: string): string {
+    const m = display.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+  }
+
+  /** YYYY-MM-DD → DD.MM.YYYY */
+  protected toDisplayDate(iso: string): string {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}.${m}.${y}`;
+  }
+
   onDateFromChange(event: Event): void {
-    this.dateFrom.set((event.target as HTMLInputElement).value);
+    const raw = (event.target as HTMLInputElement).value;
+    this.dateFrom.set(this.parseDisplayDate(raw));
     this.futureOnly.set(false);
     this.selectedYear.set(null);
     this.page.set(1);
   }
 
   onDateToChange(event: Event): void {
-    this.dateTo.set((event.target as HTMLInputElement).value);
+    const raw = (event.target as HTMLInputElement).value;
+    this.dateTo.set(this.parseDisplayDate(raw));
     this.futureOnly.set(false);
     this.selectedYear.set(null);
     this.page.set(1);

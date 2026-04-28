@@ -55,9 +55,6 @@ export class EventFormComponent implements OnInit {
   protected readonly mapCoordinates = signal<{ lat: number; lng: number } | null>(null);
   protected readonly imageUrl = signal<string | null>(null);
 
-  // Bound to `<app-image-upload [uploadFn] [deleteFn]>`. We declare them as
-  // arrow-function properties so `this.eventId()` resolves at call time
-  // (the edit page always has an id by the time the user picks a file).
   protected readonly uploadImageFn = (file: File) =>
     this.uploadService.uploadEventImage(this.eventId()!, file);
   protected readonly deleteImageFn = () =>
@@ -70,8 +67,10 @@ export class EventFormComponent implements OnInit {
     }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(5000)] }),
     disciplineSlug: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    startDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    endDate: new FormControl('', { nonNullable: true }),
+    startDate: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)] }),
+    startTime: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)] }),
+    endDate: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)] }),
+    endTime: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)] }),
     locationName: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(2)],
@@ -80,7 +79,8 @@ export class EventFormComponent implements OnInit {
     country: new FormControl('', { nonNullable: true }),
     lat: new FormControl<number | null>(null),
     lng: new FormControl<number | null>(null),
-    registrationDeadline: new FormControl('', { nonNullable: true }),
+    registrationDeadline: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)] }),
+    registrationDeadlineTime: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)] }),
     externalUrl: new FormControl('', { nonNullable: true }),
     status: new FormControl('published', { nonNullable: true }),
   });
@@ -113,8 +113,8 @@ export class EventFormComponent implements OnInit {
       name: raw.name,
       description: raw.description || undefined,
       disciplineSlug: raw.disciplineSlug,
-      startDate: new Date(raw.startDate).toISOString(),
-      endDate: raw.endDate ? new Date(raw.endDate).toISOString() : undefined,
+      startDate: this.combineDatetime(raw.startDate, raw.startTime),
+      endDate: raw.endDate ? this.combineDatetime(raw.endDate, raw.endTime) : undefined,
       locationName: raw.locationName,
       address: raw.address || undefined,
       country: raw.country || undefined,
@@ -123,7 +123,7 @@ export class EventFormComponent implements OnInit {
           ? { lat: raw.lat, lng: raw.lng }
           : undefined,
       registrationDeadline: raw.registrationDeadline
-        ? new Date(raw.registrationDeadline).toISOString()
+        ? this.combineDatetime(raw.registrationDeadline, raw.registrationDeadlineTime)
         : undefined,
       externalUrl: raw.externalUrl || undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
@@ -169,15 +169,20 @@ export class EventFormComponent implements OnInit {
       name: event.name,
       description: event.description ?? '',
       disciplineSlug: event.disciplineSlug,
-      startDate: this.toDatetimeLocal(event.startDate),
-      endDate: event.endDate ? this.toDatetimeLocal(event.endDate) : '',
+      startDate: this.toDateString(event.startDate),
+      startTime: this.toTimeString(event.startDate),
+      endDate: event.endDate ? this.toDateString(event.endDate) : '',
+      endTime: event.endDate ? this.toTimeString(event.endDate) : '',
       locationName: event.locationName,
       address: event.address ?? '',
       country: event.country ?? '',
       lat: event.coordinates?.lat ?? null,
       lng: event.coordinates?.lng ?? null,
       registrationDeadline: event.registrationDeadline
-        ? this.toDatetimeLocal(event.registrationDeadline)
+        ? this.toDateString(event.registrationDeadline)
+        : '',
+      registrationDeadlineTime: event.registrationDeadline
+        ? this.toTimeString(event.registrationDeadline)
         : '',
       externalUrl: event.externalUrl ?? '',
       status: event.status,
@@ -190,9 +195,33 @@ export class EventFormComponent implements OnInit {
     this.loading.set(false);
   }
 
-  private toDatetimeLocal(iso: string): string {
+  /** '28.04.2026' */
+  private toDateString(iso: string): string {
     const d = new Date(iso);
     const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+  }
+
+  /** 'HH:mm' or '' if midnight */
+  private toTimeString(iso: string): string {
+    const d = new Date(iso);
+    if (d.getHours() === 0 && d.getMinutes() === 0) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  /** Parses DD.MM.YYYY to YYYY-MM-DD. */
+  private parseDate(display: string): string {
+    const [dd, mm, yyyy] = display.split('.');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  /** Combines a display date (DD.MM.YYYY) and optional time (HH:mm) into an ISO string. */
+  private combineDatetime(date: string, time: string): string {
+    const iso = this.parseDate(date);
+    if (time) {
+      return new Date(`${iso}T${time}`).toISOString();
+    }
+    return new Date(`${iso}T00:00`).toISOString();
   }
 }

@@ -13,6 +13,8 @@ import { Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
 
 const TOKEN_KEY = 'velocal-token';
+const LANG_KEY = 'velocal-lang';
+const LOCALE_KEY = 'velocal-locale';
 
 export interface AuthResponse {
   accessToken: string;
@@ -94,7 +96,12 @@ export class AuthService {
   }
 
   private setSession(res: AuthResponse): void {
-    if (this.isBrowser) localStorage.setItem(TOKEN_KEY, res.accessToken);
+    if (this.isBrowser) {
+      localStorage.setItem(TOKEN_KEY, res.accessToken);
+      if (this.syncLocalePrefs(res.user)) {
+        setTimeout(() => window.location.reload(), 200);
+      }
+    }
     this._currentUser.set(res.user);
   }
 
@@ -126,11 +133,27 @@ export class AuthService {
       }
 
       const user: User = await res.json();
+      this.syncLocalePrefs(user);
       this._currentUser.set(user);
     } catch {
       this.logout();
     } finally {
       this._initialized.set(true);
     }
+  }
+
+  /**
+   * Persist the user's locale prefs to localStorage so localeIdFactory / storedLang
+   * pick them up on the next bootstrap. Writes directly to avoid depending on
+   * LocaleService (which would create a circular dep through TranslocoService).
+   * Returns true if the format locale changed (needs page reload for LOCALE_ID).
+   */
+  private syncLocalePrefs(user: User): boolean {
+    const lang = user.preferredLanguage ?? 'de';
+    const locale = user.preferredLocale ?? 'de';
+    const prevLocale = localStorage.getItem(LOCALE_KEY);
+    localStorage.setItem(LANG_KEY, lang);
+    localStorage.setItem(LOCALE_KEY, locale);
+    return prevLocale !== null && prevLocale !== locale;
   }
 }

@@ -28,6 +28,12 @@
                                     {{ event.name }}
                                 </p>
                                 <div class="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                                    @if (formatTime(event.startDate); as t) {
+                                        <span class="inline-flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                            {{ t }}
+                                        </span>
+                                    }
                                     <span class="inline-flex items-center gap-1">
                                         <span class="material-symbols-outlined text-[14px]">location_on</span>
                                         {{ event.locationName }}

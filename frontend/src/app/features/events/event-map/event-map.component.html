@@ -230,22 +230,28 @@
           <div class="flex items-center gap-2">
             <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'events.dateFrom' | transloco }}</span>
             <input
-              type="date"
-              [value]="dateFrom()"
+              type="text"
+              [value]="toDisplayDate(dateFrom())"
               (change)="onDateChange('from', $event)"
+              placeholder="TT.MM.JJJJ"
+              maxlength="10"
               class="min-w-0 flex-1 rounded-[var(--radius-default)] border border-[var(--color-border)]
-                bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+                bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)] tabular-nums
+                placeholder:text-[var(--color-muted)]
                 focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
             />
           </div>
           <div class="flex items-center gap-2">
             <span class="w-8 shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'events.dateTo' | transloco }}</span>
             <input
-              type="date"
-              [value]="dateTo()"
+              type="text"
+              [value]="toDisplayDate(dateTo())"
               (change)="onDateChange('to', $event)"
+              placeholder="TT.MM.JJJJ"
+              maxlength="10"
               class="min-w-0 flex-1 rounded-[var(--radius-default)] border border-[var(--color-border)]
-                bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]
+                bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)] tabular-nums
+                placeholder:text-[var(--color-muted)]
                 focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
             />
           </div>

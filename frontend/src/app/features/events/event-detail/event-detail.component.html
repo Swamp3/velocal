@@ -86,9 +86,15 @@
         <div>
           <dt class="text-[var(--color-text-muted)]">{{ 'events.detail.date' | transloco }}</dt>
           <dd class="font-medium text-[var(--color-text)]">
-            {{ event.startDate | date: 'dd.MM.yyyy' }}
+            {{ event.startDate | date: 'mediumDate' }}
+            @if (startTime(); as t) {
+              <span class="text-[var(--color-text-muted)]">{{ t }}</span>
+            }
             @if (event.endDate) {
-              – {{ event.endDate | date: 'dd.MM.yyyy' }}
+              – {{ event.endDate | date: 'mediumDate' }}
+              @if (endTime(); as t) {
+                <span class="text-[var(--color-text-muted)]">{{ t }}</span>
+              }
             }
           </dd>
         </div>
@@ -113,7 +119,10 @@
           <div>
             <dt class="text-[var(--color-text-muted)]">{{ 'events.detail.registrationDeadline' | transloco }}</dt>
             <dd class="font-medium text-[var(--color-text)]">
-              {{ event.registrationDeadline | date: 'dd.MM.yyyy' }}
+              {{ event.registrationDeadline | date: 'mediumDate' }}
+              @if (deadlineTime(); as t) {
+                <span class="text-[var(--color-text-muted)]">{{ t }}</span>
+              }
             </dd>
           </div>
         </div>

@@ -60,7 +60,7 @@
       @if (post.publishedAt) {
         <span class="inline-flex items-center gap-1.5">
           <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-          {{ post.publishedAt | date: 'dd.MM.yyyy' }}
+          {{ post.publishedAt | date: 'mediumDate' }}
         </span>
       }
       <span class="inline-flex items-center gap-1.5">

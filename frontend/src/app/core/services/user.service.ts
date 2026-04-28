@@ -7,6 +7,7 @@ export interface UpdateProfileDto {
   displayName?: string;
   homeZip?: string;
   homeCountry?: string;
+  preferredLanguage?: string;
   preferredLocale?: string;
 }
 

@@ -41,6 +41,9 @@ export class User {
   isAdmin: boolean;
 
   @Column({ default: 'de' })
+  preferredLanguage: string;
+
+  @Column({ default: 'de' })
   preferredLocale: string;
 
   @CreateDateColumn()

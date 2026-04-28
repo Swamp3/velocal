@@ -82,34 +82,64 @@
         }
       </div>
 
-      <!-- Dates row -->
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label for="startDate" class="block text-sm font-medium text-[var(--color-text)]">
-            {{ 'event.form.startDate' | transloco }} *
-          </label>
+      <!-- Start date + time -->
+      <div>
+        <label for="startDate" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.startDate' | transloco }} *
+        </label>
+        <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-2">
           <input
             id="startDate"
-            type="datetime-local"
+            type="text"
             formControlName="startDate"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            placeholder="TT.MM.JJJJ"
+            maxlength="10"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
+              placeholder:text-[var(--color-muted)]
               focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
-          @if (hasError('startDate', 'required')) {
-            <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
-          }
+          <input
+            type="text"
+            formControlName="startTime"
+            placeholder="HH:mm"
+            maxlength="5"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
         </div>
-        <div>
-          <label for="endDate" class="block text-sm font-medium text-[var(--color-text)]">
-            {{ 'event.form.endDate' | transloco }}
-          </label>
+        @if (hasError('startDate', 'required')) {
+          <p class="mt-1 text-xs text-[var(--color-danger)]">{{ 'validation.required' | transloco }}</p>
+        }
+      </div>
+
+      <!-- End date + time -->
+      <div>
+        <label for="endDate" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.endDate' | transloco }}
+        </label>
+        <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-2">
           <input
             id="endDate"
-            type="datetime-local"
+            type="text"
             formControlName="endDate"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
+            placeholder="TT.MM.JJJJ"
+            maxlength="10"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+          <input
+            type="text"
+            formControlName="endTime"
+            placeholder="HH:mm"
+            maxlength="5"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
+              placeholder:text-[var(--color-muted)]
               focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
@@ -204,14 +234,29 @@
         <label for="registrationDeadline" class="block text-sm font-medium text-[var(--color-text)]">
           {{ 'event.form.registrationDeadline' | transloco }}
         </label>
-        <input
-          id="registrationDeadline"
-          type="datetime-local"
-          formControlName="registrationDeadline"
-          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)]
-            focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
-        />
+        <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-2">
+          <input
+            id="registrationDeadline"
+            type="text"
+            formControlName="registrationDeadline"
+            placeholder="TT.MM.JJJJ"
+            maxlength="10"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+          <input
+            type="text"
+            formControlName="registrationDeadlineTime"
+            placeholder="HH:mm"
+            maxlength="5"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)]
+              bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums
+              placeholder:text-[var(--color-muted)]
+              focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
       </div>
 
       <!-- External URL -->

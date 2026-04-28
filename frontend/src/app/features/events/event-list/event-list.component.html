@@ -88,10 +88,12 @@
                 'events.dateFrom' | transloco
               }}</span>
               <input
-                type="date"
-                [value]="dateFrom()"
+                type="text"
+                [value]="toDisplayDate(dateFrom())"
                 (change)="onDateFromChange($event)"
-                class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+                placeholder="TT.MM.JJJJ"
+                maxlength="10"
+                class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums shadow-sm placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
               />
             </label>
             <label class="flex flex-col gap-1.5">
@@ -99,10 +101,12 @@
                 'events.dateTo' | transloco
               }}</span>
               <input
-                type="date"
-                [value]="dateTo()"
+                type="text"
+                [value]="toDisplayDate(dateTo())"
                 (change)="onDateToChange($event)"
-                class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
+                placeholder="TT.MM.JJJJ"
+                maxlength="10"
+                class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums shadow-sm placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all duration-200"
               />
             </label>
 

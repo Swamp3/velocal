@@ -27,6 +27,8 @@ import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { DisciplineFilterComponent } from '@shared/components';
 import { normalizeCoords } from '@shared/utils/coords';
+import { formatTime } from '@shared/utils/event-date';
+import { LocaleService } from '@core/services/locale.service';
 
 const EUROPE_CENTER: LeafletNS.LatLngExpression = [51.1657, 10.4515];
 const DEFAULT_ZOOM = 5;
@@ -68,6 +70,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   protected readonly geolocationService = inject(GeolocationService);
   readonly filterStateService = inject(FilterStateService);
   private readonly transloco = inject(TranslocoService);
+  private readonly localeService = inject(LocaleService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
@@ -234,8 +237,22 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     else this.refreshMap();
   }
 
+  /** DD.MM.YYYY → YYYY-MM-DD */
+  private parseDisplayDate(display: string): string {
+    const m = display.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+  }
+
+  /** YYYY-MM-DD → DD.MM.YYYY */
+  protected toDisplayDate(iso: string): string {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}.${m}.${y}`;
+  }
+
   protected onDateChange(field: 'from' | 'to', event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
+    const raw = (event.target as HTMLInputElement).value;
+    const value = this.parseDisplayDate(raw);
     if (field === 'from') this.dateFrom.set(value);
     else this.dateTo.set(value);
     if (this.geoActive()) this.triggerGeoSearch();
@@ -485,11 +502,13 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       const marker = this.L.marker([coords.lat, coords.lng], { icon });
       this.markerById.set(ev.id, marker);
 
-      const date = new Date(ev.startDate).toLocaleDateString('de-DE', {
+      const date = new Date(ev.startDate).toLocaleDateString(this.localeService.intlLocale(), {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       });
+      const time = formatTime(ev.startDate);
+      const dateTimeLabel = time ? `${date}, ${time}` : date;
 
       const disciplineName =
         ev.discipline?.nameTranslations?.[lang] ?? ev.disciplineSlug;
@@ -504,7 +523,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
       marker.bindPopup(
         `<div style="font-family:system-ui,sans-serif">
           <strong style="font-size:14px;line-height:1.3;display:block">${this.esc(ev.name)}</strong>
-          <div style="font-size:12px;color:#6b7280;margin-top:4px">${date} · ${this.esc(ev.locationName)}</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:4px">${dateTimeLabel} · ${this.esc(ev.locationName)}</div>
           <div style="font-size:12px;color:#6b7280;margin-top:2px">${this.esc(disciplineName)}</div>
           ${distanceHtml}
           <a href="javascript:void(0)" class="map-evt-link" style="font-size:12px;color:#2563eb;margin-top:6px;display:inline-block;text-decoration:none;font-weight:500">${this.esc(detailsLabel)}</a>

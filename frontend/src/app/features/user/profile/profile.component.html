@@ -43,7 +43,7 @@
           <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
             <input
               type="radio"
-              formControlName="preferredLocale"
+              formControlName="preferredLanguage"
               value="de"
               class="accent-[var(--color-primary)]"
             />
@@ -52,11 +52,41 @@
           <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
             <input
               type="radio"
-              formControlName="preferredLocale"
+              formControlName="preferredLanguage"
               value="en"
               class="accent-[var(--color-primary)]"
             />
             English
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Format / Number locale -->
+      <fieldset class="space-y-2">
+        <legend class="text-sm font-medium text-[var(--color-text)]">
+          {{ 'profile.formatLocale' | transloco }}
+        </legend>
+        <p class="text-xs text-[var(--color-text-muted)]">
+          {{ 'profile.formatLocaleHint' | transloco }}
+        </p>
+        <div class="flex items-center gap-6">
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+            <input
+              type="radio"
+              formControlName="preferredLocale"
+              value="de"
+              class="accent-[var(--color-primary)]"
+            />
+            {{ 'profile.formatDe' | transloco }}
+          </label>
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+            <input
+              type="radio"
+              formControlName="preferredLocale"
+              value="en"
+              class="accent-[var(--color-primary)]"
+            />
+            {{ 'profile.formatEn' | transloco }}
           </label>
         </div>
       </fieldset>

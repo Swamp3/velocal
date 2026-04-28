@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 import { DisciplineService } from '@core/services/discipline.service';
 import { EventSearchParams, EventService } from '@core/services/event.service';
 import { FilterStateService } from '@core/services/filter-state.service';
+import { LocaleService } from '@core/services/locale.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { CyclingEvent, Discipline } from '@shared/models';
@@ -40,6 +41,7 @@ export class EventCalendarComponent implements OnInit {
   private readonly eventService = inject(EventService);
   private readonly disciplineService = inject(DisciplineService);
   readonly filterStateService = inject(FilterStateService);
+  private readonly localeService = inject(LocaleService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly currentDate = signal(new Date());
@@ -84,7 +86,7 @@ export class EventCalendarComponent implements OnInit {
 
   readonly monthLabel = computed(() => {
     const d = this.currentDate();
-    return d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    return d.toLocaleDateString(this.localeService.intlLocale(), { month: 'long', year: 'numeric' });
   });
 
   constructor() {

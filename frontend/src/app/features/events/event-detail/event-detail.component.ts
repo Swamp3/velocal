@@ -27,6 +27,8 @@ import {
 import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
+import { formatTime } from '@shared/utils/event-date';
+import { LocaleService } from '@core/services/locale.service';
 
 @Pipe({ name: 'externalUrlDisplay' })
 export class ExternalUrlDisplayPipe implements PipeTransform {
@@ -70,6 +72,7 @@ export class EventDetailComponent implements OnInit {
   private readonly seo = inject(SeoService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly event = signal<CyclingEvent | null>(null);
   protected readonly loading = signal(true);
@@ -78,6 +81,10 @@ export class EventDetailComponent implements OnInit {
   protected readonly deleteLoading = signal(false);
   protected readonly eventSeries = signal<RaceSeries[]>([]);
   protected readonly linkedPosts = signal<PostListItem[]>([]);
+
+  protected readonly startTime = computed(() => formatTime(this.event()?.startDate));
+  protected readonly endTime = computed(() => formatTime(this.event()?.endDate));
+  protected readonly deadlineTime = computed(() => formatTime(this.event()?.registrationDeadline));
 
   protected readonly isFavorite = computed(() => {
     const ev = this.event();
@@ -161,7 +168,7 @@ export class EventDetailComponent implements OnInit {
     const image = this.seo.ogImage(event.imageUrl);
     const disciplineName = event.discipline?.nameTranslations?.[lang] ?? event.disciplineSlug;
 
-    const dateLabel = this.formatEventDate(event.startDate, event.endDate, lang);
+    const dateLabel = this.formatEventDate(event.startDate, event.endDate);
     const venue = event.locationName ?? '';
     const shortDesc =
       [disciplineName, dateLabel, venue].filter(Boolean).join(' · ').slice(0, 260) ||
@@ -218,8 +225,8 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
-  private formatEventDate(start: string, end: string | null | undefined, lang: string): string {
-    const locale = lang === 'en' ? 'en-GB' : 'de-DE';
+  private formatEventDate(start: string, end: string | null | undefined): string {
+    const locale = this.localeService.intlLocale();
     const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
     try {
       const s = new Date(start).toLocaleDateString(locale, opts);

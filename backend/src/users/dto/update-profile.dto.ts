@@ -15,5 +15,9 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsIn(['de', 'en'])
+  preferredLanguage?: string;
+
+  @IsOptional()
+  @IsIn(['de', 'en'])
   preferredLocale?: string;
 }

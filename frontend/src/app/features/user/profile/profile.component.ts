@@ -12,6 +12,7 @@ import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { FavoriteService } from '@core/services/favorite.service';
 import { FilterStateService } from '@core/services/filter-state.service';
+import { LocaleService } from '@core/services/locale.service';
 import { UserService } from '@core/services/user.service';
 import { ToastService } from '@shared/ui';
 import { ButtonComponent, ChipComponent, InputComponent } from '@shared/ui';
@@ -43,6 +44,7 @@ export class ProfileComponent implements OnInit {
   private readonly filterStateService = inject(FilterStateService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly saving = signal(false);
   protected readonly disciplines = signal<Discipline[]>([]);
@@ -61,6 +63,7 @@ export class ProfileComponent implements OnInit {
     displayName: [''],
     homeZip: [''],
     homeCountry: [''],
+    preferredLanguage: ['de', Validators.required],
     preferredLocale: ['de', Validators.required],
   });
 
@@ -83,6 +86,7 @@ export class ProfileComponent implements OnInit {
       displayName: user.displayName ?? '',
       homeZip: user.homeZip ?? '',
       homeCountry: user.homeCountry ?? '',
+      preferredLanguage: user.preferredLanguage ?? 'de',
       preferredLocale: user.preferredLocale ?? 'de',
     });
   }
@@ -108,12 +112,15 @@ export class ProfileComponent implements OnInit {
       next: (user) => {
         this.auth.updateCurrentUser(user);
 
-        if (vals.preferredLocale !== this.transloco.getActiveLang()) {
-          this.transloco.setActiveLang(vals.preferredLocale);
-        }
+        this.localeService.setLanguage(vals.preferredLanguage as 'de' | 'en');
+        const needsReload = this.localeService.setLocale(vals.preferredLocale as 'de' | 'en');
 
         this.toast.success(this.transloco.translate('profile.savedSuccess'));
         this.saving.set(false);
+
+        if (needsReload) {
+          setTimeout(() => window.location.reload(), 500);
+        }
       },
       error: () => {
         this.toast.error(this.transloco.translate('profile.savedError'));

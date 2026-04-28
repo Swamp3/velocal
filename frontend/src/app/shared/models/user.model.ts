@@ -4,6 +4,7 @@ export interface User {
   displayName?: string;
   homeZip?: string;
   homeCountry?: string;
+  preferredLanguage: string;
   preferredLocale: string;
   isAdmin?: boolean;
   emailVerified?: boolean;

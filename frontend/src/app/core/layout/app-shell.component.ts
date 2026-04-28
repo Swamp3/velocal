@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
+import { LocaleService } from '@core/services/locale.service';
 import { SeoService } from '@core/services/seo.service';
+import { UserService } from '@core/services/user.service';
 import { ThemeService } from '@core/theme.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui';
@@ -108,6 +110,8 @@ export class AppShellComponent {
   protected readonly theme = inject(ThemeService);
   protected readonly auth = inject(AuthService);
   private readonly transloco = inject(TranslocoService);
+  private readonly localeService = inject(LocaleService);
+  private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
   private readonly destroyRef = inject(DestroyRef);
@@ -161,8 +165,14 @@ export class AppShellComponent {
   }
 
   protected toggleLang(): void {
-    const next = this.transloco.getActiveLang() === 'de' ? 'en' : 'de';
-    this.transloco.setActiveLang(next);
+    const next = (this.transloco.getActiveLang() === 'de' ? 'en' : 'de') as 'de' | 'en';
+    this.localeService.setLanguage(next);
+
+    if (this.auth.isAuthenticated()) {
+      this.userService.updateProfile({ preferredLanguage: next }).subscribe({
+        next: (user) => this.auth.updateCurrentUser(user),
+      });
+    }
   }
 
   protected activeLang(): string {

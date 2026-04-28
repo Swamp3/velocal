@@ -21,6 +21,7 @@ export interface AuthResponse {
     id: string;
     email: string;
     displayName: string;
+    preferredLanguage: string;
     preferredLocale: string;
     isAdmin: boolean;
     emailVerified: boolean;
@@ -160,6 +161,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         displayName: user.displayName,
+        preferredLanguage: user.preferredLanguage,
         preferredLocale: user.preferredLocale,
         isAdmin: user.isAdmin,
         emailVerified: user.emailVerified,
