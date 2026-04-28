@@ -1,8 +1,14 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from '@core/guards/admin.guard';
 import { authGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'events', pathMatch: 'full' },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadChildren: () => import('./features/admin/admin.routes'),
+  },
   {
     path: 'events',
     loadChildren: () => import('./features/events/event.routes'),

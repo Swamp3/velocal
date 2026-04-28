@@ -26,6 +26,11 @@ export class ImportController {
     return this.importService.startImport(dto.source);
   }
 
+  @Get('jobs')
+  getJobs(): ImportJob[] {
+    return this.importService.getJobs();
+  }
+
   @Get('jobs/:id')
   getJob(@Param('id') id: string): ImportJob {
     const job = this.importService.getJob(id);

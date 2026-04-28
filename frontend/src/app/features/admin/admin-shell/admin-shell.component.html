@@ -1,0 +1,65 @@
+<div class="flex min-h-[calc(100dvh-8rem)]">
+  <!-- Sidebar -->
+  <aside
+    class="hidden w-56 shrink-0 border-r border-[var(--color-border)] pr-6 md:block"
+    [class.!w-14]="sidebarCollapsed()"
+    [class.!pr-0]="sidebarCollapsed()"
+  >
+    <div class="sticky top-24 flex flex-col gap-1">
+      <div class="mb-4 flex items-center justify-between">
+        @if (!sidebarCollapsed()) {
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            {{ 'admin.title' | transloco }}
+          </h2>
+        }
+        <button
+          class="rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+          (click)="sidebarCollapsed.set(!sidebarCollapsed())"
+          [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+        >
+          <span class="material-symbols-outlined text-[18px]">
+            {{ sidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}
+          </span>
+        </button>
+      </div>
+
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+          [class.justify-center]="sidebarCollapsed()"
+          [class.!px-2]="sidebarCollapsed()"
+          [attr.title]="sidebarCollapsed() ? (item.key | transloco) : null"
+        >
+          <span
+            class="material-symbols-outlined text-[20px]"
+            style="font-variation-settings: 'FILL' 0"
+          >{{ item.icon }}</span>
+          @if (!sidebarCollapsed()) {
+            <span>{{ item.key | transloco }}</span>
+          }
+        </a>
+      }
+    </div>
+  </aside>
+
+  <!-- Mobile nav -->
+  <nav class="mb-4 flex gap-1 overflow-x-auto border-b border-[var(--color-border)] pb-3 md:hidden">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+        class="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+      >
+        <span class="material-symbols-outlined text-[18px]">{{ item.icon }}</span>
+        <span>{{ item.key | transloco }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Content -->
+  <div class="min-w-0 flex-1 pl-0 md:pl-6">
+    <router-outlet />
+  </div>
+</div>

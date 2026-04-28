@@ -9,7 +9,8 @@
       "profile": "Profil",
       "login": "Anmelden",
       "logout": "Abmelden",
-      "news": "News"
+      "news": "News",
+      "admin": "Admin"
     }
   },
   "events": {
@@ -277,6 +278,38 @@
       "submit": "Veröffentlichen",
       "saveDraft": "Als Entwurf speichern",
       "pin": "Beitrag anpinnen"
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "nav": {
+      "imports": "Importe"
+    },
+    "imports": {
+      "title": "Import-Status",
+      "subtitle": "Import-Pipeline überwachen und manuelle Läufe starten.",
+      "trigger": "Import starten",
+      "running": "Läuft…",
+      "empty": "Noch keine Import-Läufe",
+      "emptyHint": "Starte einen manuellen Import oder warte auf den geplanten Lauf.",
+      "allSources": "Alle Quellen",
+      "showError": "Fehlerdetails anzeigen",
+      "hideError": "Fehlerdetails ausblenden",
+      "status": {
+        "running": "Läuft",
+        "completed": "Erfolgreich",
+        "failed": "Fehlgeschlagen"
+      },
+      "col": {
+        "status": "Status",
+        "source": "Quelle",
+        "started": "Gestartet",
+        "duration": "Dauer",
+        "created": "Erstellt",
+        "updated": "Aktualisiert",
+        "skipped": "Übersprungen",
+        "total": "Gesamt"
+      }
     }
   },
   "errors": {

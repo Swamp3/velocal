@@ -97,6 +97,12 @@ export class ImportService {
     return this.jobs.get(id) ?? null;
   }
 
+  getJobs(): ImportJob[] {
+    return Array.from(this.jobs.values()).sort(
+      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+    );
+  }
+
   getSourceNames(): string[] {
     return this.sources.map((s) => s.name);
   }

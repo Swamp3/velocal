@@ -9,7 +9,8 @@
       "profile": "Profile",
       "login": "Login",
       "logout": "Logout",
-      "news": "News"
+      "news": "News",
+      "admin": "Admin"
     }
   },
   "events": {
@@ -277,6 +278,38 @@
       "submit": "Publish",
       "saveDraft": "Save as draft",
       "pin": "Pin post"
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "nav": {
+      "imports": "Imports"
+    },
+    "imports": {
+      "title": "Import Status",
+      "subtitle": "Monitor event import pipeline health and trigger manual runs.",
+      "trigger": "Run Import",
+      "running": "Running…",
+      "empty": "No import runs yet",
+      "emptyHint": "Trigger a manual import or wait for the scheduled run.",
+      "allSources": "All sources",
+      "showError": "Show error details",
+      "hideError": "Hide error details",
+      "status": {
+        "running": "Running",
+        "completed": "Success",
+        "failed": "Failed"
+      },
+      "col": {
+        "status": "Status",
+        "source": "Source",
+        "started": "Started",
+        "duration": "Duration",
+        "created": "Created",
+        "updated": "Updated",
+        "skipped": "Skipped",
+        "total": "Total"
+      }
     }
   },
   "errors": {

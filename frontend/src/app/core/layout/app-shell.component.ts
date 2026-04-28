@@ -24,6 +24,7 @@ const NAV_LINKS: NavLink[] = [
   // { path: '/series', key: 'app.nav.series' },
 ];
 
+const ADMIN_NAV: NavLink = { path: '/admin', key: 'app.nav.admin' };
 const AUTH_NAV: NavLink = { path: '/profile', key: 'app.nav.profile' };
 
 interface RouteSeo {
@@ -118,6 +119,7 @@ export class AppShellComponent {
 
   protected readonly mobileMenuOpen = signal(false);
   protected readonly navLinks = NAV_LINKS;
+  protected readonly adminNav = ADMIN_NAV;
   protected readonly authNav = AUTH_NAV;
   protected readonly appVersion = APP_VERSION;
 
@@ -142,7 +144,7 @@ export class AppShellComponent {
       !path.endsWith('/edit');
     if (isDetail) return;
 
-    const editish = /\/(new|edit)(\/|$)/.test(path) || /^\/(auth|profile)/.test(path);
+    const editish = /\/(new|edit)(\/|$)/.test(path) || /^\/(auth|profile|admin)/.test(path);
     const hasDisallowedQuery = !!rawQuery && this.hasDisallowedParams(rawQuery);
 
     const entry = ROUTE_SEO_TABLE.find(({ test }) => test(path))?.seo ?? DEFAULT_SEO;

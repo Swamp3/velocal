@@ -34,6 +34,15 @@
 
       @if (auth.hydrated()) {
         @if (auth.isAuthenticated()) {
+          @if (auth.currentUser()?.isAdmin) {
+            <a
+              [routerLink]="adminNav.path"
+              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+              class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+            >
+              {{ adminNav.key | transloco }}
+            </a>
+          }
           <a
             [routerLink]="authNav.path"
             routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
@@ -154,6 +163,16 @@
 
         @if (auth.hydrated()) {
           @if (auth.isAuthenticated()) {
+            @if (auth.currentUser()?.isAdmin) {
+              <a
+                [routerLink]="adminNav.path"
+                routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+                (click)="mobileMenuOpen.set(false)"
+              >
+                {{ adminNav.key | transloco }}
+              </a>
+            }
             <a
               [routerLink]="authNav.path"
               routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"

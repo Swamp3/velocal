@@ -1,0 +1,212 @@
+<!-- Header -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-[var(--color-text)]">
+      {{ 'admin.imports.title' | transloco }}
+    </h1>
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      {{ 'admin.imports.subtitle' | transloco }}
+    </p>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <ui-button
+      variant="primary"
+      size="sm"
+      [loading]="triggering()"
+      [disabled]="hasRunningJob()"
+      (click)="triggerImport()"
+    >
+      <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+      {{ 'admin.imports.trigger' | transloco }}
+    </ui-button>
+  </div>
+</div>
+
+<!-- Loading skeleton -->
+@if (loading()) {
+  <div class="space-y-3">
+    @for (_ of [1, 2, 3]; track $index) {
+      <div class="rounded-xl border border-[var(--color-border)] p-4">
+        <div class="flex items-center gap-4">
+          <ui-skeleton class="h-6 w-20" />
+          <ui-skeleton class="h-4 w-32" />
+          <ui-skeleton class="h-4 w-24 ml-auto" />
+        </div>
+      </div>
+    }
+  </div>
+} @else if (jobs().length === 0) {
+  <!-- Empty state -->
+  <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] py-16">
+    <span
+      class="material-symbols-outlined mb-3 text-4xl text-[var(--color-text-muted)]/50"
+      style="font-variation-settings: 'FILL' 0"
+    >cloud_off</span>
+    <p class="text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.imports.empty' | transloco }}
+    </p>
+    <p class="mt-1 text-xs text-[var(--color-text-muted)]/70">
+      {{ 'admin.imports.emptyHint' | transloco }}
+    </p>
+  </div>
+} @else {
+  <!-- Jobs table (desktop) -->
+  <div class="hidden overflow-hidden rounded-xl border border-[var(--color-border)] md:block">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]/50">
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.status' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.source' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.started' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.duration' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.created' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.updated' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.skipped' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.imports.col.total' | transloco }}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[var(--color-border)]">
+        @for (job of jobs(); track job.id) {
+          <tr class="hover:bg-[var(--color-bg-alt)]/30 transition-colors">
+            <td class="px-4 py-3">
+              <ui-badge [variant]="statusVariant(job.status)">
+                {{ 'admin.imports.status.' + job.status | transloco }}
+              </ui-badge>
+            </td>
+            <td class="px-4 py-3 text-[var(--color-text)]">
+              {{ job.source ?? ('admin.imports.allSources' | transloco) }}
+            </td>
+            <td class="px-4 py-3 text-[var(--color-text-muted)]">
+              {{ job.startedAt | date:'short' }}
+            </td>
+            <td class="px-4 py-3 text-[var(--color-text-muted)]">
+              @if (job.status === 'running') {
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="relative flex size-2">
+                    <span class="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex size-2 rounded-full bg-amber-500"></span>
+                  </span>
+                  {{ 'admin.imports.running' | transloco }}
+                </span>
+              } @else {
+                {{ duration(job) ?? '—' }}
+              }
+            </td>
+            <td class="px-4 py-3 text-right tabular-nums text-[var(--color-text)]">
+              {{ job.result?.created ?? '—' }}
+            </td>
+            <td class="px-4 py-3 text-right tabular-nums text-[var(--color-text)]">
+              {{ job.result?.updated ?? '—' }}
+            </td>
+            <td class="px-4 py-3 text-right tabular-nums text-[var(--color-text)]">
+              {{ job.result?.skipped ?? '—' }}
+            </td>
+            <td class="px-4 py-3 text-right tabular-nums font-medium text-[var(--color-text)]">
+              {{ job.result ? totalEvents(job) : '—' }}
+            </td>
+          </tr>
+          @if (job.error) {
+            <tr>
+              <td colspan="8" class="px-4 pb-3">
+                <button
+                  class="text-xs font-medium text-[var(--color-danger)] hover:underline cursor-pointer"
+                  (click)="toggleError(job.id)"
+                >
+                  {{ isErrorExpanded(job.id) ? ('admin.imports.hideError' | transloco) : ('admin.imports.showError' | transloco) }}
+                </button>
+                @if (isErrorExpanded(job.id)) {
+                  <pre class="mt-2 max-h-40 overflow-auto rounded-lg bg-red-50 p-3 text-xs text-red-800 dark:bg-red-950/30 dark:text-red-300">{{ job.error }}</pre>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Jobs cards (mobile) -->
+  <div class="flex flex-col gap-3 md:hidden">
+    @for (job of jobs(); track job.id) {
+      <div class="rounded-xl border border-[var(--color-border)] p-4">
+        <div class="flex items-center justify-between gap-3">
+          <ui-badge [variant]="statusVariant(job.status)">
+            {{ 'admin.imports.status.' + job.status | transloco }}
+          </ui-badge>
+          <span class="text-xs text-[var(--color-text-muted)]">
+            {{ job.startedAt | date:'short' }}
+          </span>
+        </div>
+
+        <div class="mt-3 flex items-center gap-4 text-sm">
+          <span class="text-[var(--color-text-muted)]">
+            {{ job.source ?? ('admin.imports.allSources' | transloco) }}
+          </span>
+          @if (job.status === 'running') {
+            <span class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+              <span class="relative flex size-2">
+                <span class="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex size-2 rounded-full bg-amber-500"></span>
+              </span>
+              {{ 'admin.imports.running' | transloco }}
+            </span>
+          } @else if (duration(job); as dur) {
+            <span class="text-[var(--color-text-muted)]">{{ dur }}</span>
+          }
+        </div>
+
+        @if (job.result) {
+          <div class="mt-3 grid grid-cols-4 gap-2 text-center">
+            <div>
+              <div class="text-lg font-semibold tabular-nums text-[var(--color-text)]">{{ job.result.created }}</div>
+              <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">{{ 'admin.imports.col.created' | transloco }}</div>
+            </div>
+            <div>
+              <div class="text-lg font-semibold tabular-nums text-[var(--color-text)]">{{ job.result.updated }}</div>
+              <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">{{ 'admin.imports.col.updated' | transloco }}</div>
+            </div>
+            <div>
+              <div class="text-lg font-semibold tabular-nums text-[var(--color-text)]">{{ job.result.skipped }}</div>
+              <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">{{ 'admin.imports.col.skipped' | transloco }}</div>
+            </div>
+            <div>
+              <div class="text-lg font-semibold tabular-nums text-[var(--color-text)]">{{ totalEvents(job) }}</div>
+              <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">{{ 'admin.imports.col.total' | transloco }}</div>
+            </div>
+          </div>
+        }
+
+        @if (job.error) {
+          <div class="mt-3">
+            <button
+              class="text-xs font-medium text-[var(--color-danger)] hover:underline cursor-pointer"
+              (click)="toggleError(job.id)"
+            >
+              {{ isErrorExpanded(job.id) ? ('admin.imports.hideError' | transloco) : ('admin.imports.showError' | transloco) }}
+            </button>
+            @if (isErrorExpanded(job.id)) {
+              <pre class="mt-2 max-h-40 overflow-auto rounded-lg bg-red-50 p-3 text-xs text-red-800 dark:bg-red-950/30 dark:text-red-300">{{ job.error }}</pre>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
