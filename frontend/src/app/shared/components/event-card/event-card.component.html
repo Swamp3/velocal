@@ -43,7 +43,8 @@
     <app-event-status-badge [status]="event().status" />
   </div>
 
-  <div class="mt-4 flex items-center gap-2">
+  <div class="mt-4 flex items-center justify-between gap-2">
     <app-discipline-chip [discipline]="event().discipline" />
+    <app-add-to-calendar [event]="event()" [iconOnly]="true" />
   </div>
 </a>

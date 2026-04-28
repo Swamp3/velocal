@@ -18,6 +18,7 @@ import { SeoService } from '@core/services/seo.service';
 import { SeriesService } from '@core/services/series.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
+  AddToCalendarComponent,
   DisciplineChipComponent,
   EmptyStateComponent,
   EventDetailMapComponent,
@@ -51,6 +52,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     TranslocoPipe,
     ButtonComponent,
     SkeletonComponent,
+    AddToCalendarComponent,
     DisciplineChipComponent,
     EventStatusBadgeComponent,
     EmptyStateComponent,

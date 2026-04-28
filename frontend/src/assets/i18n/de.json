@@ -51,6 +51,13 @@
         "openApple": "In Apple Maps öffnen",
         "openOsm": "In OpenStreetMap öffnen",
         "showOnFullMap": "Auf Vollkarte anzeigen"
+      },
+      "addToCalendar": {
+        "button": "Zum Kalender hinzufügen",
+        "google": "Google Kalender",
+        "apple": "Apple Kalender",
+        "outlook": "Outlook",
+        "ics": ".ics-Datei herunterladen"
       }
     },
     "status": {
@@ -210,7 +217,8 @@
     "required": "Pflichtfeld",
     "email": "Ungültige E-Mail",
     "minLength": "Mindestens {{min}} Zeichen",
-    "passwordMismatch": "Passwörter stimmen nicht überein"
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "badWord": "Dieses Feld enthält unangemessene Sprache"
   },
   "common": {
     "loading": "Laden...",

@@ -1,0 +1,95 @@
+@if (iconOnly()) {
+  <button
+    type="button"
+    class="inline-flex items-center justify-center rounded-full p-1.5
+      text-[var(--color-text-muted)] hover:text-[var(--color-primary)]
+      hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="'events.detail.addToCalendar.button' | transloco"
+    aria-haspopup="menu"
+    (click)="toggle($event)"
+  >
+    <span class="material-symbols-outlined text-[20px]">calendar_add_on</span>
+  </button>
+} @else {
+  <button
+    type="button"
+    class="inline-flex items-center gap-2 rounded-[var(--radius-default)]
+      border border-[var(--color-border)] bg-[var(--color-bg)]
+      px-4 py-2 text-sm font-medium text-[var(--color-text)]
+      hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="menu"
+    (click)="toggle($event)"
+  >
+    <span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+    {{ 'events.detail.addToCalendar.button' | transloco }}
+  </button>
+}
+
+@if (open()) {
+  <div
+    role="menu"
+    class="absolute right-0 z-50 mt-1 w-56 rounded-[var(--radius-default)]
+      border border-[var(--color-border)] bg-[var(--color-bg)]
+      shadow-[var(--shadow-elevated)] py-1"
+  >
+    <button
+      type="button"
+      role="menuitem"
+      class="flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-[var(--color-text)]
+        hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+      (click)="openGoogle($event)"
+    >
+      <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none">
+        <path d="M18.316 5.684H24v12.632h-5.684V5.684z" fill="#1967D2"/>
+        <path d="M0 18.316V5.684h5.684v12.632H0z" fill="#188038"/>
+        <path d="M18.316 24V18.316H5.684V24H0v-5.684h5.684V24h12.632v-5.684H24V24h-5.684z" fill="#FBBC04"/>
+        <path d="M18.316 0v5.684H5.684V0H0v5.684h5.684V0h12.632v5.684H24V0h-5.684z" fill="#EA4335"/>
+        <path d="M5.684 5.684h12.632v12.632H5.684V5.684z" fill="#fff"/>
+        <path d="M8.5 15.5V9h1.2l2.3 4 2.3-4h1.2v6.5h-1.1v-4.8l-2.1 3.6h-.6l-2.1-3.6v4.8H8.5z" fill="#1967D2"/>
+      </svg>
+      {{ 'events.detail.addToCalendar.google' | transloco }}
+    </button>
+
+    <button
+      type="button"
+      role="menuitem"
+      class="flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-[var(--color-text)]
+        hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+      (click)="downloadIcsFile($event)"
+    >
+      <span class="material-symbols-outlined text-[16px] text-[var(--color-text-muted)]">smartphone</span>
+      {{ 'events.detail.addToCalendar.apple' | transloco }}
+    </button>
+
+    <button
+      type="button"
+      role="menuitem"
+      class="flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-[var(--color-text)]
+        hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+      (click)="openOutlook($event)"
+    >
+      <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none">
+        <path d="M24 7.387v10.478c0 .254-.1.498-.278.678a.944.944 0 01-.67.281H8.667a.944.944 0 01-.67-.281.968.968 0 01-.278-.678V7.387L12 10.32l12-2.934z" fill="#0078D4"/>
+        <path d="M8.667 5.254h14.385c.378 0 .722.162.948.43L12 10.32 7.72 7.387V6.21c0-.254.098-.498.276-.678a.944.944 0 01.67-.278z" fill="#0078D4"/>
+        <path d="M0 6.75v11.625L8.25 21V3L0 6.75z" fill="#0078D4"/>
+        <ellipse cx="4.125" cy="12.562" rx="2.25" ry="3.187" fill="#fff"/>
+      </svg>
+      {{ 'events.detail.addToCalendar.outlook' | transloco }}
+    </button>
+
+    <div class="mx-3 my-1 border-t border-[var(--color-border)]"></div>
+
+    <button
+      type="button"
+      role="menuitem"
+      class="flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-[var(--color-text)]
+        hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+      (click)="downloadIcsFile($event)"
+    >
+      <span class="material-symbols-outlined text-[16px] text-[var(--color-text-muted)]">download</span>
+      {{ 'events.detail.addToCalendar.ics' | transloco }}
+    </button>
+  </div>
+}

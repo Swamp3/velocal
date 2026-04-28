@@ -51,6 +51,13 @@
         "openApple": "Open in Apple Maps",
         "openOsm": "Open in OpenStreetMap",
         "showOnFullMap": "Show on full map"
+      },
+      "addToCalendar": {
+        "button": "Add to calendar",
+        "google": "Google Calendar",
+        "apple": "Apple Calendar",
+        "outlook": "Outlook",
+        "ics": "Download .ics file"
       }
     },
     "status": {
@@ -210,7 +217,8 @@
     "required": "Required",
     "email": "Invalid email",
     "minLength": "At least {{min}} characters",
-    "passwordMismatch": "Passwords do not match"
+    "passwordMismatch": "Passwords do not match",
+    "badWord": "This field contains inappropriate language"
   },
   "common": {
     "loading": "Loading...",

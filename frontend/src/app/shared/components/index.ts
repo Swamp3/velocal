@@ -1,3 +1,4 @@
+export { AddToCalendarComponent } from './add-to-calendar/add-to-calendar.component';
 export { DisciplineChipComponent } from './discipline-chip/discipline-chip.component';
 export { DisciplineFilterComponent } from './discipline-filter/discipline-filter.component';
 export { EventCardComponent } from './event-card/event-card.component';

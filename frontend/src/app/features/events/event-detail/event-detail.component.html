@@ -52,10 +52,12 @@
       </div>
     }
 
-    <!-- Header: discipline chip + status -->
+    <!-- Header: discipline chip + status + calendar -->
     <div class="mt-5 flex flex-wrap items-center gap-2">
       <app-discipline-chip [discipline]="event.discipline" />
       <app-event-status-badge [status]="event.status" />
+      <span class="flex-1"></span>
+      <app-add-to-calendar [event]="event" [iconOnly]="true" />
     </div>
 
     <!-- Cancelled banner -->
