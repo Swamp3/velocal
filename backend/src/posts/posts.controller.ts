@@ -24,6 +24,7 @@ import { PostSearchDto } from './dto/post-search.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 
 const imagePipe = new ParseFilePipeBuilder()
   .addFileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ })
@@ -51,6 +52,8 @@ export class PostsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('title', 'body')
   create(
     @Body() dto: CreatePostDto,
     @CurrentUser() user: { id: string },
@@ -60,6 +63,8 @@ export class PostsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('title', 'body')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePostDto,

@@ -6,23 +6,19 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { EventService } from '@core/services/event.service';
-import { DisciplineService } from '@core/services/discipline.service';
+import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
+import { DisciplineService } from '@core/services/discipline.service';
+import { EventService } from '@core/services/event.service';
 import { UploadService } from '@core/services/upload.service';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
-import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
+import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
 import { CyclingEvent, Discipline } from '@shared/models';
+import { ButtonComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-event-form',
@@ -46,6 +42,7 @@ export class EventFormComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly uploadService = inject(UploadService);
+  private readonly transloco = inject(TranslocoService);
 
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly loading = signal(false);
@@ -57,20 +54,37 @@ export class EventFormComponent implements OnInit {
 
   protected readonly uploadImageFn = (file: File) =>
     this.uploadService.uploadEventImage(this.eventId()!, file);
-  protected readonly deleteImageFn = () =>
-    this.uploadService.deleteEventImage(this.eventId()!);
+  protected readonly deleteImageFn = () => this.uploadService.deleteEventImage(this.eventId()!);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(3), Validators.maxLength(200)],
     }),
-    description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(5000)] }),
+    description: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.maxLength(5000)],
+    }),
     disciplineSlug: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    startDate: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)] }),
-    startTime: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)] }),
-    endDate: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)] }),
-    endTime: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)] }),
+    startDate: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/),
+      ],
+    }),
+    startTime: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+    }),
+    endDate: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)],
+    }),
+    endTime: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+    }),
     locationName: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(2)],
@@ -79,8 +93,14 @@ export class EventFormComponent implements OnInit {
     country: new FormControl('', { nonNullable: true }),
     lat: new FormControl<number | null>(null),
     lng: new FormControl<number | null>(null),
-    registrationDeadline: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)] }),
-    registrationDeadlineTime: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)] }),
+    registrationDeadline: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)],
+    }),
+    registrationDeadlineTime: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+    }),
     externalUrl: new FormControl('', { nonNullable: true }),
     status: new FormControl('published', { nonNullable: true }),
   });
@@ -118,10 +138,7 @@ export class EventFormComponent implements OnInit {
       locationName: raw.locationName,
       address: raw.address || undefined,
       country: raw.country || undefined,
-      coordinates:
-        raw.lat != null && raw.lng != null
-          ? { lat: raw.lat, lng: raw.lng }
-          : undefined,
+      coordinates: raw.lat != null && raw.lng != null ? { lat: raw.lat, lng: raw.lng } : undefined,
       registrationDeadline: raw.registrationDeadline
         ? this.combineDatetime(raw.registrationDeadline, raw.registrationDeadlineTime)
         : undefined,
@@ -137,13 +154,18 @@ export class EventFormComponent implements OnInit {
       next: (event) => {
         this.submitting.set(false);
         const key = this.isEdit() ? 'event.form.success.update' : 'event.form.success.create';
-        this.toast.success(key);
+        this.toast.success(this.transloco.translate(key));
         this.router.navigate(['/events', event.id]);
       },
-      error: () => {
+      error: (err: ApiError) => {
         this.submitting.set(false);
-        const key = this.isEdit() ? 'event.form.error.update' : 'event.form.error.create';
-        this.toast.error(key);
+        if (err.status === 422 && err.body?.['error'] === 'content_policy_violation') {
+          this.applyBadWordErrors(err.body['violations'] as { field: string }[]);
+          this.toast.error(this.transloco.translate('validation.badWord'));
+        } else {
+          const key = this.isEdit() ? 'event.form.error.update' : 'event.form.error.create';
+          this.toast.error(this.transloco.translate(key));
+        }
       },
     });
   }
@@ -151,6 +173,16 @@ export class EventFormComponent implements OnInit {
   protected hasError(field: string, error: string): boolean {
     const control = this.form.get(field);
     return !!control?.hasError(error) && (control.dirty || control.touched);
+  }
+
+  private applyBadWordErrors(violations: { field: string }[]): void {
+    for (const { field } of violations) {
+      const control = this.form.get(field);
+      if (control) {
+        control.setErrors({ badWord: true });
+        control.markAsTouched();
+      }
+    }
   }
 
   private loadEvent(id: string): void {

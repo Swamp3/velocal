@@ -25,6 +25,7 @@ import { AddSeriesEventDto } from './dto/add-series-event.dto';
 import { UpdateSeriesEventDto } from './dto/update-series-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 
 const imagePipe = new ParseFilePipeBuilder()
   .addFileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ })
@@ -54,6 +55,8 @@ export class SeriesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('name', 'description')
   create(
     @Body() dto: CreateSeriesDto,
     @CurrentUser() user: { id: string },
@@ -63,6 +66,8 @@ export class SeriesController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('name', 'description')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSeriesDto,

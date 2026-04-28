@@ -7,6 +7,7 @@ import { catchError } from 'rxjs/operators';
 export interface ApiError {
   status: number;
   message: string;
+  body?: Record<string, unknown>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -56,6 +57,7 @@ export class ApiService {
     const apiError: ApiError = {
       status: err.status,
       message: err.error?.message ?? err.statusText ?? 'Unknown error',
+      body: err.error && typeof err.error === 'object' ? err.error : undefined,
     };
     return throwError(() => apiError);
   }

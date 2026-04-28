@@ -27,6 +27,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 
 const imagePipe = new ParseFilePipeBuilder()
   .addFileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ })
@@ -49,6 +50,8 @@ export class EventsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('name', 'description', 'locationName')
   async create(
     @Body() dto: CreateEventDto,
     @CurrentUser() user: { id: string },
@@ -59,6 +62,8 @@ export class EventsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('name', 'description', 'locationName')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateEventDto,
