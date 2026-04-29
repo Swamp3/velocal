@@ -38,6 +38,7 @@
           [modules]="quillModules"
           theme="snow"
           [placeholder]="'news.form.bodyPlaceholder' | transloco"
+          (onEditorCreated)="onEditorCreated($event)"
         />
       </div>
 

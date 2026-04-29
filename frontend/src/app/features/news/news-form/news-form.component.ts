@@ -66,9 +66,26 @@ export class NewsFormComponent implements OnInit {
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }],
       ['blockquote', 'link'],
+      [{ color: [] }],
       ['clean'],
     ],
+    clipboard: {
+      matchVisual: false,
+    },
   };
+
+  protected onEditorCreated(editor: any): void {
+    editor.clipboard.addMatcher(Node.ELEMENT_NODE, (_node: any, delta: any) => {
+      delta.ops = delta.ops.map((op: any) => {
+        if (op.attributes) {
+          delete op.attributes.color;
+          delete op.attributes.background;
+        }
+        return op;
+      });
+      return delta;
+    });
+  }
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
