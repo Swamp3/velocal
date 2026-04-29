@@ -15,5 +15,6 @@
 | GET    | `/api/users/me/discipline-prefs`   | JWT      | Get discipline preferences     |
 | PUT    | `/api/users/me/discipline-prefs`   | JWT      | Set discipline preferences     |
 | POST   | `/api/import/trigger`              | Admin    | Start import job (202, returns job) |
+| GET    | `/api/import/jobs?limit=&offset=`  | Admin    | List import runs (persisted)   |
 | GET    | `/api/import/jobs/:id`             | Admin    | Poll import job status         |
 | GET    | `/api/import/sources`              | Admin    | List registered import sources |

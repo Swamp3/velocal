@@ -10,6 +10,7 @@ import { RaceSeries } from '../series/entities/race-series.entity';
 import { RaceSeriesEvent } from '../series/entities/race-series-event.entity';
 import { Post } from '../posts/entities/post.entity';
 import { PostTag } from '../posts/entities/post-tag.entity';
+import { ImportRun } from '../import/entities/import-run.entity';
 import { OtpToken } from '../auth/entities/otp-token.entity';
 
 export default new DataSource({
@@ -30,6 +31,7 @@ export default new DataSource({
     Post,
     PostTag,
     OtpToken,
+    ImportRun,
   ],
   migrations: ['src/migrations/*.ts'],
 });

@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import {
   Event,
@@ -13,6 +12,7 @@ import {
   EventStatus,
 } from '../events/entities/event.entity';
 import { GeocodingService } from '../events/geocoding.service';
+import { ImportRun, ImportRunStatus } from './entities/import-run.entity';
 import {
   ImportResult,
   ImportSource,
@@ -22,32 +22,20 @@ import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
-const MAX_JOB_HISTORY = 20;
-
-export type ImportJobStatus = 'running' | 'completed' | 'failed';
-
-export interface ImportJob {
-  id: string;
-  source: string | null;
-  status: ImportJobStatus;
-  startedAt: string;
-  finishedAt: string | null;
-  result: ImportResult | null;
-  error: string | null;
-}
+const RETENTION_DAYS = 90;
 
 @Injectable()
 export class ImportService {
   private readonly logger = new Logger(ImportService.name);
   private readonly sources: ImportSource[];
   private readonly cooldownMs: number;
-  private lastImportAt: Date | null = null;
   private importRunning = false;
-  private readonly jobs = new Map<string, ImportJob>();
 
   constructor(
     @InjectRepository(Event)
     private readonly eventRepo: Repository<Event>,
+    @InjectRepository(ImportRun)
+    private readonly importRunRepo: Repository<ImportRun>,
     private readonly config: ConfigService,
     private readonly geocoding: GeocodingService,
     radNetSource: RadNetSource,
@@ -57,15 +45,22 @@ export class ImportService {
     this.cooldownMs =
       (this.config.get<number>('IMPORT_COOLDOWN_MINUTES') ?? 5) * 60 * 1000 ||
       DEFAULT_COOLDOWN_MS;
+
+    void this.recoverStaleRuns();
   }
 
-  startImport(sourceName?: string): ImportJob {
+  async startImport(sourceName?: string): Promise<ImportRun> {
     if (this.importRunning) {
       throw new ConflictException('An import is already running');
     }
 
-    if (this.lastImportAt) {
-      const elapsed = Date.now() - this.lastImportAt.getTime();
+    const lastRun = await this.importRunRepo.findOne({
+      where: { status: ImportRunStatus.COMPLETED },
+      order: { finishedAt: 'DESC' },
+    });
+
+    if (lastRun?.finishedAt) {
+      const elapsed = Date.now() - lastRun.finishedAt.getTime();
       if (elapsed < this.cooldownMs) {
         const remainingSec = Math.ceil((this.cooldownMs - elapsed) / 1000);
         throw new ConflictException(
@@ -74,47 +69,42 @@ export class ImportService {
       }
     }
 
-    const job: ImportJob = {
-      id: randomUUID(),
+    const run = this.importRunRepo.create({
       source: sourceName ?? null,
-      status: 'running',
-      startedAt: new Date().toISOString(),
-      finishedAt: null,
-      result: null,
-      error: null,
-    };
+      status: ImportRunStatus.RUNNING,
+    });
+    await this.importRunRepo.save(run);
 
-    this.jobs.set(job.id, job);
-    this.trimJobHistory();
     this.importRunning = true;
+    void this.executeImport(run);
 
-    void this.executeImport(job);
-
-    return job;
+    return run;
   }
 
-  getJob(id: string): ImportJob | null {
-    return this.jobs.get(id) ?? null;
+  async getJob(id: string): Promise<ImportRun | null> {
+    return this.importRunRepo.findOne({ where: { id } });
   }
 
-  getJobs(): ImportJob[] {
-    return Array.from(this.jobs.values()).sort(
-      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
-    );
+  async getJobs(limit = 50, offset = 0): Promise<ImportRun[]> {
+    return this.importRunRepo.find({
+      order: { startedAt: 'DESC' },
+      take: limit,
+      skip: offset,
+    });
   }
 
   getSourceNames(): string[] {
     return this.sources.map((s) => s.name);
   }
 
-  private async executeImport(job: ImportJob): Promise<void> {
-    const sources = job.source
-      ? this.sources.filter((s) => s.name === job.source)
+  private async executeImport(run: ImportRun): Promise<void> {
+    const sources = run.source
+      ? this.sources.filter((s) => s.name === run.source)
       : this.sources;
 
     if (sources.length === 0) {
-      this.logger.warn(`No import source found for: ${job.source}`);
-      this.finishJob(job, { created: 0, updated: 0, skipped: 0 });
+      this.logger.warn(`No import source found for: ${run.source}`);
+      await this.finishRun(run, { created: 0, updated: 0, skipped: 0 });
       return;
     }
 
@@ -151,36 +141,43 @@ export class ImportService {
         );
       }
 
-      this.finishJob(job, { created, updated, skipped });
+      await this.finishRun(run, { created, updated, skipped });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      this.logger.error(`Import job ${job.id} failed: ${message}`);
-      this.failJob(job, message);
+      this.logger.error(`Import run ${run.id} failed: ${message}`);
+      await this.failRun(run, message);
     }
   }
 
-  private finishJob(job: ImportJob, result: ImportResult): void {
-    job.status = 'completed';
-    job.result = result;
-    job.finishedAt = new Date().toISOString();
+  private async finishRun(run: ImportRun, result: ImportResult): Promise<void> {
+    run.status = ImportRunStatus.COMPLETED;
+    run.eventsCreated = result.created;
+    run.eventsUpdated = result.updated;
+    run.eventsSkipped = result.skipped;
+    run.finishedAt = new Date();
+    await this.importRunRepo.save(run);
     this.importRunning = false;
-    this.lastImportAt = new Date();
   }
 
-  private failJob(job: ImportJob, error: string): void {
-    job.status = 'failed';
-    job.error = error;
-    job.finishedAt = new Date().toISOString();
+  private async failRun(run: ImportRun, error: string): Promise<void> {
+    run.status = ImportRunStatus.FAILED;
+    run.errorLog = error;
+    run.finishedAt = new Date();
+    await this.importRunRepo.save(run);
     this.importRunning = false;
-    this.lastImportAt = new Date();
   }
 
-  private trimJobHistory(): void {
-    if (this.jobs.size <= MAX_JOB_HISTORY) return;
-    const excess = this.jobs.size - MAX_JOB_HISTORY;
-    const keys = Array.from(this.jobs.keys()).slice(0, excess);
-    for (const key of keys) {
-      this.jobs.delete(key);
+  /**
+   * Mark any runs left as "running" from a previous process as failed.
+   * This handles the case where the server crashed mid-import.
+   */
+  private async recoverStaleRuns(): Promise<void> {
+    const stale = await this.importRunRepo.find({
+      where: { status: ImportRunStatus.RUNNING },
+    });
+    for (const run of stale) {
+      this.logger.warn(`Marking stale import run ${run.id} as failed`);
+      await this.failRun(run, 'Server restarted while import was running');
     }
   }
 
