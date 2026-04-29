@@ -137,73 +137,9 @@
     </div>
   </div>
 
-  <!-- Mobile slide-out -->
-  @if (mobileMenuOpen()) {
-    <div
-      class="fixed inset-0 top-16 z-20 bg-black/50 backdrop-blur-sm md:hidden"
-      (click)="mobileMenuOpen.set(false)"
-    ></div>
-    <nav
-      class="fixed right-0 top-16 z-30 h-[calc(100dvh-4rem)] w-72 border-l border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-2xl md:hidden"
-      aria-label="Mobile navigation"
-    >
-      <div class="flex flex-col gap-1">
-        @for (link of navLinks; track link.path) {
-          <a
-            [routerLink]="link.path"
-            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-            (click)="mobileMenuOpen.set(false)"
-          >
-            {{ link.key | transloco }}
-          </a>
-        }
-
-        <div class="my-2 h-px bg-[var(--color-border)]"></div>
-
-        @if (auth.hydrated()) {
-          @if (auth.isAuthenticated()) {
-            @if (auth.currentUser()?.isAdmin) {
-              <a
-                [routerLink]="adminNav.path"
-                routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-                class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-                (click)="mobileMenuOpen.set(false)"
-              >
-                {{ adminNav.key | transloco }}
-              </a>
-            }
-            <a
-              [routerLink]="authNav.path"
-              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-              class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-              (click)="mobileMenuOpen.set(false)"
-            >
-              {{ authNav.key | transloco }}
-            </a>
-            <button
-              class="rounded-lg px-4 py-2.5 text-sm font-medium text-left text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
-              (click)="mobileMenuOpen.set(false); onLogout()"
-            >
-              {{ 'app.nav.logout' | transloco }}
-            </button>
-          } @else {
-            <a
-              routerLink="/auth/login"
-              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-              class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all duration-200"
-              (click)="mobileMenuOpen.set(false)"
-            >
-              {{ 'app.nav.login' | transloco }}
-            </a>
-          }
-        }
-      </div>
-    </nav>
-  }
 </header>
 
-<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+<main class="isolate mx-auto max-w-7xl px-4 py-8 sm:px-6">
   <router-outlet />
 </main>
 
@@ -239,3 +175,68 @@
     <line x1="14" y1="2" x2="14" y2="4" />
   </svg>
 </a>
+
+<!-- Mobile slide-out — rendered last so it paints on top of everything -->
+@if (mobileMenuOpen()) {
+  <div
+    class="fixed inset-0 top-16 z-[999] bg-black/50 backdrop-blur-sm md:hidden"
+    (click)="mobileMenuOpen.set(false)"
+  ></div>
+  <nav
+    class="fixed right-0 top-16 z-[1000] h-[calc(100dvh-4rem)] w-72 border-l border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-2xl md:hidden"
+    aria-label="Mobile navigation"
+  >
+    <div class="flex flex-col gap-1">
+      @for (link of navLinks; track link.path) {
+        <a
+          [routerLink]="link.path"
+          routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+          class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+          (click)="mobileMenuOpen.set(false)"
+        >
+          {{ link.key | transloco }}
+        </a>
+      }
+
+      <div class="my-2 h-px bg-[var(--color-border)]"></div>
+
+      @if (auth.hydrated()) {
+        @if (auth.isAuthenticated()) {
+          @if (auth.currentUser()?.isAdmin) {
+            <a
+              [routerLink]="adminNav.path"
+              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+              class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              {{ adminNav.key | transloco }}
+            </a>
+          }
+          <a
+            [routerLink]="authNav.path"
+            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            {{ authNav.key | transloco }}
+          </a>
+          <button
+            class="rounded-lg px-4 py-2.5 text-sm font-medium text-left text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
+            (click)="mobileMenuOpen.set(false); onLogout()"
+          >
+            {{ 'app.nav.logout' | transloco }}
+          </button>
+        } @else {
+          <a
+            routerLink="/auth/login"
+            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all duration-200"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            {{ 'app.nav.login' | transloco }}
+          </a>
+        }
+      }
+    </div>
+  </nav>
+}

@@ -58,7 +58,7 @@ function disciplineColor(slug: string): string {
   imports: [TranslocoPipe, DisciplineFilterComponent],
   templateUrl: './event-map.component.html',
   host: {
-    class: 'block fixed top-14 right-0 bottom-0 left-0 z-10',
+    class: 'block fixed top-14 right-0 bottom-0 left-0 z-0',
   },
 })
 export class EventMapComponent implements OnInit, AfterViewInit {
