@@ -215,7 +215,16 @@ export class PostsService {
   private serializeListItem(post: Post): SerializedPostListItem {
     const full = this.serialize(post);
     const { body: _, ...rest } = full;
-    const plain = post.body.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    const plain = post.body
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
     return {
       ...rest,
       excerpt: plain.length > 200 ? plain.slice(0, 200) + '…' : plain,
