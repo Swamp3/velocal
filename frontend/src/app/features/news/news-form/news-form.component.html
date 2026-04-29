@@ -33,6 +33,7 @@
           {{ 'news.form.body' | transloco }}
         </label>
         <quill-editor
+          class="block w-full [&_.ql-container]:rounded-b-xl [&_.ql-toolbar]:rounded-t-xl"
           formControlName="body"
           [modules]="quillModules"
           theme="snow"

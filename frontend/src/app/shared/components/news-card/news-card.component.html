@@ -1,6 +1,6 @@
 <a
   [routerLink]="['/news', post().slug]"
-  class="group block rounded-2xl border p-5 shadow-[var(--shadow-card)]
+  class="group block overflow-hidden rounded-2xl border p-5 shadow-[var(--shadow-card)]
     transition-all duration-200
     hover:shadow-[var(--shadow-elevated)] hover:-translate-y-0.5
     focus-visible:outline-2 focus-visible:outline-offset-2
@@ -37,7 +37,7 @@
     </span>
   </div>
 
-  <p class="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)] line-clamp-3">
+  <p class="mt-3 break-words text-sm leading-relaxed text-[var(--color-text-muted)] line-clamp-3">
     {{ post().excerpt }}
   </p>
 
@@ -51,8 +51,8 @@
 
   @if (post().event) {
     <div class="mt-3 flex items-center gap-1.5 text-xs text-[var(--color-primary)]">
-      <span class="material-symbols-outlined text-[14px]">link</span>
-      {{ post().event!.name }}
+      <span class="material-symbols-outlined shrink-0 text-[14px]">link</span>
+      <span class="truncate">{{ post().event!.name }}</span>
     </div>
   }
 
