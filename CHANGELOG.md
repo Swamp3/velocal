@@ -4,7 +4,7 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.3.0] — 2026-04-28
+## [0.3.0] — 2026-04-29
 
 ### Added
 
@@ -14,18 +14,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Image uploads** — hero image upload for events and posts with Sharp-based processing.
 - **Admin section** — new `/admin` area with collapsible sidebar, admin-only route guard, and lazy-loaded routes. Visible only to admin users in the main nav.
 - **Import status dashboard** — admin page at `/admin/imports` showing import job history with status badges, event counts, duration, error logs, manual trigger button, and 10s auto-refresh.
+- **Persistent import runs** — import jobs now stored in `import_runs` database table instead of in-memory. Runs survive server restarts; stale jobs auto-marked as failed on startup. All runs (frontend, CLI, cron) logged to the same table.
 - **User management** — admin page at `/admin/users` with paginated, searchable user table, role filter, and admin role toggle with confirmation dialog. Self-role-change blocked on both frontend and backend.
 - **Data quality dashboard** — admin page at `/admin/missing-data` listing future events with incomplete fields (URL, address, coordinates, description). Stat cards, filter tabs, and direct edit links for quick triage.
 
 ### Changed
 
 - **Event form layout** — save/cancel buttons moved to page header for better UX.
-- **Event detail layout** — action buttons (favorite, edit, delete) moved to top-right next to back link.
+- **Event detail layout** — action buttons (favorite, edit, delete) moved to top-right next to back link; buttons now wrap cleanly on mobile.
 - **`ui-button` component** — added `form` input to support external form submission.
 - **`ApiService` error handling** — error responses now preserve full body for structured error handling (e.g. content policy violations).
+- **Admin shell** — mobile nav tabs moved outside sidebar flex container so they stack correctly on small screens.
+- **Calendar button** — removed from event list cards (detail-page-only action); fixes z-index stacking issue.
 
 ### Fixed
 
+- **Mobile sidebar on map view** — menu was clipped by map's fixed positioning and header's `backdrop-filter` containing block. Moved menu to end of DOM with high z-index; isolated `<main>` stacking context.
+- **News text overflow** — long text/URLs in post cards and detail view now wrap correctly (`break-words`, `overflow-hidden`).
+- **News editor field width** — Quill editor now full-width to match other form fields.
 - **SendGrid configuration** — corrected `.env.example` and config setup.
 - **Docker production config** — fixed backend internal URL and added missing networks.
 - **Docker hot reload** — backend TypeScript watcher now uses polling (`dynamicPriorityPolling`) to reliably detect file changes through Docker bind mounts on macOS.
