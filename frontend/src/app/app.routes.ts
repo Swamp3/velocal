@@ -39,6 +39,27 @@ export const routes: Routes = [
     loadChildren: () => import('./features/user/user.routes'),
   },
   {
+    path: 'impressum',
+    loadComponent: () =>
+      import('./features/legal/imprint/imprint.component').then(
+        (m) => m.ImprintComponent,
+      ),
+  },
+  {
+    path: 'datenschutz',
+    loadComponent: () =>
+      import('./features/legal/privacy/privacy.component').then(
+        (m) => m.PrivacyComponent,
+      ),
+  },
+  {
+    path: 'nutzungsbedingungen',
+    loadComponent: () =>
+      import('./features/legal/terms/terms.component').then(
+        (m) => m.TermsComponent,
+      ),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(

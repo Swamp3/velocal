@@ -118,10 +118,12 @@ export class AppShellComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly mobileMenuOpen = signal(false);
+  protected readonly isFullViewport = signal(false);
   protected readonly navLinks = NAV_LINKS;
   protected readonly adminNav = ADMIN_NAV;
   protected readonly authNav = AUTH_NAV;
   protected readonly appVersion = APP_VERSION;
+  protected readonly currentYear = new Date().getFullYear();
 
   constructor() {
     this.router.events
@@ -129,7 +131,10 @@ export class AppShellComponent {
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((e) => this.applyRouteDefaults(e.urlAfterRedirects));
+      .subscribe((e) => {
+        this.isFullViewport.set(/^\/map(\?|$)/.test(e.urlAfterRedirects));
+        this.applyRouteDefaults(e.urlAfterRedirects);
+      });
   }
 
   private applyRouteDefaults(url: string): void {
@@ -143,6 +148,9 @@ export class AppShellComponent {
       !/^\/(events|series|news)\/(new|edit)$/.test(path) &&
       !path.endsWith('/edit');
     if (isDetail) return;
+
+    const isLegal = /^\/(impressum|datenschutz|nutzungsbedingungen)/.test(path);
+    if (isLegal) return;
 
     const editish = /\/(new|edit)(\/|$)/.test(path) || /^\/(auth|profile|admin)/.test(path);
     const hasDisallowedQuery = !!rawQuery && this.hasDisallowedParams(rawQuery);

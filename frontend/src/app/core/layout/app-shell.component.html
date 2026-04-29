@@ -4,15 +4,11 @@
   <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
     <!-- Logo -->
     <a routerLink="/" class="flex items-center gap-2.5 group">
-      <div
-        class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 shadow-md group-hover:shadow-lg transition-shadow"
-      >
-        <span
-          class="material-symbols-outlined text-[18px] text-white"
-          style="font-variation-settings: 'FILL' 1"
-          >pedal_bike</span
-        >
-      </div>
+      <img
+        src="/logo2.svg"
+        alt="VeloCal"
+        class="size-8 shadow-md group-hover:shadow-lg transition-shadow"
+      />
       <span class="text-lg font-bold tracking-tight text-[var(--color-text)]">
         Velo<span class="text-[var(--color-primary)]">Cal</span>
       </span>
@@ -136,12 +132,41 @@
       </button>
     </div>
   </div>
-
 </header>
 
-<main class="isolate mx-auto max-w-7xl px-4 py-8 sm:px-6">
+<main [class]="isFullViewport() ? 'isolate' : 'isolate mx-auto max-w-7xl px-4 py-8 sm:px-6'">
   <router-outlet />
 </main>
+
+@if (!isFullViewport()) {
+  <footer
+    class="border-t border-[var(--color-border)]/50 bg-[var(--color-bg)] py-6 text-sm text-[var(--color-text-muted)]"
+  >
+    <div class="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between sm:px-6">
+      <span>&copy; {{ currentYear }} VeloCal</span>
+      <nav class="flex gap-4" aria-label="Legal links">
+        <a
+          routerLink="/impressum"
+          class="hover:text-[var(--color-text)] transition-colors"
+        >
+          {{ 'legal.footer.imprint' | transloco }}
+        </a>
+        <a
+          routerLink="/datenschutz"
+          class="hover:text-[var(--color-text)] transition-colors"
+        >
+          {{ 'legal.footer.privacy' | transloco }}
+        </a>
+        <a
+          routerLink="/nutzungsbedingungen"
+          class="hover:text-[var(--color-text)] transition-colors"
+        >
+          {{ 'legal.footer.terms' | transloco }}
+        </a>
+      </nav>
+    </div>
+  </footer>
+}
 
 <ui-toast-container />
 
