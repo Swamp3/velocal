@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
 import { SeoService } from '@core/services/seo.service';
-import { AddToCalendarComponent } from '@shared/components';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-imprint',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, AddToCalendarComponent],
+  imports: [TranslocoPipe],
   templateUrl: './imprint.component.html',
 })
 export class ImprintComponent implements OnInit {
