@@ -371,6 +371,10 @@
       }
     }
   },
+  "workouts": {
+    "title": "Workouts",
+    "comingSoon": "Dieses Feature ist noch in Entwicklung. Bald verfügbar!"
+  },
   "legal": {
     "footer": {
       "imprint": "Impressum",

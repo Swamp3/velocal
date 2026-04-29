@@ -39,6 +39,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/user/user.routes'),
   },
   {
+    path: 'workouts',
+    loadComponent: () =>
+      import('./features/workouts/workouts-placeholder.component').then(
+        (m) => m.WorkoutsPlaceholderComponent,
+      ),
+  },
+  {
     path: 'impressum',
     loadComponent: () =>
       import('./features/legal/imprint/imprint.component').then(

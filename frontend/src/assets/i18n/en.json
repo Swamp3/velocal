@@ -371,6 +371,10 @@
       }
     }
   },
+  "workouts": {
+    "title": "Workouts",
+    "comingSoon": "This feature is still in development. Coming soon!"
+  },
   "legal": {
     "footer": {
       "imprint": "Imprint",
