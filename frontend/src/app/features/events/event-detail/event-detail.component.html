@@ -28,19 +28,17 @@
 } @else if (event(); as event) {
   <div class="mx-auto max-w-3xl">
     <!-- Top bar: back link + actions -->
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <a
-          routerLink="/events"
-          class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
-            hover:text-[var(--color-text)] transition-colors"
-        >
-          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-          {{ 'events.detail.backToList' | transloco }}
-        </a>
-      </div>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <a
+        routerLink="/events"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
+          hover:text-[var(--color-text)] transition-colors"
+      >
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {{ 'events.detail.backToList' | transloco }}
+      </a>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         @if (auth.isAuthenticated()) {
           <ui-button
             size="sm"
