@@ -29,6 +29,34 @@ export class MailService {
     }
   }
 
+  async sendPasswordReset(email: string, resetUrl: string): Promise<void> {
+    if (!this.enabled) {
+      this.logger.log(`[DEV] Password reset for ${email}: ${resetUrl}`);
+      return;
+    }
+
+    const subject = 'VeloCal — Reset your password';
+    const preheader = 'Click the link to set a new password for your VeloCal account.';
+
+    await this.send({
+      to: email,
+      from: { email: this.fromEmail, name: this.fromName },
+      ...(this.replyTo ? { replyTo: this.replyTo } : {}),
+      subject,
+      text: this.passwordResetText(resetUrl),
+      html: this.passwordResetHtml(resetUrl, preheader),
+      categories: ['transactional', 'auth-password-reset'],
+      trackingSettings: {
+        clickTracking: { enable: false, enableText: false },
+        openTracking: { enable: false },
+        subscriptionTracking: { enable: false },
+      },
+      mailSettings: {
+        bypassListManagement: { enable: false },
+      },
+    });
+  }
+
   async sendOtp(email: string, code: string): Promise<void> {
     if (!this.enabled) {
       this.logger.log(`[DEV] OTP for ${email}: ${code}`);
@@ -115,6 +143,57 @@ export class MailService {
           </div>
           <p style="margin:0 0 16px;color:#71717a;font-size:13px;line-height:1.5">
             This code expires in ${OTP_EXPIRY_MINUTES} minutes.<br>
+            If you didn't request this, you can safely ignore this email.
+          </p>
+          <p style="margin:24px 0 0;color:#a1a1aa;font-size:11px">Sent by VeloCal · velocal.cc</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+  }
+
+  private passwordResetText(resetUrl: string): string {
+    return [
+      'VeloCal — Reset your password',
+      '',
+      'Click the link below to set a new password:',
+      resetUrl,
+      '',
+      'This link expires in 4 hours.',
+      "If you didn't request this, you can ignore this email.",
+      '',
+      '— VeloCal',
+    ].join('\n');
+  }
+
+  private passwordResetHtml(resetUrl: string, preheader: string): string {
+    const safeUrl = this.esc(resetUrl);
+    const safePreheader = this.esc(preheader);
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reset your password</title>
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f4f5;color:#18181b">
+  <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;font-size:1px;line-height:1px;max-height:0;max-width:0;overflow:hidden">${safePreheader}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
+    <tr><td align="center">
+      <table role="presentation" width="420" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+        <tr><td style="text-align:center">
+          <h1 style="margin:0 0 8px;font-size:22px;color:#18181b">VeloCal</h1>
+          <p style="margin:0 0 24px;color:#71717a;font-size:14px">Reset your password</p>
+          <p style="margin:0 0 24px;color:#3f3f46;font-size:14px;line-height:1.5">
+            Click the button below to set a new password for your account.
+          </p>
+          <a href="${safeUrl}" style="display:inline-block;background:#2563eb;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px">
+            Set new password
+          </a>
+          <p style="margin:24px 0 0;color:#71717a;font-size:13px;line-height:1.5">
+            This link expires in 4 hours.<br>
             If you didn't request this, you can safely ignore this email.
           </p>
           <p style="margin:24px 0 0;color:#a1a1aa;font-size:11px">Sent by VeloCal · velocal.cc</p>

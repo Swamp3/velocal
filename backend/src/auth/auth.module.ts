@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { OtpToken } from './entities/otp-token.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { OtpToken } from './entities/otp-token.entity';
         } as import('@nestjs/jwt').JwtModuleOptions;
       },
     }),
-    TypeOrmModule.forFeature([OtpToken]),
+    TypeOrmModule.forFeature([OtpToken, PasswordResetToken]),
     UsersModule,
     MailModule,
   ],

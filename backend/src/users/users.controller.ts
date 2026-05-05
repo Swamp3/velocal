@@ -84,7 +84,7 @@ export class UsersController {
 
   private sanitize(user: User | null) {
     if (!user) return null;
-    const { passwordHash: _, ...rest } = user;
-    return rest;
+    const { passwordHash, ...rest } = user;
+    return { ...rest, hasPassword: !!passwordHash };
   }
 }

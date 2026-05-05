@@ -12,6 +12,7 @@ import { Post } from '../posts/entities/post.entity';
 import { PostTag } from '../posts/entities/post-tag.entity';
 import { ImportRun } from '../import/entities/import-run.entity';
 import { OtpToken } from '../auth/entities/otp-token.entity';
+import { PasswordResetToken } from '../auth/entities/password-reset-token.entity';
 
 export default new DataSource({
   type: 'postgres',
@@ -31,6 +32,7 @@ export default new DataSource({
     Post,
     PostTag,
     OtpToken,
+    PasswordResetToken,
     ImportRun,
   ],
   migrations: ['src/migrations/*.ts'],
