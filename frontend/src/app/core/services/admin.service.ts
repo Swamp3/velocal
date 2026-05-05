@@ -13,6 +13,7 @@ export interface ImportJob {
   finishedAt: string | null;
   result: { created: number; updated: number; skipped: number } | null;
   error: string | null;
+  triggeredBy: string | null;
 }
 
 export interface AdminUser {

@@ -324,6 +324,7 @@
       "col": {
         "status": "Status",
         "source": "Source",
+        "triggeredBy": "Triggered by",
         "started": "Started",
         "duration": "Duration",
         "created": "Created",

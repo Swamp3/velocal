@@ -49,7 +49,7 @@ export class ImportService {
     void this.recoverStaleRuns();
   }
 
-  async startImport(sourceName?: string): Promise<ImportRun> {
+  async startImport(sourceName?: string, triggeredBy?: string): Promise<ImportRun> {
     if (this.importRunning) {
       throw new ConflictException('An import is already running');
     }
@@ -72,6 +72,7 @@ export class ImportService {
     const run = this.importRunRepo.create({
       source: sourceName ?? null,
       status: ImportRunStatus.RUNNING,
+      triggeredBy: triggeredBy ?? null,
     });
     await this.importRunRepo.save(run);
 

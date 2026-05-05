@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 import { ImportService } from './import.service';
 import { ImportRun } from './entities/import-run.entity';
 import { TriggerImportDto } from './dto/trigger-import.dto';
@@ -26,6 +28,7 @@ interface ImportJobResponse {
   finishedAt: string | null;
   result: { created: number; updated: number; skipped: number } | null;
   error: string | null;
+  triggeredBy: string | null;
 }
 
 function toJobResponse(run: ImportRun): ImportJobResponse {
@@ -44,6 +47,7 @@ function toJobResponse(run: ImportRun): ImportJobResponse {
         }
       : null,
     error: run.errorLog,
+    triggeredBy: run.triggeredBy,
   };
 }
 
@@ -54,8 +58,11 @@ export class ImportController {
 
   @Post('trigger')
   @HttpCode(HttpStatus.ACCEPTED)
-  async trigger(@Body() dto: TriggerImportDto): Promise<ImportJobResponse> {
-    const run = await this.importService.startImport(dto.source);
+  async trigger(
+    @Body() dto: TriggerImportDto,
+    @CurrentUser() user: User,
+  ): Promise<ImportJobResponse> {
+    const run = await this.importService.startImport(dto.source, user.email);
     return toJobResponse(run);
   }
 

@@ -39,4 +39,7 @@ export class ImportRun {
 
   @Column({ type: 'text', nullable: true })
   errorLog: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  triggeredBy: string | null;
 }
