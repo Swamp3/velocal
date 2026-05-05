@@ -51,6 +51,10 @@ export class ProfileComponent implements OnInit {
   protected readonly selectedSlugs = signal<Set<string>>(new Set());
   protected readonly savingPrefs = signal(false);
 
+  protected readonly hasPassword = signal(false);
+  protected readonly passwordActionLoading = signal(false);
+  protected readonly passwordActionSent = signal(false);
+
   protected readonly favoriteEvents = signal<CyclingEvent[]>([]);
   protected readonly favoritesTotal = signal(0);
   protected readonly favoritesPage = signal(1);
@@ -72,6 +76,11 @@ export class ProfileComponent implements OnInit {
     this.loadDisciplines();
     this.loadDisciplinePrefs();
     this.loadFavorites();
+
+    const user = this.auth.currentUser();
+    if (user) {
+      this.hasPassword.set(!!user.hasPassword);
+    }
   }
 
   protected activeLang(): string {
@@ -125,6 +134,25 @@ export class ProfileComponent implements OnInit {
       error: () => {
         this.toast.error(this.transloco.translate('profile.savedError'));
         this.saving.set(false);
+      },
+    });
+  }
+
+  protected onChangePassword(): void {
+    if (this.passwordActionLoading()) return;
+    this.passwordActionLoading.set(true);
+
+    this.auth.changePassword().subscribe({
+      next: () => {
+        this.passwordActionLoading.set(false);
+        this.passwordActionSent.set(true);
+        this.toast.success(
+          this.transloco.translate('profile.passwordResetSent'),
+        );
+      },
+      error: () => {
+        this.passwordActionLoading.set(false);
+        this.toast.error(this.transloco.translate('profile.passwordResetError'));
       },
     });
   }

@@ -159,7 +159,19 @@
     "resendIn": "Resend in {{seconds}}s",
     "changeEmail": "Change email",
     "usePassword": "Sign in with password instead",
-    "useOtp": "Sign in with email code instead"
+    "useOtp": "Sign in with email code instead",
+    "forgotPassword": "Forgot password?",
+    "forgotHint": "Enter your email and we'll send you a link to reset your password.",
+    "sendResetLink": "Send Reset Link",
+    "forgotSent": "If an account with this email exists, we've sent a reset link.",
+    "backToLogin": "Back to login",
+    "resetPassword": "Reset Password",
+    "newPassword": "New Password",
+    "setPassword": "Set Password",
+    "resetSuccess": "Password updated. You're now logged in.",
+    "resetTokenMissing": "No reset token found. Please request a new reset link.",
+    "resetTokenInvalid": "This reset link is invalid or has expired. Please request a new one.",
+    "resetFailed": "Failed to reset password. Please try again."
   },
   "profile": {
     "title": "Profile",
@@ -183,7 +195,14 @@
     "removeFavorite": "Remove",
     "loadMore": "Load more",
     "loadingFavorites": "Loading favorites...",
-    "noFavorites": "You have no favorites yet."
+    "noFavorites": "You have no favorites yet.",
+    "passwordTitle": "Password",
+    "changePassword": "Change Password",
+    "setPassword": "Set Password",
+    "passwordChangeHint": "We'll send a reset link to your email address.",
+    "passwordSetHint": "You signed up without a password. Set one to enable password login.",
+    "passwordResetSent": "Reset email sent. Check your inbox.",
+    "passwordResetError": "Failed to send reset email. Please try again."
   },
   "series": {
     "title": "Race Series",

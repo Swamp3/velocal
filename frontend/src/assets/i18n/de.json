@@ -159,7 +159,19 @@
     "resendIn": "Erneut senden in {{seconds}}s",
     "changeEmail": "E-Mail ändern",
     "usePassword": "Stattdessen mit Passwort anmelden",
-    "useOtp": "Stattdessen mit E-Mail-Code anmelden"
+    "useOtp": "Stattdessen mit E-Mail-Code anmelden",
+    "forgotPassword": "Passwort vergessen?",
+    "forgotHint": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.",
+    "sendResetLink": "Link senden",
+    "forgotSent": "Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link gesendet.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "resetPassword": "Passwort zurücksetzen",
+    "newPassword": "Neues Passwort",
+    "setPassword": "Passwort festlegen",
+    "resetSuccess": "Passwort aktualisiert. Du bist jetzt eingeloggt.",
+    "resetTokenMissing": "Kein Reset-Token gefunden. Bitte fordere einen neuen Link an.",
+    "resetTokenInvalid": "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
+    "resetFailed": "Passwort konnte nicht zurückgesetzt werden. Bitte versuche es erneut."
   },
   "profile": {
     "title": "Profil",
@@ -183,7 +195,14 @@
     "removeFavorite": "Entfernen",
     "loadMore": "Mehr laden",
     "loadingFavorites": "Lade Favoriten...",
-    "noFavorites": "Du hast noch keine Favoriten."
+    "noFavorites": "Du hast noch keine Favoriten.",
+    "passwordTitle": "Passwort",
+    "changePassword": "Passwort ändern",
+    "setPassword": "Passwort festlegen",
+    "passwordChangeHint": "Wir senden einen Link zum Zurücksetzen an deine E-Mail-Adresse.",
+    "passwordSetHint": "Du hast dich ohne Passwort registriert. Lege eines fest, um dich auch mit Passwort anmelden zu können.",
+    "passwordResetSent": "E-Mail zum Zurücksetzen gesendet. Prüfe deinen Posteingang.",
+    "passwordResetError": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut."
   },
   "series": {
     "title": "Rennserien",

@@ -97,6 +97,34 @@
     </form>
   </section>
 
+  <!-- Password -->
+  <section
+    class="rounded-[var(--radius-lg)] border border-[var(--color-border)]
+      bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+  >
+    <h2 class="mb-2 text-lg font-semibold text-[var(--color-text)]">
+      {{ 'profile.passwordTitle' | transloco }}
+    </h2>
+    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+      {{ hasPassword() ? ('profile.passwordChangeHint' | transloco) : ('profile.passwordSetHint' | transloco) }}
+    </p>
+
+    @if (passwordActionSent()) {
+      <p class="text-sm text-[var(--color-success)]">
+        {{ 'profile.passwordResetSent' | transloco }}
+      </p>
+    } @else {
+      <ui-button
+        variant="outline"
+        [loading]="passwordActionLoading()"
+        [disabled]="passwordActionLoading()"
+        (click)="onChangePassword()"
+      >
+        {{ hasPassword() ? ('profile.changePassword' | transloco) : ('profile.setPassword' | transloco) }}
+      </ui-button>
+    }
+  </section>
+
   <!-- Discipline Preferences -->
   <section
     class="rounded-[var(--radius-lg)] border border-[var(--color-border)]

@@ -13,6 +13,13 @@ const routes: Routes = [
         (m) => m.RegisterComponent,
       ),
   },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+  },
 ];
 
 export default routes;

@@ -111,14 +111,75 @@
         </ui-button>
       </form>
 
-      <button
-        type="button"
-        (click)="showOtpLogin()"
-        class="mt-4 block w-full text-center text-sm text-[var(--color-text-muted)]
-          hover:text-[var(--color-text)] transition-colors"
-      >
-        {{ 'auth.useOtp' | transloco }}
-      </button>
+      <div class="mt-4 flex flex-col items-center gap-2">
+        <button
+          type="button"
+          (click)="showForgotPassword()"
+          class="text-sm text-[var(--color-primary)] hover:underline"
+        >
+          {{ 'auth.forgotPassword' | transloco }}
+        </button>
+
+        <button
+          type="button"
+          (click)="showOtpLogin()"
+          class="text-sm text-[var(--color-text-muted)]
+            hover:text-[var(--color-text)] transition-colors"
+        >
+          {{ 'auth.useOtp' | transloco }}
+        </button>
+      </div>
+    }
+
+    <!-- Forgot password -->
+    @if (view() === 'forgot') {
+      @if (forgotSent()) {
+        <div class="text-center">
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'auth.forgotSent' | transloco }}
+          </p>
+          <button
+            type="button"
+            (click)="showPasswordLogin()"
+            class="mt-4 text-sm font-medium text-[var(--color-primary)] hover:underline"
+          >
+            {{ 'auth.backToLogin' | transloco }}
+          </button>
+        </div>
+      } @else {
+        <form [formGroup]="forgotForm" (ngSubmit)="submitForgotPassword()" class="flex flex-col gap-4">
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'auth.forgotHint' | transloco }}
+          </p>
+
+          <ui-input
+            [label]="'auth.email' | transloco"
+            type="email"
+            placeholder="name@example.com"
+            formControlName="email"
+            [error]="forgotFieldError()"
+          />
+
+          <ui-button
+            type="submit"
+            size="lg"
+            [loading]="loading()"
+            [disabled]="loading()"
+            class="w-full"
+          >
+            {{ 'auth.sendResetLink' | transloco }}
+          </ui-button>
+        </form>
+
+        <button
+          type="button"
+          (click)="showPasswordLogin()"
+          class="mt-4 block w-full text-center text-sm text-[var(--color-text-muted)]
+            hover:text-[var(--color-text)] transition-colors"
+        >
+          {{ 'auth.backToLogin' | transloco }}
+        </button>
+      }
     }
 
     <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">

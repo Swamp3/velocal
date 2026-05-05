@@ -81,6 +81,20 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>('/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<AuthResponse> {
+    return this.api
+      .post<AuthResponse>('/auth/reset-password', { token, password })
+      .pipe(tap((res) => this.setSession(res)));
+  }
+
+  changePassword(): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>('/auth/change-password', {});
+  }
+
   updateCurrentUser(user: User): void {
     this._currentUser.set(user);
   }

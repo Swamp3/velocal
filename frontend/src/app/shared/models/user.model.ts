@@ -8,4 +8,5 @@ export interface User {
   preferredLocale: string;
   isAdmin?: boolean;
   emailVerified?: boolean;
+  hasPassword?: boolean;
 }

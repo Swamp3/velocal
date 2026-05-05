@@ -19,7 +19,7 @@ import {
   ToastService,
 } from '@shared/ui';
 
-type AuthView = 'email' | 'otp' | 'password';
+type AuthView = 'email' | 'otp' | 'password' | 'forgot';
 
 @Component({
   selector: 'app-login',
@@ -46,7 +46,13 @@ export class LoginComponent {
   protected readonly otpEmail = signal('');
   protected readonly resendCooldown = signal(0);
 
+  protected readonly forgotSent = signal(false);
+
   protected readonly emailForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
+
+  protected readonly forgotForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
   });
 
@@ -130,6 +136,39 @@ export class LoginComponent {
     });
   }
 
+  protected showForgotPassword(): void {
+    this.view.set('forgot');
+    this.forgotSent.set(false);
+    const email =
+      this.passwordForm.getRawValue().email ||
+      this.emailForm.getRawValue().email ||
+      this.otpEmail();
+    if (email) {
+      this.forgotForm.controls.email.setValue(email);
+    }
+  }
+
+  protected submitForgotPassword(): void {
+    if (this.loading() || this.forgotForm.invalid) {
+      this.forgotForm.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    const email = this.forgotForm.getRawValue().email;
+
+    this.auth.forgotPassword(email).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.forgotSent.set(true);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toast.error(this.transloco.translate('auth.resetFailed'));
+      },
+    });
+  }
+
   protected showPasswordLogin(): void {
     this.view.set('password');
     const email = this.emailForm.getRawValue().email || this.otpEmail();
@@ -167,6 +206,14 @@ export class LoginComponent {
 
   protected emailError(): string {
     const ctrl = this.emailForm.controls.email;
+    if (!ctrl.touched || ctrl.valid) return '';
+    if (ctrl.hasError('required')) return this.transloco.translate('validation.required');
+    if (ctrl.hasError('email')) return this.transloco.translate('validation.email');
+    return '';
+  }
+
+  protected forgotFieldError(): string {
+    const ctrl = this.forgotForm.controls.email;
     if (!ctrl.touched || ctrl.valid) return '';
     if (ctrl.hasError('required')) return this.transloco.translate('validation.required');
     if (ctrl.hasError('email')) return this.transloco.translate('validation.email');
