@@ -33,11 +33,11 @@ export class AnalyticsService {
       .createQueryBuilder('pv')
       .select('pv.path', 'path')
       .addSelect('COUNT(*)::int', 'views')
-      .where("pv.viewedAt > NOW() - :interval::interval", {
-        interval: `${days} days`,
+      .where('pv.viewedAt > NOW() - CAST(:days AS interval)', {
+        days: `${days} days`,
       })
       .groupBy('pv.path')
-      .orderBy('views', 'DESC')
+      .orderBy('COUNT(*)', 'DESC')
       .limit(limit)
       .getRawMany<TopPage>();
 
@@ -45,29 +45,33 @@ export class AnalyticsService {
   }
 
   async getOverview(days = 30): Promise<AnalyticsOverview> {
-    const since = `${days} days`;
+    const interval = `${days} days`;
 
-    const [{ totalViews }] = await this.pageViewRepo
+    const totalResult = await this.pageViewRepo
       .createQueryBuilder('pv')
       .select('COUNT(*)::int', 'totalViews')
-      .where("pv.viewedAt > NOW() - :since::interval", { since })
-      .getRawMany<{ totalViews: number }>();
+      .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
+      .getRawOne<{ totalViews: number }>();
 
-    const [{ uniquePaths }] = await this.pageViewRepo
+    const uniqueResult = await this.pageViewRepo
       .createQueryBuilder('pv')
       .select('COUNT(DISTINCT pv.path)::int', 'uniquePaths')
-      .where("pv.viewedAt > NOW() - :since::interval", { since })
-      .getRawMany<{ uniquePaths: number }>();
+      .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
+      .getRawOne<{ uniquePaths: number }>();
 
     const viewsPerDay = await this.pageViewRepo
       .createQueryBuilder('pv')
       .select("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')", 'date')
       .addSelect('COUNT(*)::int', 'views')
-      .where("pv.viewedAt > NOW() - :since::interval", { since })
-      .groupBy('date')
-      .orderBy('date', 'ASC')
+      .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
+      .groupBy("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')")
+      .orderBy("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')", 'ASC')
       .getRawMany<{ date: string; views: number }>();
 
-    return { totalViews, uniquePaths, viewsPerDay };
+    return {
+      totalViews: totalResult?.totalViews ?? 0,
+      uniquePaths: uniqueResult?.uniquePaths ?? 0,
+      viewsPerDay,
+    };
   }
 }

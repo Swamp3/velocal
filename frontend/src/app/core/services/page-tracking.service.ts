@@ -1,13 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { EMPTY, filter, pairwise, startWith, switchMap, throttleTime } from 'rxjs';
-import { ApiService } from './api.service';
+import { API_BASE_URL } from '@core/tokens/api-base-url';
+import { catchError, EMPTY, filter, pairwise, startWith, switchMap, throttleTime } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class PageTrackingService {
   private readonly router = inject(Router);
-  private readonly api = inject(ApiService);
+  private readonly http = inject(HttpClient);
+  private readonly base = inject(API_BASE_URL);
   private readonly destroyRef = inject(DestroyRef);
 
   init(): void {
@@ -20,10 +22,12 @@ export class PageTrackingService {
         throttleTime(1000),
         switchMap(([, event]) => {
           if (!event) return EMPTY;
-          return this.api.post('/analytics/page-view', { path: event.urlAfterRedirects });
+          return this.http
+            .post(`${this.base}/analytics/page-view`, { path: event.urlAfterRedirects }, { responseType: 'text' })
+            .pipe(catchError(() => EMPTY));
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({ error: () => {} });
+      .subscribe();
   }
 }
