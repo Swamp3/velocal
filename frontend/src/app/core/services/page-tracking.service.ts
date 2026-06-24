@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { DestroyRef, inject, Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
@@ -13,10 +14,13 @@ export class PageTrackingService {
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL);
   private readonly destroyRef = inject(DestroyRef);
-
-  private readonly clientId = this.getOrCreateClientId();
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   init(): void {
+    if (!this.isBrowser) return;
+
+    const clientId = this.getOrCreateClientId();
+
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -29,7 +33,7 @@ export class PageTrackingService {
           return this.http
             .post(
               `${this.base}/analytics/page-view`,
-              { path: event.urlAfterRedirects, clientId: this.clientId },
+              { path: event.urlAfterRedirects, clientId },
               { responseType: 'text' },
             )
             .pipe(catchError(() => EMPTY));
