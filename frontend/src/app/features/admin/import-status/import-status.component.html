@@ -10,12 +10,23 @@
   </div>
 
   <div class="flex items-center gap-2">
+    <select
+      class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)]"
+      [value]="selectedSource()"
+      (change)="selectedSource.set($any($event.target).value)"
+    >
+      <option value="">{{ 'admin.imports.allSources' | transloco }}</option>
+      @for (source of sources(); track source) {
+        <option [value]="source">{{ source }}</option>
+      }
+    </select>
+
     <ui-button
       variant="primary"
       size="sm"
       [loading]="triggering()"
       [disabled]="hasRunningJob()"
-      (click)="triggerImport()"
+      (click)="triggerImport(selectedSource() || undefined)"
     >
       <span class="material-symbols-outlined text-[18px]">play_arrow</span>
       {{ 'admin.imports.trigger' | transloco }}

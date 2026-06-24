@@ -32,6 +32,7 @@ export class ImportStatusComponent implements OnInit {
 
   protected readonly jobs = signal<ImportJob[]>([]);
   protected readonly sources = signal<string[]>([]);
+  protected readonly selectedSource = signal('');
   protected readonly loading = signal(true);
   protected readonly triggering = signal(false);
   protected readonly expandedErrors = signal<Set<string>>(new Set());
