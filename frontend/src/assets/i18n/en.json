@@ -395,6 +395,7 @@
       "title": "Analytics",
       "totalViews": "Total Page Views",
       "uniquePages": "Unique Pages",
+      "uniqueClients": "Unique Visitors",
       "topPages": "Top Pages",
       "path": "Path",
       "views": "Views",

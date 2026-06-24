@@ -26,6 +26,7 @@ export class AnalyticsComponent implements OnInit {
   protected readonly period = signal<Period>(30);
   protected readonly totalViews = signal(0);
   protected readonly uniquePaths = signal(0);
+  protected readonly uniqueClients = signal(0);
   protected readonly topPages = signal<{ path: string; views: number }[]>([]);
   protected readonly viewsPerDay = signal<{ date: string; views: number }[]>([]);
 
@@ -62,6 +63,7 @@ export class AnalyticsComponent implements OnInit {
       next: (overview) => {
         this.totalViews.set(overview.totalViews);
         this.uniquePaths.set(overview.uniquePaths);
+        this.uniqueClients.set(overview.uniqueClients);
         this.viewsPerDay.set(overview.viewsPerDay);
       },
     });

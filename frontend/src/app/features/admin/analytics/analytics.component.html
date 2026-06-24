@@ -23,7 +23,7 @@
 </div>
 
 <!-- Summary cards -->
-<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
   <div class="rounded-xl border border-[var(--color-border)] p-5">
     <div class="text-sm font-medium text-[var(--color-text-muted)]">
       {{ 'admin.analytics.totalViews' | transloco }}
@@ -45,6 +45,18 @@
     } @else {
       <div class="mt-1 text-3xl font-bold tabular-nums text-[var(--color-text)]">
         {{ uniquePaths() | number }}
+      </div>
+    }
+  </div>
+  <div class="rounded-xl border border-[var(--color-border)] p-5">
+    <div class="text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.analytics.uniqueClients' | transloco }}
+    </div>
+    @if (loading()) {
+      <ui-skeleton class="mt-2 h-8 w-24" />
+    } @else {
+      <div class="mt-1 text-3xl font-bold tabular-nums text-[var(--color-text)]">
+        {{ uniqueClients() | number }}
       </div>
     }
   </div>

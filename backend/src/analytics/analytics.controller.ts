@@ -22,6 +22,6 @@ export class AnalyticsController {
     @Body() dto: RecordPageViewDto,
     @CurrentUser() user: { id: string } | null,
   ): Promise<void> {
-    await this.analyticsService.recordPageView(dto.path, user?.id);
+    await this.analyticsService.recordPageView(dto.path, user?.id, dto.clientId);
   }
 }

@@ -96,7 +96,7 @@ export class AdminService {
 
   getAnalyticsOverview(
     days = 30,
-  ): Observable<{ totalViews: number; uniquePaths: number; viewsPerDay: { date: string; views: number }[] }> {
+  ): Observable<{ totalViews: number; uniquePaths: number; uniqueClients: number; viewsPerDay: { date: string; views: number }[] }> {
     return this.api.get('/admin/analytics/overview', { days });
   }
 }

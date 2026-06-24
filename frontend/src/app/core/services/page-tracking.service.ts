@@ -5,12 +5,16 @@ import { NavigationEnd, Router } from '@angular/router';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
 import { catchError, EMPTY, filter, pairwise, startWith, switchMap, throttleTime } from 'rxjs';
 
+const CLIENT_ID_KEY = 'velocal_client_id';
+
 @Injectable({ providedIn: 'root' })
 export class PageTrackingService {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL);
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly clientId = this.getOrCreateClientId();
 
   init(): void {
     this.router.events
@@ -23,11 +27,24 @@ export class PageTrackingService {
         switchMap(([, event]) => {
           if (!event) return EMPTY;
           return this.http
-            .post(`${this.base}/analytics/page-view`, { path: event.urlAfterRedirects }, { responseType: 'text' })
+            .post(
+              `${this.base}/analytics/page-view`,
+              { path: event.urlAfterRedirects, clientId: this.clientId },
+              { responseType: 'text' },
+            )
             .pipe(catchError(() => EMPTY));
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
+  }
+
+  private getOrCreateClientId(): string {
+    let id = localStorage.getItem(CLIENT_ID_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(CLIENT_ID_KEY, id);
+    }
+    return id;
   }
 }

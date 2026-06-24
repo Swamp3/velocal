@@ -11,6 +11,7 @@ export interface TopPage {
 export interface AnalyticsOverview {
   totalViews: number;
   uniquePaths: number;
+  uniqueClients: number;
   viewsPerDay: { date: string; views: number }[];
 }
 
@@ -21,10 +22,11 @@ export class AnalyticsService {
     private readonly pageViewRepo: Repository<PageView>,
   ) {}
 
-  async recordPageView(path: string, userId?: string): Promise<void> {
+  async recordPageView(path: string, userId?: string, clientId?: string): Promise<void> {
     await this.pageViewRepo.insert({
       path,
       userId: userId ?? null,
+      clientId: clientId ?? null,
     });
   }
 
@@ -59,6 +61,12 @@ export class AnalyticsService {
       .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
       .getRawOne<{ uniquePaths: number }>();
 
+    const clientsResult = await this.pageViewRepo
+      .createQueryBuilder('pv')
+      .select('COUNT(DISTINCT pv.clientId)::int', 'uniqueClients')
+      .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
+      .getRawOne<{ uniqueClients: number }>();
+
     const viewsPerDay = await this.pageViewRepo
       .createQueryBuilder('pv')
       .select("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')", 'date')
@@ -71,6 +79,7 @@ export class AnalyticsService {
     return {
       totalViews: totalResult?.totalViews ?? 0,
       uniquePaths: uniqueResult?.uniquePaths ?? 0,
+      uniqueClients: clientsResult?.uniqueClients ?? 0,
       viewsPerDay,
     };
   }

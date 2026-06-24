@@ -19,6 +19,10 @@ export class PageView {
   @Column({ type: 'uuid', nullable: true })
   userId: string | null;
 
+  @Column({ type: 'uuid', nullable: true })
+  @Index()
+  clientId: string | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   viewedAt: Date;
 }
