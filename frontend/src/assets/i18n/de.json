@@ -304,7 +304,8 @@
     "nav": {
       "imports": "Importe",
       "users": "Benutzer",
-      "missingData": "Datenqualität"
+      "missingData": "Datenqualität",
+      "analytics": "Statistiken"
     },
     "imports": {
       "title": "Import-Status",
@@ -388,6 +389,20 @@
         "location": "Ort",
         "missing": "Fehlende Felder",
         "actions": "Aktionen"
+      }
+    },
+    "analytics": {
+      "title": "Statistiken",
+      "totalViews": "Seitenaufrufe gesamt",
+      "uniquePages": "Eindeutige Seiten",
+      "topPages": "Meistbesuchte Seiten",
+      "path": "Pfad",
+      "views": "Aufrufe",
+      "empty": "Noch keine Seitenaufrufe erfasst",
+      "period": {
+        "7d": "7 Tage",
+        "30d": "30 Tage",
+        "90d": "90 Tage"
       }
     }
   },

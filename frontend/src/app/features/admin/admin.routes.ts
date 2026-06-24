@@ -3,6 +3,7 @@ import { AdminShellComponent } from './admin-shell/admin-shell.component';
 import { ImportStatusComponent } from './import-status/import-status.component';
 import { MissingDataComponent } from './missing-data/missing-data.component';
 import { UserListComponent } from './user-list/user-list.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
 
 export default [
   {
@@ -13,6 +14,7 @@ export default [
       { path: 'imports', component: ImportStatusComponent },
       { path: 'users', component: UserListComponent },
       { path: 'missing-data', component: MissingDataComponent },
+      { path: 'analytics', component: AnalyticsComponent },
     ],
   },
 ] satisfies Routes;

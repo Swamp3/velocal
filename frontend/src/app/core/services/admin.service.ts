@@ -84,6 +84,21 @@ export class AdminService {
   getMissingDataStats(): Observable<Record<string, number>> {
     return this.api.get<Record<string, number>>('/admin/events/missing-data/stats');
   }
+
+  // --- Analytics ---
+
+  getTopPages(days = 30, limit = 20): Observable<{ path: string; views: number }[]> {
+    return this.api.get<{ path: string; views: number }[]>(
+      '/admin/analytics/top-pages',
+      { days, limit },
+    );
+  }
+
+  getAnalyticsOverview(
+    days = 30,
+  ): Observable<{ totalViews: number; uniquePaths: number; viewsPerDay: { date: string; views: number }[] }> {
+    return this.api.get('/admin/analytics/overview', { days });
+  }
 }
 
 export type MissingDataType = 'url' | 'address' | 'coordinates' | 'description';

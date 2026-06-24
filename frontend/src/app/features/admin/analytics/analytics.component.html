@@ -1,0 +1,118 @@
+<!-- Header -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-[var(--color-text)]">
+      {{ 'admin.analytics.title' | transloco }}
+    </h1>
+  </div>
+
+  <!-- Period selector -->
+  <div class="flex items-center gap-1 rounded-lg border border-[var(--color-border)] p-1">
+    @for (p of periods; track p) {
+      <button
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+        [class]="period() === p
+          ? 'bg-[var(--color-primary)] text-white'
+          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]'"
+        (click)="setPeriod(p)"
+      >
+        {{ 'admin.analytics.period.' + p + 'd' | transloco }}
+      </button>
+    }
+  </div>
+</div>
+
+<!-- Summary cards -->
+<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div class="rounded-xl border border-[var(--color-border)] p-5">
+    <div class="text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.analytics.totalViews' | transloco }}
+    </div>
+    @if (loading()) {
+      <ui-skeleton class="mt-2 h-8 w-24" />
+    } @else {
+      <div class="mt-1 text-3xl font-bold tabular-nums text-[var(--color-text)]">
+        {{ totalViews() | number }}
+      </div>
+    }
+  </div>
+  <div class="rounded-xl border border-[var(--color-border)] p-5">
+    <div class="text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.analytics.uniquePages' | transloco }}
+    </div>
+    @if (loading()) {
+      <ui-skeleton class="mt-2 h-8 w-24" />
+    } @else {
+      <div class="mt-1 text-3xl font-bold tabular-nums text-[var(--color-text)]">
+        {{ uniquePaths() | number }}
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Top pages -->
+@if (loading()) {
+  <div class="space-y-3">
+    @for (_ of [1, 2, 3, 4, 5]; track $index) {
+      <div class="rounded-xl border border-[var(--color-border)] p-4">
+        <div class="flex items-center gap-4">
+          <ui-skeleton class="h-4 w-48" />
+          <ui-skeleton class="h-4 w-16 ml-auto" />
+        </div>
+      </div>
+    }
+  </div>
+} @else if (topPages().length === 0) {
+  <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] py-16">
+    <span
+      class="material-symbols-outlined mb-3 text-4xl text-[var(--color-text-muted)]/50"
+      style="font-variation-settings: 'FILL' 0"
+    >analytics</span>
+    <p class="text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.analytics.empty' | transloco }}
+    </p>
+  </div>
+} @else {
+  <div class="overflow-hidden rounded-xl border border-[var(--color-border)]">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]/50">
+          <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
+            {{ 'admin.analytics.path' | transloco }}
+          </th>
+          <th class="hidden px-4 py-3 text-left font-medium text-[var(--color-text-muted)] sm:table-cell" style="width: 40%">
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]" style="width: 100px">
+            {{ 'admin.analytics.views' | transloco }}
+          </th>
+          <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]" style="width: 80px">
+            %
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[var(--color-border)]">
+        @for (page of topPages(); track page.path) {
+          <tr class="hover:bg-[var(--color-bg-alt)]/30 transition-colors">
+            <td class="px-4 py-3 font-mono text-xs text-[var(--color-text)]">
+              {{ page.path }}
+            </td>
+            <td class="hidden px-4 py-3 sm:table-cell">
+              <div class="h-2 w-full rounded-full bg-[var(--color-border)]">
+                <div
+                  class="h-2 rounded-full bg-[var(--color-primary)]"
+                  [style.width.%]="barWidth(page.views)"
+                ></div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-right tabular-nums font-medium text-[var(--color-text)]">
+              {{ page.views | number }}
+            </td>
+            <td class="px-4 py-3 text-right tabular-nums text-[var(--color-text-muted)]">
+              {{ percentage(page.views) | percent:'1.1-1' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

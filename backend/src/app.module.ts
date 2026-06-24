@@ -15,6 +15,7 @@ import { PostsModule } from './posts/posts.module';
 import { SeoModule } from './seo/seo.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { BadWordModule } from './common/bad-words';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { BadWordModule } from './common/bad-words';
     SeoModule,
     UploadsModule,
     BadWordModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
 })

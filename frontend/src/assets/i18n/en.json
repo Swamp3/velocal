@@ -304,7 +304,8 @@
     "nav": {
       "imports": "Imports",
       "users": "Users",
-      "missingData": "Data Quality"
+      "missingData": "Data Quality",
+      "analytics": "Analytics"
     },
     "imports": {
       "title": "Import Status",
@@ -388,6 +389,20 @@
         "location": "Location",
         "missing": "Missing Fields",
         "actions": "Actions"
+      }
+    },
+    "analytics": {
+      "title": "Analytics",
+      "totalViews": "Total Page Views",
+      "uniquePages": "Unique Pages",
+      "topPages": "Top Pages",
+      "path": "Path",
+      "views": "Views",
+      "empty": "No page views recorded yet",
+      "period": {
+        "7d": "7 days",
+        "30d": "30 days",
+        "90d": "90 days"
       }
     }
   },
