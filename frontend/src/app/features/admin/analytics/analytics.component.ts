@@ -1,4 +1,4 @@
-import { DecimalPipe, PercentPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,7 +7,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { AdminService } from '@core/services/admin.service';
+import { AdminService, DailyStats } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { SkeletonComponent } from '@shared/ui';
 
@@ -16,7 +16,7 @@ type Period = 7 | 30 | 90;
 @Component({
   selector: 'app-analytics',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DecimalPipe, PercentPipe, SkeletonComponent],
+  imports: [TranslocoPipe, DecimalPipe, PercentPipe, DatePipe, SkeletonComponent],
   templateUrl: './analytics.component.html',
 })
 export class AnalyticsComponent implements OnInit {
@@ -28,11 +28,23 @@ export class AnalyticsComponent implements OnInit {
   protected readonly uniquePaths = signal(0);
   protected readonly uniqueClients = signal(0);
   protected readonly topPages = signal<{ path: string; views: number }[]>([]);
-  protected readonly viewsPerDay = signal<{ date: string; views: number }[]>([]);
+  protected readonly daily = signal<DailyStats[]>([]);
 
   protected readonly maxViews = computed(() => {
     const pages = this.topPages();
     return pages.length > 0 ? pages[0].views : 1;
+  });
+
+  protected readonly maxDailyViews = computed(() => {
+    const days = this.daily();
+    if (days.length === 0) return 1;
+    return Math.max(...days.map((d) => d.views), 1);
+  });
+
+  protected readonly maxDailyClients = computed(() => {
+    const days = this.daily();
+    if (days.length === 0) return 1;
+    return Math.max(...days.map((d) => d.uniqueClients), 1);
   });
 
   protected readonly periods: Period[] = [7, 30, 90];
@@ -55,6 +67,14 @@ export class AnalyticsComponent implements OnInit {
     return total > 0 ? views / total : 0;
   }
 
+  protected chartBarHeight(views: number): number {
+    return (views / this.maxDailyViews()) * 100;
+  }
+
+  protected chartClientHeight(clients: number): number {
+    return (clients / this.maxDailyClients()) * 100;
+  }
+
   private loadData(): void {
     this.loading.set(true);
     const days = this.period();
@@ -64,7 +84,7 @@ export class AnalyticsComponent implements OnInit {
         this.totalViews.set(overview.totalViews);
         this.uniquePaths.set(overview.uniquePaths);
         this.uniqueClients.set(overview.uniqueClients);
-        this.viewsPerDay.set(overview.viewsPerDay);
+        this.daily.set(overview.daily);
       },
     });
 

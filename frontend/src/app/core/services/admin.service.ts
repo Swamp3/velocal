@@ -96,9 +96,22 @@ export class AdminService {
 
   getAnalyticsOverview(
     days = 30,
-  ): Observable<{ totalViews: number; uniquePaths: number; uniqueClients: number; viewsPerDay: { date: string; views: number }[] }> {
-    return this.api.get('/admin/analytics/overview', { days });
+  ): Observable<AnalyticsOverview> {
+    return this.api.get<AnalyticsOverview>('/admin/analytics/overview', { days });
   }
+}
+
+export interface DailyStats {
+  date: string;
+  views: number;
+  uniqueClients: number;
+}
+
+export interface AnalyticsOverview {
+  totalViews: number;
+  uniquePaths: number;
+  uniqueClients: number;
+  daily: DailyStats[];
 }
 
 export type MissingDataType = 'url' | 'address' | 'coordinates' | 'description';

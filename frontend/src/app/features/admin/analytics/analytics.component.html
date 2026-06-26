@@ -62,6 +62,61 @@
   </div>
 </div>
 
+<!-- Daily chart -->
+@if (!loading() && daily().length > 0) {
+  <div class="mb-6 rounded-xl border border-[var(--color-border)] p-5">
+    <h2 class="mb-4 text-sm font-medium text-[var(--color-text-muted)]">
+      {{ 'admin.analytics.dailyChart' | transloco }}
+    </h2>
+
+    <!-- Legend -->
+    <div class="mb-3 flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
+      <span class="flex items-center gap-1.5">
+        <span class="inline-block h-2.5 w-2.5 rounded-sm bg-[var(--color-primary)]"></span>
+        {{ 'admin.analytics.views' | transloco }}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="inline-block h-2.5 w-2.5 rounded-sm bg-[var(--color-primary)]/30"></span>
+        {{ 'admin.analytics.uniqueClients' | transloco }}
+      </span>
+    </div>
+
+    <!-- Bar chart -->
+    <div class="flex items-end gap-[2px] h-40">
+      @for (day of daily(); track day.date) {
+        <div
+          class="group relative flex flex-1 flex-col items-center justify-end h-full gap-[1px]"
+        >
+          <!-- Views bar -->
+          <div
+            class="w-full rounded-t-sm bg-[var(--color-primary)] transition-all min-h-[2px]"
+            [style.height.%]="chartBarHeight(day.views)"
+          ></div>
+          <!-- Clients bar (overlaid, lighter) -->
+          <div
+            class="absolute bottom-0 w-full rounded-t-sm bg-[var(--color-primary)]/30 transition-all min-h-[1px]"
+            [style.height.%]="chartClientHeight(day.uniqueClients)"
+          ></div>
+          <!-- Tooltip -->
+          <div class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-xs shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <div class="font-medium text-[var(--color-text)]">{{ day.date | date:'mediumDate' }}</div>
+            <div class="text-[var(--color-text-muted)]">{{ day.views }} {{ 'admin.analytics.views' | transloco }}</div>
+            <div class="text-[var(--color-text-muted)]">{{ day.uniqueClients }} {{ 'admin.analytics.visitors' | transloco }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- X-axis labels -->
+    <div class="mt-2 flex justify-between text-[10px] text-[var(--color-text-muted)]">
+      @if (daily().length > 0) {
+        <span>{{ daily()[0].date | date:'shortDate' }}</span>
+        <span>{{ daily()[daily().length - 1].date | date:'shortDate' }}</span>
+      }
+    </div>
+  </div>
+}
+
 <!-- Top pages -->
 @if (loading()) {
   <div class="space-y-3">

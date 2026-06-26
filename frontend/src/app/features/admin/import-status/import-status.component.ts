@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CanActivateFn } from '@angular/router';
 import { AdminService, ImportJob, ImportJobStatus } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BadgeComponent, BadgeVariant, ButtonComponent, SkeletonComponent } from '@shared/ui';

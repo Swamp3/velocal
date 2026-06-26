@@ -399,6 +399,8 @@
       "topPages": "Meistbesuchte Seiten",
       "path": "Pfad",
       "views": "Aufrufe",
+      "dailyChart": "Seitenaufrufe im Zeitverlauf",
+      "visitors": "Besucher",
       "empty": "Noch keine Seitenaufrufe erfasst",
       "period": {
         "7d": "7 Tage",

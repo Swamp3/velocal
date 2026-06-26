@@ -8,11 +8,17 @@ export interface TopPage {
   views: number;
 }
 
+export interface DailyStats {
+  date: string;
+  views: number;
+  uniqueClients: number;
+}
+
 export interface AnalyticsOverview {
   totalViews: number;
   uniquePaths: number;
   uniqueClients: number;
-  viewsPerDay: { date: string; views: number }[];
+  daily: DailyStats[];
 }
 
 @Injectable()
@@ -67,20 +73,21 @@ export class AnalyticsService {
       .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
       .getRawOne<{ uniqueClients: number }>();
 
-    const viewsPerDay = await this.pageViewRepo
+    const daily = await this.pageViewRepo
       .createQueryBuilder('pv')
       .select("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')", 'date')
       .addSelect('COUNT(*)::int', 'views')
+      .addSelect('COUNT(DISTINCT pv.clientId)::int', 'uniqueClients')
       .where('pv.viewedAt > NOW() - CAST(:interval AS interval)', { interval })
       .groupBy("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')")
       .orderBy("TO_CHAR(pv.viewedAt, 'YYYY-MM-DD')", 'ASC')
-      .getRawMany<{ date: string; views: number }>();
+      .getRawMany<DailyStats>();
 
     return {
       totalViews: totalResult?.totalViews ?? 0,
       uniquePaths: uniqueResult?.uniquePaths ?? 0,
       uniqueClients: clientsResult?.uniqueClients ?? 0,
-      viewsPerDay,
+      daily,
     };
   }
 }
