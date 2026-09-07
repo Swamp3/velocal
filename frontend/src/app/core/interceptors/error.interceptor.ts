@@ -28,14 +28,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       },
     }),
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/auth/')) {
+      const isAuthRoute = req.url.includes('/auth/');
+
+      if (error.status === 401 && !isAuthRoute) {
         injector.get(AuthService).logout();
         injector.get(Router).navigate(['/auth/login']);
       } else if (error.status === 0) {
         toast.error(transloco.translate('errors.offline'));
       } else if (error.status === 408) {
         toast.error(transloco.translate('errors.timeout'));
-      } else if (error.status >= 500) {
+      } else if (error.status >= 500 && !isAuthRoute) {
+        // Auth flows (login, OTP, password reset/change) show their own
+        // specific error toast — a generic one here would just double up.
         toast.error(transloco.translate('errors.serverError'));
       }
 
