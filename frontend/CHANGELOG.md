@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0] - 2026-09-07
+
+### Added
+
+- Daily views/visitors chart in the admin analytics dashboard, with hover tooltips
+
+### Fixed
+
+- Page-view tracking no longer breaks server-side rendering (guarded to browser-only — `localStorage` is unavailable during SSR)
+
 ## [0.4.0] - 2026-06-24
 
 ### Added

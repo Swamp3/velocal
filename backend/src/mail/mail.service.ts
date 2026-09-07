@@ -1,8 +1,16 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import sgMail, { MailDataRequired } from '@sendgrid/mail';
+import { Resend } from 'resend';
 
 const OTP_EXPIRY_MINUTES = 10;
+
+interface EmailMessage {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+  category: string;
+}
 
 @Injectable()
 export class MailService {
@@ -11,20 +19,21 @@ export class MailService {
   private readonly fromName: string;
   private readonly replyTo?: string;
   private readonly enabled: boolean;
+  private readonly resend?: Resend;
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = this.config.get<string>('sendgrid.apiKey') ?? '';
+    const apiKey = this.config.get<string>('resend.apiKey') ?? '';
     this.fromEmail =
-      this.config.get<string>('sendgrid.fromEmail') ?? 'noreply@velocal.cc';
-    this.fromName = this.config.get<string>('sendgrid.fromName') ?? 'VeloCal';
-    this.replyTo = this.config.get<string>('sendgrid.replyTo') || undefined;
-    this.enabled = apiKey.startsWith('SG.');
+      this.config.get<string>('resend.fromEmail') ?? 'noreply@velocal.cc';
+    this.fromName = this.config.get<string>('resend.fromName') ?? 'VeloCal';
+    this.replyTo = this.config.get<string>('resend.replyTo') || undefined;
+    this.enabled = apiKey.startsWith('re_');
 
     if (this.enabled) {
-      sgMail.setApiKey(apiKey);
+      this.resend = new Resend(apiKey);
     } else {
       this.logger.warn(
-        'SendGrid API key not configured — emails will be logged to console',
+        'Resend API key not configured — emails will be logged to console',
       );
     }
   }
@@ -40,20 +49,10 @@ export class MailService {
 
     await this.send({
       to: email,
-      from: { email: this.fromEmail, name: this.fromName },
-      ...(this.replyTo ? { replyTo: this.replyTo } : {}),
       subject,
       text: this.passwordResetText(resetUrl),
       html: this.passwordResetHtml(resetUrl, preheader),
-      categories: ['transactional', 'auth-password-reset'],
-      trackingSettings: {
-        clickTracking: { enable: false, enableText: false },
-        openTracking: { enable: false },
-        subscriptionTracking: { enable: false },
-      },
-      mailSettings: {
-        bypassListManagement: { enable: false },
-      },
+      category: 'auth-password-reset',
     });
   }
 
@@ -68,40 +67,30 @@ export class MailService {
 
     await this.send({
       to: email,
-      from: { email: this.fromEmail, name: this.fromName },
-      ...(this.replyTo ? { replyTo: this.replyTo } : {}),
       subject,
       text: this.otpText(code),
       html: this.otpHtml(code, preheader),
-      categories: ['transactional', 'auth-otp'],
-      // Transactional security mail: don't let SendGrid rewrite links
-      // (none here, but defense in depth) or inject open-tracking pixels
-      // that hurt deliverability.
-      trackingSettings: {
-        clickTracking: { enable: false, enableText: false },
-        openTracking: { enable: false },
-        subscriptionTracking: { enable: false },
-      },
-      mailSettings: {
-        // Tells receiving MTAs this is transactional, not bulk — improves
-        // Gmail/Apple Mail classification.
-        bypassListManagement: { enable: false },
-      },
+      category: 'auth-otp',
     });
   }
 
-  private async send(msg: MailDataRequired): Promise<void> {
-    try {
-      await sgMail.send(msg);
-    } catch (err: unknown) {
-      const e = err as {
-        code?: number;
-        message?: string;
-        response?: { body?: unknown };
-      };
+  private async send(msg: EmailMessage): Promise<void> {
+    // Resend doesn't rewrite links or inject open-tracking pixels on
+    // transactional sends by default, unlike SendGrid — no explicit
+    // tracking-disable settings needed here.
+    const { error } = await this.resend!.emails.send({
+      from: `${this.fromName} <${this.fromEmail}>`,
+      ...(this.replyTo ? { replyTo: this.replyTo } : {}),
+      to: msg.to,
+      subject: msg.subject,
+      text: msg.text,
+      html: msg.html,
+      tags: [{ name: 'category', value: msg.category }],
+    });
+
+    if (error) {
       this.logger.error(
-        `SendGrid send failed: code=${e.code} message=${e.message}`,
-        JSON.stringify(e.response?.body ?? {}),
+        `Resend send failed: name=${error.name} message=${error.message}`,
       );
       throw new ServiceUnavailableException('Failed to send email');
     }
