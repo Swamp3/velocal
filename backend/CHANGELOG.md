@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0] - 2026-09-07
+
+### Added
+
+- Daily views/visitors chart data on the analytics overview endpoint (per-day views + unique clients)
+
+### Fixed
+
+- Password-reset and OTP login emails — migrated from SendGrid (expired trial, sends failing with 401) to Resend
+
 ## [0.4.0] - 2026-06-24
 
 ### Added

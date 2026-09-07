@@ -4,6 +4,16 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.5.0] — 2026-09-07
+
+### Added
+
+- **New logo and favicon assets** — refreshed branding across the app icon set.
+
+### Fixed
+
+- **Password-reset and login emails** — transactional email provider migrated from SendGrid (trial expired, sends were failing with 401) to Resend.
+
 ## [0.3.0] — 2026-04-29
 
 ### Added
