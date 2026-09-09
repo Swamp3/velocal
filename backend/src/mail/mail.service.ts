@@ -24,7 +24,7 @@ export class MailService {
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('resend.apiKey') ?? '';
     this.fromEmail =
-      this.config.get<string>('resend.fromEmail') ?? 'noreply@velocal.cc';
+      this.config.get<string>('resend.fromEmail') ?? 'noreply@system.velocal.cc';
     this.fromName = this.config.get<string>('resend.fromName') ?? 'VeloCal';
     this.replyTo = this.config.get<string>('resend.replyTo') || undefined;
     this.enabled = apiKey.startsWith('re_');
