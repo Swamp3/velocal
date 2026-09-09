@@ -296,7 +296,16 @@
       "image": "Titelbild",
       "submit": "Veröffentlichen",
       "saveDraft": "Als Entwurf speichern",
-      "pin": "Beitrag anpinnen"
+      "pin": "Beitrag anpinnen",
+      "success": {
+        "create": "Beitrag erfolgreich veröffentlicht",
+        "createDraft": "Entwurf gespeichert",
+        "update": "Beitrag erfolgreich aktualisiert"
+      },
+      "error": {
+        "create": "Veröffentlichen fehlgeschlagen",
+        "update": "Aktualisieren fehlgeschlagen"
+      }
     }
   },
   "admin": {

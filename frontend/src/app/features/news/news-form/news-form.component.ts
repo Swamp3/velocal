@@ -137,11 +137,18 @@ export class NewsFormComponent implements OnInit {
 
     request.subscribe({
       next: (post) => {
-        this.toast.success(this.transloco.translate('news.form.submit'));
+        const key = existing
+          ? 'news.form.success.update'
+          : val.status === 'draft'
+            ? 'news.form.success.createDraft'
+            : 'news.form.success.create';
+        this.toast.success(this.transloco.translate(key));
         this.router.navigate(['/news', post.slug]);
       },
       error: () => {
         this.submitting.set(false);
+        const key = existing ? 'news.form.error.update' : 'news.form.error.create';
+        this.toast.error(this.transloco.translate(key));
       },
     });
   }

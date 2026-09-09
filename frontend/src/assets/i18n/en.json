@@ -296,7 +296,16 @@
       "image": "Cover image",
       "submit": "Publish",
       "saveDraft": "Save as draft",
-      "pin": "Pin post"
+      "pin": "Pin post",
+      "success": {
+        "create": "Post published successfully",
+        "createDraft": "Draft saved",
+        "update": "Post updated successfully"
+      },
+      "error": {
+        "create": "Failed to publish post",
+        "update": "Failed to update post"
+      }
     }
   },
   "admin": {
