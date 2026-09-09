@@ -4,3 +4,4 @@ export * from './user.model';
 export * from './pagination.model';
 export * from './series.model';
 export * from './post.model';
+export * from './changelog.model';

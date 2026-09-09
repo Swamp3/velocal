@@ -106,6 +106,7 @@ export class SitemapController {
       urlEntry({ loc: `${site}/calendar`, changefreq: 'daily', priority: 0.6 }),
       urlEntry({ loc: `${site}/series`, changefreq: 'weekly', priority: 0.7 }),
       urlEntry({ loc: `${site}/news`, changefreq: 'daily', priority: 0.7 }),
+      urlEntry({ loc: `${site}/changelog`, changefreq: 'weekly', priority: 0.4 }),
     ];
     res.send(wrapUrlset(entries));
   }

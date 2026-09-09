@@ -19,8 +19,8 @@ services:
   backend:
     container_name: velocal-backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
       target: production
     environment:
       NODE_ENV: production

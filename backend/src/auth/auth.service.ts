@@ -300,8 +300,12 @@ export class AuthService {
       },
     });
     if (recentToken) {
+      const elapsedSec = Math.floor(
+        (Date.now() - recentToken.createdAt.getTime()) / 1000,
+      );
+      const remainingSec = Math.max(OTP_COOLDOWN_SECONDS - elapsedSec, 1);
       throw new UnauthorizedException(
-        `Please wait before requesting another code`,
+        `Please wait ${remainingSec}s before requesting another code`,
       );
     }
 

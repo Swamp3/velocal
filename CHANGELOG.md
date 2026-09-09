@@ -4,6 +4,16 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.0] — 2026-09-09
+
+### Added
+
+- **Changelog page** — `/changelog` shows release notes and recent fixes, rendered live from this file. Linked from the footer and the version badge.
+
+### Fixed
+
+- **OTP login errors** — the login page now shows the specific reason an OTP failed (rate-limit cooldown with remaining seconds, hourly limit, invalid code, too many attempts) instead of one generic message.
+
 ## [0.5.0] — 2026-09-07
 
 ### Added

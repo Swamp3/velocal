@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0] - 2026-09-09
+
+### Added
+
+- `GET /changelog` endpoint — parses the root CHANGELOG.md into structured JSON for the frontend's changelog page
+
+### Fixed
+
+- OTP login errors now return the specific failure reason (rate-limit cooldown, hourly limit, invalid code, too many attempts) instead of a generic message
+- Transactional email now sent from a dedicated `system.` subdomain instead of the apex domain
+
 ## [0.5.0] - 2026-09-07
 
 ### Added

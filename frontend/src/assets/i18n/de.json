@@ -413,6 +413,16 @@
     "title": "Workouts",
     "comingSoon": "Dieses Feature ist noch in Entwicklung. Bald verfügbar!"
   },
+  "changelog": {
+    "footerLink": "Änderungsprotokoll",
+    "title": "Änderungsprotokoll",
+    "subtitle": "Was ist neu bei VeloCal — Release Notes und aktuelle Fixes.",
+    "unreleased": "Unveröffentlicht",
+    "errorTitle": "Änderungsprotokoll konnte nicht geladen werden",
+    "errorMessage": "Beim Laden der letzten Updates ist etwas schiefgelaufen. Bitte versuche es später erneut.",
+    "emptyTitle": "Noch keine Einträge",
+    "emptyMessage": "Schau bald wieder vorbei für Release Notes."
+  },
   "legal": {
     "footer": {
       "imprint": "Impressum",

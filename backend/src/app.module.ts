@@ -16,6 +16,7 @@ import { SeoModule } from './seo/seo.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { BadWordModule } from './common/bad-words';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { ChangelogModule } from './changelog/changelog.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     UploadsModule,
     BadWordModule,
     AnalyticsModule,
+    ChangelogModule,
   ],
   controllers: [AppController],
 })

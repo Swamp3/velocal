@@ -88,7 +88,7 @@ export class LoginComponent {
         this.loading.set(false);
         this.toast.error(
           err.status === 401
-            ? this.transloco.translate('auth.otpCooldown')
+            ? (err.message ?? this.transloco.translate('auth.otpCooldown'))
             : this.transloco.translate('auth.otpSendFailed'),
         );
       },
@@ -107,7 +107,7 @@ export class LoginComponent {
         this.loading.set(false);
         this.toast.error(
           err.status === 401
-            ? this.transloco.translate('auth.otpInvalid')
+            ? (err.message ?? this.transloco.translate('auth.otpInvalid'))
             : this.transloco.translate('auth.loginFailed'),
         );
       },
@@ -129,9 +129,13 @@ export class LoginComponent {
         this.startCooldown();
         this.toast.success(this.transloco.translate('auth.otpResent'));
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.toast.error(this.transloco.translate('auth.otpSendFailed'));
+        this.toast.error(
+          err.status === 401
+            ? (err.message ?? this.transloco.translate('auth.otpCooldown'))
+            : this.transloco.translate('auth.otpSendFailed'),
+        );
       },
     });
   }
