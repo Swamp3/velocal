@@ -22,6 +22,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostSearchDto } from './dto/post-search.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
@@ -36,8 +37,12 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  findAll(@Query() query: PostSearchDto): Promise<PaginatedPosts> {
-    return this.postsService.findAll(query);
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @Query() query: PostSearchDto,
+    @CurrentUser() user?: { isAdmin: boolean },
+  ): Promise<PaginatedPosts> {
+    return this.postsService.findAll(query, user?.isAdmin ?? false);
   }
 
   @Get('tags')
