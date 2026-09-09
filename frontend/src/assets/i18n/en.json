@@ -413,6 +413,16 @@
     "title": "Workouts",
     "comingSoon": "This feature is still in development. Coming soon!"
   },
+  "changelog": {
+    "footerLink": "Changelog",
+    "title": "Changelog",
+    "subtitle": "What's new in VeloCal — release notes and recent fixes.",
+    "unreleased": "Unreleased",
+    "errorTitle": "Couldn't load the changelog",
+    "errorMessage": "Something went wrong loading recent updates. Please try again later.",
+    "emptyTitle": "No entries yet",
+    "emptyMessage": "Check back soon for release notes."
+  },
   "legal": {
     "footer": {
       "imprint": "Imprint",

@@ -46,31 +46,28 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'changelog',
+    loadComponent: () =>
+      import('./features/changelog/changelog.component').then((m) => m.ChangelogComponent),
+  },
+  {
     path: 'impressum',
     loadComponent: () =>
-      import('./features/legal/imprint/imprint.component').then(
-        (m) => m.ImprintComponent,
-      ),
+      import('./features/legal/imprint/imprint.component').then((m) => m.ImprintComponent),
   },
   {
     path: 'datenschutz',
     loadComponent: () =>
-      import('./features/legal/privacy/privacy.component').then(
-        (m) => m.PrivacyComponent,
-      ),
+      import('./features/legal/privacy/privacy.component').then((m) => m.PrivacyComponent),
   },
   {
     path: 'nutzungsbedingungen',
     loadComponent: () =>
-      import('./features/legal/terms/terms.component').then(
-        (m) => m.TermsComponent,
-      ),
+      import('./features/legal/terms/terms.component').then((m) => m.TermsComponent),
   },
   {
     path: '**',
     loadComponent: () =>
-      import('./features/not-found/not-found.component').then(
-        (m) => m.NotFoundComponent,
-      ),
+      import('./features/not-found/not-found.component').then((m) => m.NotFoundComponent),
   },
 ];

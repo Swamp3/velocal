@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Login page now shows the specific OTP failure reason (rate-limit cooldown with remaining seconds, hourly limit, invalid code, too many attempts) instead of one generic toast
+- Global error interceptor no longer stacks a second generic toast on top of auth flows' own error handling
+
 ## [0.5.0] - 2026-09-07
 
 ### Added

@@ -1,0 +1,13 @@
+# Applies to the backend build (context: repo root — see docker-compose*.yml).
+# The frontend still builds from ./frontend with its own frontend/.dockerignore.
+.git
+.env
+.env.*
+!.env.example
+
+**/node_modules
+**/dist
+**/.angular
+**/.pnpm-store
+backend/uploads
+frontend

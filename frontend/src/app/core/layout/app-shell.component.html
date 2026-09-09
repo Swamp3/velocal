@@ -142,19 +142,18 @@
   <footer
     class="border-t border-[var(--color-border)]/50 bg-[var(--color-bg)] py-6 text-sm text-[var(--color-text-muted)]"
   >
-    <div class="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between sm:px-6">
+    <div
+      class="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between sm:px-6"
+    >
       <span>&copy; {{ currentYear }} VeloCal</span>
       <nav class="flex gap-4" aria-label="Legal links">
-        <a
-          routerLink="/impressum"
-          class="hover:text-[var(--color-text)] transition-colors"
-        >
+        <a routerLink="/changelog" class="hover:text-[var(--color-text)] transition-colors">
+          {{ 'changelog.footerLink' | transloco }}
+        </a>
+        <a routerLink="/impressum" class="hover:text-[var(--color-text)] transition-colors">
           {{ 'legal.footer.imprint' | transloco }}
         </a>
-        <a
-          routerLink="/datenschutz"
-          class="hover:text-[var(--color-text)] transition-colors"
-        >
+        <a routerLink="/datenschutz" class="hover:text-[var(--color-text)] transition-colors">
           {{ 'legal.footer.privacy' | transloco }}
         </a>
         <a
@@ -170,12 +169,13 @@
 
 <ui-toast-container />
 
-<span
-  class="fixed bottom-4 left-4 z-40 select-none font-mono text-[11px] text-[var(--color-text-muted)]/70"
-  aria-label="App version"
+<a
+  routerLink="/changelog"
+  class="fixed bottom-4 left-4 z-40 select-none font-mono text-[11px] text-[var(--color-text-muted)]/70 hover:text-[var(--color-text-muted)] hover:underline"
+  [attr.aria-label]="'changelog.footerLink' | transloco"
 >
   v{{ appVersion }}
-</span>
+</a>
 
 <a
   href="https://buymeacoffee.com/timoa"
