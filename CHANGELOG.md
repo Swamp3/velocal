@@ -4,7 +4,11 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.6.0] — 2026-09-09
+
+### Added
+
+- **Changelog page** — `/changelog` shows release notes and recent fixes, rendered live from this file. Linked from the footer and the version badge.
 
 ### Fixed
 

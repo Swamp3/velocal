@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.6.0] - 2026-09-09
+
+### Added
+
+- Changelog page at `/changelog` showing release notes and recent fixes, linked from the footer and version badge
 
 ### Fixed
 

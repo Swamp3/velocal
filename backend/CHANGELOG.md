@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.6.0] - 2026-09-09
+
+### Added
+
+- `GET /changelog` endpoint — parses the root CHANGELOG.md into structured JSON for the frontend's changelog page
 
 ### Fixed
 
