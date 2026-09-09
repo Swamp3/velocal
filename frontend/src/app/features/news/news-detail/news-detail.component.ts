@@ -16,7 +16,13 @@ import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyStateComponent } from '@shared/components';
 import { Post } from '@shared/models';
-import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import {
+  BadgeComponent,
+  ButtonComponent,
+  ChipComponent,
+  SkeletonComponent,
+  ToastService,
+} from '@shared/ui';
 
 @Component({
   selector: 'app-news-detail',
@@ -26,6 +32,7 @@ import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from 
     DatePipe,
     TranslocoPipe,
     ButtonComponent,
+    BadgeComponent,
     ChipComponent,
     SkeletonComponent,
     EmptyStateComponent,
@@ -47,6 +54,7 @@ export class NewsDetailComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly deleteLoading = signal(false);
+  protected readonly publishLoading = signal(false);
   protected readonly renderedBody = signal<SafeHtml>('');
 
   protected readonly isAdmin = computed(() => !!this.auth.currentUser()?.isAdmin);
@@ -70,6 +78,24 @@ export class NewsDetailComponent implements OnInit {
         this.router.navigate(['/news']);
       },
       error: () => this.deleteLoading.set(false),
+    });
+  }
+
+  protected publishPost(): void {
+    const p = this.post();
+    if (!p) return;
+
+    this.publishLoading.set(true);
+    this.postService.updatePost(p.id, { status: 'published' }).subscribe({
+      next: (post) => {
+        this.post.set(post);
+        this.publishLoading.set(false);
+        this.toast.success(this.transloco.translate('news.publishSuccess'));
+      },
+      error: () => {
+        this.publishLoading.set(false);
+        this.toast.error(this.transloco.translate('news.publishError'));
+      },
     });
   }
 

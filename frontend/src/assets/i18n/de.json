@@ -285,6 +285,14 @@
     "deleteConfirm": "Soll dieser Beitrag wirklich gelöscht werden?",
     "pinned": "Angepinnt",
     "linkedEvent": "Verknüpftes Event",
+    "publish": "Veröffentlichen",
+    "publishSuccess": "Beitrag veröffentlicht",
+    "publishError": "Veröffentlichen fehlgeschlagen",
+    "status": {
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "archived": "Archiviert"
+    },
     "form": {
       "title": "Titel",
       "body": "Inhalt",

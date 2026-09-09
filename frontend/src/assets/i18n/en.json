@@ -285,6 +285,14 @@
     "deleteConfirm": "Are you sure you want to delete this post?",
     "pinned": "Pinned",
     "linkedEvent": "Linked event",
+    "publish": "Publish",
+    "publishSuccess": "Post published",
+    "publishError": "Failed to publish post",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
     "form": {
       "title": "Title",
       "body": "Content",

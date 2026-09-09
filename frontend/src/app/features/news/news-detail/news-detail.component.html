@@ -57,6 +57,11 @@
 
     <!-- Meta -->
     <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[var(--color-text-muted)]">
+      @if (post.status !== 'published') {
+        <ui-badge [variant]="post.status === 'draft' ? 'warning' : 'neutral'">
+          {{ 'news.status.' + post.status | transloco }}
+        </ui-badge>
+      }
       @if (post.publishedAt) {
         <span class="inline-flex items-center gap-1.5">
           <span class="material-symbols-outlined text-[16px]">calendar_today</span>
@@ -109,6 +114,17 @@
     <!-- Admin actions -->
     @if (isAdmin()) {
       <div class="mt-8 flex flex-wrap items-center gap-3 border-t border-[var(--color-border)] pt-6">
+        @if (post.status !== 'published') {
+          <ui-button
+            variant="primary"
+            size="sm"
+            [loading]="publishLoading()"
+            (click)="publishPost()"
+          >
+            <span class="material-symbols-outlined text-[16px]">publish</span>
+            {{ 'news.publish' | transloco }}
+          </ui-button>
+        }
         <a [routerLink]="['/news', post.slug, 'edit']" class="inline-flex">
           <ui-button variant="outline" size="sm">
             <span class="material-symbols-outlined text-[16px]">edit</span>

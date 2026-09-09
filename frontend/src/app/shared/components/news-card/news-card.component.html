@@ -9,10 +9,19 @@
     ? 'border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5 hover:border-[var(--color-primary)]/50'
     : 'border-[var(--color-border)] bg-[var(--color-bg-card)] hover:border-[var(--color-primary)]/30'"
 >
-  @if (pinned()) {
-    <div class="mb-2 inline-flex items-center gap-1 rounded-full bg-[var(--color-primary)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)]">
-      <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1">push_pin</span>
-      {{ 'news.pinned' | transloco }}
+  @if (pinned() || post().status !== 'published') {
+    <div class="mb-2 flex flex-wrap items-center gap-1.5">
+      @if (pinned()) {
+        <div class="inline-flex items-center gap-1 rounded-full bg-[var(--color-primary)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)]">
+          <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1">push_pin</span>
+          {{ 'news.pinned' | transloco }}
+        </div>
+      }
+      @if (post().status !== 'published') {
+        <ui-badge [variant]="post().status === 'draft' ? 'warning' : 'neutral'">
+          {{ 'news.status.' + post().status | transloco }}
+        </ui-badge>
+      }
     </div>
   }
 
