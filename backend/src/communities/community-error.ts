@@ -11,6 +11,7 @@ export const CommunityErrorCode = {
   notCommunityMember: 'community.notCommunityMember',
   inviteOnly: 'community.inviteOnly',
   membersOnly: 'community.membersOnly',
+  pollClosed: 'community.pollClosed',
 } as const;
 
 export type CommunityErrorCode =

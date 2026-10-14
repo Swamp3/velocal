@@ -3,7 +3,9 @@ import {
   Community,
   CommunityComment,
   CommunityJoinRequest,
+  CommunityPoll,
   CommunityPost,
+  PollResultsVisibility,
   CommunityMember,
   CommunityRole,
   CreateCommunityDto,
@@ -228,6 +230,48 @@ export class CommunityService {
     return this.api.delete(
       `${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments/${commentId}`,
     );
+  }
+
+  listPolls(communitySlug: string, subgroupSlug?: string | null): Observable<CommunityPoll[]> {
+    return this.api.get(this.pollsPath(communitySlug, subgroupSlug));
+  }
+
+  createPoll(
+    communitySlug: string,
+    dto: {
+      question: string;
+      multiple: boolean;
+      resultsVisibility: PollResultsVisibility;
+      closesAt?: string;
+      options: { label: string }[];
+    },
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPoll> {
+    return this.api.post(this.pollsPath(communitySlug, subgroupSlug), dto);
+  }
+
+  votePoll(
+    communitySlug: string,
+    pollId: string,
+    optionIds: string[],
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPoll> {
+    return this.api.post(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}/votes`, {
+      optionIds,
+    });
+  }
+
+  deletePoll(
+    communitySlug: string,
+    pollId: string,
+    subgroupSlug?: string | null,
+  ): Observable<void> {
+    return this.api.delete(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}`);
+  }
+
+  private pollsPath(communitySlug: string, subgroupSlug?: string | null): string {
+    const base = `/communities/${communitySlug}`;
+    return subgroupSlug ? `${base}/subgroups/${subgroupSlug}/polls` : `${base}/polls`;
   }
 
   private postsPath(communitySlug: string, subgroupSlug?: string | null): string {

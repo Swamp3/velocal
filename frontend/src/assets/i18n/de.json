@@ -627,7 +627,28 @@
       "userNotFound": "Kein Konto nutzt diese E-Mail.",
       "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft.",
       "inviteOnly": "Diese Gruppe ist nur auf Einladung.",
-      "membersOnly": "Das sehen nur Mitglieder."
+      "membersOnly": "Das sehen nur Mitglieder.",
+      "pollClosed": "Diese Umfrage ist geschlossen."
+    },
+    "polls": {
+      "title": "Umfragen",
+      "empty": "Noch keine Umfragen",
+      "question": "Frage",
+      "option": "Option",
+      "addOption": "Option hinzufügen",
+      "multiple": "Mehrere Antworten erlauben",
+      "results": "Wer die Ergebnisse sieht",
+      "resultsMembers": "Mitglieder",
+      "resultsManagers": "Admins und Moderatoren",
+      "deadline": "Endet am",
+      "create": "Umfrage erstellen",
+      "vote": "Abstimmen",
+      "voted": "Deine Stimme ist gespeichert",
+      "closed": "Geschlossen",
+      "votes": "{{count}} Stimmen",
+      "hidden": "Ergebnisse sind verborgen",
+      "delete": "Umfrage löschen",
+      "deleteConfirm": "Diese Umfrage löschen?"
     },
     "posts": {
       "title": "Beiträge",

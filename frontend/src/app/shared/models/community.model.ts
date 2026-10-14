@@ -107,6 +107,28 @@ export interface CommunityPost {
   updatedAt: string;
 }
 
+export type PollResultsVisibility = 'members' | 'managers';
+
+export interface CommunityPollOption {
+  id: string;
+  label: string;
+  votes: number | null;
+  selected: boolean;
+}
+
+export interface CommunityPoll {
+  id: string;
+  question: string;
+  multiple: boolean;
+  resultsVisibility: PollResultsVisibility;
+  closesAt: string | null;
+  closed: boolean;
+  canSeeResults: boolean;
+  canDelete: boolean;
+  options: CommunityPollOption[];
+  createdAt: string;
+}
+
 export interface CommunityComment {
   id: string;
   body: string;

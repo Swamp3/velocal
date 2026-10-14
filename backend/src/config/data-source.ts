@@ -16,6 +16,9 @@ import { SubgroupMember } from '../communities/entities/subgroup-member.entity';
 import { SubgroupJoinRequest } from '../communities/entities/subgroup-join-request.entity';
 import { CommunityPost } from '../communities/entities/community-post.entity';
 import { CommunityPostComment } from '../communities/entities/community-post-comment.entity';
+import { CommunityPoll } from '../communities/entities/community-poll.entity';
+import { CommunityPollOption } from '../communities/entities/community-poll-option.entity';
+import { CommunityPollVote } from '../communities/entities/community-poll-vote.entity';
 import { Post } from '../posts/entities/post.entity';
 import { PostTag } from '../posts/entities/post-tag.entity';
 import { ImportRun } from '../import/entities/import-run.entity';
@@ -45,6 +48,9 @@ export default new DataSource({
     SubgroupJoinRequest,
     CommunityPost,
     CommunityPostComment,
+    CommunityPoll,
+    CommunityPollOption,
+    CommunityPollVote,
     Post,
     PostTag,
     OtpToken,

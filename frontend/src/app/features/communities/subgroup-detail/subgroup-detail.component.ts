@@ -18,6 +18,7 @@ import {
   RichTextViewComponent,
 } from '@shared/components';
 import { CommunityFeedComponent } from '../community-feed/community-feed.component';
+import { CommunityPollsComponent } from '../community-polls/community-polls.component';
 import { Subgroup, SubgroupVisibility, subgroupVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -35,6 +36,7 @@ import { communityErrorKey } from '../community-error';
     EmptyStateComponent,
     RichTextViewComponent,
     CommunityFeedComponent,
+    CommunityPollsComponent,
   ],
   templateUrl: './subgroup-detail.component.html',
 })

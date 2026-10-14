@@ -627,7 +627,28 @@
       "userNotFound": "No account uses that email.",
       "notCommunityMember": "That person is not a member of this community.",
       "inviteOnly": "This group is invite only.",
-      "membersOnly": "Only members can see this."
+      "membersOnly": "Only members can see this.",
+      "pollClosed": "This poll is closed."
+    },
+    "polls": {
+      "title": "Polls",
+      "empty": "No polls yet",
+      "question": "Question",
+      "option": "Option",
+      "addOption": "Add option",
+      "multiple": "Allow multiple choices",
+      "results": "Who can see the results",
+      "resultsMembers": "Members",
+      "resultsManagers": "Admins and moderators",
+      "deadline": "Closes at",
+      "create": "Create poll",
+      "vote": "Vote",
+      "voted": "Your vote is in",
+      "closed": "Closed",
+      "votes": "{{count}} votes",
+      "hidden": "Results are hidden",
+      "delete": "Delete poll",
+      "deleteConfirm": "Delete this poll?"
     },
     "posts": {
       "title": "Posts",

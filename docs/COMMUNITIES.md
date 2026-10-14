@@ -132,9 +132,9 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 
 | Id | Status | Note |
 | --- | --- | --- |
-| `polls` | todo | Single or multi choice, one host, members of that host. |
-| `poll-results` | todo | Results visible to members, or to admins and moderators only. |
-| `poll-deadline` | todo | Poll closes at a deadline. |
+| `polls` | done | Single or multi choice, one host, members of that host. |
+| `poll-results` | done | Results visible to members, or to admins and moderators only. Counts stay off the payload otherwise. |
+| `poll-deadline` | done | Poll closes at a deadline. Voting after that returns `community.pollClosed`. |
 
 ### 5. Events
 

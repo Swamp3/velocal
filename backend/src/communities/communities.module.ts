@@ -12,6 +12,11 @@ import { SubgroupMember } from './entities/subgroup-member.entity';
 import { Subgroup } from './entities/subgroup.entity';
 import { CommunityPostComment } from './entities/community-post-comment.entity';
 import { CommunityPost } from './entities/community-post.entity';
+import { CommunityPollOption } from './entities/community-poll-option.entity';
+import { CommunityPollVote } from './entities/community-poll-vote.entity';
+import { CommunityPoll } from './entities/community-poll.entity';
+import { CommunityPollsController } from './community-polls.controller';
+import { CommunityPollsService } from './community-polls.service';
 import { CommunityPostsController } from './community-posts.controller';
 import { CommunityPostsService } from './community-posts.service';
 import { SubgroupsController } from './subgroups.controller';
@@ -28,6 +33,9 @@ import { SubgroupsService } from './subgroups.service';
       SubgroupJoinRequest,
       CommunityPost,
       CommunityPostComment,
+      CommunityPoll,
+      CommunityPollOption,
+      CommunityPollVote,
       User,
     ]),
     UploadsModule,
@@ -36,8 +44,14 @@ import { SubgroupsService } from './subgroups.service';
     CommunitiesController,
     SubgroupsController,
     CommunityPostsController,
+    CommunityPollsController,
   ],
-  providers: [CommunitiesService, SubgroupsService, CommunityPostsService],
+  providers: [
+    CommunitiesService,
+    SubgroupsService,
+    CommunityPostsService,
+    CommunityPollsService,
+  ],
   exports: [CommunitiesService, SubgroupsService],
 })
 export class CommunitiesModule {}

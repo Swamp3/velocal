@@ -19,6 +19,7 @@ import {
   RichTextViewComponent,
 } from '@shared/components';
 import { CommunityFeedComponent } from '../community-feed/community-feed.component';
+import { CommunityPollsComponent } from '../community-polls/community-polls.component';
 import { communityErrorKey } from '../community-error';
 import {
   Community,
@@ -42,6 +43,7 @@ import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from
     EmptyStateComponent,
     RichTextViewComponent,
     CommunityFeedComponent,
+    CommunityPollsComponent,
   ],
   templateUrl: './community-detail.component.html',
 })

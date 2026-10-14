@@ -122,6 +122,7 @@
     }
 
     @if (c.myRole) {
+      <app-community-polls [communitySlug]="c.slug" />
       <app-community-feed [communitySlug]="c.slug" />
     }
   </div>

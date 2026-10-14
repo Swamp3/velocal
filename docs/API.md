@@ -43,6 +43,10 @@
 | DELETE | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin | Delete a subgroup |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/join` | Community member | Join an open subgroup or request a `request` subgroup |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/invites` | Community admin or moderator | Add a community member to the subgroup |
+| GET    | `/api/communities/:slug/polls` | Member | Community-hosted polls |
+| POST   | `/api/communities/:slug/polls` | Member | Create a poll. Two to twelve options |
+| POST   | `/api/communities/:slug/polls/:pollId/votes` | Member | Replace the caller's vote. 409 when the poll is closed |
+| DELETE | `/api/communities/:slug/polls/:pollId` | Author or community admin | Delete a poll |
 | GET    | `/api/communities/:slug/posts` | Member | Community-hosted posts |
 | POST   | `/api/communities/:slug/posts` | Member | Create a community-hosted post |
 | GET    | `/api/communities/:slug/posts/:postId` | Member | One community-hosted post |
@@ -50,6 +54,10 @@
 | GET    | `/api/communities/:slug/posts/:postId/comments` | Member | Comments on a community post |
 | POST   | `/api/communities/:slug/posts/:postId/comments` | Member | Comment on a community post |
 | DELETE | `/api/communities/:slug/posts/:postId/comments/:commentId` | Author or community admin | Delete a comment |
+| GET    | `/api/communities/:slug/subgroups/:subgroupSlug/polls` | Subgroup member or community admin | Subgroup-hosted polls |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/polls` | Subgroup member or community admin | Create a subgroup poll |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/polls/:pollId/votes` | Subgroup member or community admin | Replace the caller's vote |
+| DELETE | `/api/communities/:slug/subgroups/:subgroupSlug/polls/:pollId` | Author, moderator, or community admin | Delete a subgroup poll |
 | GET    | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Subgroup-hosted posts |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Create a subgroup post |
 | DELETE | `/api/communities/:slug/subgroups/:subgroupSlug/posts/:postId` | Author, moderator, or community admin | Delete a subgroup post |

@@ -91,6 +91,10 @@
     </div>
 
     @if (subgroup.myRole || subgroup.viewerIsCommunityAdmin) {
+      <app-community-polls
+        [communitySlug]="subgroup.communitySlug"
+        [subgroupSlug]="subgroup.slug"
+      />
       <app-community-feed [communitySlug]="subgroup.communitySlug" [subgroupSlug]="subgroup.slug" />
     }
   </div>
