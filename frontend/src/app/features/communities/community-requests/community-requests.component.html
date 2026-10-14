@@ -1,0 +1,41 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton width="40%" height="2rem" />
+    <ui-skeleton height="4rem" />
+  </div>
+} @else if (notFound()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="'communities.notFoundTitle' | transloco"
+    [message]="'communities.notFoundMessage' | transloco"
+  />
+} @else {
+  <div class="mx-auto max-w-3xl">
+    <a
+      [routerLink]="backLink()"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ backLabel() }}
+    </a>
+
+    <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
+      {{ 'communities.requests.title' | transloco }}
+    </h1>
+
+    <div class="mt-6">
+      @if (requestItems().length === 0) {
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ 'communities.requests.empty' | transloco }}
+        </p>
+      } @else {
+        <app-request-list
+          [items]="requestItems()"
+          (approve)="onApprove($event)"
+          (reject)="onReject($event)"
+        />
+      }
+    </div>
+  </div>
+}

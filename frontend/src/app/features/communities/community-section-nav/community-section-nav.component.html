@@ -1,0 +1,16 @@
+<nav class="mt-8 grid grid-cols-2 gap-3" [attr.aria-label]="'communities.sections' | transloco">
+  @for (link of links(); track link.labelKey) {
+    <a
+      [routerLink]="link.commands"
+      class="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-4 text-sm font-medium break-words text-[var(--color-text)] shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:text-base"
+    >
+      <span
+        class="material-symbols-outlined text-[22px] text-[var(--color-primary)]"
+        aria-hidden="true"
+      >
+        {{ link.icon }}
+      </span>
+      {{ link.labelKey | transloco }}
+    </a>
+  }
+</nav>

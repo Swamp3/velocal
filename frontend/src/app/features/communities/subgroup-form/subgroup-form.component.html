@@ -1,0 +1,106 @@
+<div class="mx-auto max-w-xl">
+  <a
+    [routerLink]="['/communities', communitySlug()]"
+    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+  >
+    <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+    {{ 'communities.subgroups.back' | transloco }}
+  </a>
+
+  <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
+    {{
+      (isEdit() ? 'communities.subgroups.editTitle' : 'communities.subgroups.createTitle')
+        | transloco
+    }}
+  </h1>
+
+  @if (!loaded()) {
+    <div class="mt-6 space-y-4">
+      <ui-skeleton height="2.5rem" />
+      <ui-skeleton height="6rem" />
+    </div>
+  } @else {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    >
+      <ui-input
+        [label]="'communities.form.name' | transloco"
+        formControlName="name"
+        [error]="fieldError()"
+      />
+
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+          {{ 'communities.form.description' | transloco }}
+        </label>
+        <app-rich-text formControlName="description" [compact]="true" />
+      </div>
+
+      @if (canChangeVisibility()) {
+        <div>
+          <label
+            for="subgroup-visibility"
+            class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
+          >
+            {{ 'communities.form.visibility' | transloco }}
+          </label>
+          <select
+            id="subgroup-visibility"
+            formControlName="visibility"
+            class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+          >
+            @for (visibility of visibilities; track visibility) {
+              <option [value]="visibility">
+                {{ 'communities.subgroups.visibility.' + visibility | transloco }}
+              </option>
+            }
+          </select>
+        </div>
+      }
+
+      @if (subgroupSlug()) {
+        <div>
+          <p class="mb-1.5 text-sm font-medium text-[var(--color-text)]">
+            {{ 'communities.form.hero' | transloco }}
+          </p>
+          <app-image-upload
+            [imageUrl]="heroUrl()"
+            [uploadFn]="uploadHeroFn"
+            [deleteFn]="deleteHeroFn"
+            [disabled]="saving()"
+            (imageChange)="heroUrl.set($event)"
+          />
+        </div>
+        <div>
+          <p class="mb-1.5 text-sm font-medium text-[var(--color-text)]">
+            {{ 'communities.form.logo' | transloco }}
+          </p>
+          <app-image-upload
+            [imageUrl]="logoUrl()"
+            [uploadFn]="uploadLogoFn"
+            [deleteFn]="deleteLogoFn"
+            [disabled]="saving()"
+            (imageChange)="logoUrl.set($event)"
+          />
+        </div>
+      }
+
+      <div class="flex gap-3 pt-2">
+        <ui-button type="submit" [loading]="saving()" [disabled]="saving()">
+          {{ 'common.save' | transloco }}
+        </ui-button>
+        <a
+          [routerLink]="
+            subgroupSlug()
+              ? ['/communities', communitySlug(), 'subgroups', subgroupSlug()]
+              : ['/communities', communitySlug()]
+          "
+        >
+          <ui-button variant="outline" type="button">{{ 'common.cancel' | transloco }}</ui-button>
+        </a>
+      </div>
+    </form>
+  }
+</div>

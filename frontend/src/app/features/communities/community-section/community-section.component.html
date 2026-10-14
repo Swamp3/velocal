@@ -1,0 +1,69 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton width="40%" height="2rem" />
+    <ui-skeleton height="8rem" />
+  </div>
+} @else if (error()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="
+      (section() === 'posts' ? 'communities.posts.notFoundTitle' : 'communities.notFoundTitle')
+        | transloco
+    "
+    [message]="
+      (section() === 'posts' ? 'communities.posts.notFoundMessage' : 'communities.notFoundMessage')
+        | transloco
+    "
+  />
+} @else if (!allowed()) {
+  <div class="mx-auto max-w-3xl">
+    <a
+      [routerLink]="backLink()"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ backLabel() }}
+    </a>
+    <app-empty-state
+      class="mt-8 block"
+      icon="lock"
+      [title]="
+        (section() === 'posts' ? 'communities.posts.title' : 'communities.polls.title') | transloco
+      "
+      [message]="'communities.errors.membersOnly' | transloco"
+    />
+  </div>
+} @else {
+  <div class="mx-auto max-w-3xl">
+    <a
+      [routerLink]="backLink()"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ backLabel() }}
+    </a>
+
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+      <h1 class="min-w-0 text-2xl font-bold text-[var(--color-text)]">
+        {{
+          (section() === 'posts' ? 'communities.posts.title' : 'communities.polls.title')
+            | transloco
+        }}
+      </h1>
+      <a [routerLink]="createLink()" [class]="outlineLinkClass">
+        {{
+          (section() === 'posts' ? 'communities.posts.create' : 'communities.polls.new') | transloco
+        }}
+      </a>
+    </div>
+
+    <div class="mt-6">
+      @if (section() === 'posts') {
+        <app-community-feed [communitySlug]="communitySlug()" [subgroupSlug]="subgroupSlug()" />
+      } @else {
+        <app-community-polls [communitySlug]="communitySlug()" [subgroupSlug]="subgroupSlug()" />
+      }
+    </div>
+  </div>
+}

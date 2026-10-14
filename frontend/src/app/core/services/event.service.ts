@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import { CreateEventDto, CyclingEvent, PaginatedResponse, UpdateEventDto } from '@shared/models';
+import {
+  CreateEventDto,
+  CyclingEvent,
+  EventRsvpStatus,
+  PaginatedResponse,
+  UpdateEventDto,
+} from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { EventInviteResult } from './notification.service';
 
 export type EventSort = 'date' | 'distance' | 'name';
 
@@ -43,4 +50,39 @@ export class EventService {
   deleteEvent(id: string): Observable<void> {
     return this.api.delete(`/events/${id}`);
   }
+
+  invite(id: string, email: string): Observable<EventInviteResult> {
+    return this.api.post(`/events/${id}/invites`, { email });
+  }
+
+  setRsvp(id: string, status: EventRsvpStatus): Observable<CyclingEvent> {
+    return this.api.post(`/events/${id}/rsvp`, { status });
+  }
+
+  listRsvps(
+    id: string,
+  ): Observable<{ userId: string; displayName: string; status: EventRsvpStatus }[]> {
+    return this.api.get(`/events/${id}/rsvps`);
+  }
+
+  listComments(id: string): Observable<EventComment[]> {
+    return this.api.get(`/events/${id}/comments`);
+  }
+
+  addComment(id: string, body: string): Observable<EventComment> {
+    return this.api.post(`/events/${id}/comments`, { body });
+  }
+
+  deleteComment(id: string, commentId: string): Observable<void> {
+    return this.api.delete(`/events/${id}/comments/${commentId}`);
+  }
+}
+
+export interface EventComment {
+  id: string;
+  body: string;
+  authorId: string;
+  authorName: string | null;
+  canDelete: boolean;
+  createdAt: string;
 }

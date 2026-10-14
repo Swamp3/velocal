@@ -16,8 +16,7 @@
   >
     <a
       routerLink="/series"
-      class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)]
-        hover:underline"
+      class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] hover:underline"
     >
       <span class="material-symbols-outlined text-[16px]">arrow_back</span>
       {{ 'series.backToList' | transloco }}
@@ -27,8 +26,7 @@
   <div class="mx-auto max-w-3xl">
     <a
       routerLink="/series"
-      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
-        hover:text-[var(--color-text)] transition-colors"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
     >
       <span class="material-symbols-outlined text-[16px]">arrow_back</span>
       {{ 'series.backToList' | transloco }}
@@ -36,8 +34,7 @@
 
     @if (s.imageUrl) {
       <div
-        class="mt-5 overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)]
-          bg-[var(--color-bg-alt)]"
+        class="mt-5 overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-alt)]"
       >
         <img
           [src]="s.imageUrl"
@@ -55,8 +52,7 @@
       }
       @if (s.year) {
         <span
-          class="inline-flex items-center rounded-full bg-[var(--color-bg-alt)]
-            px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+          class="inline-flex items-center rounded-full bg-[var(--color-bg-alt)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
         >
           {{ s.year }}
         </span>
@@ -68,18 +64,17 @@
     </h1>
 
     @if (s.description) {
-      <p
-        class="mt-4 whitespace-pre-line text-sm leading-relaxed text-[var(--color-text-muted)]"
-      >{{ s.description }}</p>
+      <app-rich-text-view class="mt-4 block" [value]="s.description" />
     }
 
     <!-- Meta info -->
     <dl
-      class="mt-6 grid gap-4 rounded-2xl border border-[var(--color-border)]
-        bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)] text-sm sm:grid-cols-2"
+      class="mt-6 grid gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)] text-sm sm:grid-cols-2"
     >
       <div class="flex items-start gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]">flag</span>
+        <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
+          >flag</span
+        >
         <div>
           <dt class="text-[var(--color-text-muted)]">{{ 'series.events' | transloco }}</dt>
           <dd class="font-medium text-[var(--color-text)]">
@@ -90,7 +85,9 @@
 
       @if (s.externalUrl) {
         <div class="flex items-start gap-3">
-          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]">link</span>
+          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
+            >link</span
+          >
           <div>
             <dt class="text-[var(--color-text-muted)]">{{ 'series.externalUrl' | transloco }}</dt>
             <dd>

@@ -1,0 +1,19 @@
+@if (items().length > 0) {
+  <ul
+    class="divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)]"
+  >
+    @for (item of items(); track item.id) {
+      <li class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <p class="min-w-0 truncate font-medium text-[var(--color-text)]">{{ item.name }}</p>
+        <div class="flex shrink-0 flex-wrap gap-2">
+          <ui-button size="sm" (click)="approve.emit(item.id)">
+            {{ 'communities.requests.approve' | transloco }}
+          </ui-button>
+          <ui-button variant="outline" size="sm" (click)="reject.emit(item.id)">
+            {{ 'communities.requests.reject' | transloco }}
+          </ui-button>
+        </div>
+      </li>
+    }
+  </ul>
+}

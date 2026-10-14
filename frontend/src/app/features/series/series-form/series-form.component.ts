@@ -15,6 +15,7 @@ import { DisciplineService } from '@core/services/discipline.service';
 import { UploadService } from '@core/services/upload.service';
 import { Discipline, RaceSeriesDetail } from '@shared/models';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
+import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
 
 @Component({
@@ -27,6 +28,7 @@ import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
     ButtonComponent,
     InputComponent,
     ImageUploadComponent,
+    RichTextComponent,
   ],
   templateUrl: './series-form.component.html',
 })
@@ -49,8 +51,7 @@ export class SeriesFormComponent implements OnInit {
 
   protected readonly uploadImageFn = (file: File) =>
     this.uploadService.uploadSeriesImage(this.editId, file);
-  protected readonly deleteImageFn = () =>
-    this.uploadService.deleteSeriesImage(this.editId);
+  protected readonly deleteImageFn = () => this.uploadService.deleteSeriesImage(this.editId);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -112,8 +113,7 @@ export class SeriesFormComponent implements OnInit {
   protected fieldError(name: 'name'): string {
     const ctrl = this.form.controls[name];
     if (!ctrl.touched || ctrl.valid) return '';
-    if (ctrl.hasError('required'))
-      return this.transloco.translate('validation.required');
+    if (ctrl.hasError('required')) return this.transloco.translate('validation.required');
     return '';
   }
 

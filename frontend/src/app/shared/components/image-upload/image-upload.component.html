@@ -21,8 +21,8 @@
           text-sm text-[var(--color-text-muted)]"
       >
         <span class="material-symbols-outlined text-4xl">add_photo_alternate</span>
-        <span>Drop an image here or click to choose</span>
-        <span class="text-xs">JPEG, PNG, or WebP · up to 10 MB</span>
+        <span>{{ 'uploads.drop' | transloco }}</span>
+        <span class="text-xs">{{ 'uploads.hint' | transloco }}</span>
         <input
           type="file"
           [accept]="accept"
@@ -61,7 +61,7 @@
           [class.pointer-events-none]="disabled()"
           [class.opacity-50]="disabled()"
         >
-          Replace image
+          {{ 'uploads.replace' | transloco }}
         </span>
       </label>
       @if (deleteFn()) {
@@ -71,7 +71,7 @@
           [disabled]="disabled()"
           (click)="remove()"
         >
-          Remove
+          {{ 'uploads.remove' | transloco }}
         </ui-button>
       }
     </div>

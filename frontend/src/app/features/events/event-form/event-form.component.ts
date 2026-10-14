@@ -11,15 +11,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
+import { CommunityService } from '@core/services/community.service';
 import { EventService } from '@core/services/event.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
-import { toDisplayDate as toDisplayDateUtil, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
+import {
+  toDisplayDate as toDisplayDateUtil,
+  parseDisplayDate,
+  datePlaceholder,
+} from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 
 @Component({
@@ -33,6 +39,7 @@ import { LocaleService } from '@core/services/locale.service';
     CountrySelectorComponent,
     LocationPickerComponent,
     ImageUploadComponent,
+    RichTextComponent,
   ],
   templateUrl: './event-form.component.html',
 })
@@ -40,6 +47,7 @@ export class EventFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
+  private readonly communities = inject(CommunityService);
   private readonly disciplineService = inject(DisciplineService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -49,7 +57,9 @@ export class EventFormComponent implements OnInit {
 
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly loading = signal(false);
-  protected readonly dateInputPlaceholder = computed(() => datePlaceholder(this.localeService.locale()));
+  protected readonly dateInputPlaceholder = computed(() =>
+    datePlaceholder(this.localeService.locale()),
+  );
   protected readonly submitting = signal(false);
   protected readonly eventId = signal<string | null>(null);
   protected readonly isEdit = computed(() => this.eventId() !== null);
@@ -107,9 +117,25 @@ export class EventFormComponent implements OnInit {
     }),
     externalUrl: new FormControl('', { nonNullable: true }),
     status: new FormControl('published', { nonNullable: true }),
+    listing: new FormControl<'public' | 'members'>('members', { nonNullable: true }),
+    stravaUrl: new FormControl('', { nonNullable: true }),
+    meetupPlace: new FormControl('', { nonNullable: true }),
+    meetupDate: new FormControl('', { nonNullable: true }),
+    meetupTime: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+    }),
+    meetupNote: new FormControl('', { nonNullable: true }),
   });
 
+  protected readonly hosted = signal(false);
+  protected readonly communitySlug = signal<string | null>(null);
+  protected readonly subgroupSlug = signal<string | null>(null);
+
   ngOnInit(): void {
+    this.communitySlug.set(this.route.snapshot.paramMap.get('slug'));
+    this.subgroupSlug.set(this.route.snapshot.paramMap.get('subgroupSlug'));
+    this.hosted.set(!!this.communitySlug());
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.eventId.set(id);
@@ -122,6 +148,17 @@ export class EventFormComponent implements OnInit {
   protected onCoordinatesChange(coords: { lat: number; lng: number }): void {
     this.form.patchValue({ lat: coords.lat, lng: coords.lng });
     this.mapCoordinates.set(coords);
+  }
+
+  protected backCommands(): string[] {
+    if (this.isEdit() && this.eventId()) return ['/events', this.eventId()!];
+    const community = this.communitySlug();
+    const subgroup = this.subgroupSlug();
+    if (community && subgroup) {
+      return ['/communities', community, 'subgroups', subgroup];
+    }
+    if (community) return ['/communities', community];
+    return ['/events'];
   }
 
   protected onSubmit(): void {
@@ -148,18 +185,32 @@ export class EventFormComponent implements OnInit {
         : undefined,
       externalUrl: raw.externalUrl || undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
+      ...(this.hosted()
+        ? {
+            listing: raw.listing,
+            stravaUrl: raw.stravaUrl,
+            meetupPlace: raw.meetupPlace,
+            meetupAt: raw.meetupDate ? this.combineDatetime(raw.meetupDate, raw.meetupTime) : '',
+            meetupNote: raw.meetupNote,
+          }
+        : {}),
     };
 
+    const community = this.communitySlug();
     const action = this.isEdit()
       ? this.eventService.updateEvent(this.eventId()!, dto)
-      : this.eventService.createEvent(dto);
+      : community
+        ? this.communities.createEvent(community, dto, this.subgroupSlug() ?? undefined)
+        : this.eventService.createEvent(dto);
 
     action.subscribe({
       next: (event) => {
         this.submitting.set(false);
         const key = this.isEdit() ? 'event.form.success.update' : 'event.form.success.create';
         this.toast.success(this.transloco.translate(key));
-        this.router.navigate(['/events', event.id]);
+        this.router.navigate(
+          community && !this.isEdit() ? this.backCommands() : ['/events', event.id],
+        );
       },
       error: (err: ApiError) => {
         this.submitting.set(false);
@@ -201,6 +252,11 @@ export class EventFormComponent implements OnInit {
   }
 
   private patchForm(event: CyclingEvent): void {
+    if (!this.canManage(event)) {
+      this.loading.set(false);
+      void this.router.navigate(['/events', event.id]);
+      return;
+    }
     this.form.patchValue({
       name: event.name,
       description: event.description ?? '',
@@ -222,13 +278,27 @@ export class EventFormComponent implements OnInit {
         : '',
       externalUrl: event.externalUrl ?? '',
       status: event.status,
+      listing: event.listing ?? 'members',
+      stravaUrl: event.stravaUrl ?? '',
+      meetupPlace: event.meetupPlace ?? '',
+      meetupDate: event.meetupAt ? this.toDateString(event.meetupAt) : '',
+      meetupTime: event.meetupAt ? this.toTimeString(event.meetupAt) : '',
+      meetupNote: event.meetupNote ?? '',
     });
+    if (event.communityId) this.hosted.set(true);
 
     if (event.coordinates) {
       this.mapCoordinates.set(event.coordinates);
     }
     this.imageUrl.set(event.imageUrl ?? null);
     this.loading.set(false);
+  }
+
+  private canManage(event: CyclingEvent): boolean {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+    if (event.communityId) return event.canEdit === true;
+    return event.createdById === user.id || !!user.isAdmin;
   }
 
   /** '28.04.2026' */
@@ -250,7 +320,6 @@ export class EventFormComponent implements OnInit {
   private parseDate(display: string): string {
     return parseDisplayDate(display, this.localeService.locale());
   }
-
 
   private combineDatetime(date: string, time: string): string {
     const iso = this.parseDate(date);

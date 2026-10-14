@@ -1,8 +1,16 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { LocaleService } from '@core/services/locale.service';
+import { NotificationService } from '@core/services/notification.service';
 import { SeoService } from '@core/services/seo.service';
 import { UserService } from '@core/services/user.service';
 import { ThemeService } from '@core/theme.service';
@@ -21,6 +29,7 @@ const NAV_LINKS: NavLink[] = [
   { path: '/events', key: 'app.nav.events' },
   { path: '/calendar', key: 'app.nav.calendar' },
   { path: '/map', key: 'app.nav.map' },
+  { path: '/communities', key: 'app.nav.communities' },
   // { path: '/series', key: 'app.nav.series' },
 ];
 
@@ -79,6 +88,14 @@ const ROUTE_SEO_TABLE: Array<{ test: (path: string) => boolean; seo: RouteSeo }>
     },
   },
   {
+    test: (p) => p.startsWith('/communities'),
+    seo: {
+      title: 'VeloCal — Communities',
+      description: 'Find and join cycling communities.',
+      canonical: '/communities',
+    },
+  },
+  {
     test: (p) => p.startsWith('/calendar'),
     seo: {
       title: 'VeloCal — Calendar',
@@ -116,6 +133,9 @@ export class AppShellComponent {
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notifications = inject(NotificationService);
+
+  protected readonly unreadCount = this.notifications.unread;
 
   protected readonly mobileMenuOpen = signal(false);
   protected readonly isFullViewport = signal(false);
@@ -134,7 +154,18 @@ export class AppShellComponent {
       .subscribe((e) => {
         this.isFullViewport.set(/^\/map(\?|$)/.test(e.urlAfterRedirects));
         this.applyRouteDefaults(e.urlAfterRedirects);
+        this.refreshUnread();
       });
+
+    effect(() => {
+      if (!this.auth.hydrated()) return;
+      this.refreshUnread();
+    });
+  }
+
+  private refreshUnread(): void {
+    if (this.auth.isAuthenticated()) this.notifications.refreshUnread();
+    else this.notifications.unread.set(0);
   }
 
   private applyRouteDefaults(url: string): void {
@@ -144,15 +175,16 @@ export class AppShellComponent {
     // Detail pages own their own SEO — but exclude editor/new routes so those fall through
     // to the shell's noindex branch and the detail component never overwrites them.
     const isDetail =
-      /^\/(events|series|news)\/[^/]+$/.test(path) &&
-      !/^\/(events|series|news)\/(new|edit)$/.test(path) &&
+      /^\/(events|series|news|communities)\/[^/]+$/.test(path) &&
+      !/^\/(events|series|news|communities)\/(new|edit)$/.test(path) &&
       !path.endsWith('/edit');
     if (isDetail) return;
 
     const isLegal = /^\/(impressum|datenschutz|nutzungsbedingungen)/.test(path);
     if (isLegal) return;
 
-    const editish = /\/(new|edit)(\/|$)/.test(path) || /^\/(auth|profile|admin)/.test(path);
+    const editish =
+      /\/(new|edit|members)(\/|$)/.test(path) || /^\/(auth|profile|admin|notifications)/.test(path);
     const hasDisallowedQuery = !!rawQuery && this.hasDisallowedParams(rawQuery);
 
     const entry = ROUTE_SEO_TABLE.find(({ test }) => test(path))?.seo ?? DEFAULT_SEO;

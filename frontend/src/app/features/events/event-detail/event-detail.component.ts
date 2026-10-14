@@ -24,8 +24,12 @@ import {
   EventDetailMapComponent,
   EventStatusBadgeComponent,
   NewsCardComponent,
+  RichTextViewComponent,
 } from '@shared/components';
 import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
+import { EventCommentsComponent } from '../event-comments/event-comments.component';
+import { EventInviteComponent } from '../event-invite/event-invite.component';
+import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
 import { formatTime } from '@shared/utils/event-date';
@@ -60,6 +64,10 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     ExternalUrlDisplayPipe,
     ChipComponent,
     NewsCardComponent,
+    RichTextViewComponent,
+    EventRsvpComponent,
+    EventInviteComponent,
+    EventCommentsComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -98,6 +106,7 @@ export class EventDetailComponent implements OnInit {
     const ev = this.event();
     const user = this.auth.currentUser();
     if (!ev || !user) return false;
+    if (ev.communityId) return ev.canEdit === true;
     return ev.createdById === user.id || !!user.isAdmin;
   });
 

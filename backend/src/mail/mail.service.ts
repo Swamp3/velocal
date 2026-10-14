@@ -1,4 +1,8 @@
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
@@ -24,7 +28,8 @@ export class MailService {
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('resend.apiKey') ?? '';
     this.fromEmail =
-      this.config.get<string>('resend.fromEmail') ?? 'noreply@system.velocal.cc';
+      this.config.get<string>('resend.fromEmail') ??
+      'noreply@system.velocal.cc';
     this.fromName = this.config.get<string>('resend.fromName') ?? 'VeloCal';
     this.replyTo = this.config.get<string>('resend.replyTo') || undefined;
     this.enabled = apiKey.startsWith('re_');
@@ -45,7 +50,8 @@ export class MailService {
     }
 
     const subject = 'VeloCal — Reset your password';
-    const preheader = 'Click the link to set a new password for your VeloCal account.';
+    const preheader =
+      'Click the link to set a new password for your VeloCal account.';
 
     await this.send({
       to: email,
@@ -72,6 +78,41 @@ export class MailService {
       html: this.otpHtml(code, preheader),
       category: 'auth-otp',
     });
+  }
+
+  /** Returns false when mail is disabled, so the caller does not count a dev log against the cap. */
+  async sendEventInvite(
+    email: string,
+    eventName: string,
+    url: string,
+    lang: 'de' | 'en',
+  ): Promise<boolean> {
+    if (!this.enabled) {
+      this.logger.log(`[DEV] Event invite for ${email}: ${eventName} ${url}`);
+      return false;
+    }
+
+    const copy =
+      lang === 'en'
+        ? {
+            subject: `You're invited: ${eventName}`,
+            text: `You're invited to ${eventName}.\n\n${url}\n`,
+            button: 'Open the event',
+          }
+        : {
+            subject: `Einladung: ${eventName}`,
+            text: `Du bist zu ${eventName} eingeladen.\n\n${url}\n`,
+            button: 'Event öffnen',
+          };
+
+    await this.send({
+      to: email,
+      subject: copy.subject,
+      text: copy.text,
+      html: this.inviteHtml(eventName, url, copy.button),
+      category: 'event-invite',
+    });
+    return true;
   }
 
   private async send(msg: EmailMessage): Promise<void> {
@@ -190,6 +231,26 @@ export class MailService {
       </table>
     </td></tr>
   </table>
+</body>
+</html>`;
+  }
+
+  private inviteHtml(eventName: string, url: string, button: string): string {
+    const safeName = this.esc(eventName);
+    const safeUrl = this.esc(url);
+    const safeButton = this.esc(button);
+    return `<!DOCTYPE html>
+<html lang="en">
+<body style="margin:0;background:#f4f4f5;font-family:sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
+    <table width="100%" style="max-width:480px;background:#fff;border-radius:12px;padding:32px">
+      <tr><td>
+        <p style="margin:0 0 16px;font-size:16px;color:#18181b">${safeName}</p>
+        <a href="${safeUrl}" style="display:inline-block;background:#2563eb;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 32px;border-radius:8px">${safeButton}</a>
+        <p style="margin:24px 0 0;color:#a1a1aa;font-size:11px">VeloCal · velocal.cc</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
 </body>
 </html>`;
   }

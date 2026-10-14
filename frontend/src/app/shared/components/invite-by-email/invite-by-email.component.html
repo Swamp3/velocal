@@ -1,0 +1,8 @@
+<form class="flex flex-col gap-3 sm:flex-row sm:items-end" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="min-w-0 flex-1">
+    <ui-input [label]="label()" type="email" formControlName="email" />
+  </div>
+  <ui-button type="submit" [loading]="submitting()" [disabled]="submitting()">
+    {{ action() }}
+  </ui-button>
+</form>

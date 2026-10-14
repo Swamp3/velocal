@@ -1,0 +1,39 @@
+<a
+  [routerLink]="['/communities', community().slug]"
+  class="group flex h-full gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-elevated)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+>
+  @if (community().logoUrl; as logoUrl) {
+    <img
+      [src]="logoUrl"
+      alt=""
+      class="size-12 shrink-0 rounded-xl object-cover"
+      loading="lazy"
+      decoding="async"
+    />
+  } @else {
+    <div
+      class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary)] text-sm font-bold text-white"
+      aria-hidden="true"
+    >
+      {{ initials() }}
+    </div>
+  }
+
+  <div class="min-w-0 flex-1">
+    <h3
+      class="truncate text-base font-semibold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]"
+    >
+      {{ community().name }}
+    </h3>
+
+    <div class="mt-2 flex flex-wrap items-center gap-2">
+      <ui-badge [variant]="visibilityVariant()">
+        {{ 'communities.visibility.' + community().visibility | transloco }}
+      </ui-badge>
+      <span class="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">group</span>
+        {{ 'communities.memberCount' | transloco: { count: community().memberCount } }}
+      </span>
+    </div>
+  </div>
+</a>

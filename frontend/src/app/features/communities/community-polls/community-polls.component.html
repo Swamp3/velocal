@@ -1,0 +1,69 @@
+<div>
+  @if (!loading() && polls().length === 0) {
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'communities.polls.empty' | transloco }}
+    </p>
+  } @else {
+    <ul class="space-y-3">
+      @for (poll of polls(); track poll.id) {
+        <li class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4">
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-sm font-medium text-[var(--color-text)]">{{ poll.question }}</p>
+            @if (poll.canDelete) {
+              <button
+                type="button"
+                class="text-xs font-medium text-[var(--color-text-muted)]"
+                (click)="remove(poll)"
+              >
+                {{ 'communities.polls.delete' | transloco }}
+              </button>
+            }
+          </div>
+          @if (poll.closed) {
+            <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+              {{ 'communities.polls.closed' | transloco }}
+            </p>
+          }
+          <ul class="mt-3 space-y-2">
+            @for (option of poll.options; track option.id) {
+              <li>
+                <label class="flex items-center gap-2 text-sm text-[var(--color-text)]">
+                  <input
+                    [type]="poll.multiple ? 'checkbox' : 'radio'"
+                    [name]="'poll-' + poll.id"
+                    [checked]="chosen(poll.id, option.id)"
+                    [disabled]="poll.closed"
+                    (change)="toggle(poll, option.id)"
+                  />
+                  <span>{{ option.label }}</span>
+                  @if (poll.canSeeResults) {
+                    <span class="text-[var(--color-text-muted)]">
+                      {{ 'communities.polls.votes' | transloco: { count: option.votes } }}
+                    </span>
+                  }
+                </label>
+              </li>
+            }
+          </ul>
+          @if (!poll.canSeeResults) {
+            <p class="mt-2 text-xs text-[var(--color-text-muted)]">
+              {{ 'communities.polls.hidden' | transloco }}
+            </p>
+          }
+          @if (!poll.closed) {
+            <div class="mt-3">
+              <ui-button
+                type="button"
+                [loading]="votingId() === poll.id"
+                [disabled]="votingId() === poll.id"
+                (click)="vote(poll)"
+              >
+                {{ 'communities.polls.vote' | transloco }}
+              </ui-button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

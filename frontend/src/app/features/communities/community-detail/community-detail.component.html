@@ -1,0 +1,86 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton width="100%" height="12rem" rounded="lg" />
+    <ui-skeleton width="60%" height="2rem" />
+    <div class="mt-6 space-y-3">
+      <ui-skeleton height="1.25rem" />
+      <ui-skeleton height="1.25rem" />
+    </div>
+  </div>
+} @else if (error()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="'communities.notFoundTitle' | transloco"
+    [message]="'communities.notFoundMessage' | transloco"
+  >
+    <a
+      routerLink="/communities"
+      class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] hover:underline"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ 'communities.backToList' | transloco }}
+    </a>
+  </app-empty-state>
+} @else if (community(); as c) {
+  <div class="mx-auto max-w-3xl">
+    <a
+      routerLink="/communities"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ 'communities.backToList' | transloco }}
+    </a>
+
+    <div class="mt-5">
+      <app-community-hero [name]="c.name" [heroUrl]="c.heroUrl" [logoUrl]="c.logoUrl">
+        @if (!auth.isAuthenticated()) {
+          <a
+            routerLink="/auth/login"
+            class="inline-flex items-center justify-center rounded-[var(--radius-default)] bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+          >
+            {{ 'communities.loginToJoin' | transloco }}
+          </a>
+        } @else if (c.myRole === 'admin') {
+          <a [routerLink]="['/communities', c.slug, 'edit']" [class]="outlineLinkClass">
+            {{ 'communities.edit' | transloco }}
+          </a>
+        } @else if (c.myRole === 'member') {
+          <ui-button variant="outline" [loading]="acting()" [disabled]="acting()" (click)="leave()">
+            {{ 'communities.leave' | transloco }}
+          </ui-button>
+        } @else if (c.visibility === 'public') {
+          <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
+            {{ 'communities.join' | transloco }}
+          </ui-button>
+        } @else if (c.myJoinRequest === 'pending') {
+          <p class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">schedule</span>
+            {{ 'communities.pending' | transloco }}
+          </p>
+        } @else if (c.visibility === 'request') {
+          <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
+            {{ 'communities.requestJoin' | transloco }}
+          </ui-button>
+        }
+      </app-community-hero>
+    </div>
+
+    @if (c.description) {
+      <app-rich-text-view class="mt-6 block" [value]="c.description" />
+    }
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <ui-badge [variant]="visibilityVariant(c.visibility)">
+        {{ 'communities.visibility.' + c.visibility | transloco }}
+      </ui-badge>
+      <span class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">group</span>
+        {{ 'communities.memberCount' | transloco: { count: c.memberCount } }}
+      </span>
+    </div>
+
+    <app-community-section-nav [links]="sections(c)" />
+    <app-community-events [communitySlug]="c.slug" [canCreate]="c.myRole === 'admin'" />
+  </div>
+}

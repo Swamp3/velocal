@@ -40,6 +40,33 @@
             </a>
           }
           <a
+            routerLink="/notifications"
+            class="relative rounded-lg p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+            [attr.aria-label]="'notifications.title' | transloco"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+            @if (unreadCount() > 0) {
+              <span
+                class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-semibold text-white"
+              >
+                {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+              </span>
+            }
+          </a>
+          <a
             [routerLink]="authNav.path"
             routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
             class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
@@ -146,7 +173,7 @@
       class="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between sm:px-6"
     >
       <span>&copy; {{ currentYear }} VeloCal</span>
-      <nav class="flex gap-4" aria-label="Legal links">
+      <nav class="flex flex-wrap justify-center gap-x-4 gap-y-2" aria-label="Legal links">
         <a routerLink="/changelog" class="hover:text-[var(--color-text)] transition-colors">
           {{ 'changelog.footerLink' | transloco }}
         </a>
@@ -237,6 +264,20 @@
               {{ adminNav.key | transloco }}
             </a>
           }
+          <a
+            routerLink="/notifications"
+            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            {{ 'notifications.title' | transloco }}
+            @if (unreadCount() > 0) {
+              <span
+                class="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-semibold text-white"
+              >
+                {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+              </span>
+            }
+          </a>
           <a
             [routerLink]="authNav.path"
             routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"

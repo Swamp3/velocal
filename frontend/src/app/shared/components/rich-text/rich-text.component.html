@@ -1,0 +1,13 @@
+<div class="rich-text" [class.rich-text-compact]="compact()" ngSkipHydration>
+  @if (isBrowser) {
+    <quill-editor
+      class="block w-full"
+      theme="snow"
+      [ngModel]="value()"
+      [modules]="modules"
+      [placeholder]="placeholder()"
+      [readOnly]="disabled()"
+      (ngModelChange)="changed($event)"
+    />
+  }
+</div>

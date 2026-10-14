@@ -1,0 +1,88 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton width="100%" height="12rem" rounded="lg" />
+  </div>
+} @else if (error()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="'communities.subgroups.notFoundTitle' | transloco"
+    [message]="'communities.subgroups.notFoundMessage' | transloco"
+  />
+} @else if (subgroup(); as subgroup) {
+  <div class="mx-auto max-w-3xl">
+    <a
+      [routerLink]="['/communities', subgroup.communitySlug]"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ 'communities.subgroups.back' | transloco }}
+    </a>
+
+    <div class="mt-5">
+      <app-community-hero
+        [name]="subgroup.name"
+        [heroUrl]="subgroup.heroUrl"
+        [logoUrl]="subgroup.logoUrl"
+      >
+        @if (canEdit(subgroup)) {
+          <a
+            [routerLink]="[
+              '/communities',
+              subgroup.communitySlug,
+              'subgroups',
+              subgroup.slug,
+              'edit',
+            ]"
+            [class]="outlineLinkClass"
+          >
+            {{ 'communities.edit' | transloco }}
+          </a>
+        }
+        @if (subgroup.myRole) {
+          <ui-button variant="outline" [loading]="acting()" [disabled]="acting()" (click)="leave()">
+            {{ 'communities.leave' | transloco }}
+          </ui-button>
+        } @else if (!auth.isAuthenticated()) {
+          <a routerLink="/auth/login" [class]="outlineLinkClass">
+            {{ 'communities.loginToJoin' | transloco }}
+          </a>
+        } @else if (subgroup.visibility === 'open') {
+          <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
+            {{ 'communities.join' | transloco }}
+          </ui-button>
+        } @else if (subgroup.myJoinRequest === 'pending') {
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.pending' | transloco }}
+          </p>
+        } @else if (subgroup.visibility === 'request') {
+          <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
+            {{ 'communities.requestJoin' | transloco }}
+          </ui-button>
+        }
+      </app-community-hero>
+    </div>
+
+    @if (subgroup.description) {
+      <app-rich-text-view class="mt-6 block" [value]="subgroup.description" />
+    }
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <ui-badge [variant]="visibilityVariant(subgroup.visibility)">
+        {{ 'communities.subgroups.visibility.' + subgroup.visibility | transloco }}
+      </ui-badge>
+      <span class="text-sm text-[var(--color-text-muted)]">
+        {{ 'communities.memberCount' | transloco: { count: subgroup.memberCount } }}
+      </span>
+    </div>
+
+    @if (sections(subgroup).length > 0) {
+      <app-community-section-nav [links]="sections(subgroup)" />
+    }
+    <app-community-events
+      [communitySlug]="subgroup.communitySlug"
+      [subgroupSlug]="subgroup.slug"
+      [canCreate]="subgroup.viewerIsCommunityAdmin || subgroup.myRole === 'moderator'"
+    />
+  </div>
+}

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0] - 2026-10-14
+
+### Added
+
+- Communities API: clubs, membership, roles, join requests, and invites by email
+- Subgroups with moderators and separate visibility
+- Community posts, comments, and polls
+- Hosted events with public or members-only listing, RSVP, comments, meetup fields, and event invites
+- In-app notifications for new events, invites, and join decisions
+
+### Fixed
+
+- Private community images, invite-only subgroup images, and members-only event images require a signed access token
+- Hosted event updates require the current host manager
+- The monthly invite-email cap is reserved before send; a failed send does not consume it
+- Approving and rejecting a join request can no longer overwrite each other
+
 ## [0.6.0] - 2026-09-09
 
 ### Added

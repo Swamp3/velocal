@@ -6,11 +6,20 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Matches,
   Max,
+  MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { EventSource, EventStatus } from '../entities/event.entity';
+import {
+  EventListing,
+  EventSource,
+  EventStatus,
+} from '../entities/event.entity';
+
+const STRAVA_URL = /^https:\/\/(www\.)?strava\.com\/.+/i;
 
 class CoordinatesDto {
   @IsNumber()
@@ -77,4 +86,29 @@ export class UpdateEventDto {
   @IsOptional()
   @IsString()
   disciplineSlug?: string;
+
+  @IsOptional()
+  @IsEnum(EventListing)
+  listing?: EventListing;
+
+  @IsOptional()
+  @ValidateIf((dto: UpdateEventDto) => dto.stravaUrl !== '')
+  @IsUrl({ require_protocol: true, protocols: ['https'] })
+  @Matches(STRAVA_URL)
+  stravaUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  meetupPlace?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: UpdateEventDto) => dto.meetupAt !== '')
+  @IsISO8601()
+  meetupAt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  meetupNote?: string;
 }

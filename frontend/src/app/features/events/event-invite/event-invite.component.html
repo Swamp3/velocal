@@ -1,0 +1,13 @@
+<section
+  class="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 shadow-[var(--shadow-card)]"
+>
+  <h2 class="mb-3 text-sm font-semibold text-[var(--color-text)]">
+    {{ 'events.invite.title' | transloco }}
+  </h2>
+  <app-invite-by-email
+    [label]="'events.invite.email' | transloco"
+    [action]="'events.invite.action' | transloco"
+    [submitting]="submitting()"
+    (invited)="invite($event)"
+  />
+</section>

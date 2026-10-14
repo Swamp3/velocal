@@ -13,6 +13,18 @@ export interface CyclingEvent {
   coordinates?: { lat: number; lng: number };
   registrationDeadline?: string;
   externalUrl?: string;
+  stravaUrl?: string | null;
+  listing?: 'public' | 'members';
+  communityId?: string | null;
+  meetupPlace?: string | null;
+  meetupAt?: string | null;
+  meetupNote?: string | null;
+  rsvpCount?: number;
+  myRsvp?: EventRsvpStatus | null;
+  canComment?: boolean;
+  canSeeRsvps?: boolean;
+  canInvite?: boolean;
+  canEdit?: boolean;
   imageUrl?: string;
   source: EventSource;
   discipline: Discipline;
@@ -21,6 +33,8 @@ export interface CyclingEvent {
   createdAt: string;
   distance?: number;
 }
+
+export type EventRsvpStatus = 'going' | 'maybe' | 'declined';
 
 export type EventStatus = 'published' | 'cancelled' | 'completed';
 export type EventSource = 'manual' | 'imported';
@@ -37,6 +51,11 @@ export interface CreateEventDto {
   coordinates?: { lat: number; lng: number };
   registrationDeadline?: string;
   externalUrl?: string;
+  stravaUrl?: string;
+  listing?: 'public' | 'members';
+  meetupPlace?: string;
+  meetupAt?: string;
+  meetupNote?: string;
   disciplineSlug: string;
 }
 

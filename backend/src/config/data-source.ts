@@ -8,6 +8,17 @@ import { UserFavorite } from '../users/entities/user-favorite.entity';
 import { UserDisciplinePref } from '../users/entities/user-discipline-pref.entity';
 import { RaceSeries } from '../series/entities/race-series.entity';
 import { RaceSeriesEvent } from '../series/entities/race-series-event.entity';
+import { Community } from '../communities/entities/community.entity';
+import { CommunityMember } from '../communities/entities/community-member.entity';
+import { CommunityJoinRequest } from '../communities/entities/community-join-request.entity';
+import { Subgroup } from '../communities/entities/subgroup.entity';
+import { SubgroupMember } from '../communities/entities/subgroup-member.entity';
+import { SubgroupJoinRequest } from '../communities/entities/subgroup-join-request.entity';
+import { CommunityPost } from '../communities/entities/community-post.entity';
+import { CommunityPostComment } from '../communities/entities/community-post-comment.entity';
+import { CommunityPoll } from '../communities/entities/community-poll.entity';
+import { CommunityPollOption } from '../communities/entities/community-poll-option.entity';
+import { CommunityPollVote } from '../communities/entities/community-poll-vote.entity';
 import { Post } from '../posts/entities/post.entity';
 import { PostTag } from '../posts/entities/post-tag.entity';
 import { ImportRun } from '../import/entities/import-run.entity';
@@ -29,6 +40,17 @@ export default new DataSource({
     UserDisciplinePref,
     RaceSeries,
     RaceSeriesEvent,
+    Community,
+    CommunityMember,
+    CommunityJoinRequest,
+    Subgroup,
+    SubgroupMember,
+    SubgroupJoinRequest,
+    CommunityPost,
+    CommunityPostComment,
+    CommunityPoll,
+    CommunityPollOption,
+    CommunityPollVote,
     Post,
     PostTag,
     OtpToken,

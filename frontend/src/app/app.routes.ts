@@ -30,6 +30,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/news/news.routes'),
   },
   {
+    path: 'communities',
+    loadChildren: () => import('./features/communities/community.routes'),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes'),
   },
@@ -37,6 +41,14 @@ export const routes: Routes = [
     path: 'profile',
     canActivate: [authGuard],
     loadChildren: () => import('./features/user/user.routes'),
+  },
+  {
+    path: 'notifications',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/notifications/notification-inbox/notification-inbox.component').then(
+        (m) => m.NotificationInboxComponent,
+      ),
   },
   {
     path: 'workouts',

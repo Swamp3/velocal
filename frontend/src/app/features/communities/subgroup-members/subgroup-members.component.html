@@ -1,0 +1,66 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton height="4rem" />
+  </div>
+} @else if (notFound()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="'communities.subgroups.notFoundTitle' | transloco"
+    [message]="'communities.subgroups.notFoundMessage' | transloco"
+  />
+} @else if (subgroup(); as subgroup) {
+  <div class="mx-auto max-w-3xl">
+    <a
+      [routerLink]="['/communities', subgroup.communitySlug, 'subgroups', subgroup.slug]"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ subgroup.name }}
+    </a>
+
+    <div class="mt-5 flex items-center justify-between gap-3">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">
+        {{ 'communities.members.title' | transloco }}
+      </h1>
+      @if (canManage()) {
+        <a
+          [routerLink]="[
+            '/communities',
+            subgroup.communitySlug,
+            'subgroups',
+            subgroup.slug,
+            'requests',
+          ]"
+          [class]="outlineLinkClass"
+        >
+          {{ 'communities.requests.title' | transloco }}
+        </a>
+      }
+    </div>
+
+    @if (canManage()) {
+      <div class="mt-6">
+        <app-invite-by-email
+          [label]="'communities.invite.email' | transloco"
+          [action]="'communities.invite.action' | transloco"
+          [submitting]="mutating()"
+          (invited)="onInvite($event)"
+        />
+      </div>
+    }
+
+    <div class="mt-6">
+      @if (memberItems().length === 0) {
+        <app-empty-state icon="group" [title]="'communities.members.empty' | transloco" />
+      } @else {
+        <app-member-list
+          [items]="memberItems()"
+          (roleToggle)="onRoleToggle($event)"
+          (remove)="onRemove($event)"
+        />
+      }
+    </div>
+
+  </div>
+}
