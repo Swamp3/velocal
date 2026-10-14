@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-2xl px-4 py-8">
-  <div class="mb-6 flex items-center justify-between gap-4">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <h1 class="text-2xl font-semibold text-[var(--color-text)]">
       {{ 'notifications.title' | transloco }}
     </h1>
@@ -12,7 +12,11 @@
     }
   </div>
 
-  @if (rows() === null) {
+  @if (loadError()) {
+    <p class="text-sm text-[var(--color-text-muted)]" role="alert">
+      {{ 'notifications.loadError' | transloco }}
+    </p>
+  } @else if (rows() === null) {
     <ui-skeleton height="4rem" />
   } @else if (rows()!.length === 0) {
     <p class="text-sm text-[var(--color-text-muted)]">{{ 'notifications.empty' | transloco }}</p>
@@ -26,7 +30,7 @@
             [class.font-semibold]="!row.readAt"
             (click)="open(row)"
           >
-            <span class="block text-sm text-[var(--color-text)]">
+            <span class="block break-words text-sm text-[var(--color-text)]">
               {{ textKey(row) | transloco: row.payload }}
             </span>
             <time

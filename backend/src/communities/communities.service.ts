@@ -232,23 +232,24 @@ export class CommunitiesService {
       community.visibility = dto.visibility;
     }
 
-    let admitted: string[] = [];
     const saved = await this.dataSource.transaction(async (manager) => {
       const row = await manager.save(community);
-      if (opening) admitted = await this.admitPendingMembers(manager, id);
+      if (opening) {
+        const admitted = await this.admitPendingMembers(manager, id);
+        for (const memberId of admitted) {
+          await this.notifications.joinDecision(
+            memberId,
+            {
+              communityName: row.name,
+              communitySlug: row.slug,
+              decision: 'approved',
+            },
+            manager,
+          );
+        }
+      }
       return row;
     });
-    if (admitted.length > 0) {
-      await Promise.all(
-        admitted.map((memberId) =>
-          this.notifications.joinDecision(memberId, {
-            communityName: saved.name,
-            communitySlug: saved.slug,
-            decision: 'approved',
-          }),
-        ),
-      );
-    }
     return this.serializeFor(saved, userId);
   }
 
@@ -319,23 +320,27 @@ export class CommunitiesService {
       return { outcome: 'pending' };
     }
 
-    await this.dataSource.query(
-      `INSERT INTO "community_join_requests" ("community_id", "user_id", "status", "createdAt", "updatedAt")
-       VALUES ($1, $2, 'pending', now(), now())
-       ON CONFLICT ("community_id", "user_id")
-       DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
-      [id, userId],
-    );
-
     const requester = await this.users.findOne({ where: { id: userId } });
-    await this.notifications.joinRequest({
-      requesterId: userId,
-      communityId: community.id,
-      payload: {
-        communityName: community.name,
-        communitySlug: community.slug,
-        actorName: requester?.displayName ?? undefined,
-      },
+    await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `INSERT INTO "community_join_requests" ("community_id", "user_id", "status", "createdAt", "updatedAt")
+         VALUES ($1, $2, 'pending', now(), now())
+         ON CONFLICT ("community_id", "user_id")
+         DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
+        [id, userId],
+      );
+      await this.notifications.joinRequest(
+        {
+          requesterId: userId,
+          communityId: community.id,
+          payload: {
+            communityName: community.name,
+            communitySlug: community.slug,
+            actorName: requester?.displayName ?? undefined,
+          },
+        },
+        manager,
+      );
     });
 
     return { outcome: 'pending' };
@@ -505,7 +510,8 @@ export class CommunitiesService {
     requestId: string,
     actorId: string,
   ): Promise<{ status: 'approved' }> {
-    const approved = await this.dataSource.transaction(async (manager) => {
+    await this.dataSource.transaction(async (manager) => {
+      await this.lockCommunity(manager, communityId);
       const community = await manager.findOne(Community, {
         where: { id: communityId },
       });
@@ -516,6 +522,7 @@ export class CommunitiesService {
 
       const request = await manager.findOne(CommunityJoinRequest, {
         where: { id: requestId, communityId },
+        lock: { mode: 'pessimistic_write' },
       });
       if (!request || request.status !== CommunityJoinStatus.PENDING) {
         throw new NotFoundException('Join request not found');
@@ -529,13 +536,15 @@ export class CommunitiesService {
          ON CONFLICT ("community_id", "user_id") DO NOTHING`,
         [communityId, request.userId],
       );
-
-      return { community, userId: request.userId };
-    });
-    await this.notifications.joinDecision(approved.userId, {
-      communityName: approved.community.name,
-      communitySlug: approved.community.slug,
-      decision: 'approved',
+      await this.notifications.joinDecision(
+        request.userId,
+        {
+          communityName: community.name,
+          communitySlug: community.slug,
+          decision: 'approved',
+        },
+        manager,
+      );
     });
     return { status: 'approved' };
   }
@@ -545,22 +554,35 @@ export class CommunitiesService {
     requestId: string,
     actorId: string,
   ): Promise<{ status: 'rejected' }> {
-    const community = await this.findCommunity(communityId);
-    await this.assertAdmin(community.id, actorId);
+    await this.dataSource.transaction(async (manager) => {
+      await this.lockCommunity(manager, communityId);
+      const community = await manager.findOne(Community, {
+        where: { id: communityId },
+      });
+      if (!community) {
+        throw new NotFoundException(`Community ${communityId} not found`);
+      }
+      await this.assertAdminTx(manager, communityId, actorId);
 
-    const request = await this.joinRequests.findOne({
-      where: { id: requestId, communityId },
-    });
-    if (!request || request.status !== CommunityJoinStatus.PENDING) {
-      throw new NotFoundException('Join request not found');
-    }
+      const request = await manager.findOne(CommunityJoinRequest, {
+        where: { id: requestId, communityId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!request || request.status !== CommunityJoinStatus.PENDING) {
+        throw new NotFoundException('Join request not found');
+      }
 
-    request.status = CommunityJoinStatus.REJECTED;
-    await this.joinRequests.save(request);
-    await this.notifications.joinDecision(request.userId, {
-      communityName: community.name,
-      communitySlug: community.slug,
-      decision: 'rejected',
+      request.status = CommunityJoinStatus.REJECTED;
+      await manager.save(request);
+      await this.notifications.joinDecision(
+        request.userId,
+        {
+          communityName: community.name,
+          communitySlug: community.slug,
+          decision: 'rejected',
+        },
+        manager,
+      );
     });
     return { status: 'rejected' };
   }

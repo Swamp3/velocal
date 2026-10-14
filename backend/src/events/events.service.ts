@@ -4,7 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import {
@@ -44,6 +44,7 @@ import {
   MissingDataType,
 } from './dto/admin-missing-data.dto';
 import { GeocodingService } from './geocoding.service';
+import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 
 export interface SerializedEvent {
@@ -81,7 +82,9 @@ export class EventsService {
     private readonly users: Repository<User>,
     private readonly geocoding: GeocodingService,
     private readonly uploads: UploadsService,
+    private readonly imageAccess: ImageAccessService,
     private readonly notifications: NotificationsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(
@@ -157,12 +160,14 @@ export class EventsService {
     if (hasGeo) {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
+      const access = await this.accessMap(entities, userId);
 
       const data = entities.map((entity, i) =>
         this.serializeEvent(entity, {
           distance: raw[i]?.distance_m
             ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
             : undefined,
+          includeCommunityFields: access.get(entity.id)?.member ?? false,
         }),
       );
 
@@ -175,9 +180,14 @@ export class EventsService {
       };
     }
 
-    const [data, total] = await qb.getManyAndCount();
+    const [rows, total] = await qb.getManyAndCount();
+    const access = await this.accessMap(rows, userId);
     return {
-      data: data.map((e) => this.serializeEvent(e)),
+      data: rows.map((event) =>
+        this.serializeEvent(event, {
+          includeCommunityFields: access.get(event.id)?.member ?? false,
+        }),
+      ),
       total,
       page: params.page,
       limit: params.limit,
@@ -197,6 +207,22 @@ export class EventsService {
   }
 
   async create(
+    dto: CreateEventDto,
+    userId?: string,
+    host?: {
+      communityId: string;
+      subgroupId: string | null;
+      listing: EventListing;
+      stravaUrl?: string | null;
+      meetupPlace?: string | null;
+      meetupAt?: string | null;
+      meetupNote?: string | null;
+    },
+  ): Promise<Event> {
+    return this.repo.save(await this.buildEvent(dto, userId, host));
+  }
+
+  private async buildEvent(
     dto: CreateEventDto,
     userId?: string,
     host?: {
@@ -243,7 +269,7 @@ export class EventsService {
       meetupAt: host?.meetupAt ? new Date(host.meetupAt) : null,
       meetupNote: host ? host.meetupNote || null : null,
     });
-    return this.repo.save(entity);
+    return entity;
   }
 
   async update(
@@ -252,13 +278,9 @@ export class EventsService {
     user?: { id: string; isAdmin: boolean },
   ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
-    if (!(await this.canSee(event, user?.id))) {
-      throw new NotFoundException(`Event ${id} not found`);
-    }
-
-    if (user) {
-      this.assertOwnerOrAdmin(event, user);
-    }
+    if (!user)
+      throw new ForbiddenException('You can only modify your own events');
+    await this.assertCanMutate(event, user);
 
     const partial: Partial<Event> = { ...dto } as Partial<Event>;
     if (!event.communityId) {
@@ -317,13 +339,9 @@ export class EventsService {
     user?: { id: string; isAdmin: boolean },
   ): Promise<void> {
     const event = await this.findEntity(id);
-    if (!(await this.canSee(event, user?.id))) {
-      throw new NotFoundException(`Event ${id} not found`);
-    }
-
-    if (user) {
-      this.assertOwnerOrAdmin(event, user);
-    }
+    if (!user)
+      throw new ForbiddenException('You can only modify your own events');
+    await this.assertCanMutate(event, user);
 
     // Best-effort cleanup — removing the event row has to succeed either way.
     await this.uploads.remove('events', event.id);
@@ -336,12 +354,12 @@ export class EventsService {
     user: { id: string; isAdmin: boolean },
   ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
-    this.assertOwnerOrAdmin(event, user);
+    await this.assertCanMutate(event, user);
 
     const url = await this.uploads.save('events', event.id, file);
     event.imageUrl = url;
     const saved = await this.repo.save(event);
-    return this.serializeEvent(saved);
+    return this.present(saved, user.id);
   }
 
   async removeImage(
@@ -349,19 +367,22 @@ export class EventsService {
     user: { id: string; isAdmin: boolean },
   ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
-    this.assertOwnerOrAdmin(event, user);
+    await this.assertCanMutate(event, user);
 
     await this.uploads.remove('events', event.id);
     event.imageUrl = null as unknown as string;
     const saved = await this.repo.save(event);
-    return this.serializeEvent(saved);
+    return this.present(saved, user.id);
   }
 
   async findMissingData(dto: AdminMissingDataDto): Promise<PaginatedEvents> {
     const qb = this.repo
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.discipline', 'discipline')
-      .andWhere('event.startDate >= NOW()');
+      .andWhere('event.startDate >= NOW()')
+      .andWhere('event.listing = :publicListing', {
+        publicListing: EventListing.PUBLIC,
+      });
 
     switch (dto.type) {
       case MissingDataType.URL:
@@ -407,7 +428,10 @@ export class EventsService {
   async getMissingDataStats(): Promise<Record<string, number>> {
     const future = this.repo
       .createQueryBuilder('e')
-      .andWhere('e.startDate >= NOW()');
+      .andWhere('e.startDate >= NOW()')
+      .andWhere('e.listing = :publicListing', {
+        publicListing: EventListing.PUBLIC,
+      });
 
     const [url, address, coordinates, description] = await Promise.all([
       future
@@ -472,7 +496,10 @@ export class EventsService {
     const rows = await qb.getMany();
     const counts = await this.goingCounts(rows.map((event) => event.id));
     return rows.map((event) =>
-      this.serializeEvent(event, { rsvpCount: counts.get(event.id) ?? 0 }),
+      this.serializeEvent(event, {
+        rsvpCount: counts.get(event.id) ?? 0,
+        includeCommunityFields: host.canSeeMembers,
+      }),
     );
   }
 
@@ -495,7 +522,7 @@ export class EventsService {
       true,
     );
     const listing = dto.listing ?? EventListing.MEMBERS;
-    const event = await this.create(dto, userId, {
+    const entity = await this.buildEvent(dto, userId, {
       communityId: host.community.id,
       subgroupId: host.subgroup?.id ?? null,
       listing,
@@ -504,18 +531,25 @@ export class EventsService {
       meetupAt: dto.meetupAt,
       meetupNote: dto.meetupNote,
     });
-    await this.notifications.eventCreated({
-      actorId: userId,
-      communityId: host.community.id,
-      subgroupId: host.subgroup?.id ?? null,
-      payload: {
-        communityName: host.community.name,
-        communitySlug: host.community.slug,
-        subgroupName: host.subgroup?.name,
-        subgroupSlug: host.subgroup?.slug,
-        eventId: event.id,
-        eventName: event.name,
-      },
+    const event = await this.dataSource.transaction(async (manager) => {
+      const saved = await manager.save(entity);
+      await this.notifications.eventCreated(
+        {
+          actorId: userId,
+          communityId: host.community.id,
+          subgroupId: host.subgroup?.id ?? null,
+          payload: {
+            communityName: host.community.name,
+            communitySlug: host.community.slug,
+            subgroupName: host.subgroup?.name,
+            subgroupSlug: host.subgroup?.slug,
+            eventId: saved.id,
+            eventName: saved.name,
+          },
+        },
+        manager,
+      );
+      return saved;
     });
     return this.present(event, userId);
   }
@@ -788,6 +822,8 @@ export class EventsService {
       canComment: !!event.communityId && access.member,
       canSeeRsvps: access.manager,
       canInvite: !!event.communityId && access.manager,
+      canEdit: !!event.communityId && access.manager,
+      includeCommunityFields: access.member,
     });
   }
 
@@ -855,6 +891,23 @@ export class EventsService {
     };
   }
 
+  private async assertCanMutate(
+    event: Event,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<void> {
+    if (!(await this.canSee(event, user.id))) {
+      throw new NotFoundException(`Event ${event.id} not found`);
+    }
+    if (event.communityId) {
+      const access = await this.hostRole(event, user.id);
+      if (!access.manager) {
+        throw communityForbidden(CommunityErrorCode.membersOnly);
+      }
+      return;
+    }
+    this.assertOwnerOrAdmin(event, user);
+  }
+
   private assertOwnerOrAdmin(
     event: Event,
     user: { id: string; isAdmin: boolean },
@@ -864,18 +917,100 @@ export class EventsService {
     throw new ForbiddenException('You can only modify your own events');
   }
 
+  private async accessMap(
+    events: Event[],
+    userId?: string,
+  ): Promise<Map<string, { member: boolean; manager: boolean }>> {
+    const map = new Map<string, { member: boolean; manager: boolean }>();
+    const communityIds = [
+      ...new Set(
+        events
+          .map((event) => event.communityId)
+          .filter((id): id is string => !!id),
+      ),
+    ];
+    const subgroupIds = [
+      ...new Set(
+        events
+          .map((event) => event.subgroupId)
+          .filter((id): id is string => !!id),
+      ),
+    ];
+    const communityRows =
+      userId && communityIds.length > 0
+        ? await this.communityMembers.find({
+            where: { userId, communityId: In(communityIds) },
+          })
+        : [];
+    const subgroupRows =
+      userId && subgroupIds.length > 0
+        ? await this.subgroupMembers.find({
+            where: { userId, subgroupId: In(subgroupIds) },
+          })
+        : [];
+    const communityById = new Map(
+      communityRows.map((row) => [row.communityId, row]),
+    );
+    const subgroupById = new Map(
+      subgroupRows.map((row) => [row.subgroupId, row]),
+    );
+
+    for (const event of events) {
+      if (!event.communityId || !userId) {
+        map.set(event.id, {
+          member: false,
+          manager: !!userId && event.createdById === userId,
+        });
+        continue;
+      }
+      const communityMember = communityById.get(event.communityId);
+      const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
+      if (!event.subgroupId) {
+        map.set(event.id, { member: !!communityMember, manager: isAdmin });
+        continue;
+      }
+      if (isAdmin) {
+        map.set(event.id, { member: true, manager: true });
+        continue;
+      }
+      const subgroupMember = subgroupById.get(event.subgroupId);
+      map.set(event.id, {
+        member: !!subgroupMember,
+        manager: subgroupMember?.role === SubgroupMemberRole.MODERATOR,
+      });
+    }
+    return map;
+  }
+
   private serializeEvent(
     event: Event,
     extra?: Record<string, unknown>,
   ): SerializedEvent {
+    const includeCommunityFields = extra?.['includeCommunityFields'] === true;
+    const rest = { ...(extra ?? {}) };
+    delete rest['includeCommunityFields'];
     const coords = event.coordinates;
-    return {
+    const serialized: SerializedEvent = {
       ...event,
+      imageUrl: this.visibleImage(event),
       coordinates:
         coords?.type === 'Point'
           ? { lat: coords.coordinates[1], lng: coords.coordinates[0] }
           : null,
-      ...extra,
+      ...rest,
     };
+    if (!includeCommunityFields) {
+      serialized.meetupPlace = null;
+      serialized.meetupAt = null;
+      serialized.meetupNote = null;
+      serialized.stravaUrl = null;
+    }
+    return serialized;
+  }
+
+  private visibleImage(event: Event): string | null {
+    if (!event.imageUrl) return null;
+    if (event.listing !== EventListing.MEMBERS) return event.imageUrl;
+    return this.imageAccess.sign(event.imageUrl, true);
   }
 }

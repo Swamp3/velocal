@@ -17,6 +17,7 @@
   "notifications": {
     "title": "Benachrichtigungen",
     "empty": "Keine Benachrichtigungen",
+    "loadError": "Benachrichtigungen konnten nicht geladen werden",
     "markAll": "Alle als gelesen",
     "eventCreated": "Neues Event in {{communityName}}: {{eventName}}",
     "eventInvite": "Du bist zu {{eventName}} eingeladen",

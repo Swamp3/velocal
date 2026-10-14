@@ -12,7 +12,7 @@ What the app already does, and what this feature must not pretend is there.
 | Events | Unhosted events stay public. Hosted events are `public` or `members`. Logged-out users and outsiders never see `members` events. Members who can see the host do, including `/events`, `/map`, and `/calendar`. |
 | Posts | `posts` is the public news CMS (`/news`). Community posts are a new table, `community_posts`. |
 | Social | Community posts, comments, polls, RSVP, and an in-app inbox. Email is not the fan-out. |
-| Images | Sharp variants for `events`, `series`, `posts`, `community-heroes`, and `community-logos`. Private community images and invite-only subgroup images need a signed `access` query and are not publicly cached. |
+| Images | Sharp variants for `events`, `series`, `posts`, `community-heroes`, and `community-logos`. Private community images, invite-only subgroup images, and members-only event images need a signed `access` query and are not publicly cached. |
 | Mail | Resend sends password reset, OTP, and a direct event invitation to a verified address. Invitation mail is capped at 400/month so the 3000 budget still covers auth mail. |
 
 An event with no community host stays a public calendar event. Members-only listing requires a host.
@@ -65,7 +65,7 @@ A community or subgroup overview stays short: identity, actions, and events. Pos
 - Edit subgroup name, description, hero, and logo.
 - Approve or reject subgroup join requests, and invite people into an invite-only subgroup.
 - Create and moderate subgroup posts, comments, and polls.
-- Create subgroup events, see RSVPs, and send event invitations.
+- Create, edit, and delete subgroup events, see RSVPs, and send event invitations. A demoted member keeps none of that. Site admin is not a host manager.
 
 A moderator cannot change community settings, community visibility, other subgroups, or community membership.
 
@@ -86,7 +86,7 @@ Community admins moderate the community feed and every subgroup. They do not nee
 
 - RSVP count is visible to anyone who can see the event.
 - Event comments are limited to members of the host.
-- Meetup place, time, and note are optional and separate from `startDate` and `locationName`.
+- Meetup place, time, note, and the Strava URL are optional and separate from `startDate` and `locationName`. They are returned only to members of the host, including when the listing is `public`.
 - A public community event still needs a discipline so it fits the existing list, map, and filters.
 
 ## Notifications
@@ -150,7 +150,7 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 | `rsvp` | done | Going, maybe, or declined. The going count is visible to anyone who can see the event. Name lists are for the host's admins and moderators, or the creator of an unhosted event. |
 | `event-comments` | done | Comments on a hosted event, limited to members of that host. |
 | `meetup-fields` | done | Optional meetup place, time, and note on hosted events, separate from `startDate` and `locationName`. Marked as community fields. |
-| `event-create-flow` | done | Admins create community events. Admins and subgroup moderators create subgroup events, from the overview, using the existing event form. |
+| `event-create-flow` | done | Admins create and edit community events. Admins and subgroup moderators create and edit subgroup events. Edit rights follow the current host manager, not `createdById`. |
 
 ### 6. Invites and inbox
 

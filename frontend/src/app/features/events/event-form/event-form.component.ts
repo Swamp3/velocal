@@ -252,6 +252,11 @@ export class EventFormComponent implements OnInit {
   }
 
   private patchForm(event: CyclingEvent): void {
+    if (!this.canManage(event)) {
+      this.loading.set(false);
+      void this.router.navigate(['/events', event.id]);
+      return;
+    }
     this.form.patchValue({
       name: event.name,
       description: event.description ?? '',
@@ -287,6 +292,13 @@ export class EventFormComponent implements OnInit {
     }
     this.imageUrl.set(event.imageUrl ?? null);
     this.loading.set(false);
+  }
+
+  private canManage(event: CyclingEvent): boolean {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+    if (event.communityId) return event.canEdit === true;
+    return event.createdById === user.id || !!user.isAdmin;
   }
 
   /** '28.04.2026' */

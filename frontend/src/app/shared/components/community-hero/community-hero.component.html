@@ -18,7 +18,7 @@
   <div
     class="relative z-10 -mt-10 flex flex-col gap-4 px-4 sm:flex-row sm:items-end sm:justify-between sm:px-6"
   >
-    <div class="flex items-end gap-4">
+    <div class="flex min-w-0 items-end gap-4">
       @if (logoUrl(); as logoUrl) {
         <img
           [src]="logoUrl"
@@ -34,7 +34,9 @@
           {{ initials() }}
         </div>
       }
-      <h1 class="mb-1 text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ name() }}</h1>
+      <h1 class="mb-1 min-w-0 break-words text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+        {{ name() }}
+      </h1>
     </div>
 
     <div class="flex flex-wrap items-center gap-2 sm:mb-1">

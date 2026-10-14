@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DataSource,
+  EntityManager,
   IsNull,
   MoreThanOrEqual,
   QueryFailedError,
@@ -72,12 +73,15 @@ export class NotificationsService {
       .execute();
   }
 
-  async eventCreated(input: {
-    actorId: string;
-    communityId: string;
-    subgroupId: string | null;
-    payload: NotificationPayload;
-  }): Promise<void> {
+  async eventCreated(
+    input: {
+      actorId: string;
+      communityId: string;
+      subgroupId: string | null;
+      payload: NotificationPayload;
+    },
+    manager?: EntityManager,
+  ): Promise<void> {
     const recipients = input.subgroupId
       ? await this.subgroupAudience(
           input.communityId,
@@ -85,15 +89,18 @@ export class NotificationsService {
           input.actorId,
         )
       : await this.communityMembers(input.communityId, input.actorId);
-    await this.insertMany(recipients, 'event.created', input.payload);
+    await this.insertMany(recipients, 'event.created', input.payload, manager);
   }
 
-  async joinRequest(input: {
-    requesterId: string;
-    communityId: string;
-    subgroupId?: string;
-    payload: NotificationPayload;
-  }): Promise<void> {
+  async joinRequest(
+    input: {
+      requesterId: string;
+      communityId: string;
+      subgroupId?: string;
+      payload: NotificationPayload;
+    },
+    manager?: EntityManager,
+  ): Promise<void> {
     const recipients = input.subgroupId
       ? await this.subgroupManagers(
           input.communityId,
@@ -101,14 +108,15 @@ export class NotificationsService {
           input.requesterId,
         )
       : await this.communityAdmins(input.communityId, input.requesterId);
-    await this.insertMany(recipients, 'join.request', input.payload);
+    await this.insertMany(recipients, 'join.request', input.payload, manager);
   }
 
   async joinDecision(
     userId: string,
     payload: NotificationPayload,
+    manager?: EntityManager,
   ): Promise<void> {
-    await this.insertMany([userId], 'join.decision', payload);
+    await this.insertMany([userId], 'join.decision', payload, manager);
   }
 
   async recordInvite(input: {
@@ -119,13 +127,21 @@ export class NotificationsService {
     payload: NotificationPayload;
   }): Promise<InviteEmailResult> {
     try {
-      await this.invites.save(
-        this.invites.create({
-          eventId: input.eventId,
-          userId: input.invitee.id,
-          invitedById: input.actorId,
-        }),
-      );
+      await this.dataSource.transaction(async (manager) => {
+        await manager.save(
+          manager.create(EventInvite, {
+            eventId: input.eventId,
+            userId: input.invitee.id,
+            invitedById: input.actorId,
+          }),
+        );
+        await this.insertMany(
+          [input.invitee.id],
+          'event.invite',
+          input.payload,
+          manager,
+        );
+      });
     } catch (error) {
       if (isUniqueViolation(error)) {
         return { outcome: 'already', emailed: false, emailSkipped: null };
@@ -133,16 +149,15 @@ export class NotificationsService {
       throw error;
     }
 
-    await this.insertMany([input.invitee.id], 'event.invite', input.payload);
-
     if (!input.invitee.emailVerified) {
       return { outcome: 'invited', emailed: false, emailSkipped: 'unverified' };
     }
 
-    const sentThisMonth = await this.invites.count({
-      where: { emailedAt: MoreThanOrEqual(monthStart()) },
-    });
-    if (sentThisMonth >= INVITE_EMAIL_MONTHLY_CAP) {
+    const claimed = await this.claimInviteEmail(
+      input.eventId,
+      input.invitee.id,
+    );
+    if (!claimed) {
       this.logger.warn(
         `Event invite email cap reached (${INVITE_EMAIL_MONTHLY_CAP})`,
       );
@@ -166,30 +181,52 @@ export class NotificationsService {
       );
     }
     if (!sent) {
+      await this.invites.update(
+        { eventId: input.eventId, userId: input.invitee.id },
+        { emailedAt: null },
+      );
       return { outcome: 'invited', emailed: false, emailSkipped: 'disabled' };
     }
 
-    await this.invites.update(
-      { eventId: input.eventId, userId: input.invitee.id },
-      { emailedAt: new Date() },
-    );
     return { outcome: 'invited', emailed: true, emailSkipped: null };
+  }
+
+  /**
+   * Reserves one monthly invite email. The advisory lock serializes the count
+   * and the `emailedAt` write. A failed send clears `emailedAt` so it does not
+   * consume the cap.
+   */
+  private async claimInviteEmail(
+    eventId: string,
+    userId: string,
+  ): Promise<boolean> {
+    return this.dataSource.transaction(async (manager) => {
+      await manager.query(`SELECT pg_advisory_xact_lock($1)`, [404_000_001]);
+      const sentThisMonth = await manager.count(EventInvite, {
+        where: { emailedAt: MoreThanOrEqual(monthStart()) },
+      });
+      if (sentThisMonth >= INVITE_EMAIL_MONTHLY_CAP) return false;
+      await manager.update(
+        EventInvite,
+        { eventId, userId },
+        { emailedAt: new Date() },
+      );
+      return true;
+    });
   }
 
   private async insertMany(
     userIds: string[],
     type: NotificationType,
     payload: NotificationPayload,
+    manager?: EntityManager,
   ): Promise<void> {
     const unique = [...new Set(userIds)].filter(Boolean);
     if (unique.length === 0) return;
-    try {
-      await this.notifications.insert(
-        unique.map((userId) => ({ userId, type, payload })),
-      );
-    } catch (error) {
-      this.logger.error(`Failed to write ${type} notifications`, error);
-    }
+    const repo = manager
+      ? manager.getRepository(Notification)
+      : this.notifications;
+    await repo.insert(unique.map((userId) => ({ userId, type, payload })));
   }
 
   private async communityMembers(

@@ -106,6 +106,7 @@ export class EventDetailComponent implements OnInit {
     const ev = this.event();
     const user = this.auth.currentUser();
     if (!ev || !user) return false;
+    if (ev.communityId) return ev.canEdit === true;
     return ev.createdById === user.id || !!user.isAdmin;
   });
 

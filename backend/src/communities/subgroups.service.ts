@@ -171,26 +171,26 @@ export class SubgroupsService {
     if (isAdmin && dto.visibility !== undefined) {
       subgroup.visibility = dto.visibility;
     }
-    let admitted: string[] = [];
     const saved = await this.dataSource.transaction(async (manager) => {
       const row = await manager.save(subgroup);
-      if (opening)
-        admitted = await this.admitPendingMembers(manager, subgroup.id);
+      if (opening) {
+        const admitted = await this.admitPendingMembers(manager, subgroup.id);
+        for (const memberId of admitted) {
+          await this.notifications.joinDecision(
+            memberId,
+            {
+              communityName: community.name,
+              communitySlug: community.slug,
+              subgroupName: row.name,
+              subgroupSlug: row.slug,
+              decision: 'approved',
+            },
+            manager,
+          );
+        }
+      }
       return row;
     });
-    if (admitted.length > 0) {
-      await Promise.all(
-        admitted.map((memberId) =>
-          this.notifications.joinDecision(memberId, {
-            communityName: community.name,
-            communitySlug: community.slug,
-            subgroupName: saved.name,
-            subgroupSlug: saved.slug,
-            decision: 'approved',
-          }),
-        ),
-      );
-    }
     return this.serializeFor(saved, community, userId);
   }
 
@@ -304,6 +304,7 @@ export class SubgroupsService {
     });
     if (alreadyPending) return { outcome: 'pending' };
 
+    const requester = await this.users.findOne({ where: { id: userId } });
     await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, community.id);
       const member = await manager.findOne(CommunityMember, {
@@ -319,19 +320,21 @@ export class SubgroupsService {
          DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
         [subgroup.id, userId],
       );
-    });
-    const requester = await this.users.findOne({ where: { id: userId } });
-    await this.notifications.joinRequest({
-      requesterId: userId,
-      communityId: community.id,
-      subgroupId: subgroup.id,
-      payload: {
-        communityName: community.name,
-        communitySlug: community.slug,
-        subgroupName: subgroup.name,
-        subgroupSlug: subgroup.slug,
-        actorName: requester?.displayName ?? undefined,
-      },
+      await this.notifications.joinRequest(
+        {
+          requesterId: userId,
+          communityId: community.id,
+          subgroupId: subgroup.id,
+          payload: {
+            communityName: community.name,
+            communitySlug: community.slug,
+            subgroupName: subgroup.name,
+            subgroupSlug: subgroup.slug,
+            actorName: requester?.displayName ?? undefined,
+          },
+        },
+        manager,
+      );
     });
     return { outcome: 'pending' };
   }
@@ -471,10 +474,11 @@ export class SubgroupsService {
       slug,
       actorId,
     );
-    const requesterId = await this.dataSource.transaction(async (manager) => {
+    await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, community.id);
       const request = await manager.findOne(SubgroupJoinRequest, {
         where: { id: requestId, subgroupId: subgroup.id },
+        lock: { mode: 'pessimistic_write' },
       });
       if (!request || request.status !== CommunityJoinStatus.PENDING) {
         throw new NotFoundException('Join request not found');
@@ -490,14 +494,17 @@ export class SubgroupsService {
       if (!inserted) {
         throw communityForbidden(CommunityErrorCode.notCommunityMember);
       }
-      return request.userId;
-    });
-    await this.notifications.joinDecision(requesterId, {
-      communityName: community.name,
-      communitySlug: community.slug,
-      subgroupName: subgroup.name,
-      subgroupSlug: subgroup.slug,
-      decision: 'approved',
+      await this.notifications.joinDecision(
+        request.userId,
+        {
+          communityName: community.name,
+          communitySlug: community.slug,
+          subgroupName: subgroup.name,
+          subgroupSlug: subgroup.slug,
+          decision: 'approved',
+        },
+        manager,
+      );
     });
     return { status: 'approved' };
   }
@@ -513,15 +520,28 @@ export class SubgroupsService {
       slug,
       actorId,
     );
-    const request = await this.requirePending(subgroup.id, requestId);
-    request.status = CommunityJoinStatus.REJECTED;
-    await this.joinRequests.save(request);
-    await this.notifications.joinDecision(request.userId, {
-      communityName: community.name,
-      communitySlug: community.slug,
-      subgroupName: subgroup.name,
-      subgroupSlug: subgroup.slug,
-      decision: 'rejected',
+    await this.dataSource.transaction(async (manager) => {
+      await this.lockCommunity(manager, community.id);
+      const request = await manager.findOne(SubgroupJoinRequest, {
+        where: { id: requestId, subgroupId: subgroup.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!request || request.status !== CommunityJoinStatus.PENDING) {
+        throw new NotFoundException('Join request not found');
+      }
+      request.status = CommunityJoinStatus.REJECTED;
+      await manager.save(request);
+      await this.notifications.joinDecision(
+        request.userId,
+        {
+          communityName: community.name,
+          communitySlug: community.slug,
+          subgroupName: subgroup.name,
+          subgroupSlug: subgroup.slug,
+          decision: 'rejected',
+        },
+        manager,
+      );
     });
     return { status: 'rejected' };
   }

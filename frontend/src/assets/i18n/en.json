@@ -17,6 +17,7 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications",
+    "loadError": "Could not load notifications",
     "markAll": "Mark all read",
     "eventCreated": "New event in {{communityName}}: {{eventName}}",
     "eventInvite": "You're invited to {{eventName}}",

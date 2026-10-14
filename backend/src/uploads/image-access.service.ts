@@ -23,9 +23,19 @@ export class ImageAccessService {
   /**
    * Community and subgroup images share upload subjects. A private community,
    * or an invite-only subgroup, is not fetchable from the bare file URL.
-   * Event, series, and post images stay public.
+   * Members-only event images use the same signed query. Public events, series,
+   * and news images stay public.
    */
   async restriction(subject: string, id: string): Promise<ImageRestriction> {
+    if (subject === 'events') {
+      const rows: Array<{ listing: string }> = await this.dataSource.query(
+        `SELECT "listing"::text AS "listing" FROM "events" WHERE "id" = $1`,
+        [id],
+      );
+      if (rows.length === 0) return 'hidden';
+      return rows[0].listing === 'members' ? 'signed' : 'public';
+    }
+
     if (subject !== 'community-heroes' && subject !== 'community-logos') {
       return 'public';
     }

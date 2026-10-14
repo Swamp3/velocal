@@ -19,6 +19,7 @@ export class NotificationInboxComponent implements OnInit {
   private readonly transloco = inject(TranslocoService);
 
   protected readonly rows = signal<AppNotification[] | null>(null);
+  protected readonly loadError = signal(false);
   protected readonly markingAll = signal(false);
 
   ngOnInit(): void {
@@ -72,9 +73,13 @@ export class NotificationInboxComponent implements OnInit {
   }
 
   private load(): void {
+    this.loadError.set(false);
     this.notifications.list().subscribe({
       next: (rows) => this.rows.set(rows),
-      error: () => this.rows.set([]),
+      error: () => {
+        this.rows.set(null);
+        this.loadError.set(true);
+      },
     });
   }
 

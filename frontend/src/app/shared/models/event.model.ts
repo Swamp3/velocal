@@ -24,6 +24,7 @@ export interface CyclingEvent {
   canComment?: boolean;
   canSeeRsvps?: boolean;
   canInvite?: boolean;
+  canEdit?: boolean;
   imageUrl?: string;
   source: EventSource;
   discipline: Discipline;
