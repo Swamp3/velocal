@@ -8,6 +8,8 @@ import { CommunityMember } from '../communities/entities/community-member.entity
 import { Community } from '../communities/entities/community.entity';
 import { SubgroupMember } from '../communities/entities/subgroup-member.entity';
 import { Subgroup } from '../communities/entities/subgroup.entity';
+import { EventComment } from './entities/event-comment.entity';
+import { EventRsvp } from './entities/event-rsvp.entity';
 import { Event } from './entities/event.entity';
 import { UploadsModule } from '../uploads/uploads.module';
 
@@ -15,6 +17,8 @@ import { UploadsModule } from '../uploads/uploads.module';
   imports: [
     TypeOrmModule.forFeature([
       Event,
+      EventRsvp,
+      EventComment,
       Community,
       CommunityMember,
       Subgroup,

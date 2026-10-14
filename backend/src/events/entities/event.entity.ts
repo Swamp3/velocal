@@ -126,6 +126,20 @@ export class Event {
   @Column({ type: 'varchar', length: 500, name: 'strava_url', nullable: true })
   stravaUrl: string | null;
 
+  @Column({
+    type: 'varchar',
+    length: 200,
+    name: 'meetup_place',
+    nullable: true,
+  })
+  meetupPlace: string | null;
+
+  @Column({ type: 'timestamptz', name: 'meetup_at', nullable: true })
+  meetupAt: Date | null;
+
+  @Column({ type: 'text', name: 'meetup_note', nullable: true })
+  meetupNote: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

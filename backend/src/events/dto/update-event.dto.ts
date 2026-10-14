@@ -8,6 +8,7 @@ import {
   IsUrl,
   Matches,
   Max,
+  MaxLength,
   Min,
   ValidateIf,
   ValidateNested,
@@ -95,4 +96,19 @@ export class UpdateEventDto {
   @IsUrl({ require_protocol: true, protocols: ['https'] })
   @Matches(STRAVA_URL)
   stravaUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  meetupPlace?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: UpdateEventDto) => dto.meetupAt !== '')
+  @IsISO8601()
+  meetupAt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  meetupNote?: string;
 }

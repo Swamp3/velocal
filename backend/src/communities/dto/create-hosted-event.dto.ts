@@ -1,8 +1,11 @@
 import {
   IsEnum,
+  IsISO8601,
   IsOptional,
+  IsString,
   IsUrl,
   Matches,
+  MaxLength,
   ValidateIf,
 } from 'class-validator';
 import { EventListing } from '../../events/entities/event.entity';
@@ -20,4 +23,19 @@ export class CreateHostedEventDto extends CreateEventDto {
   @IsUrl({ require_protocol: true, protocols: ['https'] })
   @Matches(STRAVA_URL)
   stravaUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  meetupPlace?: string;
+
+  @IsOptional()
+  @ValidateIf((dto: CreateHostedEventDto) => dto.meetupAt !== '')
+  @IsISO8601()
+  meetupAt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  meetupNote?: string;
 }

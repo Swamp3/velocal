@@ -30,7 +30,13 @@ export class CommunityEventsController {
   @Post('communities/:communitySlug/events')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(BadWordInterceptor)
-  @CheckBadWords('name', 'description', 'locationName')
+  @CheckBadWords(
+    'name',
+    'description',
+    'locationName',
+    'meetupPlace',
+    'meetupNote',
+  )
   createCommunity(
     @Param('communitySlug') communitySlug: string,
     @Body() dto: CreateHostedEventDto,
@@ -52,7 +58,13 @@ export class CommunityEventsController {
   @Post('communities/:communitySlug/subgroups/:subgroupSlug/events')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(BadWordInterceptor)
-  @CheckBadWords('name', 'description', 'locationName')
+  @CheckBadWords(
+    'name',
+    'description',
+    'locationName',
+    'meetupPlace',
+    'meetupNote',
+  )
   createSubgroup(
     @Param('communitySlug') communitySlug: string,
     @Param('subgroupSlug') subgroupSlug: string,

@@ -22,7 +22,14 @@
             [routerLink]="['/events', event.id]"
             class="flex items-center justify-between gap-3 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
           >
-            <span class="font-medium">{{ event.name }}</span>
+            <span class="min-w-0">
+              <span class="block font-medium">{{ event.name }}</span>
+              @if (event.rsvpCount) {
+                <span class="text-sm text-[var(--color-text-muted)]">
+                  {{ 'events.rsvp.count' | transloco: { count: event.rsvpCount } }}
+                </span>
+              }
+            </span>
             <time
               class="shrink-0 text-sm text-[var(--color-text-muted)]"
               [attr.datetime]="event.startDate"

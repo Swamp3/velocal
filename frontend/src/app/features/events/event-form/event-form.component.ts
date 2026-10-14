@@ -119,6 +119,13 @@ export class EventFormComponent implements OnInit {
     status: new FormControl('published', { nonNullable: true }),
     listing: new FormControl<'public' | 'members'>('members', { nonNullable: true }),
     stravaUrl: new FormControl('', { nonNullable: true }),
+    meetupPlace: new FormControl('', { nonNullable: true }),
+    meetupDate: new FormControl('', { nonNullable: true }),
+    meetupTime: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+    }),
+    meetupNote: new FormControl('', { nonNullable: true }),
   });
 
   protected readonly hosted = signal(false);
@@ -178,7 +185,15 @@ export class EventFormComponent implements OnInit {
         : undefined,
       externalUrl: raw.externalUrl || undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
-      ...(this.hosted() ? { listing: raw.listing, stravaUrl: raw.stravaUrl } : {}),
+      ...(this.hosted()
+        ? {
+            listing: raw.listing,
+            stravaUrl: raw.stravaUrl,
+            meetupPlace: raw.meetupPlace,
+            meetupAt: raw.meetupDate ? this.combineDatetime(raw.meetupDate, raw.meetupTime) : '',
+            meetupNote: raw.meetupNote,
+          }
+        : {}),
     };
 
     const community = this.communitySlug();
@@ -260,6 +275,10 @@ export class EventFormComponent implements OnInit {
       status: event.status,
       listing: event.listing ?? 'members',
       stravaUrl: event.stravaUrl ?? '',
+      meetupPlace: event.meetupPlace ?? '',
+      meetupDate: event.meetupAt ? this.toDateString(event.meetupAt) : '',
+      meetupTime: event.meetupAt ? this.toTimeString(event.meetupAt) : '',
+      meetupNote: event.meetupNote ?? '',
     });
     if (event.communityId) this.hosted.set(true);
 

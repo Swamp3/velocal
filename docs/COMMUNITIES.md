@@ -147,9 +147,9 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 | `event-host` | done | One host on `events`: the community or exactly one subgroup. Unhosted events stay public calendar rows. |
 | `event-listing` | done | Listing `members` or `public`. A public community event still requires a discipline. Hosted create defaults to `members`. |
 | `members-event-hide` | done | Logged-out users and non-members never see `members` events on `/events`, `/map`, `/calendar`, the sitemap, or by id (404). Members who can see the host do, including the global event list. |
-| `rsvp` | todo | RSVP plus a count visible to anyone who can see the event. |
-| `event-comments` | todo | Event comments limited to members of the host. |
-| `meetup-fields` | todo | Optional meetup place, time, and note, separate from `startDate` and `locationName`. |
+| `rsvp` | done | Going, maybe, or declined. The going count is visible to anyone who can see the event. Name lists are for the host's admins and moderators, or the creator of an unhosted event. |
+| `event-comments` | done | Comments on a hosted event, limited to members of that host. |
+| `meetup-fields` | done | Optional meetup place, time, and note on hosted events, separate from `startDate` and `locationName`. Marked as community fields. |
 | `event-create-flow` | done | Admins create community events. Admins and subgroup moderators create subgroup events, from the overview, using the existing event form. |
 
 ### 6. Invites and inbox

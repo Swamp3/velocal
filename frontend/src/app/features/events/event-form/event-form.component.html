@@ -94,6 +94,76 @@
             class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           />
         </div>
+        <div>
+          <label
+            for="meetupPlace"
+            class="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]"
+          >
+            {{ 'communities.events.meetupPlace' | transloco }}
+            <span
+              class="rounded-full bg-[var(--color-bg-alt)] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+            >
+              {{ 'communities.events.communityField' | transloco }}
+            </span>
+          </label>
+          <input
+            id="meetupPlace"
+            type="text"
+            formControlName="meetupPlace"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
+        <div>
+          <label
+            for="meetupDate"
+            class="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]"
+          >
+            {{ 'communities.events.meetupTime' | transloco }}
+            <span
+              class="rounded-full bg-[var(--color-bg-alt)] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+            >
+              {{ 'communities.events.communityField' | transloco }}
+            </span>
+          </label>
+          <div class="mt-1.5 flex gap-2">
+            <input
+              id="meetupDate"
+              type="text"
+              formControlName="meetupDate"
+              inputmode="numeric"
+              placeholder="TT.MM.JJJJ"
+              class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            />
+            <input
+              id="meetupTime"
+              type="text"
+              formControlName="meetupTime"
+              inputmode="numeric"
+              placeholder="HH:mm"
+              aria-label="HH:mm"
+              class="w-28 shrink-0 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+            />
+          </div>
+        </div>
+        <div>
+          <label
+            for="meetupNote"
+            class="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]"
+          >
+            {{ 'communities.events.meetupNote' | transloco }}
+            <span
+              class="rounded-full bg-[var(--color-bg-alt)] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+            >
+              {{ 'communities.events.communityField' | transloco }}
+            </span>
+          </label>
+          <textarea
+            id="meetupNote"
+            formControlName="meetupNote"
+            rows="3"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          ></textarea>
+        </div>
       }
       <!-- Name -->
       <div>

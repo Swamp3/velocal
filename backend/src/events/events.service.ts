@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventComment } from './entities/event-comment.entity';
+import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import {
   CommunityMember,
   CommunityMemberRole,
@@ -60,6 +62,10 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private readonly repo: Repository<Event>,
+    @InjectRepository(EventRsvp)
+    private readonly rsvps: Repository<EventRsvp>,
+    @InjectRepository(EventComment)
+    private readonly comments: Repository<EventComment>,
     @InjectRepository(Community)
     private readonly communities: Repository<Community>,
     @InjectRepository(CommunityMember)
@@ -173,11 +179,7 @@ export class EventsService {
   }
 
   async findOne(id: string, userId?: string): Promise<SerializedEvent> {
-    const event = await this.findEntity(id);
-    if (!(await this.canSee(event, userId))) {
-      throw new NotFoundException(`Event ${id} not found`);
-    }
-    return this.serializeEvent(event);
+    return this.present(await this.findEntity(id), userId);
   }
 
   private async findEntity(id: string): Promise<Event> {
@@ -196,6 +198,9 @@ export class EventsService {
       subgroupId: string | null;
       listing: EventListing;
       stravaUrl?: string | null;
+      meetupPlace?: string | null;
+      meetupAt?: string | null;
+      meetupNote?: string | null;
     },
   ): Promise<Event> {
     let coordinates = dto.coordinates;
@@ -228,6 +233,9 @@ export class EventsService {
       subgroupId: host?.subgroupId ?? null,
       listing: host?.listing ?? EventListing.PUBLIC,
       stravaUrl: host ? (host.stravaUrl ?? null) : null,
+      meetupPlace: host ? host.meetupPlace || null : null,
+      meetupAt: host?.meetupAt ? new Date(host.meetupAt) : null,
+      meetupNote: host ? host.meetupNote || null : null,
     });
     return this.repo.save(entity);
   }
@@ -250,8 +258,21 @@ export class EventsService {
     if (!event.communityId) {
       delete partial.listing;
       delete partial.stravaUrl;
-    } else if (dto.stravaUrl !== undefined) {
-      partial.stravaUrl = dto.stravaUrl || null;
+      delete partial.meetupPlace;
+      delete partial.meetupAt;
+      delete partial.meetupNote;
+    } else {
+      if (dto.stravaUrl !== undefined)
+        partial.stravaUrl = dto.stravaUrl || null;
+      if (dto.meetupPlace !== undefined) {
+        partial.meetupPlace = dto.meetupPlace.trim() || null;
+      }
+      if (dto.meetupNote !== undefined) {
+        partial.meetupNote = dto.meetupNote.trim() || null;
+      }
+      if (dto.meetupAt !== undefined) {
+        partial.meetupAt = dto.meetupAt ? new Date(dto.meetupAt) : null;
+      }
     }
 
     if (dto.startDate) partial.startDate = new Date(dto.startDate);
@@ -282,7 +303,7 @@ export class EventsService {
 
     Object.assign(event, partial);
     const saved = await this.repo.save(event);
-    return this.serializeEvent(saved);
+    return this.present(saved, user?.id);
   }
 
   async remove(
@@ -443,13 +464,22 @@ export class EventsService {
     }
     qb.orderBy('event.startDate', 'ASC').take(20);
     const rows = await qb.getMany();
-    return rows.map((event) => this.serializeEvent(event));
+    const counts = await this.goingCounts(rows.map((event) => event.id));
+    return rows.map((event) =>
+      this.serializeEvent(event, { rsvpCount: counts.get(event.id) ?? 0 }),
+    );
   }
 
   async createHosted(
     communitySlug: string,
     userId: string,
-    dto: CreateEventDto & { listing?: EventListing; stravaUrl?: string },
+    dto: CreateEventDto & {
+      listing?: EventListing;
+      stravaUrl?: string;
+      meetupPlace?: string;
+      meetupAt?: string;
+      meetupNote?: string;
+    },
     subgroupSlug?: string,
   ): Promise<SerializedEvent> {
     const host = await this.resolveHost(
@@ -464,8 +494,11 @@ export class EventsService {
       subgroupId: host.subgroup?.id ?? null,
       listing,
       stravaUrl: dto.stravaUrl || null,
+      meetupPlace: dto.meetupPlace,
+      meetupAt: dto.meetupAt,
+      meetupNote: dto.meetupNote,
     });
-    return this.serializeEvent(event);
+    return this.present(event, userId);
   }
 
   private async resolveHost(
@@ -571,18 +604,192 @@ export class EventsService {
     );
   }
 
+  async setRsvp(
+    id: string,
+    userId: string,
+    status: EventRsvpStatus,
+  ): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    if (!(await this.canSee(event, userId))) {
+      throw new NotFoundException(`Event ${id} not found`);
+    }
+    await this.rsvps.upsert(
+      { eventId: id, userId, status },
+      { conflictPaths: ['eventId', 'userId'] },
+    );
+    return this.present(event, userId);
+  }
+
+  async listRsvps(
+    id: string,
+    userId: string,
+  ): Promise<
+    { userId: string; displayName: string; status: EventRsvpStatus }[]
+  > {
+    const event = await this.requireVisible(id, userId);
+    const access = await this.hostRole(event, userId);
+    if (!access.manager)
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    const rows = await this.rsvps.find({
+      where: { eventId: id },
+      relations: { user: true },
+      order: { createdAt: 'ASC' },
+    });
+    return rows.map((row) => ({
+      userId: row.userId,
+      displayName: row.user.displayName,
+      status: row.status,
+    }));
+  }
+
+  async listComments(id: string, userId: string) {
+    const event = await this.requireVisible(id, userId);
+    await this.requireHostMember(event, userId);
+    const rows = await this.comments.find({
+      where: { eventId: id },
+      relations: { author: true },
+      order: { createdAt: 'ASC' },
+    });
+    const access = await this.hostRole(event, userId);
+    return rows.map((row) =>
+      this.serializeComment(row, userId, access.manager),
+    );
+  }
+
+  async addComment(id: string, userId: string, body: string) {
+    const event = await this.requireVisible(id, userId);
+    await this.requireHostMember(event, userId);
+    const saved = await this.comments.save(
+      this.comments.create({
+        eventId: id,
+        authorId: userId,
+        body: body.trim(),
+      }),
+    );
+    const loaded = await this.comments.findOne({
+      where: { id: saved.id },
+      relations: { author: true },
+    });
+    if (!loaded) throw new NotFoundException('Comment not found');
+    return this.serializeComment(loaded, userId, true);
+  }
+
+  async deleteComment(
+    id: string,
+    commentId: string,
+    userId: string,
+  ): Promise<void> {
+    const event = await this.requireVisible(id, userId);
+    const comment = await this.comments.findOne({
+      where: { id: commentId, eventId: id },
+    });
+    if (!comment) throw new NotFoundException('Comment not found');
+    const access = await this.hostRole(event, userId);
+    if (comment.authorId !== userId && !access.manager) {
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    }
+    await this.comments.delete(comment.id);
+  }
+
+  private async requireVisible(id: string, userId?: string): Promise<Event> {
+    const event = await this.findEntity(id);
+    if (!(await this.canSee(event, userId))) {
+      throw new NotFoundException(`Event ${id} not found`);
+    }
+    return event;
+  }
+
+  private async requireHostMember(event: Event, userId: string): Promise<void> {
+    const access = await this.hostRole(event, userId);
+    if (!event.communityId || !access.member) {
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    }
+  }
+
+  private async present(
+    event: Event,
+    userId?: string,
+  ): Promise<SerializedEvent> {
+    const access = await this.hostRole(event, userId);
+    if (event.listing === EventListing.MEMBERS && !access.member) {
+      throw new NotFoundException(`Event ${event.id} not found`);
+    }
+    const mine = userId
+      ? await this.rsvps.findOne({ where: { eventId: event.id, userId } })
+      : null;
+    const rsvpCount = await this.rsvps.count({
+      where: { eventId: event.id, status: EventRsvpStatus.GOING },
+    });
+    return this.serializeEvent(event, {
+      rsvpCount,
+      myRsvp: mine?.status ?? null,
+      canComment: !!event.communityId && access.member,
+      canSeeRsvps: access.manager,
+    });
+  }
+
+  private async goingCounts(ids: string[]): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (ids.length === 0) return counts;
+    const rows = await this.rsvps
+      .createQueryBuilder('rsvp')
+      .select('rsvp.eventId', 'eventId')
+      .addSelect('COUNT(*)', 'count')
+      .where('rsvp.eventId IN (:...ids)', { ids })
+      .andWhere('rsvp.status = :going', { going: EventRsvpStatus.GOING })
+      .groupBy('rsvp.eventId')
+      .getRawMany<{ eventId: string; count: string }>();
+    for (const row of rows) counts.set(row.eventId, Number(row.count));
+    return counts;
+  }
+
+  private serializeComment(
+    comment: EventComment,
+    userId: string,
+    manager: boolean,
+  ) {
+    return {
+      id: comment.id,
+      body: comment.body,
+      authorId: comment.authorId,
+      authorName: comment.author?.displayName ?? null,
+      canDelete: comment.authorId === userId || manager,
+      createdAt: comment.createdAt,
+    };
+  }
+
   private async canSee(event: Event, userId?: string): Promise<boolean> {
     if (event.listing !== EventListing.MEMBERS) return true;
-    if (!userId || !event.communityId) return false;
+    const access = await this.hostRole(event, userId);
+    return access.member;
+  }
+
+  private async hostRole(
+    event: Event,
+    userId?: string,
+  ): Promise<{ member: boolean; manager: boolean }> {
+    if (!event.communityId) {
+      return {
+        member: false,
+        manager: !!userId && event.createdById === userId,
+      };
+    }
+    if (!userId) return { member: false, manager: false };
     const communityMember = await this.communityMembers.findOne({
       where: { communityId: event.communityId, userId },
     });
-    if (!event.subgroupId) return !!communityMember;
-    if (communityMember?.role === CommunityMemberRole.ADMIN) return true;
+    const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
+    if (!event.subgroupId) {
+      return { member: !!communityMember, manager: isAdmin };
+    }
+    if (isAdmin) return { member: true, manager: true };
     const subgroupMember = await this.subgroupMembers.findOne({
       where: { subgroupId: event.subgroupId, userId },
     });
-    return !!subgroupMember;
+    return {
+      member: !!subgroupMember,
+      manager: subgroupMember?.role === SubgroupMemberRole.MODERATOR,
+    };
   }
 
   private assertOwnerOrAdmin(

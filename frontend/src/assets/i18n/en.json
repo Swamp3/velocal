@@ -30,6 +30,24 @@
     "yearFilter": "Filter by year",
     "filter": "Filter",
     "inRadius": "within radius",
+    "rsvp": {
+      "title": "RSVP",
+      "count": "{{count}} going",
+      "going": "Going",
+      "maybe": "Maybe",
+      "declined": "Not going",
+      "who": "Who is coming",
+      "login": "Log in to RSVP",
+      "error": "Could not save your answer"
+    },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments yet",
+      "placeholder": "Write a comment…",
+      "publish": "Comment",
+      "deleteConfirm": "Delete this comment?",
+      "error": "Could not save the comment"
+    },
     "detail": {
       "notFoundTitle": "Event not found",
       "notFoundMessage": "This event does not exist or has been removed.",
@@ -40,6 +58,10 @@
       "registrationDeadline": "Registration Deadline",
       "externalUrl": "External Link",
       "strava": "Strava",
+      "meetup": "Meetup",
+      "meetupPlace": "Place",
+      "meetupTime": "Time",
+      "meetupNote": "Note",
       "description": "Description",
       "addFavorite": "Add to favorites",
       "removeFavorite": "Remove from favorites",
@@ -663,7 +685,10 @@
       "listingPublic": "Public",
       "listingMembers": "Members only",
       "communityField": "Community",
-      "strava": "Strava link"
+      "strava": "Strava link",
+      "meetupPlace": "Meetup place",
+      "meetupTime": "Meetup time",
+      "meetupNote": "Meetup note"
     },
     "posts": {
       "title": "Posts",

@@ -16,6 +16,13 @@ export interface CyclingEvent {
   stravaUrl?: string | null;
   listing?: 'public' | 'members';
   communityId?: string | null;
+  meetupPlace?: string | null;
+  meetupAt?: string | null;
+  meetupNote?: string | null;
+  rsvpCount?: number;
+  myRsvp?: EventRsvpStatus | null;
+  canComment?: boolean;
+  canSeeRsvps?: boolean;
   imageUrl?: string;
   source: EventSource;
   discipline: Discipline;
@@ -24,6 +31,8 @@ export interface CyclingEvent {
   createdAt: string;
   distance?: number;
 }
+
+export type EventRsvpStatus = 'going' | 'maybe' | 'declined';
 
 export type EventStatus = 'published' | 'cancelled' | 'completed';
 export type EventSource = 'manual' | 'imported';
@@ -42,6 +51,9 @@ export interface CreateEventDto {
   externalUrl?: string;
   stravaUrl?: string;
   listing?: 'public' | 'members';
+  meetupPlace?: string;
+  meetupAt?: string;
+  meetupNote?: string;
   disciplineSlug: string;
 }
 

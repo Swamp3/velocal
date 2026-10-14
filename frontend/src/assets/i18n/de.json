@@ -30,6 +30,24 @@
     "yearFilter": "Nach Jahr filtern",
     "filter": "Filter",
     "inRadius": "im Umkreis",
+    "rsvp": {
+      "title": "Zusage",
+      "count": "{{count}} Zusagen",
+      "going": "Dabei",
+      "maybe": "Vielleicht",
+      "declined": "Nicht dabei",
+      "who": "Wer kommt",
+      "login": "Anmelden, um zuzusagen",
+      "error": "Die Antwort konnte nicht gespeichert werden"
+    },
+    "comments": {
+      "title": "Kommentare",
+      "empty": "Noch keine Kommentare",
+      "placeholder": "Kommentar schreiben…",
+      "publish": "Kommentieren",
+      "deleteConfirm": "Diesen Kommentar löschen?",
+      "error": "Der Kommentar konnte nicht gespeichert werden"
+    },
     "detail": {
       "notFoundTitle": "Event nicht gefunden",
       "notFoundMessage": "Dieses Event existiert nicht oder wurde entfernt.",
@@ -40,6 +58,10 @@
       "registrationDeadline": "Meldeschluss",
       "externalUrl": "Externe Seite",
       "strava": "Strava",
+      "meetup": "Treffpunkt",
+      "meetupPlace": "Ort",
+      "meetupTime": "Zeit",
+      "meetupNote": "Hinweis",
       "description": "Beschreibung",
       "addFavorite": "Zu Favoriten hinzufügen",
       "removeFavorite": "Aus Favoriten entfernen",
@@ -663,7 +685,10 @@
       "listingPublic": "Öffentlich",
       "listingMembers": "Nur Mitglieder",
       "communityField": "Gemeinschaft",
-      "strava": "Strava-Link"
+      "strava": "Strava-Link",
+      "meetupPlace": "Treffpunkt",
+      "meetupTime": "Treffzeit",
+      "meetupNote": "Hinweis zum Treffen"
     },
     "posts": {
       "title": "Beiträge",

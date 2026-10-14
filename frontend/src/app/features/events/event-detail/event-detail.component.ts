@@ -27,6 +27,8 @@ import {
   RichTextViewComponent,
 } from '@shared/components';
 import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
+import { EventCommentsComponent } from '../event-comments/event-comments.component';
+import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
 import { formatTime } from '@shared/utils/event-date';
@@ -62,6 +64,8 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     ChipComponent,
     NewsCardComponent,
     RichTextViewComponent,
+    EventRsvpComponent,
+    EventCommentsComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
