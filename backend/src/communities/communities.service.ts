@@ -5,9 +5,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import { isLastAdminRemoval } from './community-admin.policy';
-import { CommunityErrorCode, communityConflict } from './community-error';
+import {
+  CommunityErrorCode,
+  communityConflict,
+  communityForbidden,
+  communityNotFound,
+} from './community-error';
 import { CommunitySearchDto } from './dto/community-search.dto';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
@@ -78,6 +84,8 @@ export class CommunitiesService {
     private readonly members: Repository<CommunityMember>,
     @InjectRepository(CommunityJoinRequest)
     private readonly joinRequests: Repository<CommunityJoinRequest>,
+    @InjectRepository(User)
+    private readonly users: Repository<User>,
     private readonly uploads: UploadsService,
     private readonly dataSource: DataSource,
   ) {}
@@ -259,7 +267,7 @@ export class CommunitiesService {
     }
 
     if (community.visibility === CommunityVisibility.PRIVATE) {
-      throw new ForbiddenException('Private communities are invite only');
+      throw communityForbidden(CommunityErrorCode.inviteOnly);
     }
 
     if (community.visibility === CommunityVisibility.PUBLIC) {
@@ -312,6 +320,7 @@ export class CommunitiesService {
         membership.role,
         CommunityErrorCode.lastAdminRemoval,
       );
+      await this.dropSubgroupAccess(manager, id, userId);
       await manager.remove(membership);
     });
   }
@@ -393,8 +402,41 @@ export class CommunitiesService {
         membership.role,
         CommunityErrorCode.lastAdminRemoval,
       );
+      await this.dropSubgroupAccess(manager, communityId, targetUserId);
       await manager.remove(membership);
     });
+  }
+
+  async invite(
+    communityId: string,
+    email: string,
+    actorId: string,
+  ): Promise<SerializedCommunity> {
+    const community = await this.findCommunity(communityId);
+    await this.assertAdmin(communityId, actorId);
+    const trimmed = email.trim();
+    const user = await this.users
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = LOWER(:email)', { email: trimmed })
+      .getOne();
+    if (!user) throw communityNotFound(CommunityErrorCode.userNotFound);
+
+    await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `INSERT INTO "community_members" ("community_id", "user_id", "role")
+         VALUES ($1, $2, 'member')
+         ON CONFLICT ("community_id", "user_id") DO NOTHING`,
+        [communityId, user.id],
+      );
+      await manager.query(
+        `UPDATE "community_join_requests"
+         SET "status" = 'approved', "updatedAt" = now()
+         WHERE "community_id" = $1 AND "user_id" = $2 AND "status" = 'pending'`,
+        [communityId, user.id],
+      );
+    });
+
+    return this.serializeFor(community, actorId);
   }
 
   async listJoinRequests(
@@ -551,6 +593,30 @@ export class CommunitiesService {
     if (membership?.role !== CommunityMemberRole.ADMIN) {
       throw new ForbiddenException('Community admin access required');
     }
+  }
+
+  /** Subgroup rows are not FK'd to community_members, so drop them here. */
+  private async dropSubgroupAccess(
+    manager: EntityManager,
+    communityId: string,
+    userId: string,
+  ): Promise<void> {
+    await manager.query(
+      `DELETE FROM "subgroup_members" AS member
+       USING "subgroups" AS subgroup
+       WHERE member."subgroup_id" = subgroup."id"
+         AND subgroup."community_id" = $1
+         AND member."user_id" = $2`,
+      [communityId, userId],
+    );
+    await manager.query(
+      `DELETE FROM "subgroup_join_requests" AS request
+       USING "subgroups" AS subgroup
+       WHERE request."subgroup_id" = subgroup."id"
+         AND subgroup."community_id" = $1
+         AND request."user_id" = $2`,
+      [communityId, userId],
+    );
   }
 
   /** Caller must already hold the community row lock. */

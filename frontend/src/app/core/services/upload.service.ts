@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
-import { Community, CyclingEvent, Post, RaceSeries } from '@shared/models';
+import { Community, CyclingEvent, Post, RaceSeries, Subgroup } from '@shared/models';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -58,6 +58,22 @@ export class UploadService {
 
   deleteCommunityLogo(id: string): Observable<Community> {
     return this.deleteFile<Community>(`/communities/${id}/logo`);
+  }
+
+  uploadSubgroupHero(communitySlug: string, slug: string, file: File): Observable<Subgroup> {
+    return this.postFile<Subgroup>(`/communities/${communitySlug}/subgroups/${slug}/hero`, file);
+  }
+
+  deleteSubgroupHero(communitySlug: string, slug: string): Observable<Subgroup> {
+    return this.deleteFile<Subgroup>(`/communities/${communitySlug}/subgroups/${slug}/hero`);
+  }
+
+  uploadSubgroupLogo(communitySlug: string, slug: string, file: File): Observable<Subgroup> {
+    return this.postFile<Subgroup>(`/communities/${communitySlug}/subgroups/${slug}/logo`, file);
+  }
+
+  deleteSubgroupLogo(communitySlug: string, slug: string): Observable<Subgroup> {
+    return this.deleteFile<Subgroup>(`/communities/${communitySlug}/subgroups/${slug}/logo`);
   }
 
   private upload<T>(subject: string, id: string, file: File): Observable<T> {

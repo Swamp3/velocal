@@ -15,7 +15,13 @@ import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityHeroComponent, EmptyStateComponent } from '@shared/components';
 import { communityErrorKey } from '../community-error';
-import { Community, CommunityVisibility, communityVisibilityVariant } from '@shared/models';
+import {
+  Community,
+  CommunityVisibility,
+  communityVisibilityVariant,
+  Subgroup,
+  subgroupVisibilityVariant,
+} from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 
 @Component({
@@ -43,6 +49,7 @@ export class CommunityDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly community = signal<Community | null>(null);
+  protected readonly subgroups = signal<Subgroup[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly acting = signal(false);
@@ -64,6 +71,13 @@ export class CommunityDetailComponent implements OnInit {
           this.community.set(community);
           this.loading.set(false);
           this.applySeo(community);
+          this.communityService
+            .listSubgroups(community.slug)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (rows) => this.subgroups.set(rows),
+              error: () => this.subgroups.set([]),
+            });
         },
         error: () => this.fail(),
       });
@@ -71,6 +85,10 @@ export class CommunityDetailComponent implements OnInit {
 
   protected visibilityVariant(visibility: CommunityVisibility) {
     return communityVisibilityVariant(visibility);
+  }
+
+  protected subgroupVariant(visibility: Subgroup['visibility']) {
+    return subgroupVisibilityVariant(visibility);
   }
 
   protected join(): void {

@@ -11,6 +11,7 @@ export { SeriesCardComponent } from './series-card/series-card.component';
 export { LocationPickerComponent } from './location-picker/location-picker.component';
 export { NewsCardComponent } from './news-card/news-card.component';
 export { ImageUploadComponent } from './image-upload/image-upload.component';
+export { InviteByEmailComponent } from './invite-by-email/invite-by-email.component';
 export { CommunityCardComponent } from './community-card/community-card.component';
 export { CommunityHeroComponent } from './community-hero/community-hero.component';
 export { MemberListComponent, type MemberListItem } from './member-list/member-list.component';

@@ -5,6 +5,7 @@ const ERROR_KEYS: Record<string, string> = {
   'community.lastAdminRemoval': 'communities.errors.lastAdminRemoval',
   'community.userNotFound': 'communities.errors.userNotFound',
   'community.notCommunityMember': 'communities.errors.notCommunityMember',
+  'community.inviteOnly': 'communities.errors.inviteOnly',
 };
 
 /** Translation key for a community API error. Never the server's English string. */

@@ -11,19 +11,18 @@
           </div>
         </div>
 
-        @if (canManage()) {
+        @if (item.toggleLabel || item.canRemove) {
           <div class="flex shrink-0 flex-wrap gap-2">
-            <ui-button variant="outline" size="sm" (click)="roleToggle.emit(item.id)">
-              {{
-                (item.roleVariant === 'success'
-                  ? 'communities.members.demote'
-                  : 'communities.members.promote'
-                ) | transloco
-              }}
-            </ui-button>
-            <ui-button variant="danger" size="sm" (click)="remove.emit(item.id)">
-              {{ 'communities.members.remove' | transloco }}
-            </ui-button>
+            @if (item.toggleLabel) {
+              <ui-button variant="outline" size="sm" (click)="roleToggle.emit(item.id)">
+                {{ item.toggleLabel }}
+              </ui-button>
+            }
+            @if (item.canRemove) {
+              <ui-button variant="danger" size="sm" (click)="remove.emit(item.id)">
+                {{ 'communities.members.remove' | transloco }}
+              </ui-button>
+            }
           </div>
         }
       </li>

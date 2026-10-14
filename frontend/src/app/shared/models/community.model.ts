@@ -47,6 +47,47 @@ export type JoinCommunityResult =
   | { outcome: 'joined'; community: Community }
   | { outcome: 'pending' };
 
+export type SubgroupVisibility = 'open' | 'request' | 'invite';
+
+export type SubgroupRole = 'member' | 'moderator';
+
+export interface Subgroup {
+  id: string;
+  communityId: string;
+  communitySlug: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  visibility: SubgroupVisibility;
+  heroUrl: string | null;
+  logoUrl: string | null;
+  memberCount: number;
+  myRole: SubgroupRole | null;
+  myJoinRequest: 'pending' | null;
+  viewerIsCommunityAdmin: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubgroupMember {
+  userId: string;
+  displayName: string | null;
+  role: SubgroupRole;
+  joinedAt: string;
+}
+
+export type JoinSubgroupResult =
+  | { outcome: 'joined'; subgroup: Subgroup }
+  | { outcome: 'pending' };
+
+export function subgroupVisibilityVariant(
+  visibility: SubgroupVisibility,
+): 'success' | 'warning' | 'neutral' {
+  if (visibility === 'open') return 'success';
+  if (visibility === 'request') return 'warning';
+  return 'neutral';
+}
+
 /** Up to two initials for a logo fallback. */
 export function communityInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);

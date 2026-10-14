@@ -14,6 +14,7 @@ import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   EmptyStateComponent,
+  InviteByEmailComponent,
   MemberListComponent,
   MemberListItem,
   RequestListComponent,
@@ -32,6 +33,7 @@ import { forkJoin, Observable, of } from 'rxjs';
     TranslocoPipe,
     SkeletonComponent,
     EmptyStateComponent,
+    InviteByEmailComponent,
     MemberListComponent,
     RequestListComponent,
   ],
@@ -70,6 +72,14 @@ export class CommunityMembersComponent implements OnInit {
           : 'communities.members.roleMember',
       ),
       roleVariant: member.role === 'admin' ? 'success' : 'neutral',
+      toggleLabel: this.canManage()
+        ? this.transloco.translate(
+            member.role === 'admin'
+              ? 'communities.members.demote'
+              : 'communities.members.promote',
+          )
+        : undefined,
+      canRemove: this.canManage(),
     }));
   });
 
@@ -139,6 +149,25 @@ export class CommunityMembersComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.refresh(community.slug),
+        error: (err: ApiError) => {
+          this.mutating.set(false);
+          this.toastMembershipError(err);
+        },
+      });
+  }
+
+  protected onInvite(email: string): void {
+    const community = this.community();
+    if (!community || this.mutating()) return;
+    this.mutating.set(true);
+    this.communityService
+      .invite(community.id, email)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success(this.transloco.translate('communities.invite.sent'));
+          this.refresh(community.slug);
+        },
         error: (err: ApiError) => {
           this.mutating.set(false);
           this.toastMembershipError(err);

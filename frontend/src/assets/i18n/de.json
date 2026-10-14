@@ -593,12 +593,40 @@
       "approve": "Annehmen",
       "reject": "Ablehnen"
     },
+    "subgroups": {
+      "title": "Untergruppen",
+      "create": "Neue Untergruppe",
+      "createTitle": "Untergruppe erstellen",
+      "editTitle": "Untergruppe bearbeiten",
+      "empty": "Noch keine Untergruppen",
+      "back": "Zurück zur Gemeinschaft",
+      "saved": "Untergruppe gespeichert",
+      "joined": "Du bist der Untergruppe beigetreten",
+      "left": "Du hast die Untergruppe verlassen",
+      "leaveConfirm": "Diese Untergruppe verlassen?",
+      "notFoundTitle": "Untergruppe nicht gefunden",
+      "notFoundMessage": "Diese Untergruppe existiert nicht oder ist nur auf Einladung.",
+      "promote": "Zum Moderator machen",
+      "demote": "Moderator entfernen",
+      "roleModerator": "Moderator",
+      "visibility": {
+        "open": "Offen",
+        "request": "Auf Anfrage",
+        "invite": "Nur auf Einladung"
+      }
+    },
+    "invite": {
+      "email": "E-Mail",
+      "action": "Einladen",
+      "sent": "Einladung hinzugefügt"
+    },
     "errors": {
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
       "lastAdminDemotion": "Diese Gemeinschaft braucht mindestens einen Admin.",
       "lastAdminRemoval": "Diese Gemeinschaft braucht mindestens einen Admin.",
       "userNotFound": "Kein Konto nutzt diese E-Mail.",
-      "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft."
+      "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft.",
+      "inviteOnly": "Diese Gruppe ist nur auf Einladung."
     }
   },
   "errors": {

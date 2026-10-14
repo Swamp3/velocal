@@ -35,3 +35,11 @@
 | GET    | `/api/communities/:id/join-requests` | Admin of that community | Pending join requests |
 | POST   | `/api/communities/:id/join-requests/:requestId/approve` | Admin of that community | Approve a request |
 | POST   | `/api/communities/:id/join-requests/:requestId/reject` | Admin of that community | Reject a request |
+| POST   | `/api/communities/:id/invites` | Admin of that community | Add an existing user by email |
+| GET    | `/api/communities/:slug/subgroups` | Optional | Subgroups the viewer may see |
+| POST   | `/api/communities/:slug/subgroups` | Community admin | Create a subgroup |
+| GET    | `/api/communities/:slug/subgroups/:subgroupSlug` | Optional | Subgroup detail. Invite-only is 404 for outsiders |
+| PATCH  | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin or moderator | Update a subgroup |
+| DELETE | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin | Delete a subgroup |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/join` | Community member | Join an open subgroup or request a `request` subgroup |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/invites` | Community admin or moderator | Add a community member to the subgroup |

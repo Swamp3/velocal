@@ -593,12 +593,40 @@
       "approve": "Approve",
       "reject": "Reject"
     },
+    "subgroups": {
+      "title": "Subgroups",
+      "create": "New subgroup",
+      "createTitle": "Create subgroup",
+      "editTitle": "Edit subgroup",
+      "empty": "No subgroups yet",
+      "back": "Back to community",
+      "saved": "Subgroup saved",
+      "joined": "You joined the subgroup",
+      "left": "You left the subgroup",
+      "leaveConfirm": "Leave this subgroup?",
+      "notFoundTitle": "Subgroup not found",
+      "notFoundMessage": "This subgroup does not exist or is invite only.",
+      "promote": "Make moderator",
+      "demote": "Remove moderator",
+      "roleModerator": "Moderator",
+      "visibility": {
+        "open": "Open",
+        "request": "Request to join",
+        "invite": "Invite only"
+      }
+    },
+    "invite": {
+      "email": "Email",
+      "action": "Invite",
+      "sent": "Invitation added"
+    },
     "errors": {
       "generic": "Something went wrong. Please try again.",
       "lastAdminDemotion": "This community needs at least one admin.",
       "lastAdminRemoval": "This community needs at least one admin.",
       "userNotFound": "No account uses that email.",
-      "notCommunityMember": "That person is not a member of this community."
+      "notCommunityMember": "That person is not a member of this community.",
+      "inviteOnly": "This group is invite only."
     }
   },
   "errors": {

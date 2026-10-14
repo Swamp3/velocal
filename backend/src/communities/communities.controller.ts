@@ -32,6 +32,7 @@ import {
 import { CommunitySearchDto } from './dto/community-search.dto';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
+import { InviteMemberDto } from './dto/invite-member.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 
 const imagePipe = new ParseFilePipeBuilder()
@@ -185,6 +186,16 @@ export class CommunitiesController {
     @CurrentUser() user: { id: string },
   ): Promise<void> {
     return this.communitiesService.removeMember(id, userId, user.id);
+  }
+
+  @Post(':id/invites')
+  @UseGuards(JwtAuthGuard)
+  invite(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: InviteMemberDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedCommunity> {
+    return this.communitiesService.invite(id, dto.email, user.id);
   }
 
   @Get(':id/join-requests')

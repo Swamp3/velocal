@@ -11,6 +11,9 @@ import { RaceSeriesEvent } from '../series/entities/race-series-event.entity';
 import { Community } from '../communities/entities/community.entity';
 import { CommunityMember } from '../communities/entities/community-member.entity';
 import { CommunityJoinRequest } from '../communities/entities/community-join-request.entity';
+import { Subgroup } from '../communities/entities/subgroup.entity';
+import { SubgroupMember } from '../communities/entities/subgroup-member.entity';
+import { SubgroupJoinRequest } from '../communities/entities/subgroup-join-request.entity';
 import { Post } from '../posts/entities/post.entity';
 import { PostTag } from '../posts/entities/post-tag.entity';
 import { ImportRun } from '../import/entities/import-run.entity';
@@ -35,6 +38,9 @@ export default new DataSource({
     Community,
     CommunityMember,
     CommunityJoinRequest,
+    Subgroup,
+    SubgroupMember,
+    SubgroupJoinRequest,
     Post,
     PostTag,
     OtpToken,

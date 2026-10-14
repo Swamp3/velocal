@@ -2,12 +2,14 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BadgeComponent, ButtonComponent } from '@shared/ui';
 
-/** Row view-model. `success` is the higher role (demote); `neutral` is the lower role (promote). */
+/** Row view-model. Action labels are already translated by the parent. */
 export interface MemberListItem {
   id: string;
   name: string;
   roleLabel: string;
-  roleVariant: 'success' | 'neutral';
+  roleVariant: 'success' | 'warning' | 'neutral';
+  toggleLabel?: string;
+  canRemove?: boolean;
 }
 
 @Component({
@@ -19,7 +21,6 @@ export interface MemberListItem {
 })
 export class MemberListComponent {
   readonly items = input.required<MemberListItem[]>();
-  readonly canManage = input(false);
 
   /** Parent decides the next role. */
   readonly roleToggle = output<string>();

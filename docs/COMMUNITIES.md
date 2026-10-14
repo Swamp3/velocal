@@ -112,13 +112,13 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 
 | Id | Status | Note |
 | --- | --- | --- |
-| `subgroup-membership` | todo | Separate subgroup membership; a subgroup member is always a community member; community removal drops subgroup rows. |
-| `subgroup-visibility` | todo | `open`, `request`, and `invite` as defined above. |
-| `moderator-role` | todo | `member` or `moderator`; zero moderators allowed; community admins manage every subgroup without a moderator row. |
-| `moderator-permissions` | todo | Subgroup-only powers listed above; no community settings, visibility, other subgroups, or community membership; cannot appoint admins or moderators. |
-| `member-pages` | todo | Member lists for a community and for a subgroup. |
-| `join-requests` | doing | Community `request` queue is live (list, approve, reject). Subgroup queue is still open. |
-| `membership-invites` | todo | Invites into private communities and invite-only subgroups. |
+| `subgroup-membership` | done | Separate subgroup membership. Leaving a community deletes that user's subgroup rows. |
+| `subgroup-visibility` | done | `open`, `request`, and `invite`. Invite-only subgroups 404 for outsiders. |
+| `moderator-role` | done | `member` or `moderator`. Zero moderators allowed. Community admins manage every subgroup without a moderator row. |
+| `moderator-permissions` | done | Moderators edit their subgroup, its requests, and its invites. Only community admins appoint moderators. |
+| `member-pages` | done | Member lists for a community and for a subgroup. |
+| `join-requests` | done | Community and subgroup request queues: list, approve, reject. |
+| `membership-invites` | done | Admins invite by email into a community. Admins and moderators invite community members into a subgroup. |
 
 ### 3. Posts and comments
 

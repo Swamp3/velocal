@@ -20,6 +20,31 @@ const routes: Routes = [
       import('./community-form/community-form.component').then((m) => m.CommunityFormComponent),
   },
   {
+    path: ':slug/subgroups/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./subgroup-form/subgroup-form.component').then((m) => m.SubgroupFormComponent),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./subgroup-form/subgroup-form.component').then((m) => m.SubgroupFormComponent),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/members',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./subgroup-members/subgroup-members.component').then(
+        (m) => m.SubgroupMembersComponent,
+      ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug',
+    loadComponent: () =>
+      import('./subgroup-detail/subgroup-detail.component').then((m) => m.SubgroupDetailComponent),
+  },
+  {
     path: ':slug/members',
     canActivate: [authGuard],
     loadComponent: () =>

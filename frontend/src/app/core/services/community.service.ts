@@ -6,7 +6,12 @@ import {
   CommunityRole,
   CreateCommunityDto,
   JoinCommunityResult,
+  JoinSubgroupResult,
   PaginatedResponse,
+  Subgroup,
+  SubgroupMember,
+  SubgroupRole,
+  SubgroupVisibility,
   UpdateCommunityDto,
 } from '@shared/models';
 import { Observable } from 'rxjs';
@@ -79,5 +84,89 @@ export class CommunityService {
 
   rejectRequest(id: string, requestId: string): Observable<{ status: 'rejected' }> {
     return this.api.post(`/communities/${id}/join-requests/${requestId}/reject`, {});
+  }
+
+  invite(id: string, email: string): Observable<Community> {
+    return this.api.post(`/communities/${id}/invites`, { email });
+  }
+
+  listSubgroups(communitySlug: string): Observable<Subgroup[]> {
+    return this.api.get(`/communities/${communitySlug}/subgroups`);
+  }
+
+  getSubgroup(communitySlug: string, slug: string): Observable<Subgroup> {
+    return this.api.get(`/communities/${communitySlug}/subgroups/${slug}`);
+  }
+
+  createSubgroup(
+    communitySlug: string,
+    dto: { name: string; description?: string; visibility?: SubgroupVisibility },
+  ): Observable<Subgroup> {
+    return this.api.post(`/communities/${communitySlug}/subgroups`, dto);
+  }
+
+  updateSubgroup(
+    communitySlug: string,
+    slug: string,
+    dto: { name?: string; description?: string | null; visibility?: SubgroupVisibility },
+  ): Observable<Subgroup> {
+    return this.api.patch(`/communities/${communitySlug}/subgroups/${slug}`, dto);
+  }
+
+  joinSubgroup(communitySlug: string, slug: string): Observable<JoinSubgroupResult> {
+    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/join`, {});
+  }
+
+  leaveSubgroup(communitySlug: string, slug: string): Observable<void> {
+    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/leave`, {});
+  }
+
+  subgroupMembers(communitySlug: string, slug: string): Observable<SubgroupMember[]> {
+    return this.api.get(`/communities/${communitySlug}/subgroups/${slug}/members`);
+  }
+
+  updateSubgroupRole(
+    communitySlug: string,
+    slug: string,
+    userId: string,
+    role: SubgroupRole,
+  ): Observable<unknown> {
+    return this.api.patch(`/communities/${communitySlug}/subgroups/${slug}/members/${userId}`, {
+      role,
+    });
+  }
+
+  removeSubgroupMember(communitySlug: string, slug: string, userId: string): Observable<void> {
+    return this.api.delete(`/communities/${communitySlug}/subgroups/${slug}/members/${userId}`);
+  }
+
+  subgroupJoinRequests(communitySlug: string, slug: string): Observable<CommunityJoinRequest[]> {
+    return this.api.get(`/communities/${communitySlug}/subgroups/${slug}/join-requests`);
+  }
+
+  approveSubgroupRequest(
+    communitySlug: string,
+    slug: string,
+    requestId: string,
+  ): Observable<{ status: 'approved' }> {
+    return this.api.post(
+      `/communities/${communitySlug}/subgroups/${slug}/join-requests/${requestId}/approve`,
+      {},
+    );
+  }
+
+  rejectSubgroupRequest(
+    communitySlug: string,
+    slug: string,
+    requestId: string,
+  ): Observable<{ status: 'rejected' }> {
+    return this.api.post(
+      `/communities/${communitySlug}/subgroups/${slug}/join-requests/${requestId}/reject`,
+      {},
+    );
+  }
+
+  inviteToSubgroup(communitySlug: string, slug: string, email: string): Observable<Subgroup> {
+    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { email });
   }
 }

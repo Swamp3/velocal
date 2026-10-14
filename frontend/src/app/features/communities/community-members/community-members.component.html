@@ -33,13 +33,23 @@
       {{ 'communities.members.title' | transloco }}
     </h1>
 
+    @if (c.myRole === 'admin') {
+      <div class="mt-6">
+        <app-invite-by-email
+          [label]="'communities.invite.email' | transloco"
+          [action]="'communities.invite.action' | transloco"
+          [submitting]="mutating()"
+          (invited)="onInvite($event)"
+        />
+      </div>
+    }
+
     <div class="mt-6">
       @if (memberItems().length === 0) {
         <app-empty-state icon="group" [title]="'communities.members.empty' | transloco" />
       } @else {
         <app-member-list
           [items]="memberItems()"
-          [canManage]="canManage()"
           (roleToggle)="onRoleToggle($event)"
           (remove)="onRemove($event)"
         />
