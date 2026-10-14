@@ -84,8 +84,8 @@ export class CommunityPostComponent implements OnInit {
   protected backLink(): string[] {
     const subgroupSlug = this.subgroupSlug();
     return subgroupSlug
-      ? ['/communities', this.communitySlug(), 'subgroups', subgroupSlug]
-      : ['/communities', this.communitySlug()];
+      ? ['/communities', this.communitySlug(), 'subgroups', subgroupSlug, 'posts']
+      : ['/communities', this.communitySlug(), 'posts'];
   }
 
   protected authorName(name: string | null): string {

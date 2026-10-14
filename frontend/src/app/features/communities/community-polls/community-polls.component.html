@@ -1,9 +1,5 @@
-<section class="mt-10">
-  <h2 class="text-lg font-semibold text-[var(--color-text)]">
-    {{ 'communities.polls.title' | transloco }}
-  </h2>
-
-  <form class="mt-4 space-y-3" (ngSubmit)="create()">
+<div>
+  <form class="space-y-3" (ngSubmit)="create()">
     <label class="block text-sm font-medium text-[var(--color-text)]" for="poll-question">
       {{ 'communities.polls.question' | transloco }}
     </label>
@@ -141,4 +137,4 @@
       }
     </ul>
   }
-</section>
+</div>

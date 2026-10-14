@@ -17,8 +17,10 @@ import {
   EmptyStateComponent,
   RichTextViewComponent,
 } from '@shared/components';
-import { CommunityFeedComponent } from '../community-feed/community-feed.component';
-import { CommunityPollsComponent } from '../community-polls/community-polls.component';
+import {
+  CommunitySectionLink,
+  CommunitySectionNavComponent,
+} from '../community-section-nav/community-section-nav.component';
 import { Subgroup, SubgroupVisibility, subgroupVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -35,8 +37,7 @@ import { communityErrorKey } from '../community-error';
     CommunityHeroComponent,
     EmptyStateComponent,
     RichTextViewComponent,
-    CommunityFeedComponent,
-    CommunityPollsComponent,
+    CommunitySectionNavComponent,
   ],
   templateUrl: './subgroup-detail.component.html',
 })
@@ -82,6 +83,16 @@ export class SubgroupDetailComponent implements OnInit {
 
   protected canEdit(subgroup: Subgroup): boolean {
     return subgroup.viewerIsCommunityAdmin || subgroup.myRole === 'moderator';
+  }
+
+  protected sections(subgroup: Subgroup): CommunitySectionLink[] {
+    if (!subgroup.myRole && !subgroup.viewerIsCommunityAdmin) return [];
+    const base = ['/communities', subgroup.communitySlug, 'subgroups', subgroup.slug];
+    return [
+      { icon: 'forum', labelKey: 'communities.posts.title', commands: [...base, 'posts'] },
+      { icon: 'ballot', labelKey: 'communities.polls.title', commands: [...base, 'polls'] },
+      { icon: 'group', labelKey: 'communities.members.title', commands: [...base, 'members'] },
+    ];
   }
 
   protected join(): void {

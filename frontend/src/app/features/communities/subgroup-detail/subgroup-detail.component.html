@@ -39,20 +39,6 @@
             {{ 'communities.edit' | transloco }}
           </a>
         }
-        @if (subgroup.myRole || subgroup.viewerIsCommunityAdmin) {
-          <a
-            [routerLink]="[
-              '/communities',
-              subgroup.communitySlug,
-              'subgroups',
-              subgroup.slug,
-              'members',
-            ]"
-            [class]="outlineLinkClass"
-          >
-            {{ 'communities.members.title' | transloco }}
-          </a>
-        }
         @if (subgroup.myRole) {
           <ui-button variant="outline" [loading]="acting()" [disabled]="acting()" (click)="leave()">
             {{ 'communities.leave' | transloco }}
@@ -90,12 +76,8 @@
       </span>
     </div>
 
-    @if (subgroup.myRole || subgroup.viewerIsCommunityAdmin) {
-      <app-community-polls
-        [communitySlug]="subgroup.communitySlug"
-        [subgroupSlug]="subgroup.slug"
-      />
-      <app-community-feed [communitySlug]="subgroup.communitySlug" [subgroupSlug]="subgroup.slug" />
+    @if (sections(subgroup).length > 0) {
+      <app-community-section-nav [links]="sections(subgroup)" />
     }
   </div>
 }

@@ -560,6 +560,7 @@
     "edit": "Bearbeiten",
     "loginToJoin": "Zum Beitreten anmelden",
     "backToList": "Zurück zu den Gemeinschaften",
+    "sections": "Bereiche",
     "notFoundTitle": "Gemeinschaft nicht gefunden",
     "notFoundMessage": "Diese Gemeinschaft existiert nicht oder ist privat.",
     "saved": "Gemeinschaft gespeichert",
@@ -663,7 +664,7 @@
       "deleteCommentConfirm": "Diesen Kommentar löschen?",
       "published": "Beitrag veröffentlicht",
       "commentCount": "{{count}} Kommentare",
-      "back": "Zurück",
+      "back": "Zurück zu den Beiträgen",
       "notFoundTitle": "Beitrag nicht gefunden",
       "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen."
     }

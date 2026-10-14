@@ -45,13 +45,7 @@
           <a [routerLink]="['/communities', c.slug, 'edit']" [class]="outlineLinkClass">
             {{ 'communities.edit' | transloco }}
           </a>
-          <a [routerLink]="['/communities', c.slug, 'members']" [class]="outlineLinkClass">
-            {{ 'communities.members.title' | transloco }}
-          </a>
         } @else if (c.myRole === 'member') {
-          <a [routerLink]="['/communities', c.slug, 'members']" [class]="outlineLinkClass">
-            {{ 'communities.members.title' | transloco }}
-          </a>
           <ui-button variant="outline" [loading]="acting()" [disabled]="acting()" (click)="leave()">
             {{ 'communities.leave' | transloco }}
           </ui-button>
@@ -86,44 +80,6 @@
       </span>
     </div>
 
-    <div class="mt-10 flex items-center justify-between gap-3">
-      <h2 class="text-lg font-semibold text-[var(--color-text)]">
-        {{ 'communities.subgroups.title' | transloco }}
-      </h2>
-      @if (c.myRole === 'admin') {
-        <a [routerLink]="['/communities', c.slug, 'subgroups', 'new']" [class]="outlineLinkClass">
-          {{ 'communities.subgroups.create' | transloco }}
-        </a>
-      }
-    </div>
-
-    @if (subgroups().length === 0) {
-      <p class="mt-4 text-sm text-[var(--color-text-muted)]">
-        {{ 'communities.subgroups.empty' | transloco }}
-      </p>
-    } @else {
-      <ul
-        class="mt-4 divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
-      >
-        @for (subgroup of subgroups(); track subgroup.id) {
-          <li>
-            <a
-              [routerLink]="['/communities', c.slug, 'subgroups', subgroup.slug]"
-              class="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--color-bg-alt)]"
-            >
-              <span class="font-medium text-[var(--color-text)]">{{ subgroup.name }}</span>
-              <ui-badge [variant]="subgroupVariant(subgroup.visibility)">
-                {{ 'communities.subgroups.visibility.' + subgroup.visibility | transloco }}
-              </ui-badge>
-            </a>
-          </li>
-        }
-      </ul>
-    }
-
-    @if (c.myRole) {
-      <app-community-polls [communitySlug]="c.slug" />
-      <app-community-feed [communitySlug]="c.slug" />
-    }
+    <app-community-section-nav [links]="sections(c)" />
   </div>
 }

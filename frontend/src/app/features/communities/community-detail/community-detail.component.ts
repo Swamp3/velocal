@@ -18,16 +18,12 @@ import {
   EmptyStateComponent,
   RichTextViewComponent,
 } from '@shared/components';
-import { CommunityFeedComponent } from '../community-feed/community-feed.component';
-import { CommunityPollsComponent } from '../community-polls/community-polls.component';
 import { communityErrorKey } from '../community-error';
 import {
-  Community,
-  CommunityVisibility,
-  communityVisibilityVariant,
-  Subgroup,
-  subgroupVisibilityVariant,
-} from '@shared/models';
+  CommunitySectionLink,
+  CommunitySectionNavComponent,
+} from '../community-section-nav/community-section-nav.component';
+import { Community, CommunityVisibility, communityVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 
 @Component({
@@ -42,8 +38,7 @@ import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from
     CommunityHeroComponent,
     EmptyStateComponent,
     RichTextViewComponent,
-    CommunityFeedComponent,
-    CommunityPollsComponent,
+    CommunitySectionNavComponent,
   ],
   templateUrl: './community-detail.component.html',
 })
@@ -58,7 +53,6 @@ export class CommunityDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly community = signal<Community | null>(null);
-  protected readonly subgroups = signal<Subgroup[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly acting = signal(false);
@@ -80,13 +74,6 @@ export class CommunityDetailComponent implements OnInit {
           this.community.set(community);
           this.loading.set(false);
           this.applySeo(community);
-          this.communityService
-            .listSubgroups(community.slug)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: (rows) => this.subgroups.set(rows),
-              error: () => this.subgroups.set([]),
-            });
         },
         error: () => this.fail(),
       });
@@ -96,8 +83,22 @@ export class CommunityDetailComponent implements OnInit {
     return communityVisibilityVariant(visibility);
   }
 
-  protected subgroupVariant(visibility: Subgroup['visibility']) {
-    return subgroupVisibilityVariant(visibility);
+  protected sections(community: Community): CommunitySectionLink[] {
+    const base = ['/communities', community.slug];
+    const links: CommunitySectionLink[] = [
+      {
+        icon: 'groups',
+        labelKey: 'communities.subgroups.title',
+        commands: [...base, 'subgroups'],
+      },
+    ];
+    if (!community.myRole) return links;
+    return [
+      ...links,
+      { icon: 'forum', labelKey: 'communities.posts.title', commands: [...base, 'posts'] },
+      { icon: 'ballot', labelKey: 'communities.polls.title', commands: [...base, 'polls'] },
+      { icon: 'group', labelKey: 'communities.members.title', commands: [...base, 'members'] },
+    ];
   }
 
   protected join(): void {

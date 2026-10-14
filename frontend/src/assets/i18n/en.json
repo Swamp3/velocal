@@ -560,6 +560,7 @@
     "edit": "Edit",
     "loginToJoin": "Log in to join",
     "backToList": "Back to communities",
+    "sections": "Sections",
     "notFoundTitle": "Community not found",
     "notFoundMessage": "This community does not exist or is private.",
     "saved": "Community saved",
@@ -663,7 +664,7 @@
       "deleteCommentConfirm": "Delete this comment?",
       "published": "Post published",
       "commentCount": "{{count}} comments",
-      "back": "Back",
+      "back": "Back to posts",
       "notFoundTitle": "Post not found",
       "notFoundMessage": "This post does not exist or you cannot see it."
     }

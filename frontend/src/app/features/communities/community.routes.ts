@@ -20,16 +20,59 @@ const routes: Routes = [
       import('./community-form/community-form.component').then((m) => m.CommunityFormComponent),
   },
   {
+    path: ':slug/posts',
+    canActivate: [authGuard],
+    data: { section: 'posts' },
+    loadComponent: () =>
+      import('./community-section/community-section.component').then(
+        (m) => m.CommunitySectionComponent,
+      ),
+  },
+  {
+    path: ':slug/polls',
+    canActivate: [authGuard],
+    data: { section: 'polls' },
+    loadComponent: () =>
+      import('./community-section/community-section.component').then(
+        (m) => m.CommunitySectionComponent,
+      ),
+  },
+  {
     path: ':slug/posts/:postId',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./community-post/community-post.component').then((m) => m.CommunityPostComponent),
   },
   {
+    path: ':slug/subgroups/:subgroupSlug/posts',
+    canActivate: [authGuard],
+    data: { section: 'posts' },
+    loadComponent: () =>
+      import('./community-section/community-section.component').then(
+        (m) => m.CommunitySectionComponent,
+      ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/polls',
+    canActivate: [authGuard],
+    data: { section: 'polls' },
+    loadComponent: () =>
+      import('./community-section/community-section.component').then(
+        (m) => m.CommunitySectionComponent,
+      ),
+  },
+  {
     path: ':slug/subgroups/:subgroupSlug/posts/:postId',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./community-post/community-post.component').then((m) => m.CommunityPostComponent),
+  },
+  {
+    path: ':slug/subgroups',
+    loadComponent: () =>
+      import('./community-subgroups/community-subgroups.component').then(
+        (m) => m.CommunitySubgroupsComponent,
+      ),
   },
   {
     path: ':slug/subgroups/new',

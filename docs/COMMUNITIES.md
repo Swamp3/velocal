@@ -45,6 +45,10 @@ erDiagram
 
 `FeedPost` is the `community_posts` table. It is not a row in `posts`.
 
+## Pages
+
+A community or subgroup overview stays short: identity, actions, and events. Posts, polls, and the subgroup list each have their own page.
+
 ## Roles
 
 | Table | Role | Rule |

@@ -1,9 +1,5 @@
-<section class="mt-10">
-  <h2 class="text-lg font-semibold text-[var(--color-text)]">
-    {{ 'communities.posts.title' | transloco }}
-  </h2>
-
-  <form class="mt-4 space-y-3" [formGroup]="form" (ngSubmit)="publish()">
+<div>
+  <form class="space-y-3" [formGroup]="form" (ngSubmit)="publish()">
     <app-rich-text
       formControlName="body"
       [compact]="true"
@@ -40,4 +36,4 @@
       }
     </ul>
   }
-</section>
+</div>
