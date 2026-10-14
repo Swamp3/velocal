@@ -1,17 +1,19 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
-import { CyclingEvent, Post, RaceSeries } from '@shared/models';
+import { Community, CyclingEvent, Post, RaceSeries } from '@shared/models';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 /**
- * Every uploadable subject lives at
+ * Events, series, and posts share one pair of helpers:
  *   POST   {API_BASE}/{subject}/:id/image   (multipart, field name `file`)
  *   DELETE {API_BASE}/{subject}/:id/image
- * so we only need one pair of generic helpers. The server re-encodes the image
- * into variants and returns the owning entity with its `imageUrl` populated
- * (already cache-busted via `?v=` query arg).
+ * The server re-encodes the image into variants and returns the owning entity
+ * with its `imageUrl` populated (already cache-busted via `?v=` query arg).
+ *
+ * Community hero and logo are the exception: `/:id/hero` and `/:id/logo`,
+ * returning the community. Those methods do not use the generic helper.
  */
 @Injectable({ providedIn: 'root' })
 export class UploadService {
@@ -42,6 +44,22 @@ export class UploadService {
     return this.delete<Post>('/posts', id);
   }
 
+  uploadCommunityHero(id: string, file: File): Observable<Community> {
+    return this.postFile<Community>(`/communities/${id}/hero`, file);
+  }
+
+  deleteCommunityHero(id: string): Observable<Community> {
+    return this.deleteFile<Community>(`/communities/${id}/hero`);
+  }
+
+  uploadCommunityLogo(id: string, file: File): Observable<Community> {
+    return this.postFile<Community>(`/communities/${id}/logo`, file);
+  }
+
+  deleteCommunityLogo(id: string): Observable<Community> {
+    return this.deleteFile<Community>(`/communities/${id}/logo`);
+  }
+
   private upload<T>(subject: string, id: string, file: File): Observable<T> {
     const form = new FormData();
     form.append('file', file, file.name);
@@ -55,6 +73,20 @@ export class UploadService {
   private delete<T>(subject: string, id: string): Observable<T> {
     return this.http
       .delete<T>(`${this.base}${subject}/${id}/image`)
+      .pipe(catchError((err: HttpErrorResponse) => this.toError(err)));
+  }
+
+  private postFile<T>(path: string, file: File): Observable<T> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http
+      .post<T>(`${this.base}${path}`, form)
+      .pipe(catchError((err: HttpErrorResponse) => this.toError(err)));
+  }
+
+  private deleteFile<T>(path: string): Observable<T> {
+    return this.http
+      .delete<T>(`${this.base}${path}`)
       .pipe(catchError((err: HttpErrorResponse) => this.toError(err)));
   }
 

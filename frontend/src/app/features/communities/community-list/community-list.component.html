@@ -1,0 +1,90 @@
+<div class="space-y-6">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+      {{ 'communities.title' | transloco }}
+    </h1>
+
+    @if (auth.isAuthenticated()) {
+      <a
+        routerLink="/communities/new"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)]"
+      >
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+        {{ 'communities.create' | transloco }}
+      </a>
+    }
+  </div>
+
+  <div
+    class="flex flex-col gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center"
+  >
+    <div class="relative flex-1">
+      <label class="sr-only" for="community-search">{{ 'communities.search' | transloco }}</label>
+      <span
+        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-[var(--color-text-muted)]"
+        aria-hidden="true"
+        >search</span
+      >
+      <input
+        id="community-search"
+        type="search"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        [placeholder]="'communities.search' | transloco"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pl-10 pr-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+      />
+    </div>
+  </div>
+
+  @if (showMine()) {
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-[var(--color-text)]">
+        {{ 'communities.mine' | transloco }}
+      </h2>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @for (community of mine(); track community.id) {
+          <app-community-card [community]="community" />
+        }
+      </div>
+    </section>
+
+    <h2 class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'communities.discover' | transloco }}
+    </h2>
+  }
+
+  @if (loading()) {
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5">
+          <ui-skeleton height="1.25rem" width="70%" />
+          <div class="mt-3 space-y-2">
+            <ui-skeleton height="1rem" width="40%" />
+            <ui-skeleton height="1rem" width="30%" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (communities().length === 0) {
+    <app-empty-state
+      icon="groups"
+      [title]="'communities.empty' | transloco"
+      [message]="'communities.emptyHint' | transloco"
+    />
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (community of communities(); track community.id) {
+        <app-community-card [community]="community" />
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <ui-pagination
+        [total]="total()"
+        [page]="page()"
+        [limit]="limit()"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  }
+</div>

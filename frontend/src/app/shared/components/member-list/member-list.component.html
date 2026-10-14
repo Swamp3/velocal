@@ -1,0 +1,32 @@
+@if (items().length > 0) {
+  <ul
+    class="divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)]"
+  >
+    @for (item of items(); track item.id) {
+      <li class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
+          <p class="truncate font-medium text-[var(--color-text)]">{{ item.name }}</p>
+          <div class="mt-1">
+            <ui-badge [variant]="item.roleVariant">{{ item.roleLabel }}</ui-badge>
+          </div>
+        </div>
+
+        @if (canManage()) {
+          <div class="flex shrink-0 flex-wrap gap-2">
+            <ui-button variant="outline" size="sm" (click)="roleToggle.emit(item.id)">
+              {{
+                (item.roleVariant === 'success'
+                  ? 'communities.members.demote'
+                  : 'communities.members.promote'
+                ) | transloco
+              }}
+            </ui-button>
+            <ui-button variant="danger" size="sm" (click)="remove.emit(item.id)">
+              {{ 'communities.members.remove' | transloco }}
+            </ui-button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+}

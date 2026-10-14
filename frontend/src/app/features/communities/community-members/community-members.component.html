@@ -1,0 +1,69 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="8rem" height="1rem" />
+    <ui-skeleton width="40%" height="2rem" />
+    <ui-skeleton height="4rem" />
+    <ui-skeleton height="4rem" />
+  </div>
+} @else if (notFound()) {
+  <app-empty-state
+    icon="search_off"
+    [title]="'communities.notFoundTitle' | transloco"
+    [message]="'communities.notFoundMessage' | transloco"
+  >
+    <a
+      routerLink="/communities"
+      class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] hover:underline"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ 'communities.backToList' | transloco }}
+    </a>
+  </app-empty-state>
+} @else if (community(); as c) {
+  <div class="mx-auto max-w-3xl">
+    <a
+      [routerLink]="['/communities', c.slug]"
+      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+    >
+      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+      {{ c.name }}
+    </a>
+
+    <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
+      {{ 'communities.members.title' | transloco }}
+    </h1>
+
+    <div class="mt-6">
+      @if (memberItems().length === 0) {
+        <app-empty-state icon="group" [title]="'communities.members.empty' | transloco" />
+      } @else {
+        <app-member-list
+          [items]="memberItems()"
+          [canManage]="canManage()"
+          (roleToggle)="onRoleToggle($event)"
+          (remove)="onRemove($event)"
+        />
+      }
+    </div>
+
+    @if (c.myRole === 'admin') {
+      <h2 class="mt-10 text-lg font-semibold text-[var(--color-text)]">
+        {{ 'communities.requests.title' | transloco }}
+      </h2>
+
+      <div class="mt-4">
+        @if (requestItems().length === 0) {
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.requests.empty' | transloco }}
+          </p>
+        } @else {
+          <app-request-list
+            [items]="requestItems()"
+            (approve)="onApprove($event)"
+            (reject)="onReject($event)"
+          />
+        }
+      </div>
+    }
+  </div>
+}

@@ -10,6 +10,7 @@
       "login": "Anmelden",
       "logout": "Abmelden",
       "news": "News",
+      "communities": "Gemeinschaften",
       "admin": "Admin"
     }
   },
@@ -525,6 +526,65 @@
       "changesBody": "Wir behalten uns vor, diese Nutzungsbedingungen jederzeit zu ändern. Über wesentliche Änderungen werden registrierte Nutzer per E-Mail informiert.",
       "jurisdictionTitle": "9. Anwendbares Recht",
       "jurisdictionBody": "Es gilt das Recht der Bundesrepublik Deutschland."
+    }
+  },
+  "communities": {
+    "title": "Gemeinschaften",
+    "search": "Gemeinschaften suchen…",
+    "create": "Neue Gemeinschaft",
+    "mine": "Deine Gemeinschaften",
+    "discover": "Entdecken",
+    "empty": "Keine Gemeinschaften gefunden",
+    "emptyHint": "Versuche einen anderen Suchbegriff oder erstelle eine Gemeinschaft.",
+    "memberCount": "{{count}} Mitglieder",
+    "visibility": {
+      "public": "Öffentlich",
+      "request": "Auf Anfrage",
+      "private": "Privat"
+    },
+    "join": "Beitreten",
+    "requestJoin": "Beitritt anfragen",
+    "pending": "Anfrage ausstehend",
+    "leave": "Verlassen",
+    "leaveConfirm": "Diese Gemeinschaft verlassen?",
+    "edit": "Bearbeiten",
+    "loginToJoin": "Zum Beitreten anmelden",
+    "backToList": "Zurück zu den Gemeinschaften",
+    "notFoundTitle": "Gemeinschaft nicht gefunden",
+    "notFoundMessage": "Diese Gemeinschaft existiert nicht oder ist privat.",
+    "saved": "Gemeinschaft gespeichert",
+    "saveFailed": "Gemeinschaft konnte nicht gespeichert werden",
+    "joined": "Du bist der Gemeinschaft beigetreten",
+    "requested": "Beitrittsanfrage gesendet",
+    "left": "Du hast die Gemeinschaft verlassen",
+    "form": {
+      "createTitle": "Gemeinschaft erstellen",
+      "editTitle": "Gemeinschaft bearbeiten",
+      "name": "Name",
+      "description": "Beschreibung",
+      "visibility": "Sichtbarkeit",
+      "hero": "Titelbild",
+      "logo": "Logo"
+    },
+    "members": {
+      "title": "Mitglieder",
+      "empty": "Noch keine Mitglieder",
+      "unnamed": "Unbenanntes Mitglied",
+      "promote": "Zum Admin befördern",
+      "demote": "Zum Mitglied herabstufen",
+      "remove": "Mitglied entfernen",
+      "removeConfirm": "Dieses Mitglied entfernen?",
+      "roleAdmin": "Admin",
+      "roleMember": "Mitglied"
+    },
+    "requests": {
+      "title": "Beitrittsanfragen",
+      "empty": "Keine offenen Anfragen",
+      "approve": "Annehmen",
+      "reject": "Ablehnen"
+    },
+    "errors": {
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
     }
   },
   "errors": {

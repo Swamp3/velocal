@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { DisciplinesModule } from './disciplines/disciplines.module';
 import { ImportModule } from './import/import.module';
 import { SeriesModule } from './series/series.module';
+import { CommunitiesModule } from './communities/communities.module';
 import { PostsModule } from './posts/posts.module';
 import { SeoModule } from './seo/seo.module';
 import { UploadsModule } from './uploads/uploads.module';
@@ -35,6 +36,7 @@ import { ChangelogModule } from './changelog/changelog.module';
     DisciplinesModule,
     ImportModule,
     SeriesModule,
+    CommunitiesModule,
     PostsModule,
     SeoModule,
     UploadsModule,

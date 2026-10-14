@@ -10,6 +10,7 @@
       "login": "Login",
       "logout": "Logout",
       "news": "News",
+      "communities": "Communities",
       "admin": "Admin"
     }
   },
@@ -525,6 +526,65 @@
       "changesBody": "We reserve the right to modify these terms of use at any time. Registered users will be notified of material changes by email.",
       "jurisdictionTitle": "9. Applicable Law",
       "jurisdictionBody": "The laws of the Federal Republic of Germany shall apply."
+    }
+  },
+  "communities": {
+    "title": "Communities",
+    "search": "Search communities…",
+    "create": "New community",
+    "mine": "Your communities",
+    "discover": "Discover",
+    "empty": "No communities found",
+    "emptyHint": "Try a different search or create a community.",
+    "memberCount": "{{count}} members",
+    "visibility": {
+      "public": "Public",
+      "request": "Request to join",
+      "private": "Private"
+    },
+    "join": "Join",
+    "requestJoin": "Request to join",
+    "pending": "Request pending",
+    "leave": "Leave",
+    "leaveConfirm": "Leave this community?",
+    "edit": "Edit",
+    "loginToJoin": "Log in to join",
+    "backToList": "Back to communities",
+    "notFoundTitle": "Community not found",
+    "notFoundMessage": "This community does not exist or is private.",
+    "saved": "Community saved",
+    "saveFailed": "Could not save the community",
+    "joined": "You joined the community",
+    "requested": "Join request sent",
+    "left": "You left the community",
+    "form": {
+      "createTitle": "Create community",
+      "editTitle": "Edit community",
+      "name": "Name",
+      "description": "Description",
+      "visibility": "Visibility",
+      "hero": "Cover image",
+      "logo": "Logo"
+    },
+    "members": {
+      "title": "Members",
+      "empty": "No members yet",
+      "unnamed": "Unnamed member",
+      "promote": "Promote to admin",
+      "demote": "Demote to member",
+      "remove": "Remove member",
+      "removeConfirm": "Remove this member?",
+      "roleAdmin": "Admin",
+      "roleMember": "Member"
+    },
+    "requests": {
+      "title": "Join requests",
+      "empty": "No pending requests",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again."
     }
   },
   "errors": {

@@ -18,3 +18,20 @@
 | GET    | `/api/import/jobs?limit=&offset=`  | Admin    | List import runs (persisted)   |
 | GET    | `/api/import/jobs/:id`             | Admin    | Poll import job status         |
 | GET    | `/api/import/sources`              | Admin    | List registered import sources |
+| POST   | `/api/communities`                 | JWT      | Create a community; creator is admin |
+| GET    | `/api/communities`                 | Optional | List public and request communities |
+| GET    | `/api/communities/mine`            | JWT      | Communities the current user belongs to |
+| GET    | `/api/communities/:slug`           | Optional | Community detail; private is 404 for non-members |
+| PATCH  | `/api/communities/:id`             | Admin of that community | Update name, description, visibility |
+| POST   | `/api/communities/:id/hero`        | Admin of that community | Upload hero image |
+| DELETE | `/api/communities/:id/hero`        | Admin of that community | Remove hero image |
+| POST   | `/api/communities/:id/logo`        | Admin of that community | Upload logo |
+| DELETE | `/api/communities/:id/logo`        | Admin of that community | Remove logo |
+| POST   | `/api/communities/:id/join`        | JWT      | Join (`public`) or open a request (`request`). `private` is 403 |
+| POST   | `/api/communities/:id/leave`       | Member   | Leave. 409 if this drops the last admin |
+| GET    | `/api/communities/:id/members`     | Member   | Member list |
+| PATCH  | `/api/communities/:id/members/:userId` | Admin of that community | Set role `member` or `admin` |
+| DELETE | `/api/communities/:id/members/:userId` | Admin of that community | Remove a member |
+| GET    | `/api/communities/:id/join-requests` | Admin of that community | Pending join requests |
+| POST   | `/api/communities/:id/join-requests/:requestId/approve` | Admin of that community | Approve a request |
+| POST   | `/api/communities/:id/join-requests/:requestId/reject` | Admin of that community | Reject a request |
