@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0] - 2026-10-14
+
+### Added
+
+- Communities section: list, detail, members, requests, subgroups, posts, polls, and hosted events
+- Rich text editor for long community and event text
+- RSVP, comments, meetup details, and email invite on hosted events
+- Notification inbox and unread badge in the header
+
+### Fixed
+
+- News list shows draft and archived posts to admins, with one-click publish and a real error if a save fails
+- A failed inbox load shows an error instead of an empty list
+- Community and event screens wrap on narrow phones
+- Route guards wait until the session is restored before sending you to login
+
 ## [0.6.0] - 2026-09-09
 
 ### Added

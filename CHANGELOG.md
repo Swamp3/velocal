@@ -4,6 +4,22 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.7.0] — 2026-10-14
+
+### Added
+
+- **Communities** — clubs at `/communities` with public, request-to-join, or private visibility, member roles, and invites by email. A club always keeps at least one admin.
+- **Subgroups** — groups inside a club, with moderators and open, request, or invite-only access.
+- **Club feed** — members write posts, comment, and vote in polls. Longer text uses the rich text editor.
+- **Club events** — host a ride on the club or a subgroup, list it for members or for everyone, and collect RSVPs and comments. Meetup details stay with members.
+- **Inbox** — new events, invites, and join decisions show up under the bell. A direct event invite can also go out by email.
+
+### Fixed
+
+- Private clubs, invite-only groups, and members-only event photos are no longer readable from a bare image URL.
+- Hosted events can be edited by the current club admin or subgroup moderator, not by someone who used to be one.
+- News editors see draft and archived posts, can publish in one click, and get a real error if a save fails.
+
 ## [0.6.0] — 2026-09-09
 
 ### Added
