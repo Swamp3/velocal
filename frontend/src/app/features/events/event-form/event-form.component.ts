@@ -118,14 +118,17 @@ export class EventFormComponent implements OnInit {
     externalUrl: new FormControl('', { nonNullable: true }),
     status: new FormControl('published', { nonNullable: true }),
     listing: new FormControl<'public' | 'members'>('members', { nonNullable: true }),
+    stravaUrl: new FormControl('', { nonNullable: true }),
   });
 
+  protected readonly hosted = signal(false);
   protected readonly communitySlug = signal<string | null>(null);
   protected readonly subgroupSlug = signal<string | null>(null);
 
   ngOnInit(): void {
     this.communitySlug.set(this.route.snapshot.paramMap.get('slug'));
     this.subgroupSlug.set(this.route.snapshot.paramMap.get('subgroupSlug'));
+    this.hosted.set(!!this.communitySlug());
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.eventId.set(id);
@@ -175,17 +178,14 @@ export class EventFormComponent implements OnInit {
         : undefined,
       externalUrl: raw.externalUrl || undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
+      ...(this.hosted() ? { listing: raw.listing, stravaUrl: raw.stravaUrl } : {}),
     };
 
     const community = this.communitySlug();
     const action = this.isEdit()
       ? this.eventService.updateEvent(this.eventId()!, dto)
       : community
-        ? this.communities.createEvent(
-            community,
-            { ...dto, listing: raw.listing },
-            this.subgroupSlug() ?? undefined,
-          )
+        ? this.communities.createEvent(community, dto, this.subgroupSlug() ?? undefined)
         : this.eventService.createEvent(dto);
 
     action.subscribe({
@@ -258,7 +258,10 @@ export class EventFormComponent implements OnInit {
         : '',
       externalUrl: event.externalUrl ?? '',
       status: event.status,
+      listing: event.listing ?? 'members',
+      stravaUrl: event.stravaUrl ?? '',
     });
+    if (event.communityId) this.hosted.set(true);
 
     if (event.coordinates) {
       this.mapCoordinates.set(event.coordinates);

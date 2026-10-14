@@ -4,7 +4,7 @@
 | ------ | ---------------------------------- | -------- | ------------------------------ |
 | POST   | `/api/auth/register`               | No       | Create account                 |
 | POST   | `/api/auth/login`                  | No       | Log in, receive JWT            |
-| GET    | `/api/events`                      | Optional | List/search/filter public events. Members-only events are omitted |
+| GET    | `/api/events`                      | Optional | List/search/filter events. Members-only events are included only when the caller can see the host |
 | GET    | `/api/events/:id`                  | Optional | Event detail. Members-only events are 404 for outsiders |
 | GET    | `/api/disciplines`                 | No       | All disciplines                |
 | GET    | `/api/users/me`                    | JWT      | Current user profile           |

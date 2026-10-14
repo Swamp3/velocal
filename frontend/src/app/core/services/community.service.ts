@@ -261,7 +261,7 @@ export class CommunityService {
 
   createEvent(
     communitySlug: string,
-    dto: CreateEventDto & { listing?: 'public' | 'members' },
+    dto: CreateEventDto & { listing?: 'public' | 'members'; stravaUrl?: string },
     subgroupSlug?: string,
   ): Observable<CyclingEvent> {
     const path = subgroupSlug

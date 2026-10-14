@@ -50,10 +50,18 @@
     </div>
   } @else {
     <form id="eventForm" [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-6">
-      @if (communitySlug()) {
+      @if (hosted()) {
         <div>
-          <label for="listing" class="block text-sm font-medium text-[var(--color-text)]">
+          <label
+            for="listing"
+            class="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]"
+          >
             {{ 'communities.events.listing' | transloco }}
+            <span
+              class="rounded-full bg-[var(--color-bg-alt)] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+            >
+              {{ 'communities.events.communityField' | transloco }}
+            </span>
           </label>
           <select
             id="listing"
@@ -63,6 +71,28 @@
             <option value="members">{{ 'communities.events.listingMembers' | transloco }}</option>
             <option value="public">{{ 'communities.events.listingPublic' | transloco }}</option>
           </select>
+        </div>
+        <div>
+          <label
+            for="stravaUrl"
+            class="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]"
+          >
+            {{ 'communities.events.strava' | transloco }}
+            <span
+              class="rounded-full bg-[var(--color-bg-alt)] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
+            >
+              {{ 'communities.events.communityField' | transloco }}
+            </span>
+          </label>
+          <input
+            id="stravaUrl"
+            type="url"
+            formControlName="stravaUrl"
+            inputmode="url"
+            autocomplete="url"
+            placeholder="https://www.strava.com/routes/…"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
         </div>
       }
       <!-- Name -->

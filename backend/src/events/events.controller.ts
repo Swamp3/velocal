@@ -40,8 +40,12 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  findAll(@Query() query: EventSearchDto): Promise<PaginatedEvents> {
-    return this.eventsService.findAll(query);
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @Query() query: EventSearchDto,
+    @CurrentUser() user?: { id: string },
+  ): Promise<PaginatedEvents> {
+    return this.eventsService.findAll(query, user?.id);
   }
 
   @Get(':id')

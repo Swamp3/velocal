@@ -170,6 +170,29 @@
         </div>
       }
 
+      @if (event.stravaUrl) {
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
+            >route</span
+          >
+          <div>
+            <dt class="text-[var(--color-text-muted)]">
+              {{ 'events.detail.strava' | transloco }}
+            </dt>
+            <dd>
+              <a
+                [href]="event.stravaUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-medium text-[var(--color-primary)] hover:underline break-all"
+              >
+                {{ event.stravaUrl }}
+              </a>
+            </dd>
+          </div>
+        </div>
+      }
+
       @if (event.externalUrl) {
         <div class="flex items-start gap-3">
           <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"

@@ -123,6 +123,9 @@ export class Event {
   })
   listing: EventListing;
 
+  @Column({ type: 'varchar', length: 500, name: 'strava_url', nullable: true })
+  stravaUrl: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -146,7 +146,7 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 | --- | --- | --- |
 | `event-host` | done | One host on `events`: the community or exactly one subgroup. Unhosted events stay public calendar rows. |
 | `event-listing` | done | Listing `members` or `public`. A public community event still requires a discipline. Hosted create defaults to `members`. |
-| `members-event-hide` | done | `members` events stay off `/events`, `/map`, `/calendar`, sitemap, and direct fetch by outsiders (404). |
+| `members-event-hide` | done | Logged-out users and non-members never see `members` events on `/events`, `/map`, `/calendar`, the sitemap, or by id (404). Members who can see the host do, including the global event list. |
 | `rsvp` | todo | RSVP plus a count visible to anyone who can see the event. |
 | `event-comments` | todo | Event comments limited to members of the host. |
 | `meetup-fields` | todo | Optional meetup place, time, and note, separate from `startDate` and `locationName`. |
@@ -162,7 +162,7 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 
 ## Regression
 
-`members-event-hide` is the gate for discovery. A members-only event must never appear in unauthenticated `GET /api/events`, the map, or the calendar, including direct id access (`GET /api/events/:id` and `/events/:id`).
+`members-event-hide` is the gate for discovery. A members-only event must never appear for someone who cannot see the host: unauthenticated `GET /api/events`, the map, the calendar, and direct id access (`GET /api/events/:id` and `/events/:id`) stay empty or 404. A member who can see the host also finds that event in the global event list.
 
 ## Out of scope
 

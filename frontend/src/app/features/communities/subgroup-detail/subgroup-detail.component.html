@@ -77,12 +77,12 @@
     </div>
 
     @if (sections(subgroup).length > 0) {
-      <app-community-events
-        [communitySlug]="subgroup.communitySlug"
-        [subgroupSlug]="subgroup.slug"
-        [canCreate]="subgroup.viewerIsCommunityAdmin || subgroup.myRole === 'moderator'"
-      />
       <app-community-section-nav [links]="sections(subgroup)" />
     }
+    <app-community-events
+      [communitySlug]="subgroup.communitySlug"
+      [subgroupSlug]="subgroup.slug"
+      [canCreate]="subgroup.viewerIsCommunityAdmin || subgroup.myRole === 'moderator'"
+    />
   </div>
 }

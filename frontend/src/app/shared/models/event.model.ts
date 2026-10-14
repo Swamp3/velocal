@@ -13,6 +13,9 @@ export interface CyclingEvent {
   coordinates?: { lat: number; lng: number };
   registrationDeadline?: string;
   externalUrl?: string;
+  stravaUrl?: string | null;
+  listing?: 'public' | 'members';
+  communityId?: string | null;
   imageUrl?: string;
   source: EventSource;
   discipline: Discipline;
@@ -37,6 +40,8 @@ export interface CreateEventDto {
   coordinates?: { lat: number; lng: number };
   registrationDeadline?: string;
   externalUrl?: string;
+  stravaUrl?: string;
+  listing?: 'public' | 'members';
   disciplineSlug: string;
 }
 

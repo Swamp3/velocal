@@ -39,6 +39,7 @@
       "location": "Location",
       "registrationDeadline": "Registration Deadline",
       "externalUrl": "External Link",
+      "strava": "Strava",
       "description": "Description",
       "addFavorite": "Add to favorites",
       "removeFavorite": "Remove from favorites",
@@ -660,7 +661,9 @@
       "empty": "No events yet",
       "listing": "Who can see it",
       "listingPublic": "Public",
-      "listingMembers": "Members only"
+      "listingMembers": "Members only",
+      "communityField": "Community",
+      "strava": "Strava link"
     },
     "posts": {
       "title": "Posts",

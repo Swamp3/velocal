@@ -72,7 +72,10 @@ export class EventsService {
     private readonly uploads: UploadsService,
   ) {}
 
-  async findAll(params: EventSearchDto): Promise<PaginatedEvents> {
+  async findAll(
+    params: EventSearchDto,
+    userId?: string,
+  ): Promise<PaginatedEvents> {
     let { lat, lng } = params;
 
     if (params.zip && lat == null) {
@@ -90,9 +93,7 @@ export class EventsService {
 
     const status = params.status ?? EventStatus.PUBLISHED;
     qb.andWhere('event.status = :status', { status });
-    qb.andWhere('event.listing = :publicListing', {
-      publicListing: EventListing.PUBLIC,
-    });
+    this.applyAudience(qb, userId);
 
     if (params.q) {
       qb.andWhere('event.name ILIKE :q', { q: `%${params.q}%` });
@@ -194,6 +195,7 @@ export class EventsService {
       communityId: string;
       subgroupId: string | null;
       listing: EventListing;
+      stravaUrl?: string | null;
     },
   ): Promise<Event> {
     let coordinates = dto.coordinates;
@@ -225,6 +227,7 @@ export class EventsService {
       communityId: host?.communityId ?? null,
       subgroupId: host?.subgroupId ?? null,
       listing: host?.listing ?? EventListing.PUBLIC,
+      stravaUrl: host ? (host.stravaUrl ?? null) : null,
     });
     return this.repo.save(entity);
   }
@@ -244,6 +247,12 @@ export class EventsService {
     }
 
     const partial: Partial<Event> = { ...dto } as Partial<Event>;
+    if (!event.communityId) {
+      delete partial.listing;
+      delete partial.stravaUrl;
+    } else if (dto.stravaUrl !== undefined) {
+      partial.stravaUrl = dto.stravaUrl || null;
+    }
 
     if (dto.startDate) partial.startDate = new Date(dto.startDate);
     if (dto.endDate) partial.endDate = new Date(dto.endDate);
@@ -440,7 +449,7 @@ export class EventsService {
   async createHosted(
     communitySlug: string,
     userId: string,
-    dto: CreateEventDto & { listing?: EventListing },
+    dto: CreateEventDto & { listing?: EventListing; stravaUrl?: string },
     subgroupSlug?: string,
   ): Promise<SerializedEvent> {
     const host = await this.resolveHost(
@@ -454,6 +463,7 @@ export class EventsService {
       communityId: host.community.id,
       subgroupId: host.subgroup?.id ?? null,
       listing,
+      stravaUrl: dto.stravaUrl || null,
     });
     return this.serializeEvent(event);
   }
@@ -516,6 +526,49 @@ export class EventsService {
       subgroup,
       canSeeMembers: !!subgroupMember || !!isAdmin,
     };
+  }
+
+  private applyAudience(
+    qb: ReturnType<Repository<Event>['createQueryBuilder']>,
+    userId?: string,
+  ): void {
+    if (!userId) {
+      qb.andWhere('event.listing = :publicListing', {
+        publicListing: EventListing.PUBLIC,
+      });
+      return;
+    }
+
+    qb.andWhere(
+      `(event.listing = :publicListing OR (
+        event.listing = :membersListing
+        AND event.community_id IS NOT NULL
+        AND (
+          (event.subgroup_id IS NULL AND EXISTS (
+            SELECT 1 FROM community_members cm
+            WHERE cm.community_id = event.community_id AND cm.user_id = :viewerId
+          ))
+          OR (event.subgroup_id IS NOT NULL AND (
+            EXISTS (
+              SELECT 1 FROM subgroup_members sm
+              WHERE sm.subgroup_id = event.subgroup_id AND sm.user_id = :viewerId
+            )
+            OR EXISTS (
+              SELECT 1 FROM community_members cm
+              WHERE cm.community_id = event.community_id
+                AND cm.user_id = :viewerId
+                AND cm.role = :adminRole
+            )
+          ))
+        )
+      ))`,
+      {
+        publicListing: EventListing.PUBLIC,
+        membersListing: EventListing.MEMBERS,
+        viewerId: userId,
+        adminRole: CommunityMemberRole.ADMIN,
+      },
+    );
   }
 
   private async canSee(event: Event, userId?: string): Promise<boolean> {
