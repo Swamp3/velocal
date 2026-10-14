@@ -20,6 +20,7 @@ import {
   RequestListItem,
 } from '@shared/components';
 import { Community, CommunityJoinRequest, CommunityMember, CommunityRole } from '@shared/models';
+import { communityErrorKey } from '../community-error';
 import { SkeletonComponent, ToastService } from '@shared/ui';
 import { forkJoin, Observable, of } from 'rxjs';
 
@@ -218,11 +219,7 @@ export class CommunityMembersComponent implements OnInit {
   }
 
   private toastMembershipError(err: ApiError): void {
-    if (err.status === 409 && err.message) {
-      this.toast.error(err.message);
-      return;
-    }
     if (err.status >= 500 || err.status === 0 || err.status === 408) return;
-    this.toast.error(this.transloco.translate('communities.errors.generic'));
+    this.toast.error(this.transloco.translate(communityErrorKey(err)));
   }
 }

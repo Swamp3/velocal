@@ -241,6 +241,16 @@
     "passwordMismatch": "Passwords do not match",
     "badWord": "This field contains inappropriate language"
   },
+  "uploads": {
+    "drop": "Drop an image here or click to choose",
+    "hint": "JPEG, PNG, or WebP · up to 10 MB",
+    "replace": "Replace image",
+    "remove": "Remove",
+    "updated": "Image updated",
+    "failed": "Could not update the image",
+    "type": "Only JPEG, PNG, or WebP images are allowed",
+    "size": "Image must be under 10 MB"
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
@@ -584,7 +594,11 @@
       "reject": "Reject"
     },
     "errors": {
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "lastAdminDemotion": "This community needs at least one admin.",
+      "lastAdminRemoval": "This community needs at least one admin.",
+      "userNotFound": "No account uses that email.",
+      "notCommunityMember": "That person is not a member of this community."
     }
   },
   "errors": {

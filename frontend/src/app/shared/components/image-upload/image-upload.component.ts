@@ -7,6 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ButtonComponent, ToastService } from '@shared/ui';
 import { Observable } from 'rxjs';
 
@@ -25,11 +26,12 @@ const MAX_BYTES = 10 * 1024 * 1024;
   selector: 'app-image-upload',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, TranslocoPipe],
   templateUrl: './image-upload.component.html',
 })
 export class ImageUploadComponent {
   private readonly toast = inject(ToastService);
+  private readonly transloco = inject(TranslocoService);
 
   /** Current persisted image URL (null → show empty state). */
   readonly imageUrl = input<string | null | undefined>(null);
@@ -101,7 +103,7 @@ export class ImageUploadComponent {
         });
       });
     } catch (err) {
-      this.toast.error((err as { message?: string }).message ?? 'Failed to remove image');
+      this.toast.error(this.transloco.translate('uploads.failed'));
     } finally {
       this.loading.set(false);
     }
@@ -122,10 +124,10 @@ export class ImageUploadComponent {
       const next = result.imageUrl ?? null;
       this.preview.set(null);
       this.imageChange.emit(next);
-      this.toast.success('Image updated');
-    } catch (err) {
+      this.toast.success(this.transloco.translate('uploads.updated'));
+    } catch {
       this.preview.set(null);
-      this.toast.error((err as { message?: string }).message ?? 'Upload failed');
+      this.toast.error(this.transloco.translate('uploads.failed'));
     } finally {
       this.loading.set(false);
     }
@@ -133,11 +135,11 @@ export class ImageUploadComponent {
 
   private validate(file: File): boolean {
     if (!ACCEPTED.split(',').includes(file.type)) {
-      this.toast.error('Only JPEG, PNG, or WebP images are allowed');
+      this.toast.error(this.transloco.translate('uploads.type'));
       return false;
     }
     if (file.size > MAX_BYTES) {
-      this.toast.error('Image must be under 10 MB');
+      this.toast.error(this.transloco.translate('uploads.size'));
       return false;
     }
     return true;

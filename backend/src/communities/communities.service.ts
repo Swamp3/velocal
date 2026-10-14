@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -8,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import { isLastAdminRemoval } from './community-admin.policy';
+import { CommunityErrorCode, communityConflict } from './community-error';
 import { CommunitySearchDto } from './dto/community-search.dto';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
@@ -68,8 +68,6 @@ interface ViewerState {
   myJoinRequest: 'pending' | null;
 }
 
-const LAST_ADMIN_REMOVAL = 'Cannot remove the last admin of this community';
-const LAST_ADMIN_DEMOTION = 'Cannot demote the last admin of this community';
 
 @Injectable()
 export class CommunitiesService {
@@ -312,7 +310,7 @@ export class CommunitiesService {
         manager,
         id,
         membership.role,
-        LAST_ADMIN_REMOVAL,
+        CommunityErrorCode.lastAdminRemoval,
       );
       await manager.remove(membership);
     });
@@ -363,7 +361,7 @@ export class CommunitiesService {
           manager,
           communityId,
           membership.role,
-          LAST_ADMIN_DEMOTION,
+          CommunityErrorCode.lastAdminDemotion,
         );
       }
 
@@ -393,7 +391,7 @@ export class CommunitiesService {
         manager,
         communityId,
         membership.role,
-        LAST_ADMIN_REMOVAL,
+        CommunityErrorCode.lastAdminRemoval,
       );
       await manager.remove(membership);
     });
@@ -560,13 +558,13 @@ export class CommunitiesService {
     manager: EntityManager,
     communityId: string,
     role: CommunityMemberRole,
-    message: string,
+    code: CommunityErrorCode,
   ): Promise<void> {
     const adminCount = await manager.count(CommunityMember, {
       where: { communityId, role: CommunityMemberRole.ADMIN },
     });
     if (isLastAdminRemoval(role, adminCount)) {
-      throw new ConflictException(message);
+      throw communityConflict(code);
     }
   }
 

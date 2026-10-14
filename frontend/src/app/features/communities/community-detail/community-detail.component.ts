@@ -14,6 +14,7 @@ import { CommunityService } from '@core/services/community.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityHeroComponent, EmptyStateComponent } from '@shared/components';
+import { communityErrorKey } from '../community-error';
 import { Community, CommunityVisibility, communityVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 
@@ -129,10 +130,6 @@ export class CommunityDetailComponent implements OnInit {
         },
         error: (err: ApiError) => {
           this.acting.set(false);
-          if (err.status === 409 && err.message) {
-            this.toast.error(err.message);
-            return;
-          }
           this.toastUnlessTransport(err);
         },
       });
@@ -162,6 +159,6 @@ export class CommunityDetailComponent implements OnInit {
   /** 401/5xx/offline already toast in the error interceptor. */
   private toastUnlessTransport(err: ApiError): void {
     if (err.status >= 500 || err.status === 0 || err.status === 401 || err.status === 408) return;
-    this.toast.error(this.transloco.translate('communities.errors.generic'));
+    this.toast.error(this.transloco.translate(communityErrorKey(err)));
   }
 }

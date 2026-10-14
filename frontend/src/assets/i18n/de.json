@@ -241,6 +241,16 @@
     "passwordMismatch": "Passwörter stimmen nicht überein",
     "badWord": "Dieses Feld enthält unangemessene Sprache"
   },
+  "uploads": {
+    "drop": "Bild hierher ziehen oder zum Auswählen klicken",
+    "hint": "JPEG, PNG oder WebP · maximal 10 MB",
+    "replace": "Bild ersetzen",
+    "remove": "Entfernen",
+    "updated": "Bild aktualisiert",
+    "failed": "Bild konnte nicht aktualisiert werden",
+    "type": "Nur JPEG, PNG oder WebP sind erlaubt",
+    "size": "Das Bild darf höchstens 10 MB groß sein"
+  },
   "common": {
     "loading": "Laden...",
     "error": "Ein Fehler ist aufgetreten",
@@ -584,7 +594,11 @@
       "reject": "Ablehnen"
     },
     "errors": {
-      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "lastAdminDemotion": "Diese Gemeinschaft braucht mindestens einen Admin.",
+      "lastAdminRemoval": "Diese Gemeinschaft braucht mindestens einen Admin.",
+      "userNotFound": "Kein Konto nutzt diese E-Mail.",
+      "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft."
     }
   },
   "errors": {
