@@ -17,12 +17,9 @@ import {
   InviteByEmailComponent,
   MemberListComponent,
   MemberListItem,
-  RequestListComponent,
-  RequestListItem,
 } from '@shared/components';
-import { CommunityJoinRequest, Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
+import { Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
 import { SkeletonComponent, ToastService } from '@shared/ui';
-import { forkJoin, Observable, of } from 'rxjs';
 import { communityErrorKey } from '../community-error';
 
 @Component({
@@ -34,7 +31,6 @@ import { communityErrorKey } from '../community-error';
     SkeletonComponent,
     EmptyStateComponent,
     MemberListComponent,
-    RequestListComponent,
     InviteByEmailComponent,
   ],
   templateUrl: './subgroup-members.component.html',
@@ -55,8 +51,9 @@ export class SubgroupMembersComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly notFound = signal(false);
   protected readonly mutating = signal(false);
+  protected readonly outlineLinkClass =
+    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
   private readonly members = signal<SubgroupMember[]>([]);
-  private readonly requests = signal<CommunityJoinRequest[]>([]);
 
   protected readonly canManage = computed(() => {
     const subgroup = this.subgroup();
@@ -85,15 +82,6 @@ export class SubgroupMembersComponent implements OnInit {
           )
         : undefined,
       canRemove: isAdmin,
-    }));
-  });
-
-  protected readonly requestItems = computed((): RequestListItem[] => {
-    this.lang();
-    const unnamed = this.transloco.translate('communities.members.unnamed');
-    return this.requests().map((request) => ({
-      id: request.id,
-      name: request.displayName ?? unnamed,
     }));
   });
 
@@ -158,14 +146,6 @@ export class SubgroupMembersComponent implements OnInit {
       });
   }
 
-  protected onApprove(requestId: string): void {
-    this.decide(requestId, 'approve');
-  }
-
-  protected onReject(requestId: string): void {
-    this.decide(requestId, 'reject');
-  }
-
   protected onInvite(email: string): void {
     const subgroup = this.subgroup();
     if (!subgroup || this.mutating()) return;
@@ -180,28 +160,6 @@ export class SubgroupMembersComponent implements OnInit {
         },
         error: (err: ApiError) => this.fail(err),
       });
-  }
-
-  private decide(requestId: string, action: 'approve' | 'reject'): void {
-    const subgroup = this.subgroup();
-    if (!subgroup || this.mutating()) return;
-    this.mutating.set(true);
-    const request$: Observable<{ status: 'approved' | 'rejected' }> =
-      action === 'approve'
-        ? this.communityService.approveSubgroupRequest(
-            subgroup.communitySlug,
-            subgroup.slug,
-            requestId,
-          )
-        : this.communityService.rejectSubgroupRequest(
-            subgroup.communitySlug,
-            subgroup.slug,
-            requestId,
-          );
-    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => this.refresh(subgroup),
-      error: (err: ApiError) => this.fail(err),
-    });
   }
 
   private refresh(subgroup: Subgroup): void {
@@ -220,18 +178,12 @@ export class SubgroupMembersComponent implements OnInit {
   }
 
   private loadPeople(subgroup: Subgroup): void {
-    const requests$ = this.canManage()
-      ? this.communityService.subgroupJoinRequests(subgroup.communitySlug, subgroup.slug)
-      : of<CommunityJoinRequest[]>([]);
-    forkJoin({
-      members: this.communityService.subgroupMembers(subgroup.communitySlug, subgroup.slug),
-      requests: requests$,
-    })
+    this.communityService
+      .subgroupMembers(subgroup.communitySlug, subgroup.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ members, requests }) => {
+        next: (members) => {
           this.members.set(members);
-          this.requests.set(requests);
           this.loading.set(false);
           this.mutating.set(false);
         },

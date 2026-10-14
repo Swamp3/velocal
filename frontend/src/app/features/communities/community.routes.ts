@@ -20,6 +20,30 @@ const routes: Routes = [
       import('./community-form/community-form.component').then((m) => m.CommunityFormComponent),
   },
   {
+    path: ':slug/posts/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-post-form/community-post-form.component').then(
+        (m) => m.CommunityPostFormComponent,
+      ),
+  },
+  {
+    path: ':slug/polls/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-poll-form/community-poll-form.component').then(
+        (m) => m.CommunityPollFormComponent,
+      ),
+  },
+  {
+    path: ':slug/requests',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-requests/community-requests.component').then(
+        (m) => m.CommunityRequestsComponent,
+      ),
+  },
+  {
     path: ':slug/posts',
     canActivate: [authGuard],
     data: { section: 'posts' },
@@ -42,6 +66,30 @@ const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./community-post/community-post.component').then((m) => m.CommunityPostComponent),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/posts/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-post-form/community-post-form.component').then(
+        (m) => m.CommunityPostFormComponent,
+      ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/polls/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-poll-form/community-poll-form.component').then(
+        (m) => m.CommunityPollFormComponent,
+      ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/requests',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-requests/community-requests.component').then(
+        (m) => m.CommunityRequestsComponent,
+      ),
   },
   {
     path: ':slug/subgroups/:subgroupSlug/posts',

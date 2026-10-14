@@ -642,6 +642,9 @@
       "resultsMembers": "Members",
       "resultsManagers": "Admins and moderators",
       "deadline": "Closes at",
+      "new": "New poll",
+      "back": "Back to polls",
+      "created": "Poll created",
       "create": "Create poll",
       "vote": "Vote",
       "voted": "Your vote is in",
@@ -653,6 +656,8 @@
     },
     "posts": {
       "title": "Posts",
+      "create": "New post",
+      "createTitle": "Write a post",
       "empty": "No posts yet",
       "placeholder": "Write something for the members…",
       "publish": "Post",

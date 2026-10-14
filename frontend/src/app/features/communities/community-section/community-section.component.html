@@ -44,11 +44,19 @@
       {{ backLabel() }}
     </a>
 
-    <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
-      {{
-        (section() === 'posts' ? 'communities.posts.title' : 'communities.polls.title') | transloco
-      }}
-    </h1>
+    <div class="mt-5 flex items-center justify-between gap-3">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">
+        {{
+          (section() === 'posts' ? 'communities.posts.title' : 'communities.polls.title')
+            | transloco
+        }}
+      </h1>
+      <a [routerLink]="createLink()" [class]="outlineLinkClass">
+        {{
+          (section() === 'posts' ? 'communities.posts.create' : 'communities.polls.new') | transloco
+        }}
+      </a>
+    </div>
 
     <div class="mt-6">
       @if (section() === 'posts') {

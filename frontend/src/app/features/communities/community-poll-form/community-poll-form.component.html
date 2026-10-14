@@ -1,0 +1,94 @@
+<div class="mx-auto max-w-xl">
+  <a
+    [routerLink]="listLink()"
+    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+  >
+    <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+    {{ 'communities.polls.back' | transloco }}
+  </a>
+
+  <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
+    {{ 'communities.polls.create' | transloco }}
+  </h1>
+
+  @if (!loaded()) {
+    <div class="mt-6 space-y-4">
+      <ui-skeleton height="2.5rem" />
+      <ui-skeleton height="2.5rem" />
+      <ui-skeleton height="2.5rem" />
+    </div>
+  } @else {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="create()"
+      class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    >
+      <ui-input
+        [label]="'communities.polls.question' | transloco"
+        formControlName="question"
+        [error]="questionError()"
+      />
+
+      <div formArrayName="options" class="space-y-3">
+        @for (option of form.controls.options.controls; track $index) {
+          <ui-input
+            [label]="('communities.polls.option' | transloco) + ' ' + ($index + 1)"
+            [formControl]="option"
+            [error]="optionError($index)"
+          />
+        }
+      </div>
+
+      <button
+        type="button"
+        class="text-sm font-medium text-[var(--color-primary)]"
+        (click)="addOption()"
+      >
+        {{ 'communities.polls.addOption' | transloco }}
+      </button>
+
+      <label class="flex items-center gap-2 text-sm text-[var(--color-text)]">
+        <input type="checkbox" formControlName="multiple" />
+        {{ 'communities.polls.multiple' | transloco }}
+      </label>
+
+      <div>
+        <label for="poll-results" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+          {{ 'communities.polls.results' | transloco }}
+        </label>
+        <select
+          id="poll-results"
+          formControlName="resultsVisibility"
+          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        >
+          <option value="members">{{ 'communities.polls.resultsMembers' | transloco }}</option>
+          <option value="managers">{{ 'communities.polls.resultsManagers' | transloco }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label
+          for="poll-deadline"
+          class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
+        >
+          {{ 'communities.polls.deadline' | transloco }}
+        </label>
+        <input
+          id="poll-deadline"
+          type="datetime-local"
+          formControlName="closesAt"
+          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <ui-button type="submit" [loading]="saving()" [disabled]="saving()">
+          {{ 'communities.polls.create' | transloco }}
+        </ui-button>
+        <a [routerLink]="listLink()">
+          <ui-button variant="outline" type="button">{{ 'common.cancel' | transloco }}</ui-button>
+        </a>
+      </div>
+    </form>
+  }
+</div>

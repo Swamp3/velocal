@@ -43,6 +43,8 @@ export class CommunitySectionComponent implements OnInit {
   protected readonly allowed = signal(false);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
+  protected readonly outlineLinkClass =
+    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
 
   ngOnInit(): void {
     const communitySlug = this.route.snapshot.paramMap.get('slug');
@@ -85,6 +87,14 @@ export class CommunitySectionComponent implements OnInit {
         },
         error: () => this.fail(),
       });
+  }
+
+  protected createLink(): string[] {
+    const subgroupSlug = this.subgroupSlug();
+    const section = this.section();
+    return subgroupSlug
+      ? ['/communities', this.communitySlug(), 'subgroups', subgroupSlug, section, 'new']
+      : ['/communities', this.communitySlug(), section, 'new'];
   }
 
   private fail(): void {

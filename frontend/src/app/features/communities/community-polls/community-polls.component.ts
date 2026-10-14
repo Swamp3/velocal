@@ -8,18 +8,17 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { CommunityPoll, PollResultsVisibility } from '@shared/models';
+import { CommunityPoll } from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
 @Component({
   selector: 'app-community-polls',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslocoPipe, ButtonComponent],
+  imports: [TranslocoPipe, ButtonComponent],
   templateUrl: './community-polls.component.html',
 })
 export class CommunityPollsComponent implements OnInit {
@@ -33,13 +32,7 @@ export class CommunityPollsComponent implements OnInit {
 
   protected readonly polls = signal<CommunityPoll[]>([]);
   protected readonly loading = signal(true);
-  protected readonly creating = signal(false);
   protected readonly votingId = signal<string | null>(null);
-  protected readonly question = signal('');
-  protected readonly options = signal(['', '']);
-  protected readonly multiple = signal(false);
-  protected readonly resultsVisibility = signal<PollResultsVisibility>('members');
-  protected readonly closesAt = signal('');
   protected readonly selection = signal<Record<string, string[]>>({});
 
   ngOnInit(): void {
@@ -54,14 +47,6 @@ export class CommunityPollsComponent implements OnInit {
         },
         error: () => this.loading.set(false),
       });
-  }
-
-  protected addOption(): void {
-    this.options.update((options) => (options.length >= 12 ? options : [...options, '']));
-  }
-
-  protected setOption(index: number, value: string): void {
-    this.options.update((options) => options.map((option, i) => (i === index ? value : option)));
   }
 
   protected chosen(pollId: string, optionId: string): boolean {
@@ -79,44 +64,6 @@ export class CommunityPollsComponent implements OnInit {
         : [optionId];
       return { ...current, [poll.id]: next };
     });
-  }
-
-  protected create(): void {
-    const question = this.question().trim();
-    const options = this.options()
-      .map((option) => option.trim())
-      .filter(Boolean);
-    if (!question || options.length < 2 || this.creating()) return;
-    this.creating.set(true);
-    const closesAt = this.closesAt();
-    this.communityService
-      .createPoll(
-        this.communitySlug(),
-        {
-          question,
-          multiple: this.multiple(),
-          resultsVisibility: this.resultsVisibility(),
-          closesAt: closesAt ? new Date(closesAt).toISOString() : undefined,
-          options: options.map((label) => ({ label })),
-        },
-        this.subgroupSlug(),
-      )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (poll) => {
-          this.polls.update((polls) => [poll, ...polls]);
-          this.selection.update((current) => ({ ...current, [poll.id]: [] }));
-          this.question.set('');
-          this.options.set(['', '']);
-          this.multiple.set(false);
-          this.closesAt.set('');
-          this.creating.set(false);
-        },
-        error: (err: ApiError) => {
-          this.creating.set(false);
-          this.toast.error(this.transloco.translate(communityErrorKey(err)));
-        },
-      });
   }
 
   protected vote(poll: CommunityPoll): void {

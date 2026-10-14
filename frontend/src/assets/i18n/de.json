@@ -642,6 +642,9 @@
       "resultsMembers": "Mitglieder",
       "resultsManagers": "Admins und Moderatoren",
       "deadline": "Endet am",
+      "new": "Neue Umfrage",
+      "back": "Zurück zu den Umfragen",
+      "created": "Umfrage erstellt",
       "create": "Umfrage erstellen",
       "vote": "Abstimmen",
       "voted": "Deine Stimme ist gespeichert",
@@ -653,6 +656,8 @@
     },
     "posts": {
       "title": "Beiträge",
+      "create": "Neuer Beitrag",
+      "createTitle": "Beitrag schreiben",
       "empty": "Noch keine Beiträge",
       "placeholder": "Schreib etwas für die Mitglieder…",
       "publish": "Posten",

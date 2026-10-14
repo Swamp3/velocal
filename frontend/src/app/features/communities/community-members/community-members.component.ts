@@ -17,13 +17,10 @@ import {
   InviteByEmailComponent,
   MemberListComponent,
   MemberListItem,
-  RequestListComponent,
-  RequestListItem,
 } from '@shared/components';
-import { Community, CommunityJoinRequest, CommunityMember, CommunityRole } from '@shared/models';
+import { Community, CommunityMember, CommunityRole } from '@shared/models';
 import { communityErrorKey } from '../community-error';
 import { SkeletonComponent, ToastService } from '@shared/ui';
-import { forkJoin, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-community-members',
@@ -35,7 +32,6 @@ import { forkJoin, Observable, of } from 'rxjs';
     EmptyStateComponent,
     InviteByEmailComponent,
     MemberListComponent,
-    RequestListComponent,
   ],
   templateUrl: './community-members.component.html',
 })
@@ -55,8 +51,9 @@ export class CommunityMembersComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly notFound = signal(false);
   protected readonly mutating = signal(false);
+  protected readonly outlineLinkClass =
+    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
   private readonly members = signal<CommunityMember[]>([]);
-  private readonly requests = signal<CommunityJoinRequest[]>([]);
 
   protected readonly canManage = computed(() => this.community()?.myRole === 'admin');
 
@@ -78,15 +75,6 @@ export class CommunityMembersComponent implements OnInit {
           )
         : undefined,
       canRemove: this.canManage(),
-    }));
-  });
-
-  protected readonly requestItems = computed((): RequestListItem[] => {
-    this.lang();
-    const unnamed = this.transloco.translate('communities.members.unnamed');
-    return this.requests().map((request) => ({
-      id: request.id,
-      name: request.displayName ?? unnamed,
     }));
   });
 
@@ -173,33 +161,6 @@ export class CommunityMembersComponent implements OnInit {
       });
   }
 
-  protected onApprove(requestId: string): void {
-    this.decide(requestId, 'approve');
-  }
-
-  protected onReject(requestId: string): void {
-    this.decide(requestId, 'reject');
-  }
-
-  private decide(requestId: string, action: 'approve' | 'reject'): void {
-    const community = this.community();
-    if (!community || this.mutating()) return;
-
-    this.mutating.set(true);
-    const request$: Observable<{ status: 'approved' | 'rejected' }> =
-      action === 'approve'
-        ? this.communityService.approveRequest(community.id, requestId)
-        : this.communityService.rejectRequest(community.id, requestId);
-
-    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => this.refresh(community.slug),
-      error: (err: ApiError) => {
-        this.mutating.set(false);
-        this.toastMembershipError(err);
-      },
-    });
-  }
-
   private refresh(slug: string): void {
     this.communityService
       .getBySlug(slug)
@@ -220,20 +181,12 @@ export class CommunityMembersComponent implements OnInit {
   }
 
   private loadPeople(community: Community): void {
-    const requests$ =
-      community.myRole === 'admin'
-        ? this.communityService.joinRequests(community.id)
-        : of<CommunityJoinRequest[]>([]);
-
-    forkJoin({
-      members: this.communityService.members(community.id),
-      requests: requests$,
-    })
+    this.communityService
+      .members(community.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ members, requests }) => {
+        next: (members) => {
           this.members.set(members);
-          this.requests.set(requests);
           this.loading.set(false);
           this.mutating.set(false);
         },

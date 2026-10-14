@@ -1,39 +1,26 @@
-<div>
-  <form class="space-y-3" [formGroup]="form" (ngSubmit)="publish()">
-    <app-rich-text
-      formControlName="body"
-      [compact]="true"
-      [placeholder]="'communities.posts.placeholder' | transloco"
-    />
-    <ui-button type="submit" [loading]="publishing()" [disabled]="publishing()">
-      {{ 'communities.posts.publish' | transloco }}
-    </ui-button>
-  </form>
-
-  @if (!loading() && posts().length === 0) {
-    <p class="mt-4 text-sm text-[var(--color-text-muted)]">
-      {{ 'communities.posts.empty' | transloco }}
-    </p>
-  } @else {
-    <ul class="mt-4 space-y-3">
-      @for (post of posts(); track post.id) {
-        <li>
-          <a
-            [routerLink]="postLink(post.id)"
-            class="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 shadow-[var(--shadow-card)] hover:bg-[var(--color-bg-alt)]"
-          >
-            <p class="text-sm font-medium text-[var(--color-text)]">
-              {{ authorName(post.authorName) }}
-            </p>
-            <app-rich-text-view class="mt-1 block" [value]="post.body" [clamp]="true" />
-            <p class="mt-2 text-xs text-[var(--color-text-muted)]">
-              <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'medium' }}</time>
-              <span aria-hidden="true"> · </span>
-              {{ 'communities.posts.commentCount' | transloco: { count: post.commentCount } }}
-            </p>
-          </a>
-        </li>
-      }
-    </ul>
-  }
-</div>
+@if (!loading() && posts().length === 0) {
+  <p class="text-sm text-[var(--color-text-muted)]">
+    {{ 'communities.posts.empty' | transloco }}
+  </p>
+} @else {
+  <ul class="space-y-3">
+    @for (post of posts(); track post.id) {
+      <li>
+        <a
+          [routerLink]="postLink(post.id)"
+          class="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 shadow-[var(--shadow-card)] hover:bg-[var(--color-bg-alt)]"
+        >
+          <p class="text-sm font-medium text-[var(--color-text)]">
+            {{ authorName(post.authorName) }}
+          </p>
+          <app-rich-text-view class="mt-1 block" [value]="post.body" [clamp]="true" />
+          <p class="mt-2 text-xs text-[var(--color-text-muted)]">
+            <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'medium' }}</time>
+            <span aria-hidden="true"> · </span>
+            {{ 'communities.posts.commentCount' | transloco: { count: post.commentCount } }}
+          </p>
+        </a>
+      </li>
+    }
+  </ul>
+}

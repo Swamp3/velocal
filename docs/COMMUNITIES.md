@@ -47,7 +47,7 @@ erDiagram
 
 ## Pages
 
-A community or subgroup overview stays short: identity, actions, and events. Posts, polls, and the subgroup list each have their own page.
+A community or subgroup overview stays short: identity, actions, and events. Posts, polls, subgroups, and open join requests each have their own page. Creating a post, poll, or subgroup follows the same flow: a button on the list, then its own form.
 
 ## Roles
 

@@ -19,9 +19,25 @@
       {{ subgroup.name }}
     </a>
 
-    <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
-      {{ 'communities.members.title' | transloco }}
-    </h1>
+    <div class="mt-5 flex items-center justify-between gap-3">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">
+        {{ 'communities.members.title' | transloco }}
+      </h1>
+      @if (canManage()) {
+        <a
+          [routerLink]="[
+            '/communities',
+            subgroup.communitySlug,
+            'subgroups',
+            subgroup.slug,
+            'requests',
+          ]"
+          [class]="outlineLinkClass"
+        >
+          {{ 'communities.requests.title' | transloco }}
+        </a>
+      }
+    </div>
 
     @if (canManage()) {
       <div class="mt-6">
@@ -46,23 +62,5 @@
       }
     </div>
 
-    @if (canManage()) {
-      <h2 class="mt-10 text-lg font-semibold text-[var(--color-text)]">
-        {{ 'communities.requests.title' | transloco }}
-      </h2>
-      <div class="mt-4">
-        @if (requestItems().length === 0) {
-          <p class="text-sm text-[var(--color-text-muted)]">
-            {{ 'communities.requests.empty' | transloco }}
-          </p>
-        } @else {
-          <app-request-list
-            [items]="requestItems()"
-            (approve)="onApprove($event)"
-            (reject)="onReject($event)"
-          />
-        }
-      </div>
-    }
   </div>
 }
