@@ -253,12 +253,31 @@
       </div>
     }
 
-    <app-event-rsvp
-      [eventId]="event.id"
-      [count]="event.rsvpCount ?? 0"
-      [myRsvp]="event.myRsvp ?? null"
-      [canSeeList]="!!event.canSeeRsvps"
-    />
+    @if (event.hostCommunity) {
+      <p class="mt-6 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+        <span
+          class="material-symbols-outlined text-[18px] text-[var(--color-primary)]"
+          aria-hidden="true"
+          >groups</span
+        >
+        <span>{{ 'events.detail.community' | transloco }}:</span>
+        <a
+          [routerLink]="['/communities', event.hostCommunity.slug]"
+          class="font-medium text-[var(--color-primary)] hover:underline"
+          >{{ event.hostCommunity.name }}</a
+        >
+      </p>
+    }
+
+    @if (event.canRsvp) {
+      <app-event-rsvp
+        [eventId]="event.id"
+        [count]="event.rsvpCount ?? 0"
+        [myRsvp]="event.myRsvp ?? null"
+        [canSeeList]="!!event.canSeeRsvps"
+        [hostContext]="hostContext"
+      />
+    }
 
     @if (event.canInvite) {
       <app-event-invite [eventId]="event.id" />

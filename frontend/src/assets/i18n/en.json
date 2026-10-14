@@ -108,7 +108,8 @@
         "apple": "Apple Calendar",
         "outlook": "Outlook",
         "ics": "Download .ics file"
-      }
+      },
+      "community": "Community"
     },
     "status": {
       "published": "Published",
@@ -713,7 +714,17 @@
       "strava": "Strava link",
       "meetupPlace": "Meetup place",
       "meetupTime": "Meetup time",
-      "meetupNote": "Meetup note"
+      "meetupNote": "Meetup note",
+      "share": "Add a public event",
+      "shareTitle": "Share a public event with this community",
+      "shareSearch": "Search public events",
+      "shareNoResults": "No events found",
+      "sharePick": "Select",
+      "shareSelected": "Selected event",
+      "shareSubmit": "Add to community",
+      "shareRemove": "Remove",
+      "shared": "Shared from public list",
+      "shareMeetupHint": "Only members of this community see the meetup details and who is coming."
     },
     "posts": {
       "title": "Posts",

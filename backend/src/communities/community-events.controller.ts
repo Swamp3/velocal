@@ -1,7 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
   Param,
   Post,
   UseGuards,
@@ -13,6 +17,7 @@ import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 import { EventsService, SerializedEvent } from '../events/events.service';
 import { CreateHostedEventDto } from './dto/create-hosted-event.dto';
+import { ShareEventDto } from './dto/share-event.dto';
 
 @Controller()
 export class CommunityEventsController {
@@ -72,5 +77,60 @@ export class CommunityEventsController {
     @CurrentUser() user: { id: string },
   ): Promise<SerializedEvent> {
     return this.events.createHosted(communitySlug, user.id, dto, subgroupSlug);
+  }
+
+  @Post('communities/:communitySlug/events/shared')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('meetupPlace', 'meetupNote')
+  shareCommunity(
+    @Param('communitySlug') communitySlug: string,
+    @Body() dto: ShareEventDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedEvent> {
+    return this.events.shareEvent(communitySlug, user.id, dto);
+  }
+
+  @Delete('communities/:communitySlug/events/shared/:eventId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  unshareCommunity(
+    @Param('communitySlug') communitySlug: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<void> {
+    return this.events.unshareEvent(communitySlug, user.id, eventId);
+  }
+
+  @Post('communities/:communitySlug/subgroups/:subgroupSlug/events/shared')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('meetupPlace', 'meetupNote')
+  shareSubgroup(
+    @Param('communitySlug') communitySlug: string,
+    @Param('subgroupSlug') subgroupSlug: string,
+    @Body() dto: ShareEventDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedEvent> {
+    return this.events.shareEvent(communitySlug, user.id, dto, subgroupSlug);
+  }
+
+  @Delete(
+    'communities/:communitySlug/subgroups/:subgroupSlug/events/shared/:eventId',
+  )
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  unshareSubgroup(
+    @Param('communitySlug') communitySlug: string,
+    @Param('subgroupSlug') subgroupSlug: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<void> {
+    return this.events.unshareEvent(
+      communitySlug,
+      user.id,
+      eventId,
+      subgroupSlug,
+    );
   }
 }

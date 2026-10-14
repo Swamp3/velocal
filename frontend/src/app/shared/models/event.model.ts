@@ -21,6 +21,9 @@ export interface CyclingEvent {
   meetupNote?: string | null;
   rsvpCount?: number;
   myRsvp?: EventRsvpStatus | null;
+  canRsvp?: boolean;
+  shared?: boolean;
+  hostCommunity?: { name: string; slug: string } | null;
   canComment?: boolean;
   canSeeRsvps?: boolean;
   canInvite?: boolean;

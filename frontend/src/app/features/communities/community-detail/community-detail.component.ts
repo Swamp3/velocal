@@ -92,14 +92,25 @@ export class CommunityDetailComponent implements OnInit {
         icon: 'groups',
         labelKey: 'communities.subgroups.title',
         commands: [...base, 'subgroups'],
+        count: community.subgroupCount,
       },
     ];
     if (!community.myRole) return links;
     return [
       ...links,
       { icon: 'forum', labelKey: 'communities.posts.title', commands: [...base, 'posts'] },
-      { icon: 'ballot', labelKey: 'communities.polls.title', commands: [...base, 'polls'] },
-      { icon: 'group', labelKey: 'communities.members.title', commands: [...base, 'members'] },
+      {
+        icon: 'ballot',
+        labelKey: 'communities.polls.title',
+        commands: [...base, 'polls'],
+        count: community.pollCount,
+      },
+      {
+        icon: 'group',
+        labelKey: 'communities.members.title',
+        commands: [...base, 'members'],
+        count: community.memberCount,
+      },
     ];
   }
 

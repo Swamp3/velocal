@@ -92,8 +92,18 @@ export class SubgroupDetailComponent implements OnInit {
     const base = ['/communities', subgroup.communitySlug, 'subgroups', subgroup.slug];
     return [
       { icon: 'forum', labelKey: 'communities.posts.title', commands: [...base, 'posts'] },
-      { icon: 'ballot', labelKey: 'communities.polls.title', commands: [...base, 'polls'] },
-      { icon: 'group', labelKey: 'communities.members.title', commands: [...base, 'members'] },
+      {
+        icon: 'ballot',
+        labelKey: 'communities.polls.title',
+        commands: [...base, 'polls'],
+        count: subgroup.pollCount,
+      },
+      {
+        icon: 'group',
+        labelKey: 'communities.members.title',
+        commands: [...base, 'members'],
+        count: subgroup.memberCount,
+      },
     ];
   }
 

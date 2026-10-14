@@ -9,6 +9,7 @@ import { Community } from '../communities/entities/community.entity';
 import { SubgroupMember } from '../communities/entities/subgroup-member.entity';
 import { Subgroup } from '../communities/entities/subgroup.entity';
 import { EventComment } from './entities/event-comment.entity';
+import { EventShare } from './entities/event-share.entity';
 import { EventRsvp } from './entities/event-rsvp.entity';
 import { Event } from './entities/event.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -21,6 +22,7 @@ import { User } from '../users/entities/user.entity';
       Event,
       EventRsvp,
       EventComment,
+      EventShare,
       Community,
       CommunityMember,
       Subgroup,

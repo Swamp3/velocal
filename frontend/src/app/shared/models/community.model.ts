@@ -11,6 +11,8 @@ export interface Community {
   heroUrl: string | null;
   logoUrl: string | null;
   memberCount: number;
+  subgroupCount?: number;
+  pollCount?: number;
   myRole: CommunityRole | null;
   myJoinRequest: 'pending' | null;
   createdAt: string;
@@ -62,6 +64,7 @@ export interface Subgroup {
   heroUrl: string | null;
   logoUrl: string | null;
   memberCount: number;
+  pollCount?: number;
   myRole: SubgroupRole | null;
   myJoinRequest: 'pending' | null;
   viewerIsCommunityAdmin: boolean;

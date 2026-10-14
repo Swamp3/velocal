@@ -6,6 +6,8 @@ export interface CommunitySectionLink {
   icon: string;
   labelKey: string;
   commands: string[];
+  /** Item count shown next to the label so changes are easy to spot. */
+  count?: number;
 }
 
 @Component({

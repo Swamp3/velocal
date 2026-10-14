@@ -55,9 +55,11 @@ export class EventsController {
   @UseGuards(OptionalJwtAuthGuard)
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query('community') community?: string,
+    @Query('subgroup') subgroup?: string,
     @CurrentUser() user?: { id: string },
   ): Promise<SerializedEvent> {
-    return this.eventsService.findOne(id, user?.id);
+    return this.eventsService.findOne(id, user?.id, { community, subgroup });
   }
 
   @Post(':id/invites')
@@ -76,8 +78,13 @@ export class EventsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SetEventRsvpDto,
     @CurrentUser() user: { id: string },
+    @Query('community') community?: string,
+    @Query('subgroup') subgroup?: string,
   ): Promise<SerializedEvent> {
-    return this.eventsService.setRsvp(id, user.id, dto.status);
+    return this.eventsService.setRsvp(id, user.id, dto.status, {
+      community,
+      subgroup,
+    });
   }
 
   @Get(':id/rsvps')
@@ -85,8 +92,10 @@ export class EventsController {
   listRsvps(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: { id: string },
+    @Query('community') community?: string,
+    @Query('subgroup') subgroup?: string,
   ) {
-    return this.eventsService.listRsvps(id, user.id);
+    return this.eventsService.listRsvps(id, user.id, { community, subgroup });
   }
 
   @Get(':id/comments')

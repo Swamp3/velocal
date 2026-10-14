@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
-import { EventService } from '@core/services/event.service';
+import { EventHostContext, EventService } from '@core/services/event.service';
 import { EventRsvpStatus } from '@shared/models';
 import { ToastService } from '@shared/ui';
 
@@ -22,6 +22,7 @@ export class EventRsvpComponent {
   readonly count = input(0);
   readonly myRsvp = input<EventRsvpStatus | null>(null);
   readonly canSeeList = input(false);
+  readonly hostContext = input<EventHostContext>();
 
   private readonly countOverride = signal<number | null>(null);
   private readonly mineOverride = signal<EventRsvpStatus | null | undefined>(undefined);
@@ -41,7 +42,7 @@ export class EventRsvpComponent {
   protected choose(status: EventRsvpStatus): void {
     if (this.busy()) return;
     this.busy.set(true);
-    this.events.setRsvp(this.eventId(), status).subscribe({
+    this.events.setRsvp(this.eventId(), status, this.hostContext()).subscribe({
       next: (event) => {
         this.countOverride.set(event.rsvpCount ?? 0);
         this.mineOverride.set(event.myRsvp ?? status);
@@ -62,7 +63,7 @@ export class EventRsvpComponent {
   }
 
   private loadPeople(): void {
-    this.events.listRsvps(this.eventId()).subscribe({
+    this.events.listRsvps(this.eventId(), this.hostContext()).subscribe({
       next: (people) => this.people.set(people),
       error: () => this.people.set([]),
     });

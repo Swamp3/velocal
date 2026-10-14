@@ -4,9 +4,10 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
+import { EventShare } from './entities/event-share.entity';
 import {
   CommunityMember,
   CommunityMemberRole,
@@ -53,6 +54,20 @@ export interface SerializedEvent {
   [key: string]: any;
 }
 
+export interface HostQuery {
+  community?: string;
+  subgroup?: string;
+}
+
+interface EventScope {
+  communityId: string;
+  subgroupId: string | null;
+  member: boolean;
+  manager: boolean;
+  share: EventShare | null;
+  hostCommunity: { name: string; slug: string };
+}
+
 export interface PaginatedEvents {
   data: SerializedEvent[];
   total: number;
@@ -70,6 +85,8 @@ export class EventsService {
     private readonly rsvps: Repository<EventRsvp>,
     @InjectRepository(EventComment)
     private readonly comments: Repository<EventComment>,
+    @InjectRepository(EventShare)
+    private readonly shares: Repository<EventShare>,
     @InjectRepository(Community)
     private readonly communities: Repository<Community>,
     @InjectRepository(CommunityMember)
@@ -194,8 +211,17 @@ export class EventsService {
     };
   }
 
-  async findOne(id: string, userId?: string): Promise<SerializedEvent> {
-    return this.present(await this.findEntity(id), userId);
+  async findOne(
+    id: string,
+    userId?: string,
+    ctx?: HostQuery,
+  ): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    return this.present(
+      event,
+      userId,
+      await this.shareScope(event, userId, ctx),
+    );
   }
 
   private async findEntity(id: string): Promise<Event> {
@@ -494,13 +520,215 @@ export class EventsService {
     }
     qb.orderBy('event.startDate', 'ASC').take(20);
     const rows = await qb.getMany();
-    const counts = await this.goingCounts(rows.map((event) => event.id));
-    return rows.map((event) =>
+
+    const sharedRows = await this.shares
+      .createQueryBuilder('share')
+      .innerJoinAndSelect('share.event', 'event')
+      .leftJoinAndSelect('event.discipline', 'discipline')
+      .where('share.communityId = :communityId', {
+        communityId: host.community.id,
+      })
+      .andWhere(
+        host.subgroup
+          ? 'share.subgroupId = :subgroupId'
+          : 'share.subgroupId IS NULL',
+        host.subgroup ? { subgroupId: host.subgroup.id } : {},
+      )
+      .andWhere('event.status = :status', { status: EventStatus.PUBLISHED })
+      .andWhere('event.listing = :publicListing', {
+        publicListing: EventListing.PUBLIC,
+      })
+      .andWhere('event.startDate >= :from', { from: new Date() })
+      .orderBy('event.startDate', 'ASC')
+      .take(20)
+      .getMany();
+
+    const scope = {
+      communityId: host.community.id,
+      subgroupId: host.subgroup?.id ?? null,
+    };
+    const all = [
+      ...rows.map((event) => ({ event, share: null as EventShare | null })),
+      ...sharedRows.map((share) => ({ event: share.event, share })),
+    ]
+      .sort((a, b) => +a.event.startDate - +b.event.startDate)
+      .slice(0, 20);
+    const counts = host.canSeeMembers
+      ? await this.goingCounts(
+          all.map(({ event }) => event.id),
+          scope,
+        )
+      : new Map<string, number>();
+    return all.map(({ event, share }) =>
       this.serializeEvent(event, {
-        rsvpCount: counts.get(event.id) ?? 0,
+        ...(host.canSeeMembers ? { rsvpCount: counts.get(event.id) ?? 0 } : {}),
+        ...(share ? this.shareFields(share, host.canSeeMembers) : {}),
+        hostCommunity: {
+          name: host.community.name,
+          slug: host.community.slug,
+        },
         includeCommunityFields: host.canSeeMembers,
       }),
     );
+  }
+
+  async shareEvent(
+    communitySlug: string,
+    userId: string,
+    dto: {
+      eventId: string;
+      meetupPlace?: string;
+      meetupAt?: string;
+      meetupNote?: string;
+    },
+    subgroupSlug?: string,
+  ): Promise<SerializedEvent> {
+    const host = await this.resolveHost(
+      communitySlug,
+      userId,
+      subgroupSlug,
+      true,
+    );
+    const event = await this.findEntity(dto.eventId);
+    if (
+      event.communityId ||
+      event.listing !== EventListing.PUBLIC ||
+      event.status !== EventStatus.PUBLISHED
+    ) {
+      throw new NotFoundException(`Event ${dto.eventId} not found`);
+    }
+    const subgroupId = host.subgroup?.id ?? null;
+    const existing = await this.findShare(
+      event.id,
+      host.community.id,
+      subgroupId,
+    );
+    const fields = {
+      meetupPlace: dto.meetupPlace?.trim() || null,
+      meetupAt: dto.meetupAt ? new Date(dto.meetupAt) : null,
+      meetupNote: dto.meetupNote?.trim() || null,
+    };
+    let share: EventShare;
+    if (existing) {
+      share = await this.shares.save({ ...existing, ...fields });
+    } else {
+      share = await this.dataSource.transaction(async (manager) => {
+        const saved = await manager.save(
+          this.shares.create({
+            eventId: event.id,
+            communityId: host.community.id,
+            subgroupId,
+            createdById: userId,
+            ...fields,
+          }),
+        );
+        await this.notifications.eventCreated(
+          {
+            actorId: userId,
+            communityId: host.community.id,
+            subgroupId,
+            payload: {
+              communityName: host.community.name,
+              communitySlug: host.community.slug,
+              subgroupName: host.subgroup?.name,
+              subgroupSlug: host.subgroup?.slug,
+              eventId: event.id,
+              eventName: event.name,
+            },
+          },
+          manager,
+        );
+        return saved;
+      });
+    }
+    return this.present(event, userId, {
+      communityId: host.community.id,
+      subgroupId,
+      member: true,
+      manager: true,
+      share,
+      hostCommunity: { name: host.community.name, slug: host.community.slug },
+    });
+  }
+
+  async unshareEvent(
+    communitySlug: string,
+    userId: string,
+    eventId: string,
+    subgroupSlug?: string,
+  ): Promise<void> {
+    const host = await this.resolveHost(
+      communitySlug,
+      userId,
+      subgroupSlug,
+      true,
+    );
+    const share = await this.findShare(
+      eventId,
+      host.community.id,
+      host.subgroup?.id ?? null,
+    );
+    if (!share) throw new NotFoundException('Shared event not found');
+    await this.shares.delete(share.id);
+  }
+
+  private findShare(
+    eventId: string,
+    communityId: string,
+    subgroupId: string | null,
+  ): Promise<EventShare | null> {
+    return this.shares.findOne({
+      where: {
+        eventId,
+        communityId,
+        subgroupId: subgroupId ?? IsNull(),
+      },
+    });
+  }
+
+  private shareFields(share: EventShare, includeCommunityFields: boolean) {
+    if (!includeCommunityFields) return {};
+    return {
+      meetupPlace: share.meetupPlace,
+      meetupAt: share.meetupAt,
+      meetupNote: share.meetupNote,
+      shared: true,
+    };
+  }
+
+  /**
+   * The community audience an event's attendee data belongs to: the host of a
+   * community event, or the community a public event was shared with (picked
+   * by the `community`/`subgroup` query). Null when neither applies, which is
+   * the case for plain public events: they carry no attendee data at all.
+   */
+  private async shareScope(
+    event: Event,
+    userId: string | undefined,
+    ctx?: HostQuery,
+  ): Promise<EventScope | null> {
+    if (event.communityId) return null;
+    if (!ctx?.community) return null;
+    let host: Awaited<ReturnType<EventsService['resolveHost']>>;
+    try {
+      host = await this.resolveHost(ctx.community, userId, ctx.subgroup, false);
+    } catch {
+      return null;
+    }
+    const share = await this.findShare(
+      event.id,
+      host.community.id,
+      host.subgroup?.id ?? null,
+    );
+    if (!share) return null;
+    return {
+      communityId: host.community.id,
+      subgroupId: host.subgroup?.id ?? null,
+      member: host.canSeeMembers,
+      manager: host.canManage,
+      share,
+      hostCommunity: { name: host.community.name, slug: host.community.slug },
+    };
   }
 
   async createHosted(
@@ -563,6 +791,7 @@ export class EventsService {
     community: Community;
     subgroup: Subgroup | null;
     canSeeMembers: boolean;
+    canManage: boolean;
   }> {
     const community = await this.communities.findOne({
       where: { slug: communitySlug },
@@ -584,7 +813,12 @@ export class EventsService {
       if (forCreate && !isAdmin) {
         throw communityForbidden(CommunityErrorCode.membersOnly);
       }
-      return { community, subgroup: null, canSeeMembers: !!communityMember };
+      return {
+        community,
+        subgroup: null,
+        canSeeMembers: !!communityMember,
+        canManage: isAdmin,
+      };
     }
     const subgroup = await this.subgroups.findOne({
       where: { communityId: community.id, slug: subgroupSlug },
@@ -611,6 +845,7 @@ export class EventsService {
       community,
       subgroup,
       canSeeMembers: !!subgroupMember || !!isAdmin,
+      canManage: canModerate,
     };
   }
 
@@ -704,38 +939,90 @@ export class EventsService {
     id: string,
     userId: string,
     status: EventRsvpStatus,
+    ctx?: HostQuery,
   ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
     if (!(await this.canSee(event, userId))) {
       throw new NotFoundException(`Event ${id} not found`);
     }
+    const scope = await this.attendeeScope(event, userId, ctx);
+    if (!scope?.member)
+      throw communityForbidden(CommunityErrorCode.membersOnly);
     await this.rsvps.upsert(
       { eventId: id, userId, status },
       { conflictPaths: ['eventId', 'userId'] },
     );
-    return this.present(event, userId);
+    return this.present(event, userId, scope);
   }
 
   async listRsvps(
     id: string,
     userId: string,
+    ctx?: HostQuery,
   ): Promise<
     { userId: string; displayName: string; status: EventRsvpStatus }[]
   > {
     const event = await this.requireVisible(id, userId);
-    const access = await this.hostRole(event, userId);
-    if (!access.manager)
+    const scope = await this.attendeeScope(event, userId, ctx);
+    if (!scope?.member)
       throw communityForbidden(CommunityErrorCode.membersOnly);
-    const rows = await this.rsvps.find({
-      where: { eventId: id },
-      relations: { user: true },
-      order: { createdAt: 'ASC' },
-    });
+    const qb = this.rsvps
+      .createQueryBuilder('rsvp')
+      .innerJoinAndSelect('rsvp.user', 'user')
+      .where('rsvp.eventId = :id', { id })
+      .orderBy('rsvp.createdAt', 'ASC');
+    this.restrictToAudience(qb, 'rsvp.userId', scope);
+    const rows = await qb.getMany();
     return rows.map((row) => ({
       userId: row.userId,
       displayName: row.user.displayName,
       status: row.status,
     }));
+  }
+
+  /** Attendee scope for a community-hosted event or a shared public event. */
+  private async attendeeScope(
+    event: Event,
+    userId: string,
+    ctx?: HostQuery,
+  ): Promise<EventScope | null> {
+    if (event.communityId) {
+      const access = await this.hostRole(event, userId);
+      const community = await this.communities.findOne({
+        where: { id: event.communityId },
+      });
+      if (!community) return null;
+      return {
+        communityId: event.communityId,
+        subgroupId: event.subgroupId,
+        member: access.member,
+        manager: access.manager,
+        share: null,
+        hostCommunity: { name: community.name, slug: community.slug },
+      };
+    }
+    return this.shareScope(event, userId, ctx);
+  }
+
+  /** Limits RSVP rows to people who belong to the audience's community or subgroup. */
+  private restrictToAudience(
+    qb: {
+      andWhere: (where: string, params?: Record<string, unknown>) => unknown;
+    },
+    userColumn: string,
+    scope: { communityId: string; subgroupId: string | null },
+  ): void {
+    if (scope.subgroupId) {
+      qb.andWhere(
+        `EXISTS (SELECT 1 FROM subgroup_members sm WHERE sm.subgroup_id = :scopeSubgroupId AND sm.user_id = ${userColumn})`,
+        { scopeSubgroupId: scope.subgroupId },
+      );
+    } else {
+      qb.andWhere(
+        `EXISTS (SELECT 1 FROM community_members cm WHERE cm.community_id = :scopeCommunityId AND cm.user_id = ${userColumn})`,
+        { scopeCommunityId: scope.communityId },
+      );
+    }
   }
 
   async listComments(id: string, userId: string) {
@@ -805,37 +1092,67 @@ export class EventsService {
   private async present(
     event: Event,
     userId?: string,
+    scope?: EventScope | null,
   ): Promise<SerializedEvent> {
     const access = await this.hostRole(event, userId);
     if (event.listing === EventListing.MEMBERS && !access.member) {
       throw new NotFoundException(`Event ${event.id} not found`);
     }
-    const mine = userId
-      ? await this.rsvps.findOne({ where: { eventId: event.id, userId } })
-      : null;
-    const rsvpCount = await this.rsvps.count({
-      where: { eventId: event.id, status: EventRsvpStatus.GOING },
-    });
+    // Plain public events have no attendee data. RSVPs belong to a community
+    // audience, so they are only readable by that audience's members.
+    let audience: EventScope | null = scope ?? null;
+    if (!audience && event.communityId && userId) {
+      audience = await this.attendeeScope(event, userId);
+    }
+    const isMember = !!audience?.member;
+    const mine =
+      userId && isMember
+        ? await this.rsvps.findOne({ where: { eventId: event.id, userId } })
+        : null;
+    const counts = isMember
+      ? await this.goingCounts([event.id], audience!)
+      : new Map<string, number>();
+    const hostCommunity = await this.hostCommunityFor(event, audience);
     return this.serializeEvent(event, {
-      rsvpCount,
+      ...(isMember ? { rsvpCount: counts.get(event.id) ?? 0 } : {}),
       myRsvp: mine?.status ?? null,
+      canRsvp: isMember,
       canComment: !!event.communityId && access.member,
-      canSeeRsvps: access.manager,
+      canSeeRsvps: isMember,
       canInvite: !!event.communityId && access.manager,
       canEdit: !!event.communityId && access.manager,
-      includeCommunityFields: access.member,
+      hostCommunity,
+      ...(audience?.share ? this.shareFields(audience.share, isMember) : {}),
+      includeCommunityFields: access.member || isMember,
     });
   }
 
-  private async goingCounts(ids: string[]): Promise<Map<string, number>> {
+  private async hostCommunityFor(
+    event: Event,
+    audience: EventScope | null,
+  ): Promise<{ name: string; slug: string } | null> {
+    if (audience) return audience.hostCommunity;
+    if (!event.communityId) return null;
+    const community = await this.communities.findOne({
+      where: { id: event.communityId },
+    });
+    return community ? { name: community.name, slug: community.slug } : null;
+  }
+
+  private async goingCounts(
+    ids: string[],
+    scope: { communityId: string; subgroupId: string | null },
+  ): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
     if (ids.length === 0) return counts;
-    const rows = await this.rsvps
+    const qb = this.rsvps
       .createQueryBuilder('rsvp')
       .select('rsvp.eventId', 'eventId')
       .addSelect('COUNT(*)', 'count')
       .where('rsvp.eventId IN (:...ids)', { ids })
-      .andWhere('rsvp.status = :going', { going: EventRsvpStatus.GOING })
+      .andWhere('rsvp.status = :going', { going: EventRsvpStatus.GOING });
+    this.restrictToAudience(qb, 'rsvp.user_id', scope);
+    const rows = await qb
       .groupBy('rsvp.eventId')
       .getRawMany<{ eventId: string; count: string }>();
     for (const row of rows) counts.set(row.eventId, Number(row.count));

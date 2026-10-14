@@ -4,11 +4,97 @@
       {{ 'communities.events.title' | transloco }}
     </h2>
     @if (canCreate()) {
-      <a [routerLink]="createLink()" [class]="outlineLinkClass">
-        {{ 'communities.events.create' | transloco }}
-      </a>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" [class]="outlineLinkClass" (click)="toggleSharing()">
+          {{ 'communities.events.share' | transloco }}
+        </button>
+        <a [routerLink]="createLink()" [class]="outlineLinkClass">
+          {{ 'communities.events.create' | transloco }}
+        </a>
+      </div>
     }
   </div>
+
+  @if (sharing()) {
+    <div
+      class="mb-4 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 shadow-[var(--shadow-card)]"
+    >
+      <h3 class="text-base font-semibold text-[var(--color-text)]">
+        {{ 'communities.events.shareTitle' | transloco }}
+      </h3>
+      @if (picked(); as event) {
+        <p class="mt-3 text-sm text-[var(--color-text-muted)]">
+          {{ 'communities.events.shareSelected' | transloco }}:
+          <span class="font-medium text-[var(--color-text)]">{{ event.name }}</span>
+          · {{ event.startDate | date: 'mediumDate' }}
+        </p>
+        <form [formGroup]="meetupForm" (ngSubmit)="submitShare()" class="mt-3 flex flex-col gap-3">
+          <label class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.events.meetupPlace' | transloco }}
+            <input type="text" formControlName="meetupPlace" maxlength="200" [class]="inputClass" />
+          </label>
+          <label class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.events.meetupTime' | transloco }}
+            <input type="datetime-local" formControlName="meetupAt" [class]="inputClass" />
+          </label>
+          <label class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.events.meetupNote' | transloco }}
+            <textarea
+              formControlName="meetupNote"
+              rows="2"
+              maxlength="2000"
+              [class]="inputClass"
+            ></textarea>
+          </label>
+          <p class="text-xs text-[var(--color-text-muted)]">
+            {{ 'communities.events.shareMeetupHint' | transloco }}
+          </p>
+          <div class="flex gap-2">
+            <button type="submit" [class]="outlineLinkClass" [disabled]="busy()">
+              {{ 'communities.events.shareSubmit' | transloco }}
+            </button>
+            <button type="button" [class]="outlineLinkClass" (click)="picked.set(null)">
+              {{ 'common.cancel' | transloco }}
+            </button>
+          </div>
+        </form>
+      } @else {
+        <form [formGroup]="searchForm" (ngSubmit)="search()" class="mt-3 flex gap-2">
+          <input
+            type="search"
+            formControlName="q"
+            [class]="inputClass"
+            [attr.aria-label]="'communities.events.shareSearch' | transloco"
+            [placeholder]="'communities.events.shareSearch' | transloco"
+          />
+          <button type="submit" [class]="outlineLinkClass">
+            {{ 'communities.events.shareSearch' | transloco }}
+          </button>
+        </form>
+        @if (results().length === 0) {
+          <p class="mt-3 text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.events.shareNoResults' | transloco }}
+          </p>
+        } @else {
+          <ul class="mt-3 flex flex-col gap-2">
+            @for (result of results(); track result.id) {
+              <li class="flex items-center justify-between gap-3 text-sm">
+                <span class="min-w-0 break-words">
+                  <span class="font-medium text-[var(--color-text)]">{{ result.name }}</span>
+                  <span class="block text-[var(--color-text-muted)]">
+                    {{ result.startDate | date: 'mediumDate' }} · {{ result.locationName }}
+                  </span>
+                </span>
+                <button type="button" [class]="outlineLinkClass" (click)="pick(result)">
+                  {{ 'communities.events.sharePick' | transloco }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </div>
+  }
 
   @if (!loading() && events().length === 0) {
     <p class="text-sm text-[var(--color-text-muted)]">
@@ -17,13 +103,24 @@
   } @else {
     <ul class="flex flex-col gap-2">
       @for (event of events(); track event.id) {
-        <li>
+        <li class="flex items-center gap-2">
           <a
             [routerLink]="['/events', event.id]"
-            class="flex flex-col items-start gap-1 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+            [queryParams]="eventQuery()"
+            class="flex min-w-0 flex-1 flex-col items-start gap-1 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:flex-row sm:items-center sm:justify-between sm:gap-3"
           >
             <span class="min-w-0">
               <span class="block break-words font-medium">{{ event.name }}</span>
+              @if (event.shared) {
+                <span class="block text-xs text-[var(--color-text-muted)]">
+                  {{ 'communities.events.shared' | transloco }}
+                </span>
+              }
+              @if (event.meetupPlace) {
+                <span class="block text-sm text-[var(--color-text-muted)]">
+                  {{ event.meetupPlace }}
+                </span>
+              }
               @if (event.rsvpCount) {
                 <span class="text-sm text-[var(--color-text-muted)]">
                   {{ 'events.rsvp.count' | transloco: { count: event.rsvpCount } }}
@@ -37,6 +134,11 @@
               {{ event.startDate | date: 'short' }}
             </time>
           </a>
+          @if (canCreate() && event.shared) {
+            <button type="button" [class]="outlineLinkClass" (click)="unshare(event)">
+              {{ 'communities.events.shareRemove' | transloco }}
+            </button>
+          }
         </li>
       }
     </ul>

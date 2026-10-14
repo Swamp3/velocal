@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
@@ -21,6 +21,8 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { Community, CommunityVisibility } from './entities/community.entity';
+import { CommunityPoll } from './entities/community-poll.entity';
+import { Subgroup } from './entities/subgroup.entity';
 import {
   CommunityJoinRequest,
   CommunityJoinStatus,
@@ -39,6 +41,8 @@ export interface SerializedCommunity {
   heroUrl: string | null;
   logoUrl: string | null;
   memberCount: number;
+  subgroupCount?: number;
+  pollCount?: number;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
   createdAt: Date;
@@ -72,6 +76,8 @@ export type JoinCommunityResult =
 
 interface ViewerState {
   memberCount: number;
+  subgroupCount?: number;
+  pollCount?: number;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
 }
@@ -85,6 +91,10 @@ export class CommunitiesService {
     private readonly members: Repository<CommunityMember>,
     @InjectRepository(CommunityJoinRequest)
     private readonly joinRequests: Repository<CommunityJoinRequest>,
+    @InjectRepository(Subgroup)
+    private readonly subgroups: Repository<Subgroup>,
+    @InjectRepository(CommunityPoll)
+    private readonly polls: Repository<CommunityPoll>,
     @InjectRepository(User)
     private readonly users: Repository<User>,
     private readonly uploads: UploadsService,
@@ -792,7 +802,20 @@ export class CommunitiesService {
       }
     }
 
-    return this.serialize(community, { memberCount, myRole, myJoinRequest });
+    const [subgroupCount, pollCount] = await Promise.all([
+      this.subgroups.count({ where: { communityId: community.id } }),
+      this.polls.count({
+        where: { communityId: community.id, subgroupId: IsNull() },
+      }),
+    ]);
+
+    return this.serialize(community, {
+      memberCount,
+      subgroupCount,
+      pollCount,
+      myRole,
+      myJoinRequest,
+    });
   }
 
   private async viewerStates(
@@ -881,6 +904,8 @@ export class CommunitiesService {
         community.visibility === CommunityVisibility.PRIVATE,
       ),
       memberCount: viewer.memberCount,
+      subgroupCount: viewer.subgroupCount,
+      pollCount: viewer.pollCount,
       myRole: viewer.myRole,
       myJoinRequest: viewer.myJoinRequest,
       createdAt: community.createdAt,

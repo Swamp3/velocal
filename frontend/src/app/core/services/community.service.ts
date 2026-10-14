@@ -270,6 +270,24 @@ export class CommunityService {
     return this.api.post<CyclingEvent>(path, dto);
   }
 
+  shareEvent(
+    communitySlug: string,
+    dto: { eventId: string; meetupPlace?: string; meetupAt?: string; meetupNote?: string },
+    subgroupSlug?: string,
+  ): Observable<CyclingEvent> {
+    const path = subgroupSlug
+      ? `/communities/${communitySlug}/subgroups/${subgroupSlug}/events/shared`
+      : `/communities/${communitySlug}/events/shared`;
+    return this.api.post<CyclingEvent>(path, dto);
+  }
+
+  unshareEvent(communitySlug: string, eventId: string, subgroupSlug?: string): Observable<void> {
+    const path = subgroupSlug
+      ? `/communities/${communitySlug}/subgroups/${subgroupSlug}/events/shared/${eventId}`
+      : `/communities/${communitySlug}/events/shared/${eventId}`;
+    return this.api.delete<void>(path);
+  }
+
   votePoll(
     communitySlug: string,
     pollId: string,

@@ -108,7 +108,8 @@
         "apple": "Apple Kalender",
         "outlook": "Outlook",
         "ics": ".ics-Datei herunterladen"
-      }
+      },
+      "community": "Community"
     },
     "status": {
       "published": "Ausgeschrieben",
@@ -713,7 +714,17 @@
       "strava": "Strava-Link",
       "meetupPlace": "Treffpunkt",
       "meetupTime": "Treffzeit",
-      "meetupNote": "Hinweis zum Treffen"
+      "meetupNote": "Hinweis zum Treffen",
+      "share": "Öffentliches Event hinzufügen",
+      "shareTitle": "Öffentliches Event mit dieser Community teilen",
+      "shareSearch": "Öffentliche Events suchen",
+      "shareNoResults": "Keine Events gefunden",
+      "sharePick": "Auswählen",
+      "shareSelected": "Ausgewähltes Event",
+      "shareSubmit": "Zur Community hinzufügen",
+      "shareRemove": "Entfernen",
+      "shared": "Aus der öffentlichen Liste geteilt",
+      "shareMeetupHint": "Nur Mitglieder dieser Community sehen Treffpunkt-Details und wer teilnimmt."
     },
     "posts": {
       "title": "Beiträge",

@@ -10,6 +10,19 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { EventInviteResult } from './notification.service';
 
+/** Community context a shared public event is viewed in. */
+export interface EventHostContext {
+  community?: string;
+  subgroup?: string;
+}
+
+function hostQuery(ctx?: EventHostContext): string {
+  if (!ctx?.community) return '';
+  const params = new URLSearchParams({ community: ctx.community });
+  if (ctx.subgroup) params.set('subgroup', ctx.subgroup);
+  return `?${params.toString()}`;
+}
+
 export type EventSort = 'date' | 'distance' | 'name';
 
 export interface EventSearchParams {
@@ -35,8 +48,8 @@ export class EventService {
     return this.api.get('/events', params as Record<string, string | number | boolean>);
   }
 
-  getEvent(id: string): Observable<CyclingEvent> {
-    return this.api.get(`/events/${id}`);
+  getEvent(id: string, ctx?: EventHostContext): Observable<CyclingEvent> {
+    return this.api.get(`/events/${id}${hostQuery(ctx)}`);
   }
 
   createEvent(dto: CreateEventDto): Observable<CyclingEvent> {
@@ -55,14 +68,15 @@ export class EventService {
     return this.api.post(`/events/${id}/invites`, { email });
   }
 
-  setRsvp(id: string, status: EventRsvpStatus): Observable<CyclingEvent> {
-    return this.api.post(`/events/${id}/rsvp`, { status });
+  setRsvp(id: string, status: EventRsvpStatus, ctx?: EventHostContext): Observable<CyclingEvent> {
+    return this.api.post(`/events/${id}/rsvp${hostQuery(ctx)}`, { status });
   }
 
   listRsvps(
     id: string,
+    ctx?: EventHostContext,
   ): Observable<{ userId: string; displayName: string; status: EventRsvpStatus }[]> {
-    return this.api.get(`/events/${id}/rsvps`);
+    return this.api.get(`/events/${id}/rsvps${hostQuery(ctx)}`);
   }
 
   listComments(id: string): Observable<EventComment[]> {

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import { EventService } from '@core/services/event.service';
+import { EventHostContext, EventService } from '@core/services/event.service';
 import { FavoriteService } from '@core/services/favorite.service';
 import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
@@ -84,6 +84,7 @@ export class EventDetailComponent implements OnInit {
   private readonly transloco = inject(TranslocoService);
   private readonly localeService = inject(LocaleService);
 
+  protected readonly hostContext: EventHostContext = {};
   protected readonly event = signal<CyclingEvent | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
@@ -112,6 +113,9 @@ export class EventDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
+    const query = this.route.snapshot.queryParamMap;
+    this.hostContext.community = query.get('community') ?? undefined;
+    this.hostContext.subgroup = query.get('subgroup') ?? undefined;
     this.loadEvent(id);
 
     if (this.auth.isAuthenticated()) {
@@ -152,7 +156,7 @@ export class EventDetailComponent implements OnInit {
   }
 
   private loadEvent(id: string): void {
-    this.eventService.getEvent(id).subscribe({
+    this.eventService.getEvent(id, this.hostContext).subscribe({
       next: (event) => {
         this.event.set(event);
         this.loading.set(false);
