@@ -15,6 +15,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 export const serverRoutes: ServerRoute[] = [
   { path: 'auth/**', renderMode: RenderMode.Client },
   { path: 'profile/**', renderMode: RenderMode.Client },
+  { path: 'notifications', renderMode: RenderMode.Client },
 
   { path: 'events/new', renderMode: RenderMode.Client },
   { path: 'events/:id/edit', renderMode: RenderMode.Client },

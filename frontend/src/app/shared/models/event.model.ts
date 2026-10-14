@@ -23,6 +23,7 @@ export interface CyclingEvent {
   myRsvp?: EventRsvpStatus | null;
   canComment?: boolean;
   canSeeRsvps?: boolean;
+  canInvite?: boolean;
   imageUrl?: string;
   source: EventSource;
   discipline: Discipline;

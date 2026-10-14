@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { EventsModule } from '../events/events.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { UploadsModule } from '../uploads/uploads.module';
 import { CommunityEventsController } from './community-events.controller';
 import { CommunitiesController } from './communities.controller';
@@ -42,6 +43,7 @@ import { SubgroupsService } from './subgroups.service';
     ]),
     UploadsModule,
     EventsModule,
+    NotificationsModule,
   ],
   controllers: [
     CommunitiesController,

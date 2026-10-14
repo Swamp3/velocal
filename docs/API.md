@@ -6,11 +6,16 @@
 | POST   | `/api/auth/login`                  | No       | Log in, receive JWT            |
 | GET    | `/api/events`                      | Optional | List/search/filter events. Members-only events are included only when the caller can see the host |
 | GET    | `/api/events/:id`                  | Optional | Event detail, including the going count. Members-only events are 404 for outsiders |
+| POST   | `/api/events/:id/invites`          | JWT      | Invite a host member by email. Host admins and moderators. Returns `outcome`, `emailed`, `emailSkipped` |
 | POST   | `/api/events/:id/rsvp`             | JWT      | Set `going`, `maybe`, or `declined` |
 | GET    | `/api/events/:id/rsvps`            | JWT      | RSVP names. Host admins and moderators, or the creator of an unhosted event |
 | GET    | `/api/events/:id/comments`         | JWT      | Comments. Members of the host only |
 | POST   | `/api/events/:id/comments`         | JWT      | Comment on a hosted event |
 | DELETE | `/api/events/:id/comments/:commentId` | Author or host manager | Delete an event comment |
+| GET    | `/api/notifications`               | JWT      | Latest 50 inbox rows |
+| GET    | `/api/notifications/unread-count`  | JWT      | Unread count |
+| POST   | `/api/notifications/read`          | JWT      | Mark every row read |
+| POST   | `/api/notifications/:id/read`      | JWT      | Mark one row read |
 | GET    | `/api/disciplines`                 | No       | All disciplines                |
 | GET    | `/api/users/me`                    | JWT      | Current user profile           |
 | PATCH  | `/api/users/me`                    | JWT      | Update profile                 |

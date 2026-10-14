@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
@@ -89,6 +90,7 @@ export class CommunitiesService {
     private readonly uploads: UploadsService,
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async create(
@@ -230,11 +232,23 @@ export class CommunitiesService {
       community.visibility = dto.visibility;
     }
 
+    let admitted: string[] = [];
     const saved = await this.dataSource.transaction(async (manager) => {
       const row = await manager.save(community);
-      if (opening) await this.admitPendingMembers(manager, id);
+      if (opening) admitted = await this.admitPendingMembers(manager, id);
       return row;
     });
+    if (admitted.length > 0) {
+      await Promise.all(
+        admitted.map((memberId) =>
+          this.notifications.joinDecision(memberId, {
+            communityName: saved.name,
+            communitySlug: saved.slug,
+            decision: 'approved',
+          }),
+        ),
+      );
+    }
     return this.serializeFor(saved, userId);
   }
 
@@ -312,6 +326,17 @@ export class CommunitiesService {
        DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
       [id, userId],
     );
+
+    const requester = await this.users.findOne({ where: { id: userId } });
+    await this.notifications.joinRequest({
+      requesterId: userId,
+      communityId: community.id,
+      payload: {
+        communityName: community.name,
+        communitySlug: community.slug,
+        actorName: requester?.displayName ?? undefined,
+      },
+    });
 
     return { outcome: 'pending' };
   }
@@ -480,7 +505,7 @@ export class CommunitiesService {
     requestId: string,
     actorId: string,
   ): Promise<{ status: 'approved' }> {
-    return this.dataSource.transaction(async (manager) => {
+    const approved = await this.dataSource.transaction(async (manager) => {
       const community = await manager.findOne(Community, {
         where: { id: communityId },
       });
@@ -505,8 +530,14 @@ export class CommunitiesService {
         [communityId, request.userId],
       );
 
-      return { status: 'approved' };
+      return { community, userId: request.userId };
     });
+    await this.notifications.joinDecision(approved.userId, {
+      communityName: approved.community.name,
+      communitySlug: approved.community.slug,
+      decision: 'approved',
+    });
+    return { status: 'approved' };
   }
 
   async rejectJoinRequest(
@@ -526,6 +557,11 @@ export class CommunitiesService {
 
     request.status = CommunityJoinStatus.REJECTED;
     await this.joinRequests.save(request);
+    await this.notifications.joinDecision(request.userId, {
+      communityName: community.name,
+      communitySlug: community.slug,
+      decision: 'rejected',
+    });
     return { status: 'rejected' };
   }
 
@@ -576,7 +612,12 @@ export class CommunitiesService {
   private async admitPendingMembers(
     manager: EntityManager,
     communityId: string,
-  ): Promise<void> {
+  ): Promise<string[]> {
+    const pending: { user_id: string }[] = await manager.query(
+      `SELECT "user_id" FROM "community_join_requests"
+       WHERE "community_id" = $1 AND "status" = 'pending'`,
+      [communityId],
+    );
     await manager.query(
       `INSERT INTO "community_members" ("community_id", "user_id", "role")
        SELECT "community_id", "user_id", 'member'
@@ -591,6 +632,7 @@ export class CommunitiesService {
        WHERE "community_id" = $1 AND "status" = 'pending'`,
       [communityId],
     );
+    return pending.map((row) => row.user_id);
   }
 
   private async approvePendingRequest(

@@ -14,6 +14,19 @@
       "admin": "Admin"
     }
   },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Keine Benachrichtigungen",
+    "markAll": "Alle als gelesen",
+    "eventCreated": "Neues Event in {{communityName}}: {{eventName}}",
+    "eventInvite": "Du bist zu {{eventName}} eingeladen",
+    "joinCommunity": "Neue Beitrittsanfrage für {{communityName}}",
+    "joinSubgroup": "Neue Beitrittsanfrage für {{subgroupName}}",
+    "decisionApproved": "Beitritt zu {{communityName}} angenommen",
+    "decisionRejected": "Beitritt zu {{communityName}} abgelehnt",
+    "decisionSubgroupApproved": "Beitritt zu {{subgroupName}} angenommen",
+    "decisionSubgroupRejected": "Beitritt zu {{subgroupName}} abgelehnt"
+  },
   "events": {
     "title": "Radsport-Events finden",
     "subtitle": "Entdecke Rennen, Touren und Radsport-Events in deiner Nähe",
@@ -39,6 +52,17 @@
       "who": "Wer kommt",
       "login": "Anmelden, um zuzusagen",
       "error": "Die Antwort konnte nicht gespeichert werden"
+    },
+    "invite": {
+      "title": "Mitglied einladen",
+      "email": "E-Mail",
+      "action": "Einladen",
+      "emailed": "Einladung per E-Mail verschickt.",
+      "saved": "Einladung in der Inbox. Keine E-Mail verschickt.",
+      "already": "Diese Person ist schon eingeladen.",
+      "self": "Du kannst dich nicht selbst einladen.",
+      "unverified": "Einladung in der Inbox. Die Adresse ist nicht bestätigt, deshalb keine E-Mail.",
+      "capped": "Einladung in der Inbox. Das E-Mail-Limit für diesen Monat ist erreicht."
     },
     "comments": {
       "title": "Kommentare",

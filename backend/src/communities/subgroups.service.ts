@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
@@ -84,6 +85,7 @@ export class SubgroupsService {
     private readonly uploads: UploadsService,
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async create(
@@ -169,11 +171,26 @@ export class SubgroupsService {
     if (isAdmin && dto.visibility !== undefined) {
       subgroup.visibility = dto.visibility;
     }
+    let admitted: string[] = [];
     const saved = await this.dataSource.transaction(async (manager) => {
       const row = await manager.save(subgroup);
-      if (opening) await this.admitPendingMembers(manager, subgroup.id);
+      if (opening)
+        admitted = await this.admitPendingMembers(manager, subgroup.id);
       return row;
     });
+    if (admitted.length > 0) {
+      await Promise.all(
+        admitted.map((memberId) =>
+          this.notifications.joinDecision(memberId, {
+            communityName: community.name,
+            communitySlug: community.slug,
+            subgroupName: saved.name,
+            subgroupSlug: saved.slug,
+            decision: 'approved',
+          }),
+        ),
+      );
+    }
     return this.serializeFor(saved, community, userId);
   }
 
@@ -278,6 +295,15 @@ export class SubgroupsService {
       };
     }
 
+    const alreadyPending = await this.joinRequests.findOne({
+      where: {
+        subgroupId: subgroup.id,
+        userId,
+        status: CommunityJoinStatus.PENDING,
+      },
+    });
+    if (alreadyPending) return { outcome: 'pending' };
+
     await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, community.id);
       const member = await manager.findOne(CommunityMember, {
@@ -293,6 +319,19 @@ export class SubgroupsService {
          DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
         [subgroup.id, userId],
       );
+    });
+    const requester = await this.users.findOne({ where: { id: userId } });
+    await this.notifications.joinRequest({
+      requesterId: userId,
+      communityId: community.id,
+      subgroupId: subgroup.id,
+      payload: {
+        communityName: community.name,
+        communitySlug: community.slug,
+        subgroupName: subgroup.name,
+        subgroupSlug: subgroup.slug,
+        actorName: requester?.displayName ?? undefined,
+      },
     });
     return { outcome: 'pending' };
   }
@@ -432,7 +471,7 @@ export class SubgroupsService {
       slug,
       actorId,
     );
-    await this.dataSource.transaction(async (manager) => {
+    const requesterId = await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, community.id);
       const request = await manager.findOne(SubgroupJoinRequest, {
         where: { id: requestId, subgroupId: subgroup.id },
@@ -451,6 +490,14 @@ export class SubgroupsService {
       if (!inserted) {
         throw communityForbidden(CommunityErrorCode.notCommunityMember);
       }
+      return request.userId;
+    });
+    await this.notifications.joinDecision(requesterId, {
+      communityName: community.name,
+      communitySlug: community.slug,
+      subgroupName: subgroup.name,
+      subgroupSlug: subgroup.slug,
+      decision: 'approved',
     });
     return { status: 'approved' };
   }
@@ -461,7 +508,7 @@ export class SubgroupsService {
     requestId: string,
     actorId: string,
   ): Promise<{ status: 'rejected' }> {
-    const { subgroup } = await this.requireManageable(
+    const { subgroup, community } = await this.requireManageable(
       communitySlug,
       slug,
       actorId,
@@ -469,6 +516,13 @@ export class SubgroupsService {
     const request = await this.requirePending(subgroup.id, requestId);
     request.status = CommunityJoinStatus.REJECTED;
     await this.joinRequests.save(request);
+    await this.notifications.joinDecision(request.userId, {
+      communityName: community.name,
+      communitySlug: community.slug,
+      subgroupName: subgroup.name,
+      subgroupSlug: subgroup.slug,
+      decision: 'rejected',
+    });
     return { status: 'rejected' };
   }
 
@@ -703,7 +757,17 @@ export class SubgroupsService {
   private async admitPendingMembers(
     manager: EntityManager,
     subgroupId: string,
-  ): Promise<void> {
+  ): Promise<string[]> {
+    const pending: { user_id: string }[] = await manager.query(
+      `SELECT request."user_id"
+       FROM "subgroup_join_requests" request
+       INNER JOIN "subgroups" subgroup ON subgroup."id" = request."subgroup_id"
+       INNER JOIN "community_members" member
+         ON member."community_id" = subgroup."community_id"
+        AND member."user_id" = request."user_id"
+       WHERE request."subgroup_id" = $1 AND request."status" = 'pending'`,
+      [subgroupId],
+    );
     await manager.query(
       `INSERT INTO "subgroup_members" ("subgroup_id", "user_id", "role")
        SELECT request."subgroup_id", request."user_id", 'member'
@@ -730,6 +794,7 @@ export class SubgroupsService {
          )`,
       [subgroupId],
     );
+    return pending.map((row) => row.user_id);
   }
 
   private async approvePendingRequest(

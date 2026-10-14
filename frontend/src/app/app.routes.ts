@@ -43,6 +43,14 @@ export const routes: Routes = [
     loadChildren: () => import('./features/user/user.routes'),
   },
   {
+    path: 'notifications',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/notifications/notification-inbox/notification-inbox.component').then(
+        (m) => m.NotificationInboxComponent,
+      ),
+  },
+  {
     path: 'workouts',
     loadComponent: () =>
       import('./features/workouts/workouts-placeholder.component').then(

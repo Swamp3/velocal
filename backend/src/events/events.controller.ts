@@ -25,6 +25,7 @@ import {
 import { EventSearchDto } from './dto/event-search.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { CreateEventCommentDto } from './dto/create-event-comment.dto';
+import { InviteEventDto } from './dto/invite-event.dto';
 import { SetEventRsvpDto } from './dto/set-event-rsvp.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -57,6 +58,16 @@ export class EventsController {
     @CurrentUser() user?: { id: string },
   ): Promise<SerializedEvent> {
     return this.eventsService.findOne(id, user?.id);
+  }
+
+  @Post(':id/invites')
+  @UseGuards(JwtAuthGuard)
+  invite(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: InviteEventDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.eventsService.invite(id, user.id, dto.email);
   }
 
   @Post(':id/rsvp')

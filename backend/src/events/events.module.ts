@@ -11,7 +11,9 @@ import { Subgroup } from '../communities/entities/subgroup.entity';
 import { EventComment } from './entities/event-comment.entity';
 import { EventRsvp } from './entities/event-rsvp.entity';
 import { Event } from './entities/event.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { UploadsModule } from '../uploads/uploads.module';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { UploadsModule } from '../uploads/uploads.module';
       CommunityMember,
       Subgroup,
       SubgroupMember,
+      User,
     ]),
+    NotificationsModule,
     UploadsModule,
   ],
   controllers: [EventsController, AdminEventsController],

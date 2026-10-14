@@ -260,6 +260,10 @@
       [canSeeList]="!!event.canSeeRsvps"
     />
 
+    @if (event.canInvite) {
+      <app-event-invite [eventId]="event.id" />
+    }
+
     <!-- Series membership -->
     @if (eventSeries().length > 0) {
       <div class="mt-6 flex flex-wrap items-center gap-2">

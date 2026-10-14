@@ -9,11 +9,11 @@ What the app already does, and what this feature must not pretend is there.
 | Area | Today |
 | --- | --- |
 | Users | JWT auth. `users.isAdmin` is a site-admin flag and does not grant a community role. Community roles live on `community_members`. |
-| Events | Every event is public. `GET /api/events` and `GET /api/events/:id` have no audience filter. An event already has `locationName`, coordinates, `startDate`, and `endDate`. List (`/events`), map (`/map`), and calendar (`/calendar`) all read that public set. |
+| Events | Unhosted events stay public. Hosted events are `public` or `members`. Logged-out users and outsiders never see `members` events. Members who can see the host do, including `/events`, `/map`, and `/calendar`. |
 | Posts | `posts` is the public news CMS (`/news`). Community posts are a new table, `community_posts`. |
-| Social | No comments, polls, RSVP, or notification inbox. |
+| Social | Community posts, comments, polls, RSVP, and an in-app inbox. Email is not the fan-out. |
 | Images | Sharp variants for `events`, `series`, `posts`, `community-heroes`, and `community-logos`. Private community images and invite-only subgroup images need a signed `access` query and are not publicly cached. |
-| Mail | Resend sends password reset and OTP. Budget is 3000 mails/month, so email is not the fan-out channel. |
+| Mail | Resend sends password reset, OTP, and a direct event invitation to a verified address. Invitation mail is capped at 400/month so the 3000 budget still covers auth mail. |
 
 An event with no community host stays a public calendar event. Members-only listing requires a host.
 
@@ -95,7 +95,7 @@ Decision, recorded here:
 
 - The in-app inbox is the product. New events in your communities, event invites, join requests, and request decisions write a row there.
 - Email only for a direct event invitation, and only if the user has `emailVerified`. No mail because an event was created.
-- Invitation mail has a hard cap so the 3000/month Resend budget still covers password reset and OTP. Auth mail stays untouched.
+- Invitation mail is capped at 400 per month (`INVITE_EMAIL_MONTHLY_CAP`) so the 3000/month Resend budget still covers password reset and OTP. Auth mail stays on its own path. A failed or skipped send does not consume the cap.
 
 ## Tracker
 
@@ -156,9 +156,9 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 
 | Id | Status | Note |
 | --- | --- | --- |
-| `event-invite` | todo | Per-member event invite, distinct from “an event exists”. |
-| `notification-inbox` | todo | In-app rows for new community events, event invites, join requests, and request decisions. |
-| `invite-email` | todo | Email only a direct event invitation to a verified address, under a hard cap that leaves room for auth mail. |
+| `event-invite` | done | `POST /api/events/:id/invites` with an email. Host admins and moderators only. The person must already be a member of the host. A repeat invite does not write a second row. Inviting yourself is a no-op. |
+| `notification-inbox` | done | In-app rows for new hosted events, event invites, join requests, and request decisions. Bell plus `/notifications`. |
+| `invite-email` | done | Email only the first direct event invitation, and only to a verified address, capped at 400/month. Unverified, capped, or failed sends still keep the inbox row. |
 
 ## Regression
 

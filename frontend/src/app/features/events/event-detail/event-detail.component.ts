@@ -28,6 +28,7 @@ import {
 } from '@shared/components';
 import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
+import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
@@ -65,6 +66,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     NewsCardComponent,
     RichTextViewComponent,
     EventRsvpComponent,
+    EventInviteComponent,
     EventCommentsComponent,
   ],
   templateUrl: './event-detail.component.html',

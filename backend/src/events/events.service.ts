@@ -25,8 +25,11 @@ import {
 } from '../communities/entities/subgroup.entity';
 import {
   communityForbidden,
+  communityNotFound,
   CommunityErrorCode,
 } from '../communities/community-error';
+import { NotificationsService } from '../notifications/notifications.service';
+import { User } from '../users/entities/user.entity';
 import {
   Event,
   EventListing,
@@ -74,8 +77,11 @@ export class EventsService {
     private readonly subgroups: Repository<Subgroup>,
     @InjectRepository(SubgroupMember)
     private readonly subgroupMembers: Repository<SubgroupMember>,
+    @InjectRepository(User)
+    private readonly users: Repository<User>,
     private readonly geocoding: GeocodingService,
     private readonly uploads: UploadsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async findAll(
@@ -498,6 +504,19 @@ export class EventsService {
       meetupAt: dto.meetupAt,
       meetupNote: dto.meetupNote,
     });
+    await this.notifications.eventCreated({
+      actorId: userId,
+      communityId: host.community.id,
+      subgroupId: host.subgroup?.id ?? null,
+      payload: {
+        communityName: host.community.name,
+        communitySlug: host.community.slug,
+        subgroupName: host.subgroup?.name,
+        subgroupSlug: host.subgroup?.slug,
+        eventId: event.id,
+        eventName: event.name,
+      },
+    });
     return this.present(event, userId);
   }
 
@@ -602,6 +621,49 @@ export class EventsService {
         adminRole: CommunityMemberRole.ADMIN,
       },
     );
+  }
+
+  async invite(id: string, actorId: string, email: string) {
+    const event = await this.requireVisible(id, actorId);
+    const access = await this.hostRole(event, actorId);
+    if (!event.communityId || !access.manager) {
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    }
+    const normalized = email.trim().toLowerCase();
+    const invitee = await this.users
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = :email', { email: normalized })
+      .getOne();
+    if (!invitee) throw communityNotFound(CommunityErrorCode.userNotFound);
+    if (invitee.id === actorId) {
+      return { outcome: 'self' as const, emailed: false, emailSkipped: null };
+    }
+    const target = await this.hostRole(event, invitee.id);
+    if (!target.member) {
+      throw communityForbidden(CommunityErrorCode.notCommunityMember);
+    }
+    const community = await this.communities.findOne({
+      where: { id: event.communityId },
+    });
+    const subgroup = event.subgroupId
+      ? await this.subgroups.findOne({ where: { id: event.subgroupId } })
+      : null;
+    const actor = await this.users.findOne({ where: { id: actorId } });
+    return this.notifications.recordInvite({
+      eventId: event.id,
+      eventName: event.name,
+      invitee,
+      actorId,
+      payload: {
+        communityName: community?.name ?? '',
+        communitySlug: community?.slug ?? '',
+        subgroupName: subgroup?.name,
+        subgroupSlug: subgroup?.slug,
+        eventId: event.id,
+        eventName: event.name,
+        actorName: actor?.displayName ?? undefined,
+      },
+    });
   }
 
   async setRsvp(
@@ -725,6 +787,7 @@ export class EventsService {
       myRsvp: mine?.status ?? null,
       canComment: !!event.communityId && access.member,
       canSeeRsvps: access.manager,
+      canInvite: !!event.communityId && access.manager,
     });
   }
 

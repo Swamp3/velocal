@@ -14,6 +14,19 @@
       "admin": "Admin"
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAll": "Mark all read",
+    "eventCreated": "New event in {{communityName}}: {{eventName}}",
+    "eventInvite": "You're invited to {{eventName}}",
+    "joinCommunity": "New join request for {{communityName}}",
+    "joinSubgroup": "New join request for {{subgroupName}}",
+    "decisionApproved": "You're in {{communityName}}",
+    "decisionRejected": "Join request for {{communityName}} was declined",
+    "decisionSubgroupApproved": "You're in {{subgroupName}}",
+    "decisionSubgroupRejected": "Join request for {{subgroupName}} was declined"
+  },
   "events": {
     "title": "Find Cycling Events",
     "subtitle": "Discover races, tours and cycling events near you",
@@ -39,6 +52,17 @@
       "who": "Who is coming",
       "login": "Log in to RSVP",
       "error": "Could not save your answer"
+    },
+    "invite": {
+      "title": "Invite a member",
+      "email": "Email",
+      "action": "Invite",
+      "emailed": "Invitation email sent.",
+      "saved": "Invitation saved in the inbox. No email was sent.",
+      "already": "This person is already invited.",
+      "self": "You can't invite yourself.",
+      "unverified": "Invitation saved in the inbox. The address is not verified, so no email was sent.",
+      "capped": "Invitation saved in the inbox. This month's email limit is reached."
     },
     "comments": {
       "title": "Comments",
