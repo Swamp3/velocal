@@ -16,3 +16,6 @@ export { CommunityCardComponent } from './community-card/community-card.componen
 export { CommunityHeroComponent } from './community-hero/community-hero.component';
 export { MemberListComponent, type MemberListItem } from './member-list/member-list.component';
 export { RequestListComponent, type RequestListItem } from './request-list/request-list.component';
+export { RichTextComponent } from './rich-text/rich-text.component';
+export { RichTextViewComponent } from './rich-text/rich-text-view.component';
+export { normalizeRichText, plainText, toDisplayHtml } from './rich-text/rich-text';

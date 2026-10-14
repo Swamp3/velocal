@@ -12,7 +12,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommunityService } from '@core/services/community.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ImageUploadComponent } from '@shared/components';
+import { ImageUploadComponent, RichTextComponent } from '@shared/components';
 import { CommunityVisibility } from '@shared/models';
 import { ButtonComponent, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { map, Observable } from 'rxjs';
@@ -28,6 +28,7 @@ import { map, Observable } from 'rxjs';
     InputComponent,
     SkeletonComponent,
     ImageUploadComponent,
+    RichTextComponent,
   ],
   templateUrl: './community-form.component.html',
 })

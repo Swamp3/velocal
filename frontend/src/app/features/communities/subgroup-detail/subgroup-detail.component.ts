@@ -12,7 +12,11 @@ import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { CommunityHeroComponent, EmptyStateComponent } from '@shared/components';
+import {
+  CommunityHeroComponent,
+  EmptyStateComponent,
+  RichTextViewComponent,
+} from '@shared/components';
 import { CommunityFeedComponent } from '../community-feed/community-feed.component';
 import { Subgroup, SubgroupVisibility, subgroupVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
@@ -29,6 +33,7 @@ import { communityErrorKey } from '../community-error';
     SkeletonComponent,
     CommunityHeroComponent,
     EmptyStateComponent,
+    RichTextViewComponent,
     CommunityFeedComponent,
   ],
   templateUrl: './subgroup-detail.component.html',

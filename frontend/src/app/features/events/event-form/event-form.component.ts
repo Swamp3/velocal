@@ -14,12 +14,17 @@ import { DisciplineService } from '@core/services/discipline.service';
 import { EventService } from '@core/services/event.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
-import { toDisplayDate as toDisplayDateUtil, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
+import {
+  toDisplayDate as toDisplayDateUtil,
+  parseDisplayDate,
+  datePlaceholder,
+} from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 
 @Component({
@@ -33,6 +38,7 @@ import { LocaleService } from '@core/services/locale.service';
     CountrySelectorComponent,
     LocationPickerComponent,
     ImageUploadComponent,
+    RichTextComponent,
   ],
   templateUrl: './event-form.component.html',
 })
@@ -49,7 +55,9 @@ export class EventFormComponent implements OnInit {
 
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly loading = signal(false);
-  protected readonly dateInputPlaceholder = computed(() => datePlaceholder(this.localeService.locale()));
+  protected readonly dateInputPlaceholder = computed(() =>
+    datePlaceholder(this.localeService.locale()),
+  );
   protected readonly submitting = signal(false);
   protected readonly eventId = signal<string | null>(null);
   protected readonly isEdit = computed(() => this.eventId() !== null);
@@ -250,7 +258,6 @@ export class EventFormComponent implements OnInit {
   private parseDate(display: string): string {
     return parseDisplayDate(display, this.localeService.locale());
   }
-
 
   private combineDatetime(date: string, time: string): string {
     const iso = this.parseDate(date);

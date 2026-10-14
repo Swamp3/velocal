@@ -13,7 +13,11 @@ import { AuthService } from '@core/services/auth.service';
 import { CommunityService } from '@core/services/community.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { CommunityHeroComponent, EmptyStateComponent } from '@shared/components';
+import {
+  CommunityHeroComponent,
+  EmptyStateComponent,
+  RichTextViewComponent,
+} from '@shared/components';
 import { CommunityFeedComponent } from '../community-feed/community-feed.component';
 import { communityErrorKey } from '../community-error';
 import {
@@ -36,6 +40,7 @@ import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from
     SkeletonComponent,
     CommunityHeroComponent,
     EmptyStateComponent,
+    RichTextViewComponent,
     CommunityFeedComponent,
   ],
   templateUrl: './community-detail.component.html',

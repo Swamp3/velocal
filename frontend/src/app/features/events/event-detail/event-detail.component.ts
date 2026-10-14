@@ -24,6 +24,7 @@ import {
   EventDetailMapComponent,
   EventStatusBadgeComponent,
   NewsCardComponent,
+  RichTextViewComponent,
 } from '@shared/components';
 import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
 import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
@@ -60,6 +61,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     ExternalUrlDisplayPipe,
     ChipComponent,
     NewsCardComponent,
+    RichTextViewComponent,
   ],
   templateUrl: './event-detail.component.html',
 })

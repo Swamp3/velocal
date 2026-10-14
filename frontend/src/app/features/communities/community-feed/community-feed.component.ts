@@ -14,6 +14,7 @@ import { DatePipe } from '@angular/common';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { RichTextComponent, RichTextViewComponent } from '@shared/components';
 import { CommunityPost } from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -21,7 +22,15 @@ import { communityErrorKey } from '../community-error';
 @Component({
   selector: 'app-community-feed',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, TranslocoPipe, ButtonComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    DatePipe,
+    TranslocoPipe,
+    ButtonComponent,
+    RichTextComponent,
+    RichTextViewComponent,
+  ],
   templateUrl: './community-feed.component.html',
 })
 export class CommunityFeedComponent implements OnInit {
@@ -66,7 +75,7 @@ export class CommunityFeedComponent implements OnInit {
   }
 
   protected publish(): void {
-    const body = this.form.controls.body.value.trim();
+    const body = this.form.controls.body.value;
     if (!body || this.publishing()) return;
     this.publishing.set(true);
     this.communityService

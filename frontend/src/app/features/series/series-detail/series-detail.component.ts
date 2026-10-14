@@ -8,6 +8,7 @@ import {
   DisciplineChipComponent,
   EmptyStateComponent,
   EventCardComponent,
+  RichTextViewComponent,
 } from '@shared/components';
 import { RaceSeriesDetail } from '@shared/models';
 import { ButtonComponent, SkeletonComponent } from '@shared/ui';
@@ -23,6 +24,7 @@ import { ButtonComponent, SkeletonComponent } from '@shared/ui';
     DisciplineChipComponent,
     EmptyStateComponent,
     EventCardComponent,
+    RichTextViewComponent,
   ],
   templateUrl: './series-detail.component.html',
 })

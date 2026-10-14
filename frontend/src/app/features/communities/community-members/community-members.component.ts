@@ -74,9 +74,7 @@ export class CommunityMembersComponent implements OnInit {
       roleVariant: member.role === 'admin' ? 'success' : 'neutral',
       toggleLabel: this.canManage()
         ? this.transloco.translate(
-            member.role === 'admin'
-              ? 'communities.members.demote'
-              : 'communities.members.promote',
+            member.role === 'admin' ? 'communities.members.demote' : 'communities.members.promote',
           )
         : undefined,
       canRemove: this.canManage(),

@@ -13,7 +13,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { EmptyStateComponent } from '@shared/components';
+import { EmptyStateComponent, RichTextComponent, RichTextViewComponent } from '@shared/components';
 import { CommunityComment, CommunityPost } from '@shared/models';
 import { ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -29,6 +29,8 @@ import { communityErrorKey } from '../community-error';
     ButtonComponent,
     SkeletonComponent,
     EmptyStateComponent,
+    RichTextComponent,
+    RichTextViewComponent,
   ],
   templateUrl: './community-post.component.html',
 })
@@ -92,7 +94,7 @@ export class CommunityPostComponent implements OnInit {
 
   protected publishComment(): void {
     const post = this.post();
-    const body = this.form.controls.body.value.trim();
+    const body = this.form.controls.body.value;
     if (!post || !body || this.submitting()) return;
     this.submitting.set(true);
     this.communityService

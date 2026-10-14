@@ -1,8 +1,7 @@
 <div class="mx-auto max-w-xl">
   <a
     routerLink="/series"
-    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)]
-      hover:text-[var(--color-text)] transition-colors"
+    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
   >
     <span class="material-symbols-outlined text-[16px]">arrow_back</span>
     {{ 'series.backToList' | transloco }}
@@ -15,8 +14,7 @@
   <form
     [formGroup]="form"
     (ngSubmit)="onSubmit()"
-    class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)]
-      bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
     <ui-input
       [label]="'series.name' | transloco"
@@ -28,14 +26,7 @@
       <label class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
         {{ 'series.description' | transloco }}
       </label>
-      <textarea
-        formControlName="description"
-        rows="3"
-        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
-          px-3 py-2 text-sm text-[var(--color-text)]
-          focus:border-[var(--color-primary)] focus:outline-none focus:ring-1
-          focus:ring-[var(--color-primary)]"
-      ></textarea>
+      <app-rich-text formControlName="description" [compact]="true" />
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
@@ -46,10 +37,7 @@
         <input
           type="number"
           formControlName="year"
-          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
-            px-3 py-2 text-sm text-[var(--color-text)]
-            focus:border-[var(--color-primary)] focus:outline-none focus:ring-1
-            focus:ring-[var(--color-primary)]"
+          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         />
       </div>
 
@@ -59,10 +47,7 @@
         </label>
         <select
           formControlName="disciplineSlug"
-          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
-            px-3 py-2 text-sm text-[var(--color-text)]
-            focus:border-[var(--color-primary)] focus:outline-none focus:ring-1
-            focus:ring-[var(--color-primary)]"
+          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         >
           <option value="">{{ 'events.allDisciplines' | transloco }}</option>
           @for (d of disciplines(); track d.slug) {
@@ -94,11 +79,7 @@
     />
 
     <div class="flex gap-3 pt-2">
-      <ui-button
-        type="submit"
-        [loading]="loading()"
-        [disabled]="loading()"
-      >
+      <ui-button type="submit" [loading]="loading()" [disabled]="loading()">
         {{ 'common.save' | transloco }}
       </ui-button>
       <a routerLink="/series">

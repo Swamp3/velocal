@@ -52,7 +52,9 @@
       </h2>
       <div class="mt-4">
         @if (requestItems().length === 0) {
-          <p class="text-sm text-[var(--color-text-muted)]">{{ 'communities.requests.empty' | transloco }}</p>
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.requests.empty' | transloco }}
+          </p>
         } @else {
           <app-request-list
             [items]="requestItems()"

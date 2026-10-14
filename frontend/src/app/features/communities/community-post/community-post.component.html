@@ -35,9 +35,7 @@
           </ui-button>
         }
       </div>
-      <p class="mt-4 whitespace-pre-line text-sm leading-relaxed text-[var(--color-text)]">
-        {{ post.body }}
-      </p>
+      <app-rich-text-view class="mt-4 block" [value]="post.body" />
     </div>
 
     <h2 class="mt-8 text-lg font-semibold text-[var(--color-text)]">
@@ -68,9 +66,7 @@
                 </button>
               }
             </div>
-            <p class="mt-1 whitespace-pre-line text-sm text-[var(--color-text)]">
-              {{ comment.body }}
-            </p>
+            <app-rich-text-view class="mt-1 block" [value]="comment.body" />
             <p class="mt-2 text-xs text-[var(--color-text-muted)]">
               <time [attr.datetime]="comment.createdAt">{{
                 comment.createdAt | date: 'medium'
@@ -82,16 +78,11 @@
     }
 
     <form class="mt-4 space-y-3" [formGroup]="form" (ngSubmit)="publishComment()">
-      <label class="sr-only" for="community-comment-body">
-        {{ 'communities.posts.commentPlaceholder' | transloco }}
-      </label>
-      <textarea
-        id="community-comment-body"
+      <app-rich-text
         formControlName="body"
-        rows="3"
-        [attr.placeholder]="'communities.posts.commentPlaceholder' | transloco"
-        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-      ></textarea>
+        [compact]="true"
+        [placeholder]="'communities.posts.commentPlaceholder' | transloco"
+      />
       <ui-button type="submit" [loading]="submitting()" [disabled]="submitting()">
         {{ 'communities.posts.comment' | transloco }}
       </ui-button>

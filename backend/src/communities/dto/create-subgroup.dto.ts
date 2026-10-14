@@ -15,7 +15,7 @@ export class CreateSubgroupDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(5000)
+  @MaxLength(20000)
   description?: string;
 
   @IsOptional()

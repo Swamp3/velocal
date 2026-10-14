@@ -73,9 +73,7 @@
     </div>
 
     @if (c.description) {
-      <p class="mt-6 whitespace-pre-line text-sm leading-relaxed text-[var(--color-text-muted)]">
-        {{ c.description }}
-      </p>
+      <app-rich-text-view class="mt-6 block" [value]="c.description" />
     }
 
     <div class="mt-6 flex flex-wrap items-center gap-3">

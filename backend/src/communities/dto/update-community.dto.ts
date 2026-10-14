@@ -16,7 +16,7 @@ export class UpdateCommunityDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(5000)
+  @MaxLength(20000)
   description?: string | null;
 
   @IsOptional()

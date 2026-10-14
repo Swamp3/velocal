@@ -32,18 +32,10 @@
       />
 
       <div>
-        <label
-          for="subgroup-description"
-          class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
-        >
+        <label class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
           {{ 'communities.form.description' | transloco }}
         </label>
-        <textarea
-          id="subgroup-description"
-          formControlName="description"
-          rows="3"
-          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-        ></textarea>
+        <app-rich-text formControlName="description" [compact]="true" />
       </div>
 
       @if (canChangeVisibility()) {
