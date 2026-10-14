@@ -20,10 +20,20 @@
     </a>
 
     <div class="mt-5">
-      <app-community-hero [name]="subgroup.name" [heroUrl]="subgroup.heroUrl" [logoUrl]="subgroup.logoUrl">
+      <app-community-hero
+        [name]="subgroup.name"
+        [heroUrl]="subgroup.heroUrl"
+        [logoUrl]="subgroup.logoUrl"
+      >
         @if (canEdit(subgroup)) {
           <a
-            [routerLink]="['/communities', subgroup.communitySlug, 'subgroups', subgroup.slug, 'edit']"
+            [routerLink]="[
+              '/communities',
+              subgroup.communitySlug,
+              'subgroups',
+              subgroup.slug,
+              'edit',
+            ]"
             [class]="outlineLinkClass"
           >
             {{ 'communities.edit' | transloco }}
@@ -31,7 +41,13 @@
         }
         @if (subgroup.myRole || subgroup.viewerIsCommunityAdmin) {
           <a
-            [routerLink]="['/communities', subgroup.communitySlug, 'subgroups', subgroup.slug, 'members']"
+            [routerLink]="[
+              '/communities',
+              subgroup.communitySlug,
+              'subgroups',
+              subgroup.slug,
+              'members',
+            ]"
             [class]="outlineLinkClass"
           >
             {{ 'communities.members.title' | transloco }}
@@ -41,8 +57,6 @@
           <ui-button variant="outline" [loading]="acting()" [disabled]="acting()" (click)="leave()">
             {{ 'communities.leave' | transloco }}
           </ui-button>
-        } @else if (subgroup.myJoinRequest === 'pending') {
-          <p class="text-sm text-[var(--color-text-muted)]">{{ 'communities.pending' | transloco }}</p>
         } @else if (!auth.isAuthenticated()) {
           <a routerLink="/auth/login" [class]="outlineLinkClass">
             {{ 'communities.loginToJoin' | transloco }}
@@ -51,6 +65,10 @@
           <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
             {{ 'communities.join' | transloco }}
           </ui-button>
+        } @else if (subgroup.myJoinRequest === 'pending') {
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'communities.pending' | transloco }}
+          </p>
         } @else if (subgroup.visibility === 'request') {
           <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
             {{ 'communities.requestJoin' | transloco }}

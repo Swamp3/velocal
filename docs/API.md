@@ -27,7 +27,7 @@
 | DELETE | `/api/communities/:id/hero`        | Admin of that community | Remove hero image |
 | POST   | `/api/communities/:id/logo`        | Admin of that community | Upload logo |
 | DELETE | `/api/communities/:id/logo`        | Admin of that community | Remove logo |
-| POST   | `/api/communities/:id/join`        | JWT      | Join (`public`) or open a request (`request`). `private` is 403 |
+| POST   | `/api/communities/:id/join`        | JWT      | Join (`public`) or open a request (`request`). `private` is 404 for non-members |
 | POST   | `/api/communities/:id/leave`       | Member   | Leave. 409 if this drops the last admin |
 | GET    | `/api/communities/:id/members`     | Member   | Member list |
 | PATCH  | `/api/communities/:id/members/:userId` | Admin of that community | Set role `member` or `admin` |
@@ -39,7 +39,7 @@
 | GET    | `/api/communities/:slug/subgroups` | Optional | Subgroups the viewer may see |
 | POST   | `/api/communities/:slug/subgroups` | Community admin | Create a subgroup |
 | GET    | `/api/communities/:slug/subgroups/:subgroupSlug` | Optional | Subgroup detail. Invite-only is 404 for outsiders |
-| PATCH  | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin or moderator | Update a subgroup |
+| PATCH  | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin or moderator | Update name and description. Visibility is community-admin only |
 | DELETE | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin | Delete a subgroup |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/join` | Community member | Join an open subgroup or request a `request` subgroup |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/invites` | Community admin or moderator | Add a community member to the subgroup |

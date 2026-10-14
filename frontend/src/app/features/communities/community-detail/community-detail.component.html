@@ -55,15 +55,15 @@
           <ui-button variant="outline" [loading]="acting()" [disabled]="acting()" (click)="leave()">
             {{ 'communities.leave' | transloco }}
           </ui-button>
+        } @else if (c.visibility === 'public') {
+          <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
+            {{ 'communities.join' | transloco }}
+          </ui-button>
         } @else if (c.myJoinRequest === 'pending') {
           <p class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
             <span class="material-symbols-outlined text-[18px]" aria-hidden="true">schedule</span>
             {{ 'communities.pending' | transloco }}
           </p>
-        } @else if (c.visibility === 'public') {
-          <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
-            {{ 'communities.join' | transloco }}
-          </ui-button>
         } @else if (c.visibility === 'request') {
           <ui-button [loading]="acting()" [disabled]="acting()" (click)="join()">
             {{ 'communities.requestJoin' | transloco }}
@@ -93,10 +93,7 @@
         {{ 'communities.subgroups.title' | transloco }}
       </h2>
       @if (c.myRole === 'admin') {
-        <a
-          [routerLink]="['/communities', c.slug, 'subgroups', 'new']"
-          [class]="outlineLinkClass"
-        >
+        <a [routerLink]="['/communities', c.slug, 'subgroups', 'new']" [class]="outlineLinkClass">
           {{ 'communities.subgroups.create' | transloco }}
         </a>
       }
@@ -107,7 +104,9 @@
         {{ 'communities.subgroups.empty' | transloco }}
       </p>
     } @else {
-      <ul class="mt-4 divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+      <ul
+        class="mt-4 divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+      >
         @for (subgroup of subgroups(); track subgroup.id) {
           <li>
             <a

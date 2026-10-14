@@ -4,14 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import {
   CommunityErrorCode,
   communityForbidden,
   communityNotFound,
 } from './community-error';
+import { pickSlug, RESERVED_SUBGROUP_SLUGS, slugBase } from './community-slug';
 import { CreateSubgroupDto } from './dto/create-subgroup.dto';
 import { UpdateSubgroupDto } from './dto/update-subgroup.dto';
 import { UpdateSubgroupRoleDto } from './dto/update-subgroup-role.dto';
@@ -80,6 +82,7 @@ export class SubgroupsService {
     @InjectRepository(User)
     private readonly users: Repository<User>,
     private readonly uploads: UploadsService,
+    private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -88,7 +91,10 @@ export class SubgroupsService {
     dto: CreateSubgroupDto,
     userId: string,
   ): Promise<SerializedSubgroup> {
-    const community = await this.requireReadableCommunity(communitySlug, userId);
+    const community = await this.requireReadableCommunity(
+      communitySlug,
+      userId,
+    );
     await this.assertCommunityAdmin(community.id, userId);
     const slug = await this.generateSlug(community.id, dto.name);
     const saved = await this.subgroups.save(
@@ -100,14 +106,17 @@ export class SubgroupsService {
         visibility: dto.visibility ?? SubgroupVisibility.OPEN,
       }),
     );
-    return this.serializeFor(saved, community.slug, userId);
+    return this.serializeFor(saved, community, userId);
   }
 
   async list(
     communitySlug: string,
     userId?: string,
   ): Promise<SerializedSubgroup[]> {
-    const community = await this.requireReadableCommunity(communitySlug, userId);
+    const community = await this.requireReadableCommunity(
+      communitySlug,
+      userId,
+    );
     const isAdmin = await this.isCommunityAdmin(community.id, userId);
     const rows = await this.subgroups.find({
       where: { communityId: community.id },
@@ -120,7 +129,7 @@ export class SubgroupsService {
     }
 
     return Promise.all(
-      visible.map((row) => this.serializeFor(row, community.slug, userId)),
+      visible.map((row) => this.serializeFor(row, community, userId)),
     );
   }
 
@@ -137,7 +146,7 @@ export class SubgroupsService {
     if (!isAdmin && !(await this.canSee(subgroup, userId, false))) {
       throw new NotFoundException('Subgroup not found');
     }
-    return this.serializeFor(subgroup, community.slug, userId);
+    return this.serializeFor(subgroup, community, userId);
   }
 
   async update(
@@ -146,19 +155,33 @@ export class SubgroupsService {
     dto: UpdateSubgroupDto,
     userId: string,
   ): Promise<SerializedSubgroup> {
-    const { subgroup, community } = await this.requireManageable(
+    const { subgroup, community, isAdmin } = await this.requireManageable(
       communitySlug,
       slug,
       userId,
     );
     if (dto.name !== undefined) subgroup.name = dto.name;
     if (dto.description !== undefined) subgroup.description = dto.description;
-    if (dto.visibility !== undefined) subgroup.visibility = dto.visibility;
-    const saved = await this.subgroups.save(subgroup);
-    return this.serializeFor(saved, community.slug, userId);
+    const opening =
+      isAdmin &&
+      dto.visibility === SubgroupVisibility.OPEN &&
+      subgroup.visibility !== SubgroupVisibility.OPEN;
+    if (isAdmin && dto.visibility !== undefined) {
+      subgroup.visibility = dto.visibility;
+    }
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const row = await manager.save(subgroup);
+      if (opening) await this.admitPendingMembers(manager, subgroup.id);
+      return row;
+    });
+    return this.serializeFor(saved, community, userId);
   }
 
-  async remove(communitySlug: string, slug: string, userId: string): Promise<void> {
+  async remove(
+    communitySlug: string,
+    slug: string,
+    userId: string,
+  ): Promise<void> {
     const { subgroup, community } = await this.requireVisible(
       communitySlug,
       slug,
@@ -227,7 +250,7 @@ export class SubgroupsService {
     if (existing) {
       return {
         outcome: 'joined',
-        subgroup: await this.serializeFor(subgroup, community.slug, userId),
+        subgroup: await this.serializeFor(subgroup, community, userId),
       };
     }
 
@@ -236,29 +259,49 @@ export class SubgroupsService {
     }
 
     if (subgroup.visibility === SubgroupVisibility.OPEN) {
-      await this.dataSource.query(
-        `INSERT INTO "subgroup_members" ("subgroup_id", "user_id", "role")
-         VALUES ($1, $2, 'member')
-         ON CONFLICT ("subgroup_id", "user_id") DO NOTHING`,
-        [subgroup.id, userId],
-      );
+      await this.dataSource.transaction(async (manager) => {
+        await this.lockCommunity(manager, community.id);
+        const inserted = await this.insertMemberIfCommunityMember(
+          manager,
+          subgroup.id,
+          community.id,
+          userId,
+        );
+        if (!inserted) {
+          throw communityForbidden(CommunityErrorCode.notCommunityMember);
+        }
+        await this.approvePendingRequest(manager, subgroup.id, userId);
+      });
       return {
         outcome: 'joined',
-        subgroup: await this.serializeFor(subgroup, community.slug, userId),
+        subgroup: await this.serializeFor(subgroup, community, userId),
       };
     }
 
-    await this.dataSource.query(
-      `INSERT INTO "subgroup_join_requests" ("subgroup_id", "user_id", "status", "createdAt", "updatedAt")
-       VALUES ($1, $2, 'pending', now(), now())
-       ON CONFLICT ("subgroup_id", "user_id")
-       DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
-      [subgroup.id, userId],
-    );
+    await this.dataSource.transaction(async (manager) => {
+      await this.lockCommunity(manager, community.id);
+      const member = await manager.findOne(CommunityMember, {
+        where: { communityId: community.id, userId },
+      });
+      if (!member) {
+        throw communityForbidden(CommunityErrorCode.notCommunityMember);
+      }
+      await manager.query(
+        `INSERT INTO "subgroup_join_requests" ("subgroup_id", "user_id", "status", "createdAt", "updatedAt")
+         VALUES ($1, $2, 'pending', now(), now())
+         ON CONFLICT ("subgroup_id", "user_id")
+         DO UPDATE SET "status" = 'pending', "createdAt" = now(), "updatedAt" = now()`,
+        [subgroup.id, userId],
+      );
+    });
     return { outcome: 'pending' };
   }
 
-  async leave(communitySlug: string, slug: string, userId: string): Promise<void> {
+  async leave(
+    communitySlug: string,
+    slug: string,
+    userId: string,
+  ): Promise<void> {
     const { subgroup } = await this.requireVisible(communitySlug, slug, userId);
     const membership = await this.members.findOne({
       where: { subgroupId: subgroup.id, userId },
@@ -349,8 +392,8 @@ export class SubgroupsService {
       where: { subgroupId: subgroup.id, userId: targetUserId },
     });
     if (!membership) throw new NotFoundException('Member not found');
-    if (!isAdmin && membership.role === SubgroupMemberRole.MODERATOR) {
-      throw new ForbiddenException('Only a community admin can remove a moderator');
+    if (!isAdmin) {
+      throw new ForbiddenException('Community admin access required');
     }
     await this.members.remove(membership);
   }
@@ -360,7 +403,11 @@ export class SubgroupsService {
     slug: string,
     actorId: string,
   ): Promise<SerializedSubgroupJoinRequest[]> {
-    const { subgroup } = await this.requireManageable(communitySlug, slug, actorId);
+    const { subgroup } = await this.requireManageable(
+      communitySlug,
+      slug,
+      actorId,
+    );
     const requests = await this.joinRequests.find({
       where: { subgroupId: subgroup.id, status: CommunityJoinStatus.PENDING },
       relations: { user: true },
@@ -380,17 +427,30 @@ export class SubgroupsService {
     requestId: string,
     actorId: string,
   ): Promise<{ status: 'approved' }> {
-    const { subgroup } = await this.requireManageable(communitySlug, slug, actorId);
-    const request = await this.requirePending(subgroup.id, requestId);
+    const { subgroup, community } = await this.requireManageable(
+      communitySlug,
+      slug,
+      actorId,
+    );
     await this.dataSource.transaction(async (manager) => {
+      await this.lockCommunity(manager, community.id);
+      const request = await manager.findOne(SubgroupJoinRequest, {
+        where: { id: requestId, subgroupId: subgroup.id },
+      });
+      if (!request || request.status !== CommunityJoinStatus.PENDING) {
+        throw new NotFoundException('Join request not found');
+      }
       request.status = CommunityJoinStatus.APPROVED;
       await manager.save(request);
-      await manager.query(
-        `INSERT INTO "subgroup_members" ("subgroup_id", "user_id", "role")
-         VALUES ($1, $2, 'member')
-         ON CONFLICT ("subgroup_id", "user_id") DO NOTHING`,
-        [subgroup.id, request.userId],
+      const inserted = await this.insertMemberIfCommunityMember(
+        manager,
+        subgroup.id,
+        community.id,
+        request.userId,
       );
+      if (!inserted) {
+        throw communityForbidden(CommunityErrorCode.notCommunityMember);
+      }
     });
     return { status: 'approved' };
   }
@@ -401,7 +461,11 @@ export class SubgroupsService {
     requestId: string,
     actorId: string,
   ): Promise<{ status: 'rejected' }> {
-    const { subgroup } = await this.requireManageable(communitySlug, slug, actorId);
+    const { subgroup } = await this.requireManageable(
+      communitySlug,
+      slug,
+      actorId,
+    );
     const request = await this.requirePending(subgroup.id, requestId);
     request.status = CommunityJoinStatus.REJECTED;
     await this.joinRequests.save(request);
@@ -429,25 +493,20 @@ export class SubgroupsService {
     }
 
     await this.dataSource.transaction(async (manager) => {
-      await manager.query(
-        `INSERT INTO "subgroup_members" ("subgroup_id", "user_id", "role")
-         VALUES ($1, $2, 'member')
-         ON CONFLICT ("subgroup_id", "user_id") DO NOTHING`,
-        [subgroup.id, user.id],
+      await this.lockCommunity(manager, community.id);
+      const inserted = await this.insertMemberIfCommunityMember(
+        manager,
+        subgroup.id,
+        community.id,
+        user.id,
       );
-      await manager
-        .createQueryBuilder()
-        .update(SubgroupJoinRequest)
-        .set({ status: CommunityJoinStatus.APPROVED })
-        .where('subgroup_id = :subgroupId AND user_id = :userId AND status = :status', {
-          subgroupId: subgroup.id,
-          userId: user.id,
-          status: CommunityJoinStatus.PENDING,
-        })
-        .execute();
+      if (!inserted) {
+        throw communityNotFound(CommunityErrorCode.notCommunityMember);
+      }
+      await this.approvePendingRequest(manager, subgroup.id, user.id);
     });
 
-    return this.serializeFor(subgroup, community.slug, actorId);
+    return this.serializeFor(subgroup, community, actorId);
   }
 
   private async writeImage(
@@ -462,7 +521,8 @@ export class SubgroupsService {
       slug,
       userId,
     );
-    const subject = field === 'heroUrl' ? 'community-heroes' : 'community-logos';
+    const subject =
+      field === 'heroUrl' ? 'community-heroes' : 'community-logos';
     if (file) {
       subgroup[field] = await this.uploads.save(subject, subgroup.id, file);
     } else {
@@ -470,7 +530,7 @@ export class SubgroupsService {
       subgroup[field] = null;
     }
     const saved = await this.subgroups.save(subgroup);
-    return this.serializeFor(saved, community.slug, userId);
+    return this.serializeFor(saved, community, userId);
   }
 
   private async requirePending(
@@ -508,7 +568,10 @@ export class SubgroupsService {
     slug: string,
     userId?: string,
   ): Promise<{ subgroup: Subgroup; community: Community; isAdmin: boolean }> {
-    const community = await this.requireReadableCommunity(communitySlug, userId);
+    const community = await this.requireReadableCommunity(
+      communitySlug,
+      userId,
+    );
     const subgroup = await this.subgroups.findOne({
       where: { communityId: community.id, slug },
     });
@@ -584,31 +647,114 @@ export class SubgroupsService {
       .getOne();
   }
 
-  private async generateSlug(communityId: string, name: string): Promise<string> {
-    let base = name
-      .toLowerCase()
-      .replace(/[äÄ]/g, 'ae')
-      .replace(/[öÖ]/g, 'oe')
-      .replace(/[üÜ]/g, 'ue')
-      .replace(/ß/g, 'ss')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    if (!base) base = 'group';
-
-    let slug = base;
-    let suffix = 2;
-    while (
-      await this.subgroups.findOne({ where: { communityId, slug } })
-    ) {
-      slug = `${base}-${suffix}`;
-      suffix++;
+  private async generateSlug(
+    communityId: string,
+    name: string,
+  ): Promise<string> {
+    const base = slugBase(name, 'group');
+    const taken = new Set<string>();
+    let slug = pickSlug(base, RESERVED_SUBGROUP_SLUGS, taken);
+    while (await this.subgroups.findOne({ where: { communityId, slug } })) {
+      taken.add(slug);
+      slug = pickSlug(base, RESERVED_SUBGROUP_SLUGS, taken);
     }
     return slug;
   }
 
+  private async lockCommunity(
+    manager: EntityManager,
+    id: string,
+  ): Promise<void> {
+    const locked = await manager.query(
+      `SELECT "id" FROM "communities" WHERE "id" = $1 FOR UPDATE`,
+      [id],
+    );
+    if (!Array.isArray(locked) || locked.length === 0) {
+      throw new NotFoundException('Community not found');
+    }
+  }
+
+  /**
+   * Inserts a subgroup member only while the community membership row exists.
+   * The caller holds the community row lock, which `leave` also takes.
+   */
+  private async insertMemberIfCommunityMember(
+    manager: EntityManager,
+    subgroupId: string,
+    communityId: string,
+    userId: string,
+  ): Promise<boolean> {
+    const inserted: Array<{ user_id: string }> = await manager.query(
+      `INSERT INTO "subgroup_members" ("subgroup_id", "user_id", "role")
+       SELECT $1, member."user_id", 'member'
+       FROM "community_members" member
+       WHERE member."community_id" = $2 AND member."user_id" = $3
+       ON CONFLICT ("subgroup_id", "user_id") DO NOTHING
+       RETURNING "user_id"`,
+      [subgroupId, communityId, userId],
+    );
+    if (inserted.length > 0) return true;
+    const existing = await manager.findOne(SubgroupMember, {
+      where: { subgroupId, userId },
+    });
+    return !!existing;
+  }
+
+  private async admitPendingMembers(
+    manager: EntityManager,
+    subgroupId: string,
+  ): Promise<void> {
+    await manager.query(
+      `INSERT INTO "subgroup_members" ("subgroup_id", "user_id", "role")
+       SELECT request."subgroup_id", request."user_id", 'member'
+       FROM "subgroup_join_requests" request
+       INNER JOIN "subgroups" subgroup ON subgroup."id" = request."subgroup_id"
+       INNER JOIN "community_members" member
+         ON member."community_id" = subgroup."community_id"
+        AND member."user_id" = request."user_id"
+       WHERE request."subgroup_id" = $1 AND request."status" = 'pending'
+       ON CONFLICT ("subgroup_id", "user_id") DO NOTHING`,
+      [subgroupId],
+    );
+    await manager.query(
+      `UPDATE "subgroup_join_requests" AS request
+       SET "status" = 'approved', "updatedAt" = now()
+       WHERE request."subgroup_id" = $1
+         AND request."status" = 'pending'
+         AND EXISTS (
+           SELECT 1
+           FROM "community_members" AS member
+           INNER JOIN "subgroups" AS subgroup ON subgroup."id" = request."subgroup_id"
+           WHERE member."community_id" = subgroup."community_id"
+             AND member."user_id" = request."user_id"
+         )`,
+      [subgroupId],
+    );
+  }
+
+  private async approvePendingRequest(
+    manager: EntityManager,
+    subgroupId: string,
+    userId: string,
+  ): Promise<void> {
+    await manager.query(
+      `UPDATE "subgroup_join_requests"
+       SET "status" = 'approved', "updatedAt" = now()
+       WHERE "subgroup_id" = $1 AND "user_id" = $2 AND "status" = 'pending'`,
+      [subgroupId, userId],
+    );
+  }
+
+  private imagesRestricted(subgroup: Subgroup, community: Community): boolean {
+    return (
+      community.visibility === CommunityVisibility.PRIVATE ||
+      subgroup.visibility === SubgroupVisibility.INVITE
+    );
+  }
+
   private async serializeFor(
     subgroup: Subgroup,
-    communitySlug: string,
+    community: Community,
     userId?: string,
   ): Promise<SerializedSubgroup> {
     const memberCount = await this.members.count({
@@ -635,13 +781,19 @@ export class SubgroupsService {
     return {
       id: subgroup.id,
       communityId: subgroup.communityId,
-      communitySlug,
+      communitySlug: community.slug,
       slug: subgroup.slug,
       name: subgroup.name,
       description: subgroup.description ?? null,
       visibility: subgroup.visibility,
-      heroUrl: subgroup.heroUrl ?? null,
-      logoUrl: subgroup.logoUrl ?? null,
+      heroUrl: this.imageAccess.sign(
+        subgroup.heroUrl ?? null,
+        this.imagesRestricted(subgroup, community),
+      ),
+      logoUrl: this.imageAccess.sign(
+        subgroup.logoUrl ?? null,
+        this.imagesRestricted(subgroup, community),
+      ),
       memberCount,
       myRole: membership?.role ?? null,
       myJoinRequest: pending ? 'pending' : null,

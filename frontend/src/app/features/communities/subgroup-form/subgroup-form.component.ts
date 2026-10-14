@@ -49,6 +49,7 @@ export class SubgroupFormComponent implements OnInit {
   protected readonly heroUrl = signal<string | null>(null);
   protected readonly logoUrl = signal<string | null>(null);
   protected readonly visibilities: readonly SubgroupVisibility[] = ['open', 'request', 'invite'];
+  protected readonly canChangeVisibility = signal(true);
 
   protected readonly uploadHeroFn = (file: File): Observable<{ imageUrl?: string | null }> =>
     this.uploadService
@@ -97,6 +98,7 @@ export class SubgroupFormComponent implements OnInit {
             return;
           }
           this.subgroupSlug.set(subgroup.slug);
+          this.canChangeVisibility.set(subgroup.viewerIsCommunityAdmin);
           this.heroUrl.set(subgroup.heroUrl);
           this.logoUrl.set(subgroup.logoUrl);
           this.form.patchValue({
@@ -123,11 +125,12 @@ export class SubgroupFormComponent implements OnInit {
     this.saving.set(true);
     const description = raw.description.trim();
     const communitySlug = this.communitySlug();
+    const visibility = this.canChangeVisibility() ? raw.visibility : undefined;
     const request$ = this.isEdit()
       ? this.communityService.updateSubgroup(communitySlug, this.subgroupSlug(), {
           name: raw.name.trim(),
           description: description || null,
-          visibility: raw.visibility,
+          ...(visibility ? { visibility } : {}),
         })
       : this.communityService.createSubgroup(communitySlug, {
           name: raw.name.trim(),

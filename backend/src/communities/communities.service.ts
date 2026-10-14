@@ -6,12 +6,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import { isLastAdminRemoval } from './community-admin.policy';
+import { pickSlug, RESERVED_COMMUNITY_SLUGS, slugBase } from './community-slug';
 import {
   CommunityErrorCode,
   communityConflict,
-  communityForbidden,
   communityNotFound,
 } from './community-error';
 import { CommunitySearchDto } from './dto/community-search.dto';
@@ -74,7 +75,6 @@ interface ViewerState {
   myJoinRequest: 'pending' | null;
 }
 
-
 @Injectable()
 export class CommunitiesService {
   constructor(
@@ -87,6 +87,7 @@ export class CommunitiesService {
     @InjectRepository(User)
     private readonly users: Repository<User>,
     private readonly uploads: UploadsService,
+    private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -222,11 +223,18 @@ export class CommunitiesService {
     if (dto.description !== undefined) {
       community.description = dto.description;
     }
+    const opening =
+      dto.visibility === CommunityVisibility.PUBLIC &&
+      community.visibility !== CommunityVisibility.PUBLIC;
     if (dto.visibility !== undefined) {
       community.visibility = dto.visibility;
     }
 
-    const saved = await this.communities.save(community);
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const row = await manager.save(community);
+      if (opening) await this.admitPendingMembers(manager, id);
+      return row;
+    });
     return this.serializeFor(saved, userId);
   }
 
@@ -267,16 +275,19 @@ export class CommunitiesService {
     }
 
     if (community.visibility === CommunityVisibility.PRIVATE) {
-      throw communityForbidden(CommunityErrorCode.inviteOnly);
+      throw new NotFoundException(`Community ${id} not found`);
     }
 
     if (community.visibility === CommunityVisibility.PUBLIC) {
-      await this.dataSource.query(
-        `INSERT INTO "community_members" ("community_id", "user_id", "role")
-         VALUES ($1, $2, 'member')
-         ON CONFLICT ("community_id", "user_id") DO NOTHING`,
-        [id, userId],
-      );
+      await this.dataSource.transaction(async (manager) => {
+        await manager.query(
+          `INSERT INTO "community_members" ("community_id", "user_id", "role")
+           VALUES ($1, $2, 'member')
+           ON CONFLICT ("community_id", "user_id") DO NOTHING`,
+          [id, userId],
+        );
+        await this.approvePendingRequest(manager, id, userId);
+      });
       return {
         outcome: 'joined',
         community: await this.serializeFor(community, userId),
@@ -312,6 +323,10 @@ export class CommunitiesService {
         where: { communityId: id, userId },
       });
       if (!membership) {
+        const community = await manager.findOne(Community, { where: { id } });
+        if (community?.visibility === CommunityVisibility.PRIVATE) {
+          throw new NotFoundException(`Community ${id} not found`);
+        }
         throw new ForbiddenException('You are not a member of this community');
       }
       await this.assertNotLastAdminRemoval(
@@ -557,14 +572,52 @@ export class CommunitiesService {
     }
   }
 
+  /** People who asked to join become members once the community is public. */
+  private async admitPendingMembers(
+    manager: EntityManager,
+    communityId: string,
+  ): Promise<void> {
+    await manager.query(
+      `INSERT INTO "community_members" ("community_id", "user_id", "role")
+       SELECT "community_id", "user_id", 'member'
+       FROM "community_join_requests"
+       WHERE "community_id" = $1 AND "status" = 'pending'
+       ON CONFLICT ("community_id", "user_id") DO NOTHING`,
+      [communityId],
+    );
+    await manager.query(
+      `UPDATE "community_join_requests"
+       SET "status" = 'approved', "updatedAt" = now()
+       WHERE "community_id" = $1 AND "status" = 'pending'`,
+      [communityId],
+    );
+  }
+
+  private async approvePendingRequest(
+    manager: EntityManager,
+    communityId: string,
+    userId: string,
+  ): Promise<void> {
+    await manager.query(
+      `UPDATE "community_join_requests"
+       SET "status" = 'approved', "updatedAt" = now()
+       WHERE "community_id" = $1 AND "user_id" = $2 AND "status" = 'pending'`,
+      [communityId, userId],
+    );
+  }
+
   private async assertMember(
     communityId: string,
     userId: string,
   ): Promise<CommunityMember> {
+    const community = await this.findCommunity(communityId);
     const membership = await this.members.findOne({
       where: { communityId, userId },
     });
     if (!membership) {
+      if (community.visibility === CommunityVisibility.PRIVATE) {
+        throw new NotFoundException(`Community ${communityId} not found`);
+      }
       throw new ForbiddenException('You are not a member of this community');
     }
     return membership;
@@ -574,9 +627,13 @@ export class CommunitiesService {
     communityId: string,
     userId: string,
   ): Promise<void> {
+    const community = await this.findCommunity(communityId);
     const membership = await this.members.findOne({
       where: { communityId, userId },
     });
+    if (!membership && community.visibility === CommunityVisibility.PRIVATE) {
+      throw new NotFoundException(`Community ${communityId} not found`);
+    }
     if (membership?.role !== CommunityMemberRole.ADMIN) {
       throw new ForbiddenException('Community admin access required');
     }
@@ -587,9 +644,18 @@ export class CommunitiesService {
     communityId: string,
     userId: string,
   ): Promise<void> {
+    const community = await manager.findOne(Community, {
+      where: { id: communityId },
+    });
+    if (!community) {
+      throw new NotFoundException(`Community ${communityId} not found`);
+    }
     const membership = await manager.findOne(CommunityMember, {
       where: { communityId, userId },
     });
+    if (!membership && community.visibility === CommunityVisibility.PRIVATE) {
+      throw new NotFoundException(`Community ${communityId} not found`);
+    }
     if (membership?.role !== CommunityMemberRole.ADMIN) {
       throw new ForbiddenException('Community admin access required');
     }
@@ -742,8 +808,14 @@ export class CommunitiesService {
       name: community.name,
       description: community.description ?? null,
       visibility: community.visibility,
-      heroUrl: community.heroUrl ?? null,
-      logoUrl: community.logoUrl ?? null,
+      heroUrl: this.imageAccess.sign(
+        community.heroUrl ?? null,
+        community.visibility === CommunityVisibility.PRIVATE,
+      ),
+      logoUrl: this.imageAccess.sign(
+        community.logoUrl ?? null,
+        community.visibility === CommunityVisibility.PRIVATE,
+      ),
       memberCount: viewer.memberCount,
       myRole: viewer.myRole,
       myJoinRequest: viewer.myJoinRequest,
@@ -772,25 +844,13 @@ export class CommunitiesService {
   }
 
   private async generateSlug(name: string): Promise<string> {
-    const base = name
-      .toLowerCase()
-      .replace(/[äÄ]/g, 'ae')
-      .replace(/[öÖ]/g, 'oe')
-      .replace(/[üÜ]/g, 'ue')
-      .replace(/ß/g, 'ss')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    let slug = base;
-    let suffix = 2;
-
-    while (true) {
-      const existing = await this.communities.findOne({ where: { slug } });
-      if (!existing) break;
-      slug = `${base}-${suffix}`;
-      suffix++;
+    const base = slugBase(name, 'community');
+    const taken = new Set<string>();
+    let slug = pickSlug(base, RESERVED_COMMUNITY_SLUGS, taken);
+    while (await this.communities.findOne({ where: { slug } })) {
+      taken.add(slug);
+      slug = pickSlug(base, RESERVED_COMMUNITY_SLUGS, taken);
     }
-
     return slug;
   }
 }

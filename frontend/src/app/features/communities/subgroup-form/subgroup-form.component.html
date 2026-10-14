@@ -8,7 +8,10 @@
   </a>
 
   <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
-    {{ (isEdit() ? 'communities.subgroups.editTitle' : 'communities.subgroups.createTitle') | transloco }}
+    {{
+      (isEdit() ? 'communities.subgroups.editTitle' : 'communities.subgroups.createTitle')
+        | transloco
+    }}
   </h1>
 
   @if (!loaded()) {
@@ -29,7 +32,10 @@
       />
 
       <div>
-        <label for="subgroup-description" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+        <label
+          for="subgroup-description"
+          class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
+        >
           {{ 'communities.form.description' | transloco }}
         </label>
         <textarea
@@ -40,22 +46,27 @@
         ></textarea>
       </div>
 
-      <div>
-        <label for="subgroup-visibility" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
-          {{ 'communities.form.visibility' | transloco }}
-        </label>
-        <select
-          id="subgroup-visibility"
-          formControlName="visibility"
-          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-        >
-          @for (visibility of visibilities; track visibility) {
-            <option [value]="visibility">
-              {{ 'communities.subgroups.visibility.' + visibility | transloco }}
-            </option>
-          }
-        </select>
-      </div>
+      @if (canChangeVisibility()) {
+        <div>
+          <label
+            for="subgroup-visibility"
+            class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
+          >
+            {{ 'communities.form.visibility' | transloco }}
+          </label>
+          <select
+            id="subgroup-visibility"
+            formControlName="visibility"
+            class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+          >
+            @for (visibility of visibilities; track visibility) {
+              <option [value]="visibility">
+                {{ 'communities.subgroups.visibility.' + visibility | transloco }}
+              </option>
+            }
+          </select>
+        </div>
+      }
 
       @if (subgroupSlug()) {
         <div>

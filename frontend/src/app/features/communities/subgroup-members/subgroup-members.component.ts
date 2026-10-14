@@ -68,7 +68,6 @@ export class SubgroupMembersComponent implements OnInit {
     const subgroup = this.subgroup();
     const unnamed = this.transloco.translate('communities.members.unnamed');
     const isAdmin = !!subgroup?.viewerIsCommunityAdmin;
-    const isModerator = subgroup?.myRole === 'moderator';
     return this.members().map((member) => ({
       id: member.userId,
       name: member.displayName ?? unnamed,
@@ -85,7 +84,7 @@ export class SubgroupMembersComponent implements OnInit {
               : 'communities.subgroups.promote',
           )
         : undefined,
-      canRemove: isAdmin || (isModerator && member.role === 'member'),
+      canRemove: isAdmin,
     }));
   });
 
@@ -189,8 +188,16 @@ export class SubgroupMembersComponent implements OnInit {
     this.mutating.set(true);
     const request$: Observable<{ status: 'approved' | 'rejected' }> =
       action === 'approve'
-        ? this.communityService.approveSubgroupRequest(subgroup.communitySlug, subgroup.slug, requestId)
-        : this.communityService.rejectSubgroupRequest(subgroup.communitySlug, subgroup.slug, requestId);
+        ? this.communityService.approveSubgroupRequest(
+            subgroup.communitySlug,
+            subgroup.slug,
+            requestId,
+          )
+        : this.communityService.rejectSubgroupRequest(
+            subgroup.communitySlug,
+            subgroup.slug,
+            requestId,
+          );
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => this.refresh(subgroup),
       error: (err: ApiError) => this.fail(err),

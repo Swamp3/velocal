@@ -12,7 +12,7 @@ What the app already does, and what this feature must not pretend is there.
 | Events | Every event is public. `GET /api/events` and `GET /api/events/:id` have no audience filter. An event already has `locationName`, coordinates, `startDate`, and `endDate`. List (`/events`), map (`/map`), and calendar (`/calendar`) all read that public set. |
 | Posts | `posts` is the public news CMS (`/news`). Community posts are a new table, `community_posts`. |
 | Social | No comments, polls, RSVP, or notification inbox. |
-| Images | Sharp variants for `events`, `series`, `posts`, `community-heroes`, and `community-logos`. |
+| Images | Sharp variants for `events`, `series`, `posts`, `community-heroes`, and `community-logos`. Private community images and invite-only subgroup images need a signed `access` query and are not publicly cached. |
 | Mail | Resend sends password reset and OTP. Budget is 3000 mails/month, so email is not the fan-out channel. |
 
 An event with no community host stays a public calendar event. Members-only listing requires a host.
@@ -105,7 +105,7 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 | `community-media` | done | Hero and logo via Sharp. Upload subjects `community-heroes` and `community-logos`. |
 | `community-membership` | done | `community_members` with role `member` or `admin`. |
 | `admin-invariant` | done | Last admin cannot leave, be removed, or be demoted. Row lock plus `isLastAdminRemoval`. |
-| `community-visibility` | done | `public`, `request`, and `private`. Private slug lookup is 404 for non-members. |
+| `community-visibility` | done | `public`, `request`, and `private`. Private lookup is 404 for non-members, including id routes. |
 | `my-communities` | done | `GET /api/communities/mine` and the Mine section on `/communities`. |
 
 ### 2. Subgroups, moderators, people
@@ -115,7 +115,7 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 | `subgroup-membership` | done | Separate subgroup membership. Leaving a community deletes that user's subgroup rows. |
 | `subgroup-visibility` | done | `open`, `request`, and `invite`. Invite-only subgroups 404 for outsiders. |
 | `moderator-role` | done | `member` or `moderator`. Zero moderators allowed. Community admins manage every subgroup without a moderator row. |
-| `moderator-permissions` | done | Moderators edit their subgroup, its requests, and its invites. Only community admins appoint moderators. |
+| `moderator-permissions` | done | Moderators edit name, description, hero, logo, requests, and invites. Visibility and member removal stay with community admins. |
 | `member-pages` | done | Member lists for a community and for a subgroup. |
 | `join-requests` | done | Community and subgroup request queues: list, approve, reject. |
 | `membership-invites` | done | Admins invite by email into a community. Admins and moderators invite community members into a subgroup. |
