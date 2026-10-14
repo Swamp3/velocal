@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import {
   Community,
+  CommunityComment,
   CommunityJoinRequest,
+  CommunityPost,
   CommunityMember,
   CommunityRole,
   CreateCommunityDto,
@@ -168,5 +170,68 @@ export class CommunityService {
 
   inviteToSubgroup(communitySlug: string, slug: string, email: string): Observable<Subgroup> {
     return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { email });
+  }
+
+  listPosts(communitySlug: string, subgroupSlug?: string | null): Observable<CommunityPost[]> {
+    return this.api.get(this.postsPath(communitySlug, subgroupSlug));
+  }
+
+  createPost(
+    communitySlug: string,
+    body: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPost> {
+    return this.api.post(this.postsPath(communitySlug, subgroupSlug), { body });
+  }
+
+  getPost(
+    communitySlug: string,
+    postId: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPost> {
+    return this.api.get(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}`);
+  }
+
+  deletePost(
+    communitySlug: string,
+    postId: string,
+    subgroupSlug?: string | null,
+  ): Observable<void> {
+    return this.api.delete(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}`);
+  }
+
+  listComments(
+    communitySlug: string,
+    postId: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityComment[]> {
+    return this.api.get(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments`);
+  }
+
+  addComment(
+    communitySlug: string,
+    postId: string,
+    body: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityComment> {
+    return this.api.post(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments`, {
+      body,
+    });
+  }
+
+  deleteComment(
+    communitySlug: string,
+    postId: string,
+    commentId: string,
+    subgroupSlug?: string | null,
+  ): Observable<void> {
+    return this.api.delete(
+      `${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments/${commentId}`,
+    );
+  }
+
+  private postsPath(communitySlug: string, subgroupSlug?: string | null): string {
+    const base = `/communities/${communitySlug}`;
+    return subgroupSlug ? `${base}/subgroups/${subgroupSlug}/posts` : `${base}/posts`;
   }
 }

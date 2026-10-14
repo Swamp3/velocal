@@ -122,5 +122,9 @@
         }
       </ul>
     }
+
+    @if (c.myRole) {
+      <app-community-feed [communitySlug]="c.slug" />
+    }
   </div>
 }

@@ -20,6 +20,18 @@ const routes: Routes = [
       import('./community-form/community-form.component').then((m) => m.CommunityFormComponent),
   },
   {
+    path: ':slug/posts/:postId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-post/community-post.component').then((m) => m.CommunityPostComponent),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/posts/:postId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-post/community-post.component').then((m) => m.CommunityPostComponent),
+  },
+  {
     path: ':slug/subgroups/new',
     canActivate: [authGuard],
     loadComponent: () =>

@@ -626,7 +626,25 @@
       "lastAdminRemoval": "Diese Gemeinschaft braucht mindestens einen Admin.",
       "userNotFound": "Kein Konto nutzt diese E-Mail.",
       "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft.",
-      "inviteOnly": "Diese Gruppe ist nur auf Einladung."
+      "inviteOnly": "Diese Gruppe ist nur auf Einladung.",
+      "membersOnly": "Das sehen nur Mitglieder."
+    },
+    "posts": {
+      "title": "Beiträge",
+      "empty": "Noch keine Beiträge",
+      "placeholder": "Schreib etwas für die Mitglieder…",
+      "publish": "Posten",
+      "comments": "Kommentare",
+      "commentPlaceholder": "Kommentar schreiben…",
+      "comment": "Kommentieren",
+      "delete": "Löschen",
+      "deletePostConfirm": "Diesen Beitrag löschen?",
+      "deleteCommentConfirm": "Diesen Kommentar löschen?",
+      "published": "Beitrag veröffentlicht",
+      "commentCount": "{{count}} Kommentare",
+      "back": "Zurück",
+      "notFoundTitle": "Beitrag nicht gefunden",
+      "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen."
     }
   },
   "errors": {

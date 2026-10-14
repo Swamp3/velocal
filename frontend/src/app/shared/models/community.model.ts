@@ -76,9 +76,7 @@ export interface SubgroupMember {
   joinedAt: string;
 }
 
-export type JoinSubgroupResult =
-  | { outcome: 'joined'; subgroup: Subgroup }
-  | { outcome: 'pending' };
+export type JoinSubgroupResult = { outcome: 'joined'; subgroup: Subgroup } | { outcome: 'pending' };
 
 export function subgroupVisibilityVariant(
   visibility: SubgroupVisibility,
@@ -96,6 +94,26 @@ export function communityInitials(name: string): string {
   if (parts.length === 1) return first.slice(0, 2).toUpperCase();
   const second = parts[1] ?? '';
   return `${first.charAt(0)}${second.charAt(0)}`.toUpperCase();
+}
+
+export interface CommunityPost {
+  id: string;
+  body: string;
+  authorId: string;
+  authorName: string | null;
+  commentCount: number;
+  canDelete: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommunityComment {
+  id: string;
+  body: string;
+  authorId: string;
+  authorName: string | null;
+  canDelete: boolean;
+  createdAt: string;
 }
 
 /** Badge color for a community visibility value. */

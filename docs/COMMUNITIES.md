@@ -124,9 +124,9 @@ Status values: `todo`, `doing`, `done`, `later`, `blocked`. Ids stay stable; do 
 
 | Id | Status | Note |
 | --- | --- | --- |
-| `community-posts` | todo | `community_posts`, member-only, one host. Editorial `posts` stay the public news CMS. |
-| `post-comments` | todo | Comments on community posts, member-only, same host audience. |
-| `post-moderation` | todo | Moderators moderate their subgroup; community admins moderate the community and every subgroup. |
+| `community-posts` | done | `community_posts`, member-only, one host. Editorial `posts` stay the public news CMS. |
+| `post-comments` | done | Comments on community posts, member-only, same host audience. |
+| `post-moderation` | done | Author or host moderator/admin can delete. Community admins moderate every subgroup. |
 
 ### 4. Polls
 

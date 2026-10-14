@@ -43,3 +43,13 @@
 | DELETE | `/api/communities/:slug/subgroups/:subgroupSlug` | Community admin | Delete a subgroup |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/join` | Community member | Join an open subgroup or request a `request` subgroup |
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/invites` | Community admin or moderator | Add a community member to the subgroup |
+| GET    | `/api/communities/:slug/posts` | Member | Community-hosted posts |
+| POST   | `/api/communities/:slug/posts` | Member | Create a community-hosted post |
+| GET    | `/api/communities/:slug/posts/:postId` | Member | One community-hosted post |
+| DELETE | `/api/communities/:slug/posts/:postId` | Author or community admin | Delete a post |
+| GET    | `/api/communities/:slug/posts/:postId/comments` | Member | Comments on a community post |
+| POST   | `/api/communities/:slug/posts/:postId/comments` | Member | Comment on a community post |
+| DELETE | `/api/communities/:slug/posts/:postId/comments/:commentId` | Author or community admin | Delete a comment |
+| GET    | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Subgroup-hosted posts |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Create a subgroup post |
+| DELETE | `/api/communities/:slug/subgroups/:subgroupSlug/posts/:postId` | Author, moderator, or community admin | Delete a subgroup post |

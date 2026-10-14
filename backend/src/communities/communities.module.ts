@@ -10,6 +10,10 @@ import { Community } from './entities/community.entity';
 import { SubgroupJoinRequest } from './entities/subgroup-join-request.entity';
 import { SubgroupMember } from './entities/subgroup-member.entity';
 import { Subgroup } from './entities/subgroup.entity';
+import { CommunityPostComment } from './entities/community-post-comment.entity';
+import { CommunityPost } from './entities/community-post.entity';
+import { CommunityPostsController } from './community-posts.controller';
+import { CommunityPostsService } from './community-posts.service';
 import { SubgroupsController } from './subgroups.controller';
 import { SubgroupsService } from './subgroups.service';
 
@@ -22,12 +26,18 @@ import { SubgroupsService } from './subgroups.service';
       Subgroup,
       SubgroupMember,
       SubgroupJoinRequest,
+      CommunityPost,
+      CommunityPostComment,
       User,
     ]),
     UploadsModule,
   ],
-  controllers: [CommunitiesController, SubgroupsController],
-  providers: [CommunitiesService, SubgroupsService],
+  controllers: [
+    CommunitiesController,
+    SubgroupsController,
+    CommunityPostsController,
+  ],
+  providers: [CommunitiesService, SubgroupsService, CommunityPostsService],
   exports: [CommunitiesService, SubgroupsService],
 })
 export class CommunitiesModule {}

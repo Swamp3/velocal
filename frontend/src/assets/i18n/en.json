@@ -626,7 +626,25 @@
       "lastAdminRemoval": "This community needs at least one admin.",
       "userNotFound": "No account uses that email.",
       "notCommunityMember": "That person is not a member of this community.",
-      "inviteOnly": "This group is invite only."
+      "inviteOnly": "This group is invite only.",
+      "membersOnly": "Only members can see this."
+    },
+    "posts": {
+      "title": "Posts",
+      "empty": "No posts yet",
+      "placeholder": "Write something for the members…",
+      "publish": "Post",
+      "comments": "Comments",
+      "commentPlaceholder": "Write a comment…",
+      "comment": "Comment",
+      "delete": "Delete",
+      "deletePostConfirm": "Delete this post?",
+      "deleteCommentConfirm": "Delete this comment?",
+      "published": "Post published",
+      "commentCount": "{{count}} comments",
+      "back": "Back",
+      "notFoundTitle": "Post not found",
+      "notFoundMessage": "This post does not exist or you cannot see it."
     }
   },
   "errors": {

@@ -91,5 +91,9 @@
         {{ 'communities.memberCount' | transloco: { count: subgroup.memberCount } }}
       </span>
     </div>
+
+    @if (subgroup.myRole || subgroup.viewerIsCommunityAdmin) {
+      <app-community-feed [communitySlug]="subgroup.communitySlug" [subgroupSlug]="subgroup.slug" />
+    }
   </div>
 }

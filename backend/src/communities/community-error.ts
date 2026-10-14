@@ -10,6 +10,7 @@ export const CommunityErrorCode = {
   userNotFound: 'community.userNotFound',
   notCommunityMember: 'community.notCommunityMember',
   inviteOnly: 'community.inviteOnly',
+  membersOnly: 'community.membersOnly',
 } as const;
 
 export type CommunityErrorCode =
@@ -20,7 +21,9 @@ export function communityConflict(code: CommunityErrorCode): ConflictException {
   return new ConflictException({ code, message: code });
 }
 
-export function communityForbidden(code: CommunityErrorCode): ForbiddenException {
+export function communityForbidden(
+  code: CommunityErrorCode,
+): ForbiddenException {
   return new ForbiddenException({ code, message: code });
 }
 

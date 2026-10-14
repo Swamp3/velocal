@@ -14,6 +14,7 @@ import { CommunityService } from '@core/services/community.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityHeroComponent, EmptyStateComponent } from '@shared/components';
+import { CommunityFeedComponent } from '../community-feed/community-feed.component';
 import { communityErrorKey } from '../community-error';
 import {
   Community,
@@ -35,6 +36,7 @@ import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from
     SkeletonComponent,
     CommunityHeroComponent,
     EmptyStateComponent,
+    CommunityFeedComponent,
   ],
   templateUrl: './community-detail.component.html',
 })

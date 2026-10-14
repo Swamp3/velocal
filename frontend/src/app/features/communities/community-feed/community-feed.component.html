@@ -1,0 +1,50 @@
+<section class="mt-10">
+  <h2 class="text-lg font-semibold text-[var(--color-text)]">
+    {{ 'communities.posts.title' | transloco }}
+  </h2>
+
+  <form class="mt-4 space-y-3" [formGroup]="form" (ngSubmit)="publish()">
+    <label class="sr-only" for="community-post-body">
+      {{ 'communities.posts.placeholder' | transloco }}
+    </label>
+    <textarea
+      id="community-post-body"
+      formControlName="body"
+      rows="3"
+      [attr.placeholder]="'communities.posts.placeholder' | transloco"
+      class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+    ></textarea>
+    <ui-button type="submit" [loading]="publishing()" [disabled]="publishing()">
+      {{ 'communities.posts.publish' | transloco }}
+    </ui-button>
+  </form>
+
+  @if (!loading() && posts().length === 0) {
+    <p class="mt-4 text-sm text-[var(--color-text-muted)]">
+      {{ 'communities.posts.empty' | transloco }}
+    </p>
+  } @else {
+    <ul class="mt-4 space-y-3">
+      @for (post of posts(); track post.id) {
+        <li>
+          <a
+            [routerLink]="postLink(post.id)"
+            class="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 shadow-[var(--shadow-card)] hover:bg-[var(--color-bg-alt)]"
+          >
+            <p class="text-sm font-medium text-[var(--color-text)]">
+              {{ authorName(post.authorName) }}
+            </p>
+            <p class="mt-1 line-clamp-3 whitespace-pre-line text-sm text-[var(--color-text)]">
+              {{ post.body }}
+            </p>
+            <p class="mt-2 text-xs text-[var(--color-text-muted)]">
+              <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'medium' }}</time>
+              <span aria-hidden="true"> · </span>
+              {{ 'communities.posts.commentCount' | transloco: { count: post.commentCount } }}
+            </p>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>
