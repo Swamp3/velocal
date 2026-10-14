@@ -98,6 +98,7 @@ export function communityInitials(name: string): string {
 
 export interface CommunityPost {
   id: string;
+  title: string;
   body: string;
   authorId: string;
   authorName: string | null;

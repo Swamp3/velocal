@@ -654,10 +654,19 @@
       "delete": "Umfrage löschen",
       "deleteConfirm": "Diese Umfrage löschen?"
     },
+    "events": {
+      "title": "Events",
+      "create": "Neues Event",
+      "empty": "Noch keine Events",
+      "listing": "Wer das Event sieht",
+      "listingPublic": "Öffentlich",
+      "listingMembers": "Nur Mitglieder"
+    },
     "posts": {
       "title": "Beiträge",
       "create": "Neuer Beitrag",
       "createTitle": "Beitrag schreiben",
+      "heading": "Titel",
       "empty": "Noch keine Beiträge",
       "placeholder": "Schreib etwas für die Mitglieder…",
       "publish": "Posten",

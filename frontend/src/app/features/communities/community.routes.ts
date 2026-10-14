@@ -36,6 +36,12 @@ const routes: Routes = [
       ),
   },
   {
+    path: ':slug/events/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('../events/event-form/event-form.component').then((m) => m.EventFormComponent),
+  },
+  {
     path: ':slug/requests',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -82,6 +88,12 @@ const routes: Routes = [
       import('./community-poll-form/community-poll-form.component').then(
         (m) => m.CommunityPollFormComponent,
       ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/events/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('../events/event-form/event-form.component').then((m) => m.EventFormComponent),
   },
   {
     path: ':slug/subgroups/:subgroupSlug/requests',

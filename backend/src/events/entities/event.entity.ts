@@ -9,8 +9,15 @@ import {
   Index,
 } from 'typeorm';
 import type { Point } from 'geojson';
+import { Community } from '../../communities/entities/community.entity';
 import { Discipline } from '../../disciplines/entities/discipline.entity';
+import { Subgroup } from '../../communities/entities/subgroup.entity';
 import { User } from '../../users/entities/user.entity';
+
+export enum EventListing {
+  PUBLIC = 'public',
+  MEMBERS = 'members',
+}
 
 export enum EventStatus {
   PUBLISHED = 'published',
@@ -89,6 +96,32 @@ export class Event {
 
   @Column({ name: 'created_by_id', nullable: true })
   createdById: string;
+
+  /** Null means the event is not hosted by a community. */
+  @Index('IDX_events_community_id')
+  @Column({ type: 'uuid', name: 'community_id', nullable: true })
+  communityId: string | null;
+
+  @ManyToOne(() => Community, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'community_id' })
+  community: Community | null;
+
+  /** Null hosts the event on the community. Set hosts it on exactly one subgroup. */
+  @Index('IDX_events_subgroup_id')
+  @Column({ type: 'uuid', name: 'subgroup_id', nullable: true })
+  subgroupId: string | null;
+
+  @ManyToOne(() => Subgroup, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'subgroup_id' })
+  subgroup: Subgroup | null;
+
+  @Column({
+    type: 'enum',
+    enum: EventListing,
+    enumName: 'event_listing',
+    default: EventListing.PUBLIC,
+  })
+  listing: EventListing;
 
   @CreateDateColumn()
   createdAt: Date;

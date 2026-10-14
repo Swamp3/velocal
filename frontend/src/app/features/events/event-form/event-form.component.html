@@ -3,7 +3,7 @@
   <div class="flex items-center justify-between">
     <div>
       <a
-        [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']"
+        [routerLink]="backCommands()"
         class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
       >
         <span class="material-symbols-outlined text-[16px]">arrow_back</span>
@@ -12,7 +12,7 @@
     </div>
     @if (!loading()) {
       <div class="flex items-center gap-3">
-        <a [routerLink]="isEdit() ? ['/events', eventId()] : ['/events']">
+        <a [routerLink]="backCommands()">
           <ui-button variant="ghost" type="button">
             {{ 'event.form.cancel' | transloco }}
           </ui-button>
@@ -50,6 +50,21 @@
     </div>
   } @else {
     <form id="eventForm" [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-6">
+      @if (communitySlug()) {
+        <div>
+          <label for="listing" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'communities.events.listing' | transloco }}
+          </label>
+          <select
+            id="listing"
+            formControlName="listing"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          >
+            <option value="members">{{ 'communities.events.listingMembers' | transloco }}</option>
+            <option value="public">{{ 'communities.events.listingPublic' | transloco }}</option>
+          </select>
+        </div>
+      }
       <!-- Name -->
       <div>
         <label for="name" class="block text-sm font-medium text-[var(--color-text)]">

@@ -21,6 +21,7 @@ import {
   CommunitySectionLink,
   CommunitySectionNavComponent,
 } from '../community-section-nav/community-section-nav.component';
+import { CommunityEventsComponent } from '../community-events/community-events.component';
 import { Subgroup, SubgroupVisibility, subgroupVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -38,6 +39,7 @@ import { communityErrorKey } from '../community-error';
     EmptyStateComponent,
     RichTextViewComponent,
     CommunitySectionNavComponent,
+    CommunityEventsComponent,
   ],
   templateUrl: './subgroup-detail.component.html',
 })

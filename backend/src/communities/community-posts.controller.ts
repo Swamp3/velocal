@@ -37,7 +37,7 @@ export class CommunityPostsController {
 
   @Post('communities/:communitySlug/posts')
   @UseInterceptors(BadWordInterceptor)
-  @CheckBadWords('body')
+  @CheckBadWords('title', 'body')
   createCommunity(
     @Param('communitySlug') communitySlug: string,
     @Body() dto: CreateCommunityPostDto,
@@ -108,7 +108,7 @@ export class CommunityPostsController {
 
   @Post('communities/:communitySlug/subgroups/:subgroupSlug/posts')
   @UseInterceptors(BadWordInterceptor)
-  @CheckBadWords('body')
+  @CheckBadWords('title', 'body')
   createSubgroup(
     @Param('communitySlug') communitySlug: string,
     @Param('subgroupSlug') subgroupSlug: string,

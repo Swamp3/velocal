@@ -10,10 +10,11 @@
           [routerLink]="postLink(post.id)"
           class="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 shadow-[var(--shadow-card)] hover:bg-[var(--color-bg-alt)]"
         >
-          <p class="text-sm font-medium text-[var(--color-text)]">
+          <p class="font-medium text-[var(--color-text)]">{{ post.title }}</p>
+          <p class="mt-1 text-sm text-[var(--color-text-muted)]">
             {{ authorName(post.authorName) }}
           </p>
-          <app-rich-text-view class="mt-1 block" [value]="post.body" [clamp]="true" />
+          <app-rich-text-view class="mt-2 block" [value]="post.body" [clamp]="true" />
           <p class="mt-2 text-xs text-[var(--color-text-muted)]">
             <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'medium' }}</time>
             <span aria-hidden="true"> · </span>

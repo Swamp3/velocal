@@ -23,6 +23,7 @@ import {
   CommunitySectionLink,
   CommunitySectionNavComponent,
 } from '../community-section-nav/community-section-nav.component';
+import { CommunityEventsComponent } from '../community-events/community-events.component';
 import { Community, CommunityVisibility, communityVisibilityVariant } from '@shared/models';
 import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
 
@@ -39,6 +40,7 @@ import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from
     EmptyStateComponent,
     RichTextViewComponent,
     CommunitySectionNavComponent,
+    CommunityEventsComponent,
   ],
   templateUrl: './community-detail.component.html',
 })

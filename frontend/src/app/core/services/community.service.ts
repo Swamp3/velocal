@@ -17,6 +17,8 @@ import {
   SubgroupRole,
   SubgroupVisibility,
   UpdateCommunityDto,
+  CreateEventDto,
+  CyclingEvent,
 } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
@@ -180,10 +182,10 @@ export class CommunityService {
 
   createPost(
     communitySlug: string,
-    body: string,
+    dto: { title: string; body: string },
     subgroupSlug?: string | null,
   ): Observable<CommunityPost> {
-    return this.api.post(this.postsPath(communitySlug, subgroupSlug), { body });
+    return this.api.post(this.postsPath(communitySlug, subgroupSlug), dto);
   }
 
   getPost(
@@ -248,6 +250,24 @@ export class CommunityService {
     subgroupSlug?: string | null,
   ): Observable<CommunityPoll> {
     return this.api.post(this.pollsPath(communitySlug, subgroupSlug), dto);
+  }
+
+  listEvents(communitySlug: string, subgroupSlug?: string): Observable<CyclingEvent[]> {
+    const path = subgroupSlug
+      ? `/communities/${communitySlug}/subgroups/${subgroupSlug}/events`
+      : `/communities/${communitySlug}/events`;
+    return this.api.get<CyclingEvent[]>(path);
+  }
+
+  createEvent(
+    communitySlug: string,
+    dto: CreateEventDto & { listing?: 'public' | 'members' },
+    subgroupSlug?: string,
+  ): Observable<CyclingEvent> {
+    const path = subgroupSlug
+      ? `/communities/${communitySlug}/subgroups/${subgroupSlug}/events`
+      : `/communities/${communitySlug}/events`;
+    return this.api.post<CyclingEvent>(path, dto);
   }
 
   votePoll(

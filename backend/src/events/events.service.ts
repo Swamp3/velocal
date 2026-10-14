@@ -5,7 +5,32 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Event, EventSource, EventStatus } from './entities/event.entity';
+import {
+  CommunityMember,
+  CommunityMemberRole,
+} from '../communities/entities/community-member.entity';
+import {
+  Community,
+  CommunityVisibility,
+} from '../communities/entities/community.entity';
+import {
+  SubgroupMember,
+  SubgroupMemberRole,
+} from '../communities/entities/subgroup-member.entity';
+import {
+  Subgroup,
+  SubgroupVisibility,
+} from '../communities/entities/subgroup.entity';
+import {
+  communityForbidden,
+  CommunityErrorCode,
+} from '../communities/community-error';
+import {
+  Event,
+  EventListing,
+  EventSource,
+  EventStatus,
+} from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
@@ -35,6 +60,14 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private readonly repo: Repository<Event>,
+    @InjectRepository(Community)
+    private readonly communities: Repository<Community>,
+    @InjectRepository(CommunityMember)
+    private readonly communityMembers: Repository<CommunityMember>,
+    @InjectRepository(Subgroup)
+    private readonly subgroups: Repository<Subgroup>,
+    @InjectRepository(SubgroupMember)
+    private readonly subgroupMembers: Repository<SubgroupMember>,
     private readonly geocoding: GeocodingService,
     private readonly uploads: UploadsService,
   ) {}
@@ -57,6 +90,9 @@ export class EventsService {
 
     const status = params.status ?? EventStatus.PUBLISHED;
     qb.andWhere('event.status = :status', { status });
+    qb.andWhere('event.listing = :publicListing', {
+      publicListing: EventListing.PUBLIC,
+    });
 
     if (params.q) {
       qb.andWhere('event.name ILIKE :q', { q: `%${params.q}%` });
@@ -135,8 +171,12 @@ export class EventsService {
     };
   }
 
-  async findOne(id: string): Promise<SerializedEvent> {
-    return this.serializeEvent(await this.findEntity(id));
+  async findOne(id: string, userId?: string): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    if (!(await this.canSee(event, userId))) {
+      throw new NotFoundException(`Event ${id} not found`);
+    }
+    return this.serializeEvent(event);
   }
 
   private async findEntity(id: string): Promise<Event> {
@@ -147,7 +187,15 @@ export class EventsService {
     return event;
   }
 
-  async create(dto: CreateEventDto, userId?: string): Promise<Event> {
+  async create(
+    dto: CreateEventDto,
+    userId?: string,
+    host?: {
+      communityId: string;
+      subgroupId: string | null;
+      listing: EventListing;
+    },
+  ): Promise<Event> {
     let coordinates = dto.coordinates;
 
     if (!coordinates && dto.locationName) {
@@ -174,6 +222,9 @@ export class EventsService {
             coordinates: [coordinates.lng, coordinates.lat],
           }
         : undefined,
+      communityId: host?.communityId ?? null,
+      subgroupId: host?.subgroupId ?? null,
+      listing: host?.listing ?? EventListing.PUBLIC,
     });
     return this.repo.save(entity);
   }
@@ -184,6 +235,9 @@ export class EventsService {
     user?: { id: string; isAdmin: boolean },
   ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
+    if (!(await this.canSee(event, user?.id))) {
+      throw new NotFoundException(`Event ${id} not found`);
+    }
 
     if (user) {
       this.assertOwnerOrAdmin(event, user);
@@ -197,7 +251,11 @@ export class EventsService {
       partial.registrationDeadline = new Date(dto.registrationDeadline);
 
     let coordinates = dto.coordinates;
-    if (!coordinates && dto.locationName && dto.locationName !== event.locationName) {
+    if (
+      !coordinates &&
+      dto.locationName &&
+      dto.locationName !== event.locationName
+    ) {
       const geo = await this.geocoding.geocodeLocation(
         dto.locationName,
         dto.address ?? event.address,
@@ -223,6 +281,9 @@ export class EventsService {
     user?: { id: string; isAdmin: boolean },
   ): Promise<void> {
     const event = await this.findEntity(id);
+    if (!(await this.canSee(event, user?.id))) {
+      throw new NotFoundException(`Event ${id} not found`);
+    }
 
     if (user) {
       this.assertOwnerOrAdmin(event, user);
@@ -268,22 +329,16 @@ export class EventsService {
 
     switch (dto.type) {
       case MissingDataType.URL:
-        qb.andWhere(
-          "(event.externalUrl IS NULL OR event.externalUrl = '')",
-        );
+        qb.andWhere("(event.externalUrl IS NULL OR event.externalUrl = '')");
         break;
       case MissingDataType.ADDRESS:
-        qb.andWhere(
-          "(event.address IS NULL OR event.address = '')",
-        );
+        qb.andWhere("(event.address IS NULL OR event.address = '')");
         break;
       case MissingDataType.COORDINATES:
         qb.andWhere('event.coordinates IS NULL');
         break;
       case MissingDataType.DESCRIPTION:
-        qb.andWhere(
-          "(event.description IS NULL OR event.description = '')",
-        );
+        qb.andWhere("(event.description IS NULL OR event.description = '')");
         break;
       default:
         qb.andWhere(
@@ -344,6 +399,137 @@ export class EventsService {
     if (!event.coordinates) missing.push('coordinates');
     if (!event.description) missing.push('description');
     return missing;
+  }
+
+  async listHosted(
+    communitySlug: string,
+    userId: string | undefined,
+    subgroupSlug?: string,
+  ): Promise<SerializedEvent[]> {
+    const host = await this.resolveHost(
+      communitySlug,
+      userId,
+      subgroupSlug,
+      false,
+    );
+    const qb = this.repo
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.discipline', 'discipline')
+      .where('event.communityId = :communityId', {
+        communityId: host.community.id,
+      })
+      .andWhere('event.status = :status', { status: EventStatus.PUBLISHED })
+      .andWhere('event.startDate >= :from', { from: new Date() });
+    if (host.subgroup) {
+      qb.andWhere('event.subgroupId = :subgroupId', {
+        subgroupId: host.subgroup.id,
+      });
+    } else {
+      qb.andWhere('event.subgroupId IS NULL');
+    }
+    if (!host.canSeeMembers) {
+      qb.andWhere('event.listing = :publicListing', {
+        publicListing: EventListing.PUBLIC,
+      });
+    }
+    qb.orderBy('event.startDate', 'ASC').take(20);
+    const rows = await qb.getMany();
+    return rows.map((event) => this.serializeEvent(event));
+  }
+
+  async createHosted(
+    communitySlug: string,
+    userId: string,
+    dto: CreateEventDto & { listing?: EventListing },
+    subgroupSlug?: string,
+  ): Promise<SerializedEvent> {
+    const host = await this.resolveHost(
+      communitySlug,
+      userId,
+      subgroupSlug,
+      true,
+    );
+    const listing = dto.listing ?? EventListing.MEMBERS;
+    const event = await this.create(dto, userId, {
+      communityId: host.community.id,
+      subgroupId: host.subgroup?.id ?? null,
+      listing,
+    });
+    return this.serializeEvent(event);
+  }
+
+  private async resolveHost(
+    communitySlug: string,
+    userId: string | undefined,
+    subgroupSlug: string | undefined,
+    forCreate: boolean,
+  ): Promise<{
+    community: Community;
+    subgroup: Subgroup | null;
+    canSeeMembers: boolean;
+  }> {
+    const community = await this.communities.findOne({
+      where: { slug: communitySlug },
+    });
+    if (!community) throw new NotFoundException('Community not found');
+    const communityMember = userId
+      ? await this.communityMembers.findOne({
+          where: { communityId: community.id, userId },
+        })
+      : null;
+    if (
+      community.visibility === CommunityVisibility.PRIVATE &&
+      !communityMember
+    ) {
+      throw new NotFoundException('Community not found');
+    }
+    const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
+    if (!subgroupSlug) {
+      if (forCreate && !isAdmin) {
+        throw communityForbidden(CommunityErrorCode.membersOnly);
+      }
+      return { community, subgroup: null, canSeeMembers: !!communityMember };
+    }
+    const subgroup = await this.subgroups.findOne({
+      where: { communityId: community.id, slug: subgroupSlug },
+    });
+    if (!subgroup) throw new NotFoundException('Subgroup not found');
+    const subgroupMember = userId
+      ? await this.subgroupMembers.findOne({
+          where: { subgroupId: subgroup.id, userId },
+        })
+      : null;
+    if (
+      subgroup.visibility === SubgroupVisibility.INVITE &&
+      !isAdmin &&
+      !subgroupMember
+    ) {
+      throw new NotFoundException('Subgroup not found');
+    }
+    const canModerate =
+      isAdmin || subgroupMember?.role === SubgroupMemberRole.MODERATOR;
+    if (forCreate && !canModerate) {
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    }
+    return {
+      community,
+      subgroup,
+      canSeeMembers: !!subgroupMember || !!isAdmin,
+    };
+  }
+
+  private async canSee(event: Event, userId?: string): Promise<boolean> {
+    if (event.listing !== EventListing.MEMBERS) return true;
+    if (!userId || !event.communityId) return false;
+    const communityMember = await this.communityMembers.findOne({
+      where: { communityId: event.communityId, userId },
+    });
+    if (!event.subgroupId) return !!communityMember;
+    if (communityMember?.role === CommunityMemberRole.ADMIN) return true;
+    const subgroupMember = await this.subgroupMembers.findOne({
+      where: { subgroupId: event.subgroupId, userId },
+    });
+    return !!subgroupMember;
   }
 
   private assertOwnerOrAdmin(

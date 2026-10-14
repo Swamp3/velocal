@@ -654,10 +654,19 @@
       "delete": "Delete poll",
       "deleteConfirm": "Delete this poll?"
     },
+    "events": {
+      "title": "Events",
+      "create": "New event",
+      "empty": "No events yet",
+      "listing": "Who can see it",
+      "listingPublic": "Public",
+      "listingMembers": "Members only"
+    },
     "posts": {
       "title": "Posts",
       "create": "New post",
       "createTitle": "Write a post",
+      "heading": "Title",
       "empty": "No posts yet",
       "placeholder": "Write something for the members…",
       "publish": "Post",

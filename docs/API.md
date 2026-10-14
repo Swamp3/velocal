@@ -4,8 +4,8 @@
 | ------ | ---------------------------------- | -------- | ------------------------------ |
 | POST   | `/api/auth/register`               | No       | Create account                 |
 | POST   | `/api/auth/login`                  | No       | Log in, receive JWT            |
-| GET    | `/api/events`                      | Optional | List/search/filter events      |
-| GET    | `/api/events/:id`                  | Optional | Event detail                   |
+| GET    | `/api/events`                      | Optional | List/search/filter public events. Members-only events are omitted |
+| GET    | `/api/events/:id`                  | Optional | Event detail. Members-only events are 404 for outsiders |
 | GET    | `/api/disciplines`                 | No       | All disciplines                |
 | GET    | `/api/users/me`                    | JWT      | Current user profile           |
 | PATCH  | `/api/users/me`                    | JWT      | Update profile                 |
@@ -48,7 +48,9 @@
 | POST   | `/api/communities/:slug/polls/:pollId/votes` | Member | Replace the caller's vote. 409 when the poll is closed |
 | DELETE | `/api/communities/:slug/polls/:pollId` | Author or community admin | Delete a poll |
 | GET    | `/api/communities/:slug/posts` | Member | Community-hosted posts |
-| POST   | `/api/communities/:slug/posts` | Member | Create a community-hosted post |
+| POST   | `/api/communities/:slug/posts` | Member | Create a community-hosted post (`title`, `body`) |
+| GET    | `/api/communities/:slug/events` | Optional | Upcoming events hosted by the community. Members-only rows are omitted for non-members |
+| POST   | `/api/communities/:slug/events` | Community admin | Create a community event. `listing` defaults to `members` |
 | GET    | `/api/communities/:slug/posts/:postId` | Member | One community-hosted post |
 | DELETE | `/api/communities/:slug/posts/:postId` | Author or community admin | Delete a post |
 | GET    | `/api/communities/:slug/posts/:postId/comments` | Member | Comments on a community post |
@@ -59,5 +61,7 @@
 | POST   | `/api/communities/:slug/subgroups/:subgroupSlug/polls/:pollId/votes` | Subgroup member or community admin | Replace the caller's vote |
 | DELETE | `/api/communities/:slug/subgroups/:subgroupSlug/polls/:pollId` | Author, moderator, or community admin | Delete a subgroup poll |
 | GET    | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Subgroup-hosted posts |
-| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Create a subgroup post |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/posts` | Subgroup member or community admin | Create a subgroup post (`title`, `body`) |
+| GET    | `/api/communities/:slug/subgroups/:subgroupSlug/events` | Optional | Upcoming events hosted by the subgroup |
+| POST   | `/api/communities/:slug/subgroups/:subgroupSlug/events` | Moderator or community admin | Create a subgroup event |
 | DELETE | `/api/communities/:slug/subgroups/:subgroupSlug/posts/:postId` | Author, moderator, or community admin | Delete a subgroup post |

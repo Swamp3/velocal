@@ -18,6 +18,11 @@ export const serverRoutes: ServerRoute[] = [
 
   { path: 'events/new', renderMode: RenderMode.Client },
   { path: 'events/:id/edit', renderMode: RenderMode.Client },
+  { path: 'communities/:slug/events/new', renderMode: RenderMode.Client },
+  {
+    path: 'communities/:slug/subgroups/:subgroupSlug/events/new',
+    renderMode: RenderMode.Client,
+  },
 
   { path: 'series/new', renderMode: RenderMode.Client },
   { path: 'series/:slug/edit', renderMode: RenderMode.Client },

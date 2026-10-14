@@ -11,6 +11,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
+import { CommunityService } from '@core/services/community.service';
 import { EventService } from '@core/services/event.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -46,6 +47,7 @@ export class EventFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
+  private readonly communities = inject(CommunityService);
   private readonly disciplineService = inject(DisciplineService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -115,9 +117,15 @@ export class EventFormComponent implements OnInit {
     }),
     externalUrl: new FormControl('', { nonNullable: true }),
     status: new FormControl('published', { nonNullable: true }),
+    listing: new FormControl<'public' | 'members'>('members', { nonNullable: true }),
   });
 
+  protected readonly communitySlug = signal<string | null>(null);
+  protected readonly subgroupSlug = signal<string | null>(null);
+
   ngOnInit(): void {
+    this.communitySlug.set(this.route.snapshot.paramMap.get('slug'));
+    this.subgroupSlug.set(this.route.snapshot.paramMap.get('subgroupSlug'));
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.eventId.set(id);
@@ -130,6 +138,17 @@ export class EventFormComponent implements OnInit {
   protected onCoordinatesChange(coords: { lat: number; lng: number }): void {
     this.form.patchValue({ lat: coords.lat, lng: coords.lng });
     this.mapCoordinates.set(coords);
+  }
+
+  protected backCommands(): string[] {
+    if (this.isEdit() && this.eventId()) return ['/events', this.eventId()!];
+    const community = this.communitySlug();
+    const subgroup = this.subgroupSlug();
+    if (community && subgroup) {
+      return ['/communities', community, 'subgroups', subgroup];
+    }
+    if (community) return ['/communities', community];
+    return ['/events'];
   }
 
   protected onSubmit(): void {
@@ -158,16 +177,25 @@ export class EventFormComponent implements OnInit {
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
     };
 
+    const community = this.communitySlug();
     const action = this.isEdit()
       ? this.eventService.updateEvent(this.eventId()!, dto)
-      : this.eventService.createEvent(dto);
+      : community
+        ? this.communities.createEvent(
+            community,
+            { ...dto, listing: raw.listing },
+            this.subgroupSlug() ?? undefined,
+          )
+        : this.eventService.createEvent(dto);
 
     action.subscribe({
       next: (event) => {
         this.submitting.set(false);
         const key = this.isEdit() ? 'event.form.success.update' : 'event.form.success.create';
         this.toast.success(this.transloco.translate(key));
-        this.router.navigate(['/events', event.id]);
+        this.router.navigate(
+          community && !this.isEdit() ? this.backCommands() : ['/events', event.id],
+        );
       },
       error: (err: ApiError) => {
         this.submitting.set(false);

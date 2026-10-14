@@ -80,6 +80,7 @@
       </span>
     </div>
 
+    <app-community-events [communitySlug]="c.slug" [canCreate]="c.myRole === 'admin'" />
     <app-community-section-nav [links]="sections(c)" />
   </div>
 }

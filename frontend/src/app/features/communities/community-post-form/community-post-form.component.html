@@ -21,6 +21,11 @@
       (ngSubmit)="publish()"
       class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
     >
+      <ui-input
+        [label]="'communities.posts.heading' | transloco"
+        formControlName="title"
+        [error]="titleError()"
+      />
       <app-rich-text
         formControlName="body"
         [compact]="true"

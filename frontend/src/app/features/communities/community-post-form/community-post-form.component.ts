@@ -13,7 +13,7 @@ import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { RichTextComponent } from '@shared/components';
-import { ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
 @Component({
@@ -24,6 +24,7 @@ import { communityErrorKey } from '../community-error';
     RouterLink,
     TranslocoPipe,
     ButtonComponent,
+    InputComponent,
     SkeletonComponent,
     RichTextComponent,
   ],
@@ -43,6 +44,7 @@ export class CommunityPostFormComponent implements OnInit {
   protected readonly communitySlug = signal('');
   protected readonly subgroupSlug = signal<string | null>(null);
   protected readonly form = this.fb.nonNullable.group({
+    title: ['', [Validators.required, Validators.maxLength(200)]],
     body: ['', Validators.required],
   });
 
@@ -95,15 +97,22 @@ export class CommunityPostFormComponent implements OnInit {
       : ['/communities', this.communitySlug(), 'posts'];
   }
 
+  protected titleError(): string {
+    const control = this.form.controls.title;
+    if (!control.touched || control.valid) return '';
+    return this.transloco.translate('validation.required');
+  }
+
   protected publish(): void {
+    const title = this.form.controls.title.value.trim();
     const body = this.form.controls.body.value;
-    if (!body || this.saving()) {
+    if (!title || !body || this.saving()) {
       this.form.markAllAsTouched();
       return;
     }
     this.saving.set(true);
     this.communityService
-      .createPost(this.communitySlug(), body, this.subgroupSlug())
+      .createPost(this.communitySlug(), { title, body }, this.subgroupSlug())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (post) => {

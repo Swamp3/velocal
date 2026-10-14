@@ -23,6 +23,7 @@ import { Subgroup, SubgroupVisibility } from './entities/subgroup.entity';
 
 export interface SerializedCommunityPost {
   id: string;
+  title: string;
   body: string;
   authorId: string;
   authorName: string | null;
@@ -94,6 +95,7 @@ export class CommunityPostsService {
         communityId: host.community.id,
         subgroupId: host.subgroup?.id ?? null,
         authorId: userId,
+        title: dto.title.trim(),
         body: dto.body.trim(),
       }),
     );
@@ -285,6 +287,7 @@ export class CommunityPostsService {
   ): SerializedCommunityPost {
     return {
       id: post.id,
+      title: post.title,
       body: post.body,
       authorId: post.authorId,
       authorName: post.author?.displayName ?? null,

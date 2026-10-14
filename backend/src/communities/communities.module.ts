@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
+import { EventsModule } from '../events/events.module';
 import { UploadsModule } from '../uploads/uploads.module';
+import { CommunityEventsController } from './community-events.controller';
 import { CommunitiesController } from './communities.controller';
 import { CommunitiesService } from './communities.service';
 import { CommunityJoinRequest } from './entities/community-join-request.entity';
@@ -39,12 +41,14 @@ import { SubgroupsService } from './subgroups.service';
       User,
     ]),
     UploadsModule,
+    EventsModule,
   ],
   controllers: [
     CommunitiesController,
     SubgroupsController,
     CommunityPostsController,
     CommunityPollsController,
+    CommunityEventsController,
   ],
   providers: [
     CommunitiesService,

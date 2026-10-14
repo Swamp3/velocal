@@ -26,6 +26,7 @@ import { EventSearchDto } from './dto/event-search.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 
@@ -44,8 +45,12 @@ export class EventsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<SerializedEvent> {
-    return this.eventsService.findOne(id);
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user?: { id: string },
+  ): Promise<SerializedEvent> {
+    return this.eventsService.findOne(id, user?.id);
   }
 
   @Post()
@@ -84,7 +89,9 @@ export class EventsController {
 
   @Post(':id/image')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   uploadImage(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile(imagePipe) file: Express.Multer.File,

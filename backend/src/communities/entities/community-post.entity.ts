@@ -42,6 +42,9 @@ export class CommunityPost {
   @JoinColumn({ name: 'author_id' })
   author: User;
 
+  @Column({ type: 'varchar', length: 200 })
+  title: string;
+
   @Column({ type: 'text' })
   body: string;
 

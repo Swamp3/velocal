@@ -4,7 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Response } from 'express';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
-import { Event, EventStatus } from '../events/entities/event.entity';
+import {
+  Event,
+  EventListing,
+  EventStatus,
+} from '../events/entities/event.entity';
 import { Post, PostStatus } from '../posts/entities/post.entity';
 import { RaceSeries } from '../series/entities/race-series.entity';
 
@@ -28,14 +32,21 @@ interface UrlEntryInput {
   priority?: number;
 }
 
-function urlEntry({ loc, lastmod, changefreq, priority }: UrlEntryInput): string {
+function urlEntry({
+  loc,
+  lastmod,
+  changefreq,
+  priority,
+}: UrlEntryInput): string {
   const parts = [`    <loc>${xmlEscape(loc)}</loc>`];
   if (lastmod) {
     const d = lastmod instanceof Date ? lastmod : new Date(lastmod);
-    if (!Number.isNaN(d.getTime())) parts.push(`    <lastmod>${d.toISOString()}</lastmod>`);
+    if (!Number.isNaN(d.getTime()))
+      parts.push(`    <lastmod>${d.toISOString()}</lastmod>`);
   }
   if (changefreq) parts.push(`    <changefreq>${changefreq}</changefreq>`);
-  if (priority != null) parts.push(`    <priority>${priority.toFixed(1)}</priority>`);
+  if (priority != null)
+    parts.push(`    <priority>${priority.toFixed(1)}</priority>`);
   return `  <url>\n${parts.join('\n')}\n  </url>`;
 }
 
@@ -48,11 +59,14 @@ function wrapUrlset(entries: string[]): string {
   );
 }
 
-function wrapSitemapIndex(entries: Array<{ loc: string; lastmod?: Date }>): string {
+function wrapSitemapIndex(
+  entries: Array<{ loc: string; lastmod?: Date }>,
+): string {
   const body = entries
     .map(({ loc, lastmod }) => {
       const parts = [`    <loc>${xmlEscape(loc)}</loc>`];
-      if (lastmod) parts.push(`    <lastmod>${lastmod.toISOString()}</lastmod>`);
+      if (lastmod)
+        parts.push(`    <lastmod>${lastmod.toISOString()}</lastmod>`);
       return `  <sitemap>\n${parts.join('\n')}\n  </sitemap>`;
     })
     .join('\n');
@@ -70,11 +84,14 @@ export class SitemapController {
     private readonly config: ConfigService,
     @InjectRepository(Event) private readonly events: Repository<Event>,
     @InjectRepository(Post) private readonly posts: Repository<Post>,
-    @InjectRepository(RaceSeries) private readonly series: Repository<RaceSeries>,
+    @InjectRepository(RaceSeries)
+    private readonly series: Repository<RaceSeries>,
   ) {}
 
   private siteUrl(): string {
-    return (this.config.get<string>('SITE_URL') ?? 'https://velocal.cc').replace(/\/$/, '');
+    return (
+      this.config.get<string>('SITE_URL') ?? 'https://velocal.cc'
+    ).replace(/\/$/, '');
   }
 
   /** Sitemap index — points at the static + per-collection shards. */
@@ -106,7 +123,11 @@ export class SitemapController {
       urlEntry({ loc: `${site}/calendar`, changefreq: 'daily', priority: 0.6 }),
       urlEntry({ loc: `${site}/series`, changefreq: 'weekly', priority: 0.7 }),
       urlEntry({ loc: `${site}/news`, changefreq: 'daily', priority: 0.7 }),
-      urlEntry({ loc: `${site}/changelog`, changefreq: 'weekly', priority: 0.4 }),
+      urlEntry({
+        loc: `${site}/changelog`,
+        changefreq: 'weekly',
+        priority: 0.4,
+      }),
     ];
     res.send(wrapUrlset(entries));
   }
@@ -116,9 +137,15 @@ export class SitemapController {
   @Header('Cache-Control', 'public, max-age=3600')
   async sitemapEvents(@Res() res: Response): Promise<void> {
     const site = this.siteUrl();
-    const cutoff = new Date(Date.now() - ARCHIVE_CUTOFF_DAYS * 24 * 60 * 60 * 1000);
+    const cutoff = new Date(
+      Date.now() - ARCHIVE_CUTOFF_DAYS * 24 * 60 * 60 * 1000,
+    );
     const events = await this.events.find({
-      where: { status: EventStatus.PUBLISHED, startDate: MoreThanOrEqual(cutoff) },
+      where: {
+        status: EventStatus.PUBLISHED,
+        listing: EventListing.PUBLIC,
+        startDate: MoreThanOrEqual(cutoff),
+      },
       select: ['id', 'updatedAt', 'startDate'],
       order: { startDate: 'DESC' },
       take: MAX_URLS_PER_FILE,
@@ -160,7 +187,10 @@ export class SitemapController {
   async sitemapPosts(@Res() res: Response): Promise<void> {
     const site = this.siteUrl();
     const posts = await this.posts.find({
-      where: { status: PostStatus.PUBLISHED, publishedAt: LessThanOrEqual(new Date()) },
+      where: {
+        status: PostStatus.PUBLISHED,
+        publishedAt: LessThanOrEqual(new Date()),
+      },
       select: ['slug', 'updatedAt'],
       take: MAX_URLS_PER_FILE,
     });
