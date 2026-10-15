@@ -1390,26 +1390,36 @@ export class EventsService {
     }
   }
 
-  async listComments(id: string, userId: string) {
+  /** Community audience of an event's discussion; members only. */
+  private async commentScope(
+    event: Event,
+    userId: string,
+    ctx?: HostQuery,
+  ): Promise<{ shareId: string | null; manager: boolean }> {
+    const scope = await this.attendeeScope(event, userId, ctx);
+    if (!scope?.member)
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    return { shareId: scope.share?.id ?? null, manager: scope.manager };
+  }
+
+  async listComments(id: string, userId: string, ctx?: HostQuery) {
     const event = await this.requireVisible(id, userId);
-    await this.requireHostMember(event, userId);
+    const scope = await this.commentScope(event, userId, ctx);
     const rows = await this.comments.find({
-      where: { eventId: id },
+      where: { eventId: id, shareId: scope.shareId ?? IsNull() },
       relations: { author: true },
       order: { createdAt: 'ASC' },
     });
-    const access = await this.hostRole(event, userId);
-    return rows.map((row) =>
-      this.serializeComment(row, userId, access.manager),
-    );
+    return rows.map((row) => this.serializeComment(row, userId, scope.manager));
   }
 
-  async addComment(id: string, userId: string, body: string) {
+  async addComment(id: string, userId: string, body: string, ctx?: HostQuery) {
     const event = await this.requireVisible(id, userId);
-    await this.requireHostMember(event, userId);
+    const scope = await this.commentScope(event, userId, ctx);
     const saved = await this.comments.save(
       this.comments.create({
         eventId: id,
+        shareId: scope.shareId,
         authorId: userId,
         body: body.trim(),
       }),
@@ -1426,14 +1436,15 @@ export class EventsService {
     id: string,
     commentId: string,
     userId: string,
+    ctx?: HostQuery,
   ): Promise<void> {
     const event = await this.requireVisible(id, userId);
+    const scope = await this.commentScope(event, userId, ctx);
     const comment = await this.comments.findOne({
-      where: { id: commentId, eventId: id },
+      where: { id: commentId, eventId: id, shareId: scope.shareId ?? IsNull() },
     });
     if (!comment) throw new NotFoundException('Comment not found');
-    const access = await this.hostRole(event, userId);
-    if (comment.authorId !== userId && !access.manager) {
+    if (comment.authorId !== userId && !scope.manager) {
       throw communityForbidden(CommunityErrorCode.membersOnly);
     }
     await this.comments.delete(comment.id);
@@ -1445,13 +1456,6 @@ export class EventsService {
       throw new NotFoundException(`Event ${id} not found`);
     }
     return event;
-  }
-
-  private async requireHostMember(event: Event, userId: string): Promise<void> {
-    const access = await this.hostRole(event, userId);
-    if (!event.communityId || !access.member) {
-      throw communityForbidden(CommunityErrorCode.membersOnly);
-    }
   }
 
   private async present(
@@ -1490,7 +1494,7 @@ export class EventsService {
       ...(isMember ? { rsvpCount: counts.get(event.id) ?? 0 } : {}),
       myRsvp: mine?.status ?? null,
       canRsvp: isMember,
-      canComment: !!event.communityId && access.member,
+      canComment: isMember,
       canSeeRsvps: isMember,
       canInvite: !!event.communityId && access.manager,
       canEdit: !!event.communityId && access.manager,

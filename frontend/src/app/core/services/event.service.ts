@@ -92,16 +92,16 @@ export class EventService {
     return this.api.get(`/events/${id}/rsvps${hostQuery(ctx)}`);
   }
 
-  listComments(id: string): Observable<EventComment[]> {
-    return this.api.get(`/events/${id}/comments`);
+  listComments(id: string, ctx?: EventHostContext): Observable<EventComment[]> {
+    return this.api.get(`/events/${id}/comments${hostQuery(ctx)}`);
   }
 
-  addComment(id: string, body: string): Observable<EventComment> {
-    return this.api.post(`/events/${id}/comments`, { body });
+  addComment(id: string, body: string, ctx?: EventHostContext): Observable<EventComment> {
+    return this.api.post(`/events/${id}/comments${hostQuery(ctx)}`, { body });
   }
 
-  deleteComment(id: string, commentId: string): Observable<void> {
-    return this.api.delete(`/events/${id}/comments/${commentId}`);
+  deleteComment(id: string, commentId: string, ctx?: EventHostContext): Observable<void> {
+    return this.api.delete(`/events/${id}/comments/${commentId}${hostQuery(ctx)}`);
   }
 }
 

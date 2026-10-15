@@ -13,10 +13,12 @@ import localeDe from '@angular/common/locales/de';
 import localeEn from '@angular/common/locales/en';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { provideTransloco } from '@jsverse/transloco';
 
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
+import { AppUpdateService } from '@core/services/app-update.service';
 import { AuthService } from '@core/services/auth.service';
 import { localeIdFactory, storedLang } from '@core/services/locale.service';
 import { routes } from './app.routes';
@@ -40,6 +42,11 @@ export const appConfig: ApplicationConfig = {
       });
     }),
     provideBrowserGlobalErrorListeners(),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
+    provideAppInitializer(() => inject(AppUpdateService).start()),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),

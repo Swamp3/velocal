@@ -105,6 +105,23 @@ export class EventDetailComponent implements OnInit {
     return this.favoriteService.isFavorite(ev.id);
   });
 
+  /** Where "back" leads: the community the event was opened from, else the event list. */
+  protected readonly back = computed(() => {
+    const ev = this.event();
+    const community =
+      this.hostContext.community ?? (ev?.communityId ? ev.hostCommunity?.slug : null);
+    if (!community) {
+      return { commands: ['/events'], labelKey: 'events.detail.backToList' };
+    }
+    const subgroup = this.hostContext.subgroup;
+    return {
+      commands: subgroup
+        ? ['/communities', community, 'subgroups', subgroup]
+        : ['/communities', community],
+      labelKey: 'events.detail.backToCommunity',
+    };
+  });
+
   protected readonly canEdit = computed(() => {
     const ev = this.event();
     const user = this.auth.currentUser();
@@ -153,7 +170,7 @@ export class EventDetailComponent implements OnInit {
     this.eventService.deleteEvent(ev.id).subscribe({
       next: () => {
         this.toast.success(this.transloco.translate('event.form.success.delete'));
-        this.router.navigate(['/events']);
+        this.router.navigate(this.back().commands);
       },
       error: () => this.deleteLoading.set(false),
     });
@@ -173,7 +190,7 @@ export class EventDetailComponent implements OnInit {
     this.eventService.stopSeries(ev.id).subscribe({
       next: () => {
         this.toast.success(this.transloco.translate('event.series.stopped'));
-        this.router.navigate(['/events']);
+        this.router.navigate(this.back().commands);
       },
       error: () => this.deleteLoading.set(false),
     });

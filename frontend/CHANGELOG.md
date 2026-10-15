@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.8.0] - 2026-10-15
+
+### Added
+
+- Repeat option on new events, with "delete this event only" and "stop series from here"
+- Routes pages (`/routes`) to manage several GPX files per route; GPX download on event pages
+- Ride details on the event form and page: route, Strava links, and pace groups with speed range and category
+- Add a public event to a club, with meetup details and members-only comments
+- Location and Strava link on clubs; counts on the Subgroups, Posts, Polls and Members buttons
+- Name suggestions when adding members to a subgroup
+- PWA: installable app, update check, and a "new version" banner
+- Account and Events menus in the header
+
+### Changed
+
+- Back from a club's event returns to the club
+- Subgroup members can no longer be invited by email
+
+### Fixed
+
+- RSVP count and list are shown to club members only
+
 ## [0.7.0] - 2026-10-14
 
 ### Added

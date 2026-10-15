@@ -12,7 +12,13 @@
       "news": "News",
       "communities": "Gemeinschaften",
       "admin": "Admin",
-      "routes": "Strecken"
+      "routes": "Strecken",
+      "eventList": "Liste",
+      "account": "Konto"
+    },
+    "update": {
+      "available": "Eine neue Version von VeloCal ist verfügbar.",
+      "reload": "Neu laden"
     }
   },
   "notifications": {
@@ -110,7 +116,8 @@
         "outlook": "Outlook",
         "ics": ".ics-Datei herunterladen"
       },
-      "community": "Community"
+      "community": "Community",
+      "backToCommunity": "Zurück zur Community"
     },
     "status": {
       "published": "Ausgeschrieben",

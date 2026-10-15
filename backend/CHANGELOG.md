@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.0] - 2026-10-15
+
+### Added
+
+- Repeating events: weekly and biweekly series (`recurrence` on create), `POST /events/:id/series/stop`
+- Routes with several GPX files (`/routes`), with distance, ascent and bounds read on upload; downloads follow event visibility
+- Pace groups (`PUT /events/:id/pace-groups`) and Strava links (`PUT /events/:id/strava-links`)
+- Public events shared into a community or subgroup with their own meetup details, RSVPs and comments
+- Community `location` and `stravaUrl`; `postCount`, `pollCount` and `subgroupCount` on communities and subgroups
+- Migrations for event shares, recurrences, routes, pace groups, Strava links, community location and share comments
+
+### Changed
+
+- Subgroup invites take a `userId` of an existing community member instead of an email
+- The subgroup creator becomes its moderator
+- Backup script also covers the uploads volume and writes a `pg_dump`
+
+### Fixed
+
+- RSVP counts and lists are visible to community audience members only; public events carry no attendee data
+
 ## [0.7.0] - 2026-10-14
 
 ### Added
