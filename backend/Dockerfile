@@ -1,5 +1,8 @@
+ARG PNPM_VERSION=12.11.2
+
 FROM node:24-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ARG PNPM_VERSION
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 WORKDIR /app
 COPY backend/pnpm-lock.yaml backend/package.json backend/pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
@@ -17,7 +20,8 @@ COPY CHANGELOG.md ./root-CHANGELOG.md
 RUN pnpm run build
 
 FROM node:24-alpine AS production
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ARG PNPM_VERSION
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 WORKDIR /app
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
