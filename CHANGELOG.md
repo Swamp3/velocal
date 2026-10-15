@@ -20,11 +20,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The app loads faster: unused form and dialog code no longer ships with the first page.
 - Removing admin rights now takes effect immediately, not when the login expires.
+- The first page paint no longer waits for sign-in state, and the font icons use a small subset file.
 
 ### Fixed
 
 - Text in comments no longer breaks in the middle of a word.
 - Buttons in the club section no longer wrap their text on small screens.
+- Dialogs keep keyboard focus inside while open.
+- Your RSVP now belongs to the club event it was given for.
+- Uploading a route without a GPX file is refused with a clear message.
 
 ## [0.10.0] — 2026-10-15
 
