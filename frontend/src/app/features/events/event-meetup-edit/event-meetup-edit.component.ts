@@ -4,7 +4,7 @@ import { CommunityService } from '@core/services/community.service';
 import { EventHostContext } from '@core/services/event.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CyclingEvent } from '@shared/models';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ModalComponent, ToastService } from '@shared/ui';
 
 /** `YYYY-MM-DDTHH:mm` in local time, the value format of a datetime-local input. */
 function toLocalInput(iso: string | null | undefined): string {
@@ -21,7 +21,7 @@ function toLocalInput(iso: string | null | undefined): string {
 @Component({
   selector: 'app-event-meetup-edit',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent],
+  imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent, ModalComponent],
   templateUrl: './event-meetup-edit.component.html',
 })
 export class EventMeetupEditComponent {
@@ -47,16 +47,18 @@ export class EventMeetupEditComponent {
     }),
   });
 
-  protected toggle(): void {
-    if (!this.open()) {
-      const event = this.event();
-      this.form.setValue({
-        meetupPlace: event.meetupPlace ?? '',
-        meetupAt: toLocalInput(event.meetupAt),
-        meetupNote: event.meetupNote ?? '',
-      });
-    }
-    this.open.update((value) => !value);
+  protected show(): void {
+    const event = this.event();
+    this.form.setValue({
+      meetupPlace: event.meetupPlace ?? '',
+      meetupAt: toLocalInput(event.meetupAt),
+      meetupNote: event.meetupNote ?? '',
+    });
+    this.open.set(true);
+  }
+
+  protected hide(): void {
+    if (!this.saving()) this.open.set(false);
   }
 
   protected save(): void {

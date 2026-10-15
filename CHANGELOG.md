@@ -4,6 +4,22 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.10.0] — 2026-10-15
+
+### Added
+
+- **Edit posts and comments** — authors can change their own posts and comments in clubs and subgroups. Comments open in a dialog, and edited items show "edited".
+- **First and last name** — new fields on your profile. Only you and admins see them; other members still see your display name.
+- **Strava profile** — add your Strava profile link or athlete ID to your profile. Members of your communities see a small link next to your name in the member lists.
+
+### Changed
+
+- The meetup details of a shared event are edited in a dialog, opened from the club section of the event page.
+
+### Fixed
+
+- The backend Docker build works again with pnpm's release-age policy (the lockfile used packages that were too new).
+
 ## [0.9.0] — 2026-10-15
 
 ### Added

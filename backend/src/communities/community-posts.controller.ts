@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   UseGuards,
   UseInterceptors,
@@ -55,6 +56,18 @@ export class CommunityPostsController {
     return this.posts.findOne(communitySlug, postId, user.id);
   }
 
+  @Patch('communities/:communitySlug/posts/:postId')
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('title', 'body')
+  updateCommunity(
+    @Param('communitySlug') communitySlug: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Body() dto: CreateCommunityPostDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedCommunityPost> {
+    return this.posts.update(communitySlug, postId, user.id, dto);
+  }
+
   @Delete('communities/:communitySlug/posts/:postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   removeCommunity(
@@ -84,6 +97,25 @@ export class CommunityPostsController {
     @CurrentUser() user: { id: string },
   ): Promise<SerializedCommunityComment> {
     return this.posts.addComment(communitySlug, postId, user.id, dto);
+  }
+
+  @Patch('communities/:communitySlug/posts/:postId/comments/:commentId')
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('body')
+  updateCommunityComment(
+    @Param('communitySlug') communitySlug: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
+    @Body() dto: CreateCommunityCommentDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedCommunityComment> {
+    return this.posts.updateComment(
+      communitySlug,
+      postId,
+      commentId,
+      user.id,
+      dto,
+    );
   }
 
   @Delete('communities/:communitySlug/posts/:postId/comments/:commentId')
@@ -126,6 +158,19 @@ export class CommunityPostsController {
     @CurrentUser() user: { id: string },
   ): Promise<SerializedCommunityPost> {
     return this.posts.findOne(communitySlug, postId, user.id, subgroupSlug);
+  }
+
+  @Patch('communities/:communitySlug/subgroups/:subgroupSlug/posts/:postId')
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('title', 'body')
+  updateSubgroup(
+    @Param('communitySlug') communitySlug: string,
+    @Param('subgroupSlug') subgroupSlug: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Body() dto: CreateCommunityPostDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedCommunityPost> {
+    return this.posts.update(communitySlug, postId, user.id, dto, subgroupSlug);
   }
 
   @Delete('communities/:communitySlug/subgroups/:subgroupSlug/posts/:postId')
@@ -193,6 +238,29 @@ export class CommunityPostsController {
       postId,
       commentId,
       user.id,
+      subgroupSlug,
+    );
+  }
+
+  @Patch(
+    'communities/:communitySlug/subgroups/:subgroupSlug/posts/:postId/comments/:commentId',
+  )
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('body')
+  updateSubgroupComment(
+    @Param('communitySlug') communitySlug: string,
+    @Param('subgroupSlug') subgroupSlug: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
+    @Body() dto: CreateCommunityCommentDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedCommunityComment> {
+    return this.posts.updateComment(
+      communitySlug,
+      postId,
+      commentId,
+      user.id,
+      dto,
       subgroupSlug,
     );
   }

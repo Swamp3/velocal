@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0] - 2026-10-15
+
+### Added
+
+- `PATCH` for community and subgroup posts and for their comments (author only); `canEdit` on both, `updatedAt` on comments
+- `firstName` and `lastName` on users, accepted by `PATCH /users/me` and returned with the user
+- `stravaUrl` on users: accepts a profile link or athlete ID, stored as `https://www.strava.com/athletes/<id>`; included in community and subgroup member lists
+- Migrations for user names and the Strava link
+
+### Fixed
+
+- Lockfile regenerated so installs pass pnpm 12's release-age policy; pnpm is pinned in the Dockerfile; the unused `@parcel/watcher` build script is skipped
+
 ## [0.9.0] - 2026-10-15
 
 ### Added

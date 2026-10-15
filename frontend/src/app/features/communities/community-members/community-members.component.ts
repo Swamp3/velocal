@@ -63,6 +63,7 @@ export class CommunityMembersComponent implements OnInit {
     return this.members().map((member) => ({
       id: member.userId,
       name: member.displayName ?? unnamed,
+      stravaUrl: member.stravaUrl,
       roleLabel: this.transloco.translate(
         member.role === 'admin'
           ? 'communities.members.roleAdmin'

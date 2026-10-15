@@ -314,7 +314,15 @@
     "passwordChangeHint": "Wir senden einen Link zum Zurücksetzen an deine E-Mail-Adresse.",
     "passwordSetHint": "Du hast dich ohne Passwort registriert. Lege eines fest, um dich auch mit Passwort anmelden zu können.",
     "passwordResetSent": "E-Mail zum Zurücksetzen gesendet. Prüfe deinen Posteingang.",
-    "passwordResetError": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut."
+    "passwordResetError": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "namesHint": "Vor- und Nachname sehen nur du und Admins. Andere Mitglieder sehen deinen Anzeigenamen.",
+    "strava": "Strava-Profil",
+    "stravaPlaceholder": "strava.com/athletes/… oder Athleten-ID",
+    "stravaHint": "Optional. Mitglieder deiner Communities sehen neben deinem Namen einen Link dazu.",
+    "stravaInvalid": "Gib einen strava.com-Profillink oder deine Athleten-ID ein",
+    "stravaOpen": "Auf Strava öffnen"
   },
   "series": {
     "title": "Rennserien",
@@ -703,7 +711,8 @@
       "roleMember": "Mitglied",
       "addFromCommunity": "Aus Community-Mitgliedern hinzufügen",
       "searchPlaceholder": "Namen eingeben…",
-      "noMatches": "Keine passenden Community-Mitglieder"
+      "noMatches": "Keine passenden Community-Mitglieder",
+      "stravaProfile": "Strava-Profil von {{name}}"
     },
     "requests": {
       "title": "Beitrittsanfragen",
@@ -812,7 +821,13 @@
       "commentCount": "{{count}} Kommentare",
       "back": "Zurück zu den Beiträgen",
       "notFoundTitle": "Beitrag nicht gefunden",
-      "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen."
+      "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen.",
+      "edit": "Bearbeiten",
+      "editTitle": "Beitrag bearbeiten",
+      "saveChanges": "Änderungen speichern",
+      "updated": "Beitrag aktualisiert",
+      "edited": "bearbeitet",
+      "backToPost": "Zurück zum Beitrag"
     },
     "strava": "Auf Strava ansehen"
   },

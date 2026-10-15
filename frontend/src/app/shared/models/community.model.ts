@@ -25,6 +25,7 @@ export interface Community {
 export interface CommunityMember {
   userId: string;
   displayName: string | null;
+  stravaUrl: string | null;
   role: CommunityRole;
   joinedAt: string;
 }
@@ -83,6 +84,7 @@ export interface Subgroup {
 export interface SubgroupMember {
   userId: string;
   displayName: string | null;
+  stravaUrl: string | null;
   role: SubgroupRole;
   joinedAt: string;
 }
@@ -114,6 +116,7 @@ export interface CommunityPost {
   authorId: string;
   authorName: string | null;
   commentCount: number;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: string;
   updatedAt: string;
@@ -146,8 +149,10 @@ export interface CommunityComment {
   body: string;
   authorId: string;
   authorName: string | null;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 /** Badge color for a community visibility value. */

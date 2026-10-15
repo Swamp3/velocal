@@ -68,6 +68,14 @@ const routes: Routes = [
       ),
   },
   {
+    path: ':slug/posts/:postId/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-post-form/community-post-form.component').then(
+        (m) => m.CommunityPostFormComponent,
+      ),
+  },
+  {
     path: ':slug/posts/:postId',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -119,6 +127,14 @@ const routes: Routes = [
     loadComponent: () =>
       import('./community-section/community-section.component').then(
         (m) => m.CommunitySectionComponent,
+      ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/posts/:postId/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./community-post-form/community-post-form.component').then(
+        (m) => m.CommunityPostFormComponent,
       ),
   },
   {

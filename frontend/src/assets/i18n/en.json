@@ -314,7 +314,15 @@
     "passwordChangeHint": "We'll send a reset link to your email address.",
     "passwordSetHint": "You signed up without a password. Set one to enable password login.",
     "passwordResetSent": "Reset email sent. Check your inbox.",
-    "passwordResetError": "Failed to send reset email. Please try again."
+    "passwordResetError": "Failed to send reset email. Please try again.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "namesHint": "Only you and admins can see your first and last name. Other members see your display name.",
+    "strava": "Strava profile",
+    "stravaPlaceholder": "strava.com/athletes/… or athlete ID",
+    "stravaHint": "Optional. Members of your communities see a link to it next to your name.",
+    "stravaInvalid": "Enter a strava.com profile link or your athlete ID",
+    "stravaOpen": "Open on Strava"
   },
   "series": {
     "title": "Race Series",
@@ -703,7 +711,8 @@
       "roleMember": "Member",
       "addFromCommunity": "Add from community members",
       "searchPlaceholder": "Type a name…",
-      "noMatches": "No matching community members"
+      "noMatches": "No matching community members",
+      "stravaProfile": "Strava profile of {{name}}"
     },
     "requests": {
       "title": "Join requests",
@@ -812,7 +821,13 @@
       "commentCount": "{{count}} comments",
       "back": "Back to posts",
       "notFoundTitle": "Post not found",
-      "notFoundMessage": "This post does not exist or you cannot see it."
+      "notFoundMessage": "This post does not exist or you cannot see it.",
+      "edit": "Edit",
+      "editTitle": "Edit post",
+      "saveChanges": "Save changes",
+      "updated": "Post updated",
+      "edited": "edited",
+      "backToPost": "Back to post"
     },
     "strava": "Strava"
   },

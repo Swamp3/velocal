@@ -5,19 +5,45 @@
 
   <!-- Profile Form -->
   <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)]
-      bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
-    <form
-      [formGroup]="profileForm"
-      (ngSubmit)="onSaveProfile()"
-      class="space-y-5"
-    >
+    <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-5">
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <ui-input [label]="'profile.firstName' | transloco" formControlName="firstName" />
+        <ui-input [label]="'profile.lastName' | transloco" formControlName="lastName" />
+      </div>
+      <p class="-mt-3 text-xs text-[var(--color-text-muted)]">
+        {{ 'profile.namesHint' | transloco }}
+      </p>
+
       <ui-input
         [label]="'profile.displayName' | transloco"
         formControlName="displayName"
         [placeholder]="'profile.displayNamePlaceholder' | transloco"
       />
+
+      <div>
+        <ui-input
+          [label]="'profile.strava' | transloco"
+          formControlName="stravaUrl"
+          [placeholder]="'profile.stravaPlaceholder' | transloco"
+          [error]="
+            profileForm.controls.stravaUrl.invalid ? ('profile.stravaInvalid' | transloco) : ''
+          "
+        />
+        <p class="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-[var(--color-text-muted)]">
+          <span>{{ 'profile.stravaHint' | transloco }}</span>
+          @if (auth.currentUser()?.stravaUrl; as stravaUrl) {
+            <a
+              [href]="stravaUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-[var(--color-primary)] hover:underline"
+              >{{ 'profile.stravaOpen' | transloco }}</a
+            >
+          }
+        </p>
+      </div>
 
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <ui-input
@@ -40,7 +66,9 @@
           {{ 'profile.language' | transloco }}
         </legend>
         <div class="flex items-center gap-6">
-          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+          <label
+            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+          >
             <input
               type="radio"
               formControlName="preferredLanguage"
@@ -49,7 +77,9 @@
             />
             Deutsch
           </label>
-          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+          <label
+            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+          >
             <input
               type="radio"
               formControlName="preferredLanguage"
@@ -70,7 +100,9 @@
           {{ 'profile.formatLocaleHint' | transloco }}
         </p>
         <div class="flex items-center gap-6">
-          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+          <label
+            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+          >
             <input
               type="radio"
               formControlName="preferredLocale"
@@ -79,7 +111,9 @@
             />
             {{ 'profile.formatDe' | transloco }}
           </label>
-          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+          <label
+            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+          >
             <input
               type="radio"
               formControlName="preferredLocale"
@@ -99,14 +133,17 @@
 
   <!-- Password -->
   <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)]
-      bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
     <h2 class="mb-2 text-lg font-semibold text-[var(--color-text)]">
       {{ 'profile.passwordTitle' | transloco }}
     </h2>
     <p class="mb-4 text-sm text-[var(--color-text-muted)]">
-      {{ hasPassword() ? ('profile.passwordChangeHint' | transloco) : ('profile.passwordSetHint' | transloco) }}
+      {{
+        hasPassword()
+          ? ('profile.passwordChangeHint' | transloco)
+          : ('profile.passwordSetHint' | transloco)
+      }}
     </p>
 
     @if (passwordActionSent()) {
@@ -120,15 +157,18 @@
         [disabled]="passwordActionLoading()"
         (click)="onChangePassword()"
       >
-        {{ hasPassword() ? ('profile.changePassword' | transloco) : ('profile.setPassword' | transloco) }}
+        {{
+          hasPassword()
+            ? ('profile.changePassword' | transloco)
+            : ('profile.setPassword' | transloco)
+        }}
       </ui-button>
     }
   </section>
 
   <!-- Discipline Preferences -->
   <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)]
-      bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
     <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
       {{ 'profile.disciplines' | transloco }}
@@ -153,8 +193,7 @@
 
   <!-- Favorites -->
   <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)]
-      bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
   >
     <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
       {{ 'profile.favorites' | transloco }}
@@ -172,11 +211,7 @@
             <app-event-card [event]="event" />
             <button
               type="button"
-              class="absolute right-3 top-3 rounded-[var(--radius-default)] px-2.5 py-1
-                text-xs font-medium text-[var(--color-danger)]
-                border border-[var(--color-danger)]/30 bg-[var(--color-bg)]
-                hover:bg-[var(--color-danger)] hover:text-white
-                transition-colors cursor-pointer"
+              class="absolute right-3 top-3 rounded-[var(--radius-default)] px-2.5 py-1 text-xs font-medium text-[var(--color-danger)] border border-[var(--color-danger)]/30 bg-[var(--color-bg)] hover:bg-[var(--color-danger)] hover:text-white transition-colors cursor-pointer"
               (click)="onRemoveFavorite(event.id)"
             >
               ★ {{ 'profile.removeFavorite' | transloco }}
@@ -187,11 +222,7 @@
 
       @if (hasMoreFavorites()) {
         <div class="mt-4 text-center">
-          <ui-button
-            variant="outline"
-            [loading]="loadingFavorites()"
-            (click)="onLoadMore()"
-          >
+          <ui-button variant="outline" [loading]="loadingFavorites()" (click)="onLoadMore()">
             {{ 'profile.loadMore' | transloco }}
           </ui-button>
         </div>

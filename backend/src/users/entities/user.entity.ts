@@ -23,6 +23,17 @@ export class User {
   @Column({ nullable: true })
   displayName: string;
 
+  /** Real name; private to the user (and admins). Others only see the display name. */
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  firstName: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  lastName: string | null;
+
+  /** Canonical `https://www.strava.com/athletes/<id>` link the user chose to share. */
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  stravaUrl: string | null;
+
   @Column({ nullable: true })
   homeZip: string;
 

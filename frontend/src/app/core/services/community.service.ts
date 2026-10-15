@@ -196,6 +196,15 @@ export class CommunityService {
     return this.api.get(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}`);
   }
 
+  updatePost(
+    communitySlug: string,
+    postId: string,
+    dto: { title: string; body: string },
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPost> {
+    return this.api.patch(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}`, dto);
+  }
+
   deletePost(
     communitySlug: string,
     postId: string,
@@ -221,6 +230,19 @@ export class CommunityService {
     return this.api.post(`${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments`, {
       body,
     });
+  }
+
+  updateComment(
+    communitySlug: string,
+    postId: string,
+    commentId: string,
+    body: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityComment> {
+    return this.api.patch(
+      `${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments/${commentId}`,
+      { body },
+    );
   }
 
   deleteComment(

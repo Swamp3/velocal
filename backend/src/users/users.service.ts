@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { normalizeStravaProfile } from './strava-profile';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { Point } from 'geojson';
@@ -86,6 +87,13 @@ export class UsersService {
     const user = await this.userRepository.findOneByOrFail({ id: userId });
 
     Object.assign(user, dto);
+    if (dto.stravaUrl !== undefined) {
+      user.stravaUrl = normalizeStravaProfile(dto.stravaUrl);
+    }
+    // Blank names are stored as "not set".
+    if (dto.firstName !== undefined)
+      user.firstName = dto.firstName.trim() || null;
+    if (dto.lastName !== undefined) user.lastName = dto.lastName.trim() || null;
 
     if (dto.homeZip !== undefined || dto.homeCountry !== undefined) {
       const zip = dto.homeZip ?? user.homeZip;

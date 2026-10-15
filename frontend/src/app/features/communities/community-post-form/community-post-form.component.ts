@@ -40,6 +40,8 @@ export class CommunityPostFormComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saving = signal(false);
+  /** Set on the edit route; the form then updates this post instead of creating one. */
+  protected readonly postId = signal<string | null>(null);
   protected readonly loaded = signal(false);
   protected readonly communitySlug = signal('');
   protected readonly subgroupSlug = signal<string | null>(null);
@@ -57,6 +59,7 @@ export class CommunityPostFormComponent implements OnInit {
     }
     this.communitySlug.set(communitySlug);
     this.subgroupSlug.set(subgroupSlug);
+    this.postId.set(this.route.snapshot.paramMap.get('postId'));
 
     if (subgroupSlug) {
       this.communityService
@@ -68,7 +71,7 @@ export class CommunityPostFormComponent implements OnInit {
               void this.router.navigate(this.listLink());
               return;
             }
-            this.loaded.set(true);
+            this.loadPostThenShow();
           },
           error: () => void this.router.navigate(['/communities', communitySlug]),
         });
@@ -84,10 +87,45 @@ export class CommunityPostFormComponent implements OnInit {
             void this.router.navigate(this.listLink());
             return;
           }
-          this.loaded.set(true);
+          this.loadPostThenShow();
         },
         error: () => void this.router.navigateByUrl('/communities'),
       });
+  }
+
+  /** On the edit route, load the post (author only) before showing the form. */
+  private loadPostThenShow(): void {
+    const postId = this.postId();
+    if (!postId) {
+      this.loaded.set(true);
+      return;
+    }
+    this.communityService
+      .getPost(this.communitySlug(), postId, this.subgroupSlug())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (post) => {
+          if (!post.canEdit) {
+            void this.router.navigate(this.postLink(postId));
+            return;
+          }
+          this.form.setValue({ title: post.title, body: post.body });
+          this.loaded.set(true);
+        },
+        error: () => void this.router.navigate(this.listLink()),
+      });
+  }
+
+  protected postLink(postId: string): string[] {
+    const subgroupSlug = this.subgroupSlug();
+    return subgroupSlug
+      ? ['/communities', this.communitySlug(), 'subgroups', subgroupSlug, 'posts', postId]
+      : ['/communities', this.communitySlug(), 'posts', postId];
+  }
+
+  protected backLink(): string[] {
+    const postId = this.postId();
+    return postId ? this.postLink(postId) : this.listLink();
   }
 
   protected listLink(): string[] {
@@ -111,22 +149,29 @@ export class CommunityPostFormComponent implements OnInit {
       return;
     }
     this.saving.set(true);
-    this.communityService
-      .createPost(this.communitySlug(), { title, body }, this.subgroupSlug())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (post) => {
-          this.toast.success(this.transloco.translate('communities.posts.published'));
-          const subgroupSlug = this.subgroupSlug();
-          const commands = subgroupSlug
-            ? ['/communities', this.communitySlug(), 'subgroups', subgroupSlug, 'posts', post.id]
-            : ['/communities', this.communitySlug(), 'posts', post.id];
-          void this.router.navigate(commands);
-        },
-        error: (err: ApiError) => {
-          this.saving.set(false);
-          this.toast.error(this.transloco.translate(communityErrorKey(err)));
-        },
-      });
+    const postId = this.postId();
+    const request$ = postId
+      ? this.communityService.updatePost(
+          this.communitySlug(),
+          postId,
+          { title, body },
+          this.subgroupSlug(),
+        )
+      : this.communityService.createPost(
+          this.communitySlug(),
+          { title, body },
+          this.subgroupSlug(),
+        );
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (post) => {
+        const key = postId ? 'communities.posts.updated' : 'communities.posts.published';
+        this.toast.success(this.transloco.translate(key));
+        void this.router.navigate(this.postLink(post.id));
+      },
+      error: (err: ApiError) => {
+        this.saving.set(false);
+        this.toast.error(this.transloco.translate(communityErrorKey(err)));
+      },
+    });
   }
 }

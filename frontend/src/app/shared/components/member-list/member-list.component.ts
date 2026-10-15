@@ -6,6 +6,8 @@ import { BadgeComponent, ButtonComponent } from '@shared/ui';
 export interface MemberListItem {
   id: string;
   name: string;
+  /** Link to the member's Strava profile, if they shared one. */
+  stravaUrl?: string | null;
   roleLabel: string;
   roleVariant: 'success' | 'warning' | 'neutral';
   toggleLabel?: string;

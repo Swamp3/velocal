@@ -28,6 +28,7 @@ export interface SerializedCommunityPost {
   authorId: string;
   authorName: string | null;
   commentCount: number;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -38,8 +39,10 @@ export interface SerializedCommunityComment {
   body: string;
   authorId: string;
   authorName: string | null;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 interface HostAccess {
@@ -115,6 +118,32 @@ export class CommunityPostsService {
     return this.serializePost(post, userId, host, counts);
   }
 
+  /** Only the author edits a post; moderators can still delete it. */
+  async update(
+    communitySlug: string,
+    postId: string,
+    userId: string,
+    dto: CreateCommunityPostDto,
+    subgroupSlug?: string,
+  ): Promise<SerializedCommunityPost> {
+    const host = await this.requireHost(communitySlug, userId, subgroupSlug);
+    const post = await this.requireHostPost(host, postId);
+    if (post.authorId !== userId) {
+      throw new ForbiddenException('Only the author can edit this post');
+    }
+    await this.posts.update(post.id, {
+      title: dto.title.trim(),
+      body: dto.body.trim(),
+    });
+    const counts = await this.commentCounts([post.id]);
+    return this.serializePost(
+      await this.requirePost(post.id),
+      userId,
+      host,
+      counts,
+    );
+  }
+
   async remove(
     communitySlug: string,
     postId: string,
@@ -163,6 +192,33 @@ export class CommunityPostsService {
     );
     const loaded = await this.comments.findOne({
       where: { id: saved.id },
+      relations: { author: true },
+    });
+    if (!loaded) throw new NotFoundException('Comment not found');
+    return this.serializeComment(loaded, userId, host);
+  }
+
+  /** Only the author edits a comment; moderators can still delete it. */
+  async updateComment(
+    communitySlug: string,
+    postId: string,
+    commentId: string,
+    userId: string,
+    dto: CreateCommunityCommentDto,
+    subgroupSlug?: string,
+  ): Promise<SerializedCommunityComment> {
+    const host = await this.requireHost(communitySlug, userId, subgroupSlug);
+    await this.requireHostPost(host, postId);
+    const comment = await this.comments.findOne({
+      where: { id: commentId, postId },
+    });
+    if (!comment) throw new NotFoundException('Comment not found');
+    if (comment.authorId !== userId) {
+      throw new ForbiddenException('Only the author can edit this comment');
+    }
+    await this.comments.update(comment.id, { body: dto.body.trim() });
+    const loaded = await this.comments.findOne({
+      where: { id: comment.id },
       relations: { author: true },
     });
     if (!loaded) throw new NotFoundException('Comment not found');
@@ -292,6 +348,7 @@ export class CommunityPostsService {
       authorId: post.authorId,
       authorName: post.author?.displayName ?? null,
       commentCount: counts.get(post.id) ?? 0,
+      canEdit: post.authorId === userId,
       canDelete: post.authorId === userId || host.canModerate,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
@@ -308,8 +365,10 @@ export class CommunityPostsService {
       body: comment.body,
       authorId: comment.authorId,
       authorName: comment.author?.displayName ?? null,
+      canEdit: comment.authorId === userId,
       canDelete: comment.authorId === userId || host.canModerate,
       createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
     };
   }
 }

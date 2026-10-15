@@ -5,7 +5,25 @@
     @for (item of items(); track item.id) {
       <li class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
-          <p class="truncate font-medium text-[var(--color-text)]">{{ item.name }}</p>
+          <p class="flex items-center gap-2 font-medium text-[var(--color-text)]">
+            <span class="truncate">{{ item.name }}</span>
+            @if (item.stravaUrl) {
+              <a
+                [href]="item.stravaUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex shrink-0 items-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+                [attr.aria-label]="
+                  'communities.members.stravaProfile' | transloco: { name: item.name }
+                "
+                [title]="'communities.members.stravaProfile' | transloco: { name: item.name }"
+              >
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >directions_bike</span
+                >
+              </a>
+            }
+          </p>
           <div class="mt-1">
             <ui-badge [variant]="item.roleVariant">{{ item.roleLabel }}</ui-badge>
           </div>

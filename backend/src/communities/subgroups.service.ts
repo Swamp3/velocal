@@ -56,6 +56,7 @@ export interface SerializedSubgroup {
 export interface SerializedSubgroupMember {
   userId: string;
   displayName: string | null;
+  stravaUrl: string | null;
   role: SubgroupMemberRole;
   joinedAt: Date;
 }
@@ -68,8 +69,7 @@ export interface SerializedSubgroupJoinRequest {
 }
 
 export type JoinSubgroupResult =
-  | { outcome: 'joined'; subgroup: SerializedSubgroup }
-  | { outcome: 'pending' };
+  { outcome: 'joined'; subgroup: SerializedSubgroup } | { outcome: 'pending' };
 
 @Injectable()
 export class SubgroupsService {
@@ -405,6 +405,7 @@ export class SubgroupsService {
     return rows.map((member) => ({
       userId: member.userId,
       displayName: member.user?.displayName ?? null,
+      stravaUrl: member.user?.stravaUrl ?? null,
       role: member.role,
       joinedAt: member.createdAt,
     }));
@@ -433,6 +434,7 @@ export class SubgroupsService {
     return {
       userId: saved.userId,
       displayName: saved.user?.displayName ?? null,
+      stravaUrl: saved.user?.stravaUrl ?? null,
       role: saved.role,
       joinedAt: saved.createdAt,
     };

@@ -1,14 +1,14 @@
 <div class="mx-auto max-w-xl">
   <a
-    [routerLink]="listLink()"
+    [routerLink]="backLink()"
     class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
   >
     <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
-    {{ 'communities.posts.back' | transloco }}
+    {{ (postId() ? 'communities.posts.backToPost' : 'communities.posts.back') | transloco }}
   </a>
 
   <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
-    {{ 'communities.posts.createTitle' | transloco }}
+    {{ (postId() ? 'communities.posts.editTitle' : 'communities.posts.createTitle') | transloco }}
   </h1>
 
   @if (!loaded()) {
@@ -33,9 +33,11 @@
       />
       <div class="flex gap-3 pt-2">
         <ui-button type="submit" [loading]="saving()" [disabled]="saving()">
-          {{ 'communities.posts.publish' | transloco }}
+          {{
+            (postId() ? 'communities.posts.saveChanges' : 'communities.posts.publish') | transloco
+          }}
         </ui-button>
-        <a [routerLink]="listLink()">
+        <a [routerLink]="backLink()">
           <ui-button variant="outline" type="button">{{ 'common.cancel' | transloco }}</ui-button>
         </a>
       </div>

@@ -6,8 +6,6 @@ export { ToastService, type Toast, type ToastType } from './toast/toast.service'
 export { ToastContainerComponent } from './toast/toast-container.component';
 export { SkeletonComponent } from './skeleton/skeleton.component';
 export { PaginationComponent } from './pagination/pagination.component';
-export {
-  DropdownComponent,
-  type DropdownOption,
-} from './dropdown/dropdown.component';
+export { DropdownComponent, type DropdownOption } from './dropdown/dropdown.component';
+export { ModalComponent } from './modal/modal.component';
 export { OtpInputComponent } from './otp-input/otp-input.component';
