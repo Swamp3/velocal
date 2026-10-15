@@ -458,7 +458,9 @@
       "users": "Benutzer",
       "missingData": "Datenqualität",
       "analytics": "Statistiken",
-      "communities": "Communities"
+      "communities": "Communities",
+      "reports": "Meldungen",
+      "audit": "Protokoll"
     },
     "imports": {
       "title": "Import-Status",
@@ -571,7 +573,8 @@
         "createdAt": "Neueste",
         "name": "Name",
         "members": "Mitglieder",
-        "pending": "Offene Anfragen"
+        "pending": "Offene Anfragen",
+        "reports": "Offene Meldungen"
       },
       "empty": "Keine Communities gefunden",
       "createdBy": "von",
@@ -597,6 +600,58 @@
         "subgroupMessage": "Die Untergruppe „{{name}}“ mit allem Inhalt löschen? Das lässt sich nicht rückgängig machen.",
         "post": "Beitrag löschen",
         "postMessage": "Den Beitrag „{{name}}“ und seine Kommentare löschen? Das lässt sich nicht rückgängig machen."
+      },
+      "suspended": "Gesperrt",
+      "suspendedSince": "Gesperrt seit",
+      "suspendedDone": "Community gesperrt.",
+      "unsuspendedDone": "Sperre aufgehoben.",
+      "suspendTitle": "Sperrung",
+      "suspendHint": "Eine gesperrte Community ist ausgeblendet und schreibgeschützt. Die Admins werden benachrichtigt.",
+      "suspend": "Sperren",
+      "unsuspend": "Sperre aufheben",
+      "suspendReason": "Grund (für Mitglieder sichtbar)",
+      "reportsBadge": "{{count}} offene Meldungen"
+    },
+    "reports": {
+      "title": "Meldungen",
+      "subtitle": "Von Mitgliedern gemeldete Inhalte.",
+      "empty": "Keine Meldungen.",
+      "by": "Gemeldet von",
+      "multiple": "{{count}} Meldungen zu diesem Inhalt",
+      "review": "Prüfen",
+      "markResolved": "Als erledigt markieren",
+      "dismiss": "Verwerfen",
+      "remove": "Inhalt entfernen",
+      "removeConfirm": "Diesen Inhalt entfernen?",
+      "done": "Meldung aktualisiert.",
+      "error": "Meldung konnte nicht aktualisiert werden.",
+      "status": {
+        "open": "Offen",
+        "resolved": "Erledigt",
+        "dismissed": "Verworfen"
+      },
+      "target": {
+        "community": "Community",
+        "post": "Beitrag",
+        "comment": "Kommentar"
+      }
+    },
+    "audit": {
+      "title": "Protokoll",
+      "subtitle": "Moderations- und Verwaltungsaktionen.",
+      "empty": "Keine Einträge.",
+      "search": "Suchen",
+      "actions": {
+        "community.delete": "Community gelöscht",
+        "community.suspend": "Community gesperrt",
+        "community.unsuspend": "Sperre aufgehoben",
+        "subgroup.delete": "Untergruppe gelöscht",
+        "post.delete": "Beitrag entfernt",
+        "comment.delete": "Kommentar entfernt",
+        "report.resolve": "Meldung erledigt",
+        "report.dismiss": "Meldung verworfen",
+        "user.promote": "Nutzer zum Admin gemacht",
+        "user.demote": "Admin-Rolle entzogen"
       }
     }
   },
@@ -804,7 +859,8 @@
       "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft.",
       "inviteOnly": "Diese Gruppe ist nur auf Einladung.",
       "membersOnly": "Das sehen nur Mitglieder.",
-      "pollClosed": "Diese Umfrage ist geschlossen."
+      "pollClosed": "Diese Umfrage ist geschlossen.",
+      "suspended": "Diese Community ist gesperrt."
     },
     "polls": {
       "title": "Umfragen",
@@ -892,7 +948,9 @@
     "deleteWarning": "Beim Löschen werden Mitglieder, Untergruppen, Beiträge, Umfragen, Events und Dateien der Community endgültig entfernt. Das lässt sich nicht rückgängig machen.",
     "deleteConfirm": "„{{name}}“ mit allem Inhalt löschen? Das lässt sich nicht rückgängig machen.",
     "deleted": "Community gelöscht",
-    "deleteError": "Community konnte nicht gelöscht werden"
+    "deleteError": "Community konnte nicht gelöscht werden",
+    "suspendedTitle": "Diese Community ist gesperrt",
+    "suspendedHint": "Sie ist für andere nicht sichtbar und nur lesbar, bis ein Seiten-Admin die Sperre aufhebt."
   },
   "errors": {
     "notFound": "Seite nicht gefunden",
@@ -922,5 +980,27 @@
     "remove": "Entfernen",
     "delete": "Strecke löschen",
     "deleteConfirm": "Diese Strecke und alle GPX-Dateien löschen?"
+  },
+  "report": {
+    "link": "Melden",
+    "intro": "Meldungen gehen an die Seiten-Admins. Andere Mitglieder sehen sie nicht.",
+    "reason": "Was ist das Problem?",
+    "reasons": {
+      "spam": "Spam oder Werbung",
+      "abuse": "Belästigung oder Beleidigung",
+      "inappropriate": "Unangemessener Inhalt",
+      "illegal": "Illegaler Inhalt",
+      "other": "Etwas anderes"
+    },
+    "note": "Details (optional)",
+    "send": "Meldung senden",
+    "sent": "Danke, deine Meldung wurde gesendet",
+    "already": "Du hast das bereits gemeldet",
+    "error": "Meldung konnte nicht gesendet werden",
+    "title": {
+      "community": "Community melden",
+      "post": "Beitrag melden",
+      "comment": "Kommentar melden"
+    }
   }
 }

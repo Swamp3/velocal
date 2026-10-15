@@ -12,6 +12,8 @@ export interface Community {
   visibility: CommunityVisibility;
   heroUrl: string | null;
   logoUrl: string | null;
+  suspended?: boolean;
+  suspendedReason?: string | null;
   memberCount: number;
   subgroupCount?: number;
   pollCount?: number;

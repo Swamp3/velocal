@@ -3,9 +3,16 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminCommunityDetail, AdminService } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { FormsModule } from '@angular/forms';
 import { ConfirmDeleteDialogComponent } from '@shared/components';
 import { communityVisibilityVariant } from '@shared/models';
-import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import {
+  BadgeComponent,
+  ButtonComponent,
+  ModalComponent,
+  SkeletonComponent,
+  ToastService,
+} from '@shared/ui';
 
 type Pending =
   | { kind: 'community' }
@@ -24,6 +31,8 @@ type Pending =
     ButtonComponent,
     SkeletonComponent,
     ConfirmDeleteDialogComponent,
+    FormsModule,
+    ModalComponent,
   ],
   templateUrl: './community-review.component.html',
 })
@@ -39,6 +48,8 @@ export class CommunityReviewComponent implements OnInit {
   protected readonly missing = signal(false);
   protected readonly pending = signal<Pending | null>(null);
   protected readonly busy = signal(false);
+  protected readonly suspending = signal(false);
+  protected readonly suspendReason = signal('');
   protected readonly badge = communityVisibilityVariant;
 
   private id = '';
@@ -81,6 +92,41 @@ export class CommunityReviewComponent implements OnInit {
         } else {
           this.load();
         }
+      },
+      error: () => {
+        this.busy.set(false);
+        this.toast.error(this.transloco.translate('admin.communities.deleteError'));
+      },
+    });
+  }
+
+  protected suspend(): void {
+    const reason = this.suspendReason().trim();
+    if (!reason || this.busy()) return;
+    this.busy.set(true);
+    this.admin.suspendCommunity(this.id, reason).subscribe({
+      next: () => {
+        this.busy.set(false);
+        this.suspending.set(false);
+        this.suspendReason.set('');
+        this.toast.success(this.transloco.translate('admin.communities.suspendedDone'));
+        this.load();
+      },
+      error: () => {
+        this.busy.set(false);
+        this.toast.error(this.transloco.translate('admin.communities.deleteError'));
+      },
+    });
+  }
+
+  protected unsuspend(): void {
+    if (this.busy()) return;
+    this.busy.set(true);
+    this.admin.unsuspendCommunity(this.id).subscribe({
+      next: () => {
+        this.busy.set(false);
+        this.toast.success(this.transloco.translate('admin.communities.unsuspendedDone'));
+        this.load();
       },
       error: () => {
         this.busy.set(false);

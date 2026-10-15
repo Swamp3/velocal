@@ -458,7 +458,9 @@
       "users": "Users",
       "missingData": "Data Quality",
       "analytics": "Analytics",
-      "communities": "Communities"
+      "communities": "Communities",
+      "reports": "Reports",
+      "audit": "Audit log"
     },
     "imports": {
       "title": "Import Status",
@@ -571,7 +573,8 @@
         "createdAt": "Newest",
         "name": "Name",
         "members": "Members",
-        "pending": "Open requests"
+        "pending": "Open requests",
+        "reports": "Open reports"
       },
       "empty": "No communities found",
       "createdBy": "by",
@@ -597,6 +600,58 @@
         "subgroupMessage": "Delete the subgroup “{{name}}” with everything in it? This cannot be undone.",
         "post": "Delete post",
         "postMessage": "Delete the post “{{name}}” and its comments? This cannot be undone."
+      },
+      "suspended": "Suspended",
+      "suspendedSince": "Suspended since",
+      "suspendedDone": "Community suspended.",
+      "unsuspendedDone": "Suspension lifted.",
+      "suspendTitle": "Suspension",
+      "suspendHint": "A suspended community is hidden and read-only. Its admins are notified.",
+      "suspend": "Suspend",
+      "unsuspend": "Lift suspension",
+      "suspendReason": "Reason (shown to members)",
+      "reportsBadge": "{{count}} open reports"
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Content reported by members.",
+      "empty": "No reports.",
+      "by": "Reported by",
+      "multiple": "{{count}} reports on this item",
+      "review": "Review",
+      "markResolved": "Mark resolved",
+      "dismiss": "Dismiss",
+      "remove": "Remove content",
+      "removeConfirm": "Remove this content?",
+      "done": "Report updated.",
+      "error": "Could not update the report.",
+      "status": {
+        "open": "Open",
+        "resolved": "Resolved",
+        "dismissed": "Dismissed"
+      },
+      "target": {
+        "community": "Community",
+        "post": "Post",
+        "comment": "Comment"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "Moderation and administration actions.",
+      "empty": "No entries.",
+      "search": "Search",
+      "actions": {
+        "community.delete": "Deleted community",
+        "community.suspend": "Suspended community",
+        "community.unsuspend": "Lifted suspension",
+        "subgroup.delete": "Deleted subgroup",
+        "post.delete": "Removed post",
+        "comment.delete": "Removed comment",
+        "report.resolve": "Resolved report",
+        "report.dismiss": "Dismissed report",
+        "user.promote": "Promoted user to admin",
+        "user.demote": "Removed admin role"
       }
     }
   },
@@ -804,7 +859,8 @@
       "notCommunityMember": "That person is not a member of this community.",
       "inviteOnly": "This group is invite only.",
       "membersOnly": "Only members can see this.",
-      "pollClosed": "This poll is closed."
+      "pollClosed": "This poll is closed.",
+      "suspended": "This community is suspended."
     },
     "polls": {
       "title": "Polls",
@@ -892,7 +948,9 @@
     "deleteWarning": "Deleting the community permanently removes its members, subgroups, posts, polls, events and files. This cannot be undone.",
     "deleteConfirm": "Delete “{{name}}” with everything in it? This cannot be undone.",
     "deleted": "Community deleted",
-    "deleteError": "Could not delete the community"
+    "deleteError": "Could not delete the community",
+    "suspendedTitle": "This community is suspended",
+    "suspendedHint": "It is hidden from others and read-only until a site admin lifts the suspension."
   },
   "errors": {
     "notFound": "Page not found",
@@ -922,5 +980,27 @@
     "remove": "Remove",
     "delete": "Delete route",
     "deleteConfirm": "Delete this route and all its GPX files?"
+  },
+  "report": {
+    "link": "Report",
+    "intro": "Reports go to the site admins. They are not shown to other members.",
+    "reason": "What is the problem?",
+    "reasons": {
+      "spam": "Spam or advertising",
+      "abuse": "Harassment or abuse",
+      "inappropriate": "Inappropriate content",
+      "illegal": "Illegal content",
+      "other": "Something else"
+    },
+    "note": "Details (optional)",
+    "send": "Send report",
+    "sent": "Thanks, your report was sent",
+    "already": "You already reported this",
+    "error": "Could not send the report",
+    "title": {
+      "community": "Report community",
+      "post": "Report post",
+      "comment": "Report comment"
+    }
   }
 }

@@ -1,0 +1,70 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'admin.audit.title' | transloco }}</h1>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+    {{ 'admin.audit.subtitle' | transloco }}
+  </p>
+</div>
+
+<div class="relative mb-5 max-w-md">
+  <span
+    class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--color-text-muted)]"
+    >search</span
+  >
+  <input
+    type="search"
+    [placeholder]="'admin.audit.search' | transloco"
+    [ngModel]="query()"
+    (ngModelChange)="onSearch($event)"
+    class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pl-10 pr-4 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+  />
+</div>
+
+@if (loading()) {
+  <div class="space-y-2">
+    @for (_ of [1, 2, 3, 4, 5]; track $index) {
+      <ui-skeleton class="block h-12 w-full" />
+    }
+  </div>
+} @else if (entries().length === 0) {
+  <p
+    class="rounded-xl border border-dashed border-[var(--color-border)] py-12 text-center text-sm text-[var(--color-text-muted)]"
+  >
+    {{ 'admin.audit.empty' | transloco }}
+  </p>
+} @else {
+  <ul
+    class="divide-y divide-[var(--color-border)] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+  >
+    @for (e of entries(); track e.id) {
+      <li class="px-4 py-3 text-sm">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <p class="min-w-0 break-words text-[var(--color-text)]">
+            <span class="font-medium">{{ e.actorLabel }}</span>
+            {{ 'admin.audit.actions.' + e.action | transloco }}
+            @if (e.targetLabel) {
+              <span class="font-medium">“{{ e.targetLabel }}”</span>
+            }
+          </p>
+          <time
+            class="shrink-0 text-xs text-[var(--color-text-muted)]"
+            [attr.datetime]="e.createdAt"
+          >
+            {{ e.createdAt | date: 'medium' }}
+          </time>
+        </div>
+        @if (details(e)) {
+          <p class="mt-0.5 break-words text-xs text-[var(--color-text-muted)]">{{ details(e) }}</p>
+        }
+      </li>
+    }
+  </ul>
+
+  <div class="mt-6">
+    <ui-pagination
+      [page]="page()"
+      [total]="total()"
+      [limit]="limit"
+      (pageChange)="onPage($event)"
+    />
+  </div>
+}

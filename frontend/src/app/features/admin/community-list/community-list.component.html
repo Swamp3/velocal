@@ -88,6 +88,16 @@
               </p>
             </div>
             <div class="flex items-center gap-2">
+              @if (row.suspendedAt) {
+                <ui-badge variant="danger">{{
+                  'admin.communities.suspended' | transloco
+                }}</ui-badge>
+              }
+              @if (row.openReports > 0) {
+                <ui-badge variant="danger">
+                  {{ 'admin.communities.reportsBadge' | transloco: { count: row.openReports } }}
+                </ui-badge>
+              }
               @if (row.pendingRequests > 0) {
                 <ui-badge variant="warning">
                   {{ 'admin.communities.pending' | transloco: { count: row.pendingRequests } }}

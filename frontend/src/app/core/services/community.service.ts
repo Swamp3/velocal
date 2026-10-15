@@ -172,6 +172,18 @@ export class CommunityService {
     );
   }
 
+  report(
+    communitySlug: string,
+    dto: {
+      targetType: 'community' | 'post' | 'comment';
+      targetId?: string;
+      reason: string;
+      note?: string;
+    },
+  ): Observable<{ alreadyReported: boolean }> {
+    return this.api.post(`/communities/${communitySlug}/reports`, dto);
+  }
+
   deleteCommunity(id: string): Observable<void> {
     return this.api.delete(`/communities/${id}`);
   }

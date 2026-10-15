@@ -24,7 +24,10 @@
         {{ c.createdByName || c.createdByEmail || '—' }} · {{ c.createdAt | date: 'medium' }}
       </p>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+      @if (c.suspendedAt) {
+        <ui-badge variant="danger">{{ 'admin.communities.suspended' | transloco }}</ui-badge>
+      }
       <ui-badge [variant]="badge(c.visibility)">
         {{ 'communities.visibility.' + c.visibility | transloco }}
       </ui-badge>
@@ -37,6 +40,20 @@
       }
     </div>
   </div>
+
+  @if (c.suspendedAt) {
+    <div
+      class="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+      role="status"
+    >
+      <p class="font-medium">
+        {{ 'admin.communities.suspendedSince' | transloco }} {{ c.suspendedAt | date: 'medium' }}
+      </p>
+      @if (c.suspendedReason) {
+        <p class="mt-0.5 break-words">{{ c.suspendedReason }}</p>
+      }
+    </div>
+  }
 
   <dl class="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
     @for (
@@ -195,6 +212,58 @@
       </ul>
     }
   </section>
+
+  <section class="mt-10 rounded-2xl border border-amber-300 p-6 dark:border-amber-800">
+    <h2 class="text-base font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.suspendTitle' | transloco }}
+    </h2>
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      {{ 'admin.communities.suspendHint' | transloco }}
+    </p>
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      @if (c.suspendedAt) {
+        <ui-button variant="secondary" [loading]="busy()" (click)="unsuspend()">
+          {{ 'admin.communities.unsuspend' | transloco }}
+        </ui-button>
+      } @else {
+        <ui-button variant="secondary" (click)="suspending.set(true)">
+          {{ 'admin.communities.suspend' | transloco }}
+        </ui-button>
+      }
+      @if (c.openReports) {
+        <a
+          routerLink="/admin/reports"
+          class="text-sm font-medium text-[var(--color-primary)] hover:underline"
+        >
+          {{ 'admin.communities.reportsBadge' | transloco: { count: c.openReports } }}
+        </a>
+      }
+    </div>
+  </section>
+
+  @if (suspending()) {
+    <ui-modal [title]="'admin.communities.suspend' | transloco" (closed)="suspending.set(false)">
+      <label class="block text-sm font-medium text-[var(--color-text)]" for="suspend-reason">
+        {{ 'admin.communities.suspendReason' | transloco }}
+      </label>
+      <textarea
+        id="suspend-reason"
+        rows="4"
+        maxlength="500"
+        class="mt-2 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm"
+        [ngModel]="suspendReason()"
+        (ngModelChange)="suspendReason.set($event)"
+      ></textarea>
+      <div class="mt-4 flex justify-end gap-2">
+        <ui-button variant="secondary" (click)="suspending.set(false)">
+          {{ 'common.cancel' | transloco }}
+        </ui-button>
+        <ui-button [loading]="busy()" [disabled]="!suspendReason().trim()" (click)="suspend()">
+          {{ 'admin.communities.suspend' | transloco }}
+        </ui-button>
+      </div>
+    </ui-modal>
+  }
 
   <section
     class="mt-10 rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"

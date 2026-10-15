@@ -42,6 +42,11 @@
               </ui-button>
             </a>
           }
+          @if (post.authorId !== myId()) {
+            <ui-button variant="outline" (click)="reportTarget.set({ type: 'post', id: post.id })">
+              {{ 'report.title.post' | transloco }}
+            </ui-button>
+          }
           @if (post.canDelete) {
             <ui-button variant="outline" (click)="deletePost()">
               {{ 'communities.posts.delete' | transloco }}
@@ -71,6 +76,15 @@
                 {{ authorName(comment.authorName) }}
               </p>
               <div class="flex shrink-0 gap-3">
+                @if (comment.authorId !== myId()) {
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                    (click)="reportTarget.set({ type: 'comment', id: comment.id })"
+                  >
+                    {{ 'report.link' | transloco }}
+                  </button>
+                }
                 @if (comment.canEdit) {
                   <button
                     type="button"
@@ -124,5 +138,13 @@
     [saving]="savingComment()"
     (saved)="saveComment($event)"
     (closed)="editingComment.set(null)"
+  />
+}
+
+@if (reportTarget(); as target) {
+  <app-report-dialog
+    [communitySlug]="communitySlug()"
+    [target]="target"
+    (closed)="reportTarget.set(null)"
   />
 }

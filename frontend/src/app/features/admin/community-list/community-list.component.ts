@@ -40,7 +40,7 @@ export class CommunityListComponent implements OnInit {
   protected readonly visibility = signal<Visibility>('all');
   protected readonly sort = signal<Sort>('createdAt');
   protected readonly visibilityOptions: Visibility[] = ['all', 'public', 'request', 'private'];
-  protected readonly sortOptions: Sort[] = ['createdAt', 'name', 'members', 'pending'];
+  protected readonly sortOptions: Sort[] = ['createdAt', 'name', 'members', 'pending', 'reports'];
   protected readonly badge = communityVisibilityVariant;
 
   ngOnInit(): void {
