@@ -154,8 +154,7 @@ export class CommunitiesService {
       .createQueryBuilder('community')
       .where('community.visibility IN (:...visibilities)', {
         visibilities: [CommunityVisibility.PUBLIC, CommunityVisibility.REQUEST],
-      })
-      .loadRelationCountAndMap('community.memberCount', 'community.members');
+      });
 
     if (params.q) {
       qb.andWhere('community.name ILIKE :q', { q: `%${params.q}%` });
@@ -166,6 +165,7 @@ export class CommunitiesService {
       .take(limit);
 
     const [rows, total] = await qb.getManyAndCount();
+    await this.attachMemberCounts(rows);
     const states = await this.viewerStates(rows, userId);
 
     return {
@@ -187,9 +187,9 @@ export class CommunitiesService {
       .where('community.id IN (:...ids)', {
         ids: memberships.map((membership) => membership.communityId),
       })
-      .loadRelationCountAndMap('community.memberCount', 'community.members')
       .orderBy('community.name', 'ASC')
       .getMany();
+    await this.attachMemberCounts(rows);
 
     const roleByCommunity = new Map(
       memberships.map((membership) => [
@@ -888,6 +888,23 @@ export class CommunitiesService {
         myJoinRequest: null,
       }
     );
+  }
+
+  /** Sets `memberCount` on each community with one grouped query. */
+  private async attachMemberCounts(rows: Community[]): Promise<void> {
+    if (rows.length === 0) return;
+    const counts = await this.members
+      .createQueryBuilder('member')
+      .select('member.communityId', 'communityId')
+      .addSelect('COUNT(*)', 'count')
+      .where('member.communityId IN (:...ids)', { ids: rows.map((c) => c.id) })
+      .groupBy('member.communityId')
+      .getRawMany<{ communityId: string; count: string }>();
+    const byId = new Map(counts.map((r) => [r.communityId, Number(r.count)]));
+    for (const row of rows) {
+      (row as Community & { memberCount?: number }).memberCount =
+        byId.get(row.id) ?? 0;
+    }
   }
 
   private readMemberCount(community: Community): number {

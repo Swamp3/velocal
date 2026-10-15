@@ -51,10 +51,9 @@ export class UsersService {
       ]);
 
     if (dto.q) {
-      qb.andWhere(
-        '(u.displayName ILIKE :q OR u.email ILIKE :q)',
-        { q: `%${dto.q}%` },
-      );
+      qb.andWhere('(u.displayName ILIKE :q OR u.email ILIKE :q)', {
+        q: `%${dto.q}%`,
+      });
     }
 
     if (dto.role === 'admin') {
@@ -112,7 +111,7 @@ export class UsersService {
   ): Promise<{ data: UserFavorite[]; total: number }> {
     const [data, total] = await this.favoriteRepository.findAndCount({
       where: { userId },
-      relations: ['event', 'event.discipline'],
+      relations: { event: { discipline: true } },
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
@@ -143,10 +142,7 @@ export class UsersService {
     return prefs.map((p) => p.disciplineSlug);
   }
 
-  async setDisciplinePrefs(
-    userId: string,
-    slugs: string[],
-  ): Promise<string[]> {
+  async setDisciplinePrefs(userId: string, slugs: string[]): Promise<string[]> {
     await this.disciplinePrefRepository.delete({ userId });
 
     if (slugs.length) {
