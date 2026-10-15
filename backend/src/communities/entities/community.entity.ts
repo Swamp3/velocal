@@ -31,6 +31,12 @@ export class Community {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  location: string | null;
+
+  @Column({ type: 'varchar', length: 500, name: 'strava_url', nullable: true })
+  stravaUrl: string | null;
+
   @Column({
     type: 'enum',
     enum: CommunityVisibility,

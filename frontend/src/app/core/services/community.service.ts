@@ -172,8 +172,8 @@ export class CommunityService {
     );
   }
 
-  inviteToSubgroup(communitySlug: string, slug: string, email: string): Observable<Subgroup> {
-    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { email });
+  inviteToSubgroup(communitySlug: string, slug: string, userId: string): Observable<Subgroup> {
+    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { userId });
   }
 
   listPosts(communitySlug: string, subgroupSlug?: string | null): Observable<CommunityPost[]> {

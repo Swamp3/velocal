@@ -11,7 +11,8 @@
       "logout": "Abmelden",
       "news": "News",
       "communities": "Gemeinschaften",
-      "admin": "Admin"
+      "admin": "Admin",
+      "routes": "Strecken"
     }
   },
   "notifications": {
@@ -151,12 +152,59 @@
         "update": "Fehler beim Aktualisieren der Veranstaltung"
       },
       "delete": "Löschen",
-      "deleteConfirm": "Soll diese Veranstaltung wirklich gelöscht werden?"
+      "deleteConfirm": "Soll diese Veranstaltung wirklich gelöscht werden?",
+      "repeat": {
+        "label": "Wiederholung",
+        "none": "Keine Wiederholung",
+        "weekly": "Jede Woche",
+        "biweekly": "Alle 2 Wochen",
+        "hint": "Erstellt pro Termin ein Event zur gleichen Ortszeit. Jedes lässt sich einzeln bearbeiten oder löschen.",
+        "count": "Anzahl Events",
+        "until": "Oder wiederholen bis (Datum)"
+      },
+      "ride": {
+        "title": "Ausfahrt-Details",
+        "route": "Strecke (GPX)",
+        "noRoute": "Keine Strecke",
+        "manageRoutes": "Strecken und GPX-Dateien verwalten",
+        "strava": "Strava-Links für das ganze Event",
+        "stravaHint": "Ein Link pro Zeile, optional gefolgt von einer Bezeichnung. Nur strava.com-Links.",
+        "groups": "Pace-Gruppen",
+        "groupName": "Gruppenname",
+        "category": "Kategorie",
+        "speedMin": "Min. Geschwindigkeit (km/h)",
+        "speedMax": "Max. Geschwindigkeit (km/h)",
+        "groupRoute": "Strecke dieser Gruppe",
+        "groupStrava": "Strava-Links dieser Gruppe (einer pro Zeile)",
+        "addGroup": "Pace-Gruppe hinzufügen",
+        "removeGroup": "Gruppe entfernen"
+      }
     },
     "actions": {
       "create": "Veranstaltung erstellen",
       "edit": "Bearbeiten",
       "delete": "Löschen"
+    },
+    "series": {
+      "weekly": "Wöchentliche Serie",
+      "biweekly": "Alle 2 Wochen",
+      "deleteOne": "Nur dieses Event löschen",
+      "deleteOneConfirm": "Nur dieses Event löschen? Der Rest der Serie bleibt bestehen.",
+      "stop": "Serie ab hier beenden",
+      "stopConfirm": "Serie beenden? Dieses und alle späteren Events werden gelöscht. Frühere bleiben erhalten.",
+      "stopped": "Serie beendet"
+    },
+    "ride": {
+      "title": "Ausfahrt",
+      "route": "Strecke",
+      "strava": "Strava-Event"
+    },
+    "pace": {
+      "social": "Social",
+      "endurance": "Grundlage",
+      "training": "Training",
+      "dropride": "Dropride",
+      "race": "Rennen"
     }
   },
   "map": {
@@ -624,7 +672,10 @@
       "description": "Beschreibung",
       "visibility": "Sichtbarkeit",
       "hero": "Titelbild",
-      "logo": "Logo"
+      "logo": "Logo",
+      "location": "Standort",
+      "strava": "Strava-Link",
+      "stravaInvalid": "Bitte einen Link zu strava.com angeben (https://…)"
     },
     "members": {
       "title": "Mitglieder",
@@ -635,7 +686,10 @@
       "remove": "Mitglied entfernen",
       "removeConfirm": "Dieses Mitglied entfernen?",
       "roleAdmin": "Admin",
-      "roleMember": "Mitglied"
+      "roleMember": "Mitglied",
+      "addFromCommunity": "Aus Community-Mitgliedern hinzufügen",
+      "searchPlaceholder": "Namen eingeben…",
+      "noMatches": "Keine passenden Community-Mitglieder"
     },
     "requests": {
       "title": "Beitrittsanfragen",
@@ -745,7 +799,8 @@
       "back": "Zurück zu den Beiträgen",
       "notFoundTitle": "Beitrag nicht gefunden",
       "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen."
-    }
+    },
+    "strava": "Auf Strava ansehen"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",
@@ -754,5 +809,26 @@
     "offline": "Keine Serververbindung",
     "serverError": "Serverfehler. Bitte versuche es später erneut.",
     "timeout": "Die Anfrage hat zu lange gedauert. Bitte versuche es erneut."
+  },
+  "routes": {
+    "title": "Meine Strecken",
+    "subtitle": "Eine Strecke kann mehrere GPX-Dateien enthalten, zum Beispiel Varianten oder Etappen.",
+    "newName": "Name der neuen Strecke",
+    "create": "Strecke anlegen",
+    "empty": "Noch keine Strecken",
+    "fileCount": "{{count}} GPX-Dateien",
+    "name": "Name",
+    "description": "Beschreibung",
+    "saved": "Strecke gespeichert",
+    "error": "Etwas ist schiefgelaufen",
+    "notFound": "Strecke nicht gefunden",
+    "files": "GPX-Dateien",
+    "total": "gesamt",
+    "addFiles": "GPX-Dateien hinzufügen",
+    "noFiles": "Noch keine GPX-Dateien",
+    "download": "Herunterladen",
+    "remove": "Entfernen",
+    "delete": "Strecke löschen",
+    "deleteConfirm": "Diese Strecke und alle GPX-Dateien löschen?"
   }
 }

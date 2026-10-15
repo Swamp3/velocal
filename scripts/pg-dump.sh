@@ -31,17 +31,23 @@ echo "  Database: $DB_NAME"
 echo "  Target:   $DUMP_FILE"
 echo ""
 
-CONTAINER=$(docker compose -f "$PROJECT_DIR/docker-compose.yml" ps -q postgres 2>/dev/null \
-  || docker compose -f "$PROJECT_DIR/docker-compose.yml" -f "$PROJECT_DIR/docker-compose.prod.yml" ps -q postgres 2>/dev/null)
+CONTAINER=$(docker compose -f "$PROJECT_DIR/docker-compose.prod.yml" ps -q postgres 2>/dev/null || true)
+if [ -z "$CONTAINER" ]; then
+  CONTAINER=$(docker ps -q --filter "name=^velocal-postgres$" 2>/dev/null || true)
+fi
 
 if [ -z "$CONTAINER" ]; then
   echo "ERROR: postgres container is not running."
-  echo "Start it first: docker compose up postgres -d"
+  echo "Start it first: docker compose -f docker-compose.prod.yml up -d postgres"
   exit 1
 fi
 
 echo "Running pg_dump..."
-docker exec "$CONTAINER" pg_dump -U "$DB_USER" "$DB_NAME" | gzip > "$DUMP_FILE"
+if ! docker exec "$CONTAINER" pg_dump -U "$DB_USER" "$DB_NAME" | gzip > "$DUMP_FILE"; then
+  rm -f "$DUMP_FILE"
+  echo "ERROR: pg_dump failed; removed the incomplete file."
+  exit 1
+fi
 
 SIZE=$(du -h "$DUMP_FILE" | cut -f1)
 echo ""

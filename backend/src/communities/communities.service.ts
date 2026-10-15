@@ -21,6 +21,7 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { Community, CommunityVisibility } from './entities/community.entity';
+import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
 import { Subgroup } from './entities/subgroup.entity';
 import {
@@ -37,12 +38,15 @@ export interface SerializedCommunity {
   slug: string;
   name: string;
   description: string | null;
+  location: string | null;
+  stravaUrl: string | null;
   visibility: 'public' | 'request' | 'private';
   heroUrl: string | null;
   logoUrl: string | null;
   memberCount: number;
   subgroupCount?: number;
   pollCount?: number;
+  postCount?: number;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
   createdAt: Date;
@@ -78,6 +82,7 @@ interface ViewerState {
   memberCount: number;
   subgroupCount?: number;
   pollCount?: number;
+  postCount?: number;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
 }
@@ -93,6 +98,8 @@ export class CommunitiesService {
     private readonly joinRequests: Repository<CommunityJoinRequest>,
     @InjectRepository(Subgroup)
     private readonly subgroups: Repository<Subgroup>,
+    @InjectRepository(CommunityPost)
+    private readonly posts: Repository<CommunityPost>,
     @InjectRepository(CommunityPoll)
     private readonly polls: Repository<CommunityPoll>,
     @InjectRepository(User)
@@ -114,6 +121,8 @@ export class CommunitiesService {
         name: dto.name,
         slug,
         description: dto.description ?? null,
+        location: dto.location?.trim() || null,
+        stravaUrl: dto.stravaUrl?.trim() || null,
         visibility: dto.visibility ?? CommunityVisibility.PUBLIC,
         createdById: userId,
       });
@@ -234,6 +243,12 @@ export class CommunitiesService {
     }
     if (dto.description !== undefined) {
       community.description = dto.description;
+    }
+    if (dto.location !== undefined) {
+      community.location = dto.location?.trim() || null;
+    }
+    if (dto.stravaUrl !== undefined) {
+      community.stravaUrl = dto.stravaUrl?.trim() || null;
     }
     const opening =
       dto.visibility === CommunityVisibility.PUBLIC &&
@@ -802,9 +817,12 @@ export class CommunitiesService {
       }
     }
 
-    const [subgroupCount, pollCount] = await Promise.all([
+    const [subgroupCount, pollCount, postCount] = await Promise.all([
       this.subgroups.count({ where: { communityId: community.id } }),
       this.polls.count({
+        where: { communityId: community.id, subgroupId: IsNull() },
+      }),
+      this.posts.count({
         where: { communityId: community.id, subgroupId: IsNull() },
       }),
     ]);
@@ -813,6 +831,7 @@ export class CommunitiesService {
       memberCount,
       subgroupCount,
       pollCount,
+      postCount,
       myRole,
       myJoinRequest,
     });
@@ -894,6 +913,8 @@ export class CommunitiesService {
       slug: community.slug,
       name: community.name,
       description: community.description ?? null,
+      location: community.location ?? null,
+      stravaUrl: community.stravaUrl ?? null,
       visibility: community.visibility,
       heroUrl: this.imageAccess.sign(
         community.heroUrl ?? null,
@@ -906,6 +927,7 @@ export class CommunitiesService {
       memberCount: viewer.memberCount,
       subgroupCount: viewer.subgroupCount,
       pollCount: viewer.pollCount,
+      postCount: viewer.postCount,
       myRole: viewer.myRole,
       myJoinRequest: viewer.myJoinRequest,
       createdAt: community.createdAt,

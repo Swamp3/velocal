@@ -21,7 +21,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 import { CreateSubgroupDto } from './dto/create-subgroup.dto';
-import { InviteMemberDto } from './dto/invite-member.dto';
+import { InviteSubgroupMemberDto } from './dto/invite-subgroup-member.dto';
 import { UpdateSubgroupRoleDto } from './dto/update-subgroup-role.dto';
 import { UpdateSubgroupDto } from './dto/update-subgroup.dto';
 import {
@@ -98,7 +98,9 @@ export class SubgroupsController {
 
   @Post(':slug/hero')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   uploadHero(
     @Param('communitySlug') communitySlug: string,
     @Param('slug') slug: string,
@@ -120,7 +122,9 @@ export class SubgroupsController {
 
   @Post(':slug/logo')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   uploadLogo(
     @Param('communitySlug') communitySlug: string,
     @Param('slug') slug: string,
@@ -180,7 +184,13 @@ export class SubgroupsController {
     @Body() dto: UpdateSubgroupRoleDto,
     @CurrentUser() user: { id: string },
   ): Promise<SerializedSubgroupMember> {
-    return this.subgroups.updateMemberRole(communitySlug, slug, userId, dto, user.id);
+    return this.subgroups.updateMemberRole(
+      communitySlug,
+      slug,
+      userId,
+      dto,
+      user.id,
+    );
   }
 
   @Delete(':slug/members/:userId')
@@ -213,7 +223,12 @@ export class SubgroupsController {
     @Param('requestId', ParseUUIDPipe) requestId: string,
     @CurrentUser() user: { id: string },
   ): Promise<{ status: 'approved' }> {
-    return this.subgroups.approveJoinRequest(communitySlug, slug, requestId, user.id);
+    return this.subgroups.approveJoinRequest(
+      communitySlug,
+      slug,
+      requestId,
+      user.id,
+    );
   }
 
   @Post(':slug/join-requests/:requestId/reject')
@@ -224,7 +239,12 @@ export class SubgroupsController {
     @Param('requestId', ParseUUIDPipe) requestId: string,
     @CurrentUser() user: { id: string },
   ): Promise<{ status: 'rejected' }> {
-    return this.subgroups.rejectJoinRequest(communitySlug, slug, requestId, user.id);
+    return this.subgroups.rejectJoinRequest(
+      communitySlug,
+      slug,
+      requestId,
+      user.id,
+    );
   }
 
   @Post(':slug/invites')
@@ -232,9 +252,9 @@ export class SubgroupsController {
   invite(
     @Param('communitySlug') communitySlug: string,
     @Param('slug') slug: string,
-    @Body() dto: InviteMemberDto,
+    @Body() dto: InviteSubgroupMemberDto,
     @CurrentUser() user: { id: string },
   ): Promise<SerializedSubgroup> {
-    return this.subgroups.invite(communitySlug, slug, dto.email, user.id);
+    return this.subgroups.invite(communitySlug, slug, dto.userId, user.id);
   }
 }

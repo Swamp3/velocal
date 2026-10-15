@@ -1,0 +1,51 @@
+<div class="mx-auto max-w-3xl">
+  <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'routes.title' | transloco }}</h1>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'routes.subtitle' | transloco }}</p>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="create()"
+    class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end"
+  >
+    <div class="min-w-0 flex-1">
+      <label for="route-name" class="block text-sm font-medium text-[var(--color-text)]">
+        {{ 'routes.newName' | transloco }}
+      </label>
+      <input
+        id="route-name"
+        type="text"
+        formControlName="name"
+        maxlength="200"
+        class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+      />
+    </div>
+    <ui-button type="submit" [loading]="creating()" [disabled]="creating() || form.invalid">
+      {{ 'routes.create' | transloco }}
+    </ui-button>
+  </form>
+
+  <div class="mt-8">
+    @if (!loading() && routes().length === 0) {
+      <app-empty-state icon="route" [title]="'routes.empty' | transloco" />
+    } @else {
+      <ul class="flex flex-col gap-2">
+        @for (route of routes(); track route.id) {
+          <li>
+            <a
+              [routerLink]="['/routes', route.id]"
+              class="flex items-center justify-between gap-3 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)]"
+            >
+              <span class="min-w-0 break-words font-medium">{{ route.name }}</span>
+              <span class="shrink-0 text-sm text-[var(--color-text-muted)]">
+                {{ 'routes.fileCount' | transloco: { count: route.files.length } }}
+                @if (route.totalDistanceM) {
+                  · {{ distance(route.totalDistanceM) }}
+                }
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

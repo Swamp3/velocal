@@ -29,6 +29,17 @@
         [error]="fieldError('name')"
       />
 
+      <ui-input [label]="'communities.form.location' | transloco" formControlName="location" />
+
+      <ui-input
+        [label]="'communities.form.strava' | transloco"
+        type="url"
+        formControlName="stravaUrl"
+        [error]="
+          form.controls.stravaUrl.invalid ? ('communities.form.stravaInvalid' | transloco) : ''
+        "
+      />
+
       <div>
         <label class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
           {{ 'communities.form.description' | transloco }}

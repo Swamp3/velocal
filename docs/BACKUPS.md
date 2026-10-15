@@ -1,10 +1,20 @@
 # Backups & Restore
 
-Three scripts live in `scripts/` for managing database backups.
+Scripts in `scripts/` back up and restore everything the app stores.
 
-## Volume backup (full binary copy)
+## What `backup.sh` saves
 
-Creates a `.tar.gz` of the entire PostgreSQL data volume. Fast, includes everything (indexes, WAL, etc.), but only restorable to the same PostgreSQL major version.
+One run writes three files with the same timestamp:
+
+| File | Content | Use |
+| --- | --- | --- |
+| `velocal_dump_*.sql.gz` | SQL dump via `pg_dump` | **Preferred way to restore the database**: consistent even while the app runs |
+| `velocal_pgdata_*.tar.gz` | raw PostgreSQL data volume | fast same-version restore; a copy of a running DB can be inconsistent, prefer the dump |
+| `velocal_uploads_*.tar.gz` | `uploads` volume | event/community/news images and GPX routes |
+
+**Not included:** the `.env` file (database password, `JWT_SECRET`, mail key). Store it separately and securely. Backups land in `./backups` on the same machine, so copy them off-site (second server, NAS, object storage) as well.
+
+## Run a backup
 
 ```bash
 # Backup to ./backups/ (default)
@@ -19,17 +29,17 @@ KEEP_BACKUPS=5 ./scripts/backup.sh
 
 ## Volume restore
 
-Restores a volume backup. **Stops are required** — the postgres container must be down.
+Restores a database volume (`velocal_pgdata_*`) or the uploads volume (`velocal_uploads_*`). For the database the **postgres container must be stopped**.
 
 ```bash
 # Stop services first
-docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml down
 
 # Restore (interactive confirmation prompt)
 ./scripts/restore.sh ./backups/velocal_pgdata_20260326_120000.tar.gz
 
 # Start services again
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ## SQL dump (logical backup via pg_dump)
@@ -48,7 +58,7 @@ Restore a SQL dump:
 
 ```bash
 gunzip -c ./backups/velocal_dump_20260326_120000.sql.gz \
-  | docker exec -i $(docker compose ps -q postgres) psql -U velocal velocal
+  | docker exec -i $(docker compose -f docker-compose.prod.yml ps -q postgres) psql -U velocal velocal
 ```
 
 ## Copying volumes between machines

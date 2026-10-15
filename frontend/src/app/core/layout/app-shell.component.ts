@@ -30,6 +30,7 @@ const NAV_LINKS: NavLink[] = [
   { path: '/calendar', key: 'app.nav.calendar' },
   { path: '/map', key: 'app.nav.map' },
   { path: '/communities', key: 'app.nav.communities' },
+  { path: '/routes', key: 'app.nav.routes' },
   // { path: '/series', key: 'app.nav.series' },
 ];
 

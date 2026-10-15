@@ -29,6 +29,7 @@ import {
   SubgroupMember,
   SubgroupMemberRole,
 } from './entities/subgroup-member.entity';
+import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
 import { Subgroup, SubgroupVisibility } from './entities/subgroup.entity';
 
@@ -44,6 +45,7 @@ export interface SerializedSubgroup {
   logoUrl: string | null;
   memberCount: number;
   pollCount: number;
+  postCount: number;
   myRole: SubgroupMemberRole | null;
   myJoinRequest: 'pending' | null;
   viewerIsCommunityAdmin: boolean;
@@ -82,6 +84,8 @@ export class SubgroupsService {
     private readonly communities: Repository<Community>,
     @InjectRepository(CommunityMember)
     private readonly communityMembers: Repository<CommunityMember>,
+    @InjectRepository(CommunityPost)
+    private readonly posts: Repository<CommunityPost>,
     @InjectRepository(CommunityPoll)
     private readonly polls: Repository<CommunityPoll>,
     @InjectRepository(User)
@@ -103,15 +107,26 @@ export class SubgroupsService {
     );
     await this.assertCommunityAdmin(community.id, userId);
     const slug = await this.generateSlug(community.id, dto.name);
-    const saved = await this.subgroups.save(
-      this.subgroups.create({
-        communityId: community.id,
-        name: dto.name,
-        slug,
-        description: dto.description ?? null,
-        visibility: dto.visibility ?? SubgroupVisibility.OPEN,
-      }),
-    );
+    // The creator leads the new subgroup from the start.
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const subgroup = await manager.save(
+        this.subgroups.create({
+          communityId: community.id,
+          name: dto.name,
+          slug,
+          description: dto.description ?? null,
+          visibility: dto.visibility ?? SubgroupVisibility.OPEN,
+        }),
+      );
+      await manager.save(
+        this.members.create({
+          subgroupId: subgroup.id,
+          userId,
+          role: SubgroupMemberRole.MODERATOR,
+        }),
+      );
+      return subgroup;
+    });
     return this.serializeFor(saved, community, userId);
   }
 
@@ -553,7 +568,7 @@ export class SubgroupsService {
   async invite(
     communitySlug: string,
     slug: string,
-    email: string,
+    userId: string,
     actorId: string,
   ): Promise<SerializedSubgroup> {
     const { subgroup, community } = await this.requireManageable(
@@ -561,12 +576,12 @@ export class SubgroupsService {
       slug,
       actorId,
     );
-    const user = await this.findUserByEmail(email);
-    if (!user) throw communityNotFound(CommunityErrorCode.userNotFound);
+    // Only existing community members can be added; unknown ids get the same answer.
+    const user = await this.users.findOne({ where: { id: userId } });
     const communityMember = await this.communityMembers.findOne({
-      where: { communityId: community.id, userId: user.id },
+      where: { communityId: community.id, userId },
     });
-    if (!communityMember) {
+    if (!user || !communityMember) {
       throw communityNotFound(CommunityErrorCode.notCommunityMember);
     }
 
@@ -716,15 +731,6 @@ export class SubgroupsService {
     }
   }
 
-  private async findUserByEmail(email: string): Promise<User | null> {
-    const trimmed = email.trim();
-    if (!trimmed) return null;
-    return this.users
-      .createQueryBuilder('user')
-      .where('LOWER(user.email) = LOWER(:email)', { email: trimmed })
-      .getOne();
-  }
-
   private async generateSlug(
     communityId: string,
     name: string,
@@ -849,6 +855,9 @@ export class SubgroupsService {
     const memberCount = await this.members.count({
       where: { subgroupId: subgroup.id },
     });
+    const postCount = await this.posts.count({
+      where: { subgroupId: subgroup.id },
+    });
     const pollCount = await this.polls.count({
       where: { subgroupId: subgroup.id },
     });
@@ -888,6 +897,7 @@ export class SubgroupsService {
       ),
       memberCount,
       pollCount,
+      postCount,
       myRole: membership?.role ?? null,
       myJoinRequest: pending ? 'pending' : null,
       viewerIsCommunityAdmin,

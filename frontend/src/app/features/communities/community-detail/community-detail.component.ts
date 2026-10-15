@@ -98,7 +98,12 @@ export class CommunityDetailComponent implements OnInit {
     if (!community.myRole) return links;
     return [
       ...links,
-      { icon: 'forum', labelKey: 'communities.posts.title', commands: [...base, 'posts'] },
+      {
+        icon: 'forum',
+        labelKey: 'communities.posts.title',
+        commands: [...base, 'posts'],
+        count: community.postCount,
+      },
       {
         icon: 'ballot',
         labelKey: 'communities.polls.title',

@@ -41,12 +41,43 @@
 
     @if (canManage()) {
       <div class="mt-6">
-        <app-invite-by-email
-          [label]="'communities.invite.email' | transloco"
-          [action]="'communities.invite.action' | transloco"
-          [submitting]="mutating()"
-          (invited)="onInvite($event)"
+        <label for="member-search" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'communities.members.addFromCommunity' | transloco }}
+        </label>
+        <input
+          id="member-search"
+          type="search"
+          autocomplete="off"
+          [value]="query()"
+          (input)="onQuery($event)"
+          [placeholder]="'communities.members.searchPlaceholder' | transloco"
+          class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
         />
+        @if (query().trim()) {
+          <ul
+            class="mt-2 divide-y divide-[var(--color-border)] overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+          >
+            @for (candidate of suggestions(); track candidate.userId) {
+              <li>
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] disabled:opacity-60"
+                  [disabled]="mutating()"
+                  (click)="onPick(candidate.userId)"
+                >
+                  <span class="min-w-0 break-words">{{ candidate.name }}</span>
+                  <span class="shrink-0 text-[var(--color-primary)]">{{
+                    'communities.invite.action' | transloco
+                  }}</span>
+                </button>
+              </li>
+            } @empty {
+              <li class="px-3 py-2 text-sm text-[var(--color-text-muted)]">
+                {{ 'communities.members.noMatches' | transloco }}
+              </li>
+            }
+          </ul>
+        }
       </div>
     }
 
@@ -61,6 +92,5 @@
         />
       }
     </div>
-
   </div>
 }

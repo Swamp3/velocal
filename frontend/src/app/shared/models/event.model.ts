@@ -1,4 +1,5 @@
 import { Discipline } from './discipline.model';
+import { PaceGroup, PaceGroupInput, Route, StravaLink } from './route.model';
 
 export interface CyclingEvent {
   id: string;
@@ -21,6 +22,12 @@ export interface CyclingEvent {
   meetupNote?: string | null;
   rsvpCount?: number;
   myRsvp?: EventRsvpStatus | null;
+  routeId?: string | null;
+  route?: Route | null;
+  stravaLinks?: StravaLink[];
+  paceGroups?: PaceGroup[];
+  recurrenceId?: string | null;
+  recurrence?: { id: string; frequency: RecurrenceFrequency } | null;
   canRsvp?: boolean;
   shared?: boolean;
   hostCommunity?: { name: string; slug: string } | null;
@@ -35,6 +42,15 @@ export interface CyclingEvent {
   createdById?: string;
   createdAt: string;
   distance?: number;
+}
+
+export type RecurrenceFrequency = 'weekly' | 'biweekly';
+
+export interface RecurrenceDto {
+  frequency: RecurrenceFrequency;
+  until?: string;
+  count?: number;
+  timezone: string;
 }
 
 export type EventRsvpStatus = 'going' | 'maybe' | 'declined';
@@ -60,6 +76,10 @@ export interface CreateEventDto {
   meetupAt?: string;
   meetupNote?: string;
   disciplineSlug: string;
+  recurrence?: RecurrenceDto;
+  routeId?: string | null;
+  paceGroups?: PaceGroupInput[];
+  stravaLinks?: { url: string; label?: string }[];
 }
 
 export type UpdateEventDto = Partial<CreateEventDto>;

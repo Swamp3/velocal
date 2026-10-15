@@ -34,6 +34,12 @@
         <span class="material-symbols-outlined text-[16px]" aria-hidden="true">group</span>
         {{ 'communities.memberCount' | transloco: { count: community().memberCount } }}
       </span>
+      @if (community().location) {
+        <span class="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">location_on</span>
+          {{ community().location }}
+        </span>
+      }
     </div>
   </div>
 </a>

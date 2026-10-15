@@ -66,7 +66,7 @@ jobs:
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           # The server's authorized_keys forces the command (deploy.sh in
           # /opt/velocal), so no command is sent from here.
-          ssh -i ~/.ssh/deploy_key \
+          ssh -T -i ~/.ssh/deploy_key \
             -p "${DEPLOY_PORT:-22}" \
             -o IdentitiesOnly=yes \
             -o StrictHostKeyChecking=yes \

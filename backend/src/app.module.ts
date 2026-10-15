@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { DisciplinesModule } from './disciplines/disciplines.module';
 import { ImportModule } from './import/import.module';
 import { SeriesModule } from './series/series.module';
+import { RoutesModule } from './routes/routes.module';
 import { CommunitiesModule } from './communities/communities.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PostsModule } from './posts/posts.module';
@@ -37,6 +38,7 @@ import { ChangelogModule } from './changelog/changelog.module';
     DisciplinesModule,
     ImportModule,
     SeriesModule,
+    RoutesModule,
     CommunitiesModule,
     NotificationsModule,
     PostsModule,
