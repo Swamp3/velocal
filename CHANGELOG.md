@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Text in comments no longer breaks in the middle of a word.
 - Buttons in the club section no longer wrap their text on small screens.
+- The Events and account menus in the header open fully on the map page instead of being cut off.
 - Dialogs keep keyboard focus inside while open.
 - Your RSVP now belongs to the club event it was given for.
 - Uploading a route without a GPX file is refused with a clear message.

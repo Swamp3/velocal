@@ -57,6 +57,9 @@
   --shadow-glow: 0 0 0 3px rgb(56 189 248 / 0.25);
 }
 
+/* Only html clips horizontal overflow: with `overflow` on body as well, body
+   clips to its own box, which on the full-viewport map page is just the header
+   and cut off the header dropdowns. */
 html {
   overflow-x: hidden;
 }
@@ -74,7 +77,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg);
   color: var(--color-text);
-  overflow-x: hidden;
   transition:
     background-color 0.3s ease,
     color 0.3s ease;

@@ -15,6 +15,7 @@
 
 ### Fixed
 
+- Header dropdowns clipped on the map page (body no longer clips overflow)
 - Mid-word text breaks in rich text; stacked buttons on narrow screens
 
 ## [0.10.0] - 2026-10-15
