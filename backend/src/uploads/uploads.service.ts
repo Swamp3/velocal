@@ -10,11 +10,7 @@ import { join, resolve } from 'node:path';
 import sharp from 'sharp';
 
 export type UploadSubject =
-  | 'events'
-  | 'series'
-  | 'posts'
-  | 'community-heroes'
-  | 'community-logos';
+  'events' | 'series' | 'posts' | 'community-heroes' | 'community-logos';
 
 export interface UploadedFile {
   buffer: Buffer;
@@ -74,7 +70,10 @@ const LOGO_VARIANTS: VariantSpec[] = [
 ];
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const ALLOWED_FORMATS = new Set(['jpeg', 'png', 'webp']);
 const MAX_BYTES = 10 * 1024 * 1024;
+/** Decoded pixel cap, so a small file can't inflate into a huge bitmap. */
+const MAX_INPUT_PIXELS = 50_000_000;
 const DEFAULT_VARIANT = 'hero.webp';
 
 @Injectable()
@@ -97,12 +96,16 @@ export class UploadsService {
     file: UploadedFile,
   ): Promise<string> {
     this.validate(file);
+    await this.assertRealImage(file.buffer);
 
     const dir = this.subjectDir(subject, id);
     await mkdir(dir, { recursive: true });
 
     const variants = this.variantsFor(subject);
-    const pipeline = sharp(file.buffer, { failOn: 'error' }).rotate();
+    const pipeline = sharp(file.buffer, {
+      failOn: 'error',
+      limitInputPixels: MAX_INPUT_PIXELS,
+    }).rotate();
     try {
       await Promise.all(
         variants.map((v) =>
@@ -182,6 +185,25 @@ export class UploadsService {
       throw new BadRequestException('Image must be under 10 MB');
     }
     if (!ALLOWED_MIME.has(file.mimetype)) {
+      throw new BadRequestException(
+        'Only JPEG, PNG, or WebP images are allowed',
+      );
+    }
+  }
+
+  /**
+   * The client-sent mimetype is only a hint. Decode the header and require a
+   * real JPEG/PNG/WebP within the pixel limit before anything is written.
+   */
+  private async assertRealImage(buffer: Buffer): Promise<void> {
+    try {
+      const meta = await sharp(buffer, {
+        limitInputPixels: MAX_INPUT_PIXELS,
+      }).metadata();
+      if (!meta.format || !ALLOWED_FORMATS.has(meta.format)) {
+        throw new Error(`unsupported format ${meta.format}`);
+      }
+    } catch {
       throw new BadRequestException(
         'Only JPEG, PNG, or WebP images are allowed',
       );

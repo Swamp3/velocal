@@ -25,6 +25,12 @@ const angularApp = new AngularNodeAppEngine({ allowedHosts });
 
 app.disable('x-powered-by');
 
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 // Cheap liveness probe — no Angular render, no backend roundtrip.
 app.get('/healthz', (_req, res) => {
   res.type('text/plain').send('ok');
