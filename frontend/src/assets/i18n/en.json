@@ -33,7 +33,10 @@
     "decisionApproved": "You're in {{communityName}}",
     "decisionRejected": "Join request for {{communityName}} was declined",
     "decisionSubgroupApproved": "You're in {{subgroupName}}",
-    "decisionSubgroupRejected": "Join request for {{subgroupName}} was declined"
+    "decisionSubgroupRejected": "Join request for {{subgroupName}} was declined",
+    "delete": "Delete",
+    "deleteAll": "Delete all",
+    "deleteAllConfirm": "Delete all notifications?"
   },
   "events": {
     "title": "Find Cycling Events",

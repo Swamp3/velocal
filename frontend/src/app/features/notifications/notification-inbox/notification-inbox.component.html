@@ -5,9 +5,14 @@
     </h1>
     @if (rows(); as list) {
       @if (list.length > 0) {
-        <ui-button variant="outline" size="sm" [disabled]="markingAll()" (click)="markAll()">
-          {{ 'notifications.markAll' | transloco }}
-        </ui-button>
+        <div class="flex gap-2">
+          <ui-button variant="outline" size="sm" [disabled]="markingAll()" (click)="markAll()">
+            {{ 'notifications.markAll' | transloco }}
+          </ui-button>
+          <ui-button variant="outline" size="sm" (click)="removeAll()">
+            {{ 'notifications.deleteAll' | transloco }}
+          </ui-button>
+        </div>
       }
     }
   </div>
@@ -23,10 +28,10 @@
   } @else {
     <ul class="flex flex-col gap-2">
       @for (row of rows()!; track row.id) {
-        <li>
+        <li class="flex items-stretch gap-2">
           <button
             type="button"
-            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-left shadow-[var(--shadow-card)] hover:bg-[var(--color-bg-alt)]"
+            class="min-w-0 flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-left shadow-[var(--shadow-card)] hover:bg-[var(--color-bg-alt)]"
             [class.font-semibold]="!row.readAt"
             (click)="open(row)"
           >
@@ -39,6 +44,14 @@
             >
               {{ row.createdAt | date: 'medium' }}
             </time>
+          </button>
+          <button
+            type="button"
+            class="shrink-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+            [attr.aria-label]="'notifications.delete' | transloco"
+            (click)="remove(row)"
+          >
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">delete</span>
           </button>
         </li>
       }
