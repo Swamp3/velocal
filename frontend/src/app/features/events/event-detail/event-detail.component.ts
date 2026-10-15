@@ -142,13 +142,29 @@ export class EventDetailComponent implements OnInit {
     const ev = this.event();
     if (!ev) return;
 
-    const msg = this.transloco.translate('event.form.deleteConfirm');
+    const msg = this.transloco.translate(
+      ev.recurrenceId ? 'event.series.deleteOneConfirm' : 'event.form.deleteConfirm',
+    );
     if (!confirm(msg)) return;
 
     this.deleteLoading.set(true);
     this.eventService.deleteEvent(ev.id).subscribe({
       next: () => {
         this.toast.success(this.transloco.translate('event.form.success.delete'));
+        this.router.navigate(['/events']);
+      },
+      error: () => this.deleteLoading.set(false),
+    });
+  }
+
+  protected stopSeries(): void {
+    const ev = this.event();
+    if (!ev?.recurrenceId) return;
+    if (!confirm(this.transloco.translate('event.series.stopConfirm'))) return;
+    this.deleteLoading.set(true);
+    this.eventService.stopSeries(ev.id).subscribe({
+      next: () => {
+        this.toast.success(this.transloco.translate('event.series.stopped'));
         this.router.navigate(['/events']);
       },
       error: () => this.deleteLoading.set(false),

@@ -1,6 +1,8 @@
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsInt,
+  MaxLength,
   IsISO8601,
   IsNumber,
   IsOptional,
@@ -22,6 +24,28 @@ class CoordinatesDto {
   @Min(-180)
   @Max(180)
   lng: number;
+}
+
+export class RecurrenceDto {
+  @IsEnum(['weekly', 'biweekly'])
+  frequency: 'weekly' | 'biweekly';
+
+  /** Last day (inclusive) on which an occurrence may start. */
+  @IsOptional()
+  @IsISO8601()
+  until?: string;
+
+  /** Total number of events including the first one. */
+  @IsOptional()
+  @IsInt()
+  @Min(2)
+  @Max(104)
+  count?: number;
+
+  /** IANA zone the weekly time is kept in, e.g. Europe/Berlin. */
+  @IsString()
+  @MaxLength(64)
+  timezone: string;
 }
 
 export class CreateEventDto {
@@ -73,4 +97,9 @@ export class CreateEventDto {
 
   @IsString()
   disciplineSlug: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RecurrenceDto)
+  recurrence?: RecurrenceDto;
 }

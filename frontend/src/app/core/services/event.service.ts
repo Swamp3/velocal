@@ -64,6 +64,10 @@ export class EventService {
     return this.api.delete(`/events/${id}`);
   }
 
+  stopSeries(id: string): Observable<{ removed: number }> {
+    return this.api.post(`/events/${id}/series/stop`, {});
+  }
+
   invite(id: string, email: string): Observable<EventInviteResult> {
     return this.api.post(`/events/${id}/invites`, { email });
   }

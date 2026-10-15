@@ -151,12 +151,30 @@
         "update": "Fehler beim Aktualisieren der Veranstaltung"
       },
       "delete": "Löschen",
-      "deleteConfirm": "Soll diese Veranstaltung wirklich gelöscht werden?"
+      "deleteConfirm": "Soll diese Veranstaltung wirklich gelöscht werden?",
+      "repeat": {
+        "label": "Wiederholung",
+        "none": "Keine Wiederholung",
+        "weekly": "Jede Woche",
+        "biweekly": "Alle 2 Wochen",
+        "hint": "Erstellt pro Termin ein Event zur gleichen Ortszeit. Jedes lässt sich einzeln bearbeiten oder löschen.",
+        "count": "Anzahl Events",
+        "until": "Oder wiederholen bis (Datum)"
+      }
     },
     "actions": {
       "create": "Veranstaltung erstellen",
       "edit": "Bearbeiten",
       "delete": "Löschen"
+    },
+    "series": {
+      "weekly": "Wöchentliche Serie",
+      "biweekly": "Alle 2 Wochen",
+      "deleteOne": "Nur dieses Event löschen",
+      "deleteOneConfirm": "Nur dieses Event löschen? Der Rest der Serie bleibt bestehen.",
+      "stop": "Serie ab hier beenden",
+      "stopConfirm": "Serie beenden? Dieses und alle späteren Events werden gelöscht. Frühere bleiben erhalten.",
+      "stopped": "Serie beendet"
     }
   },
   "map": {

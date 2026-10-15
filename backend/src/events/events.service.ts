@@ -2,12 +2,15 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, IsNull, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
+import { EventRecurrence } from './entities/event-recurrence.entity';
+import { assertTimeZone, occurrenceStarts } from './recurrence';
 import {
   CommunityMember,
   CommunityMemberRole,
@@ -37,7 +40,7 @@ import {
   EventSource,
   EventStatus,
 } from './entities/event.entity';
-import { CreateEventDto } from './dto/create-event.dto';
+import { CreateEventDto, RecurrenceDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
 import {
@@ -87,6 +90,8 @@ export class EventsService {
     private readonly comments: Repository<EventComment>,
     @InjectRepository(EventShare)
     private readonly shares: Repository<EventShare>,
+    @InjectRepository(EventRecurrence)
+    private readonly recurrences: Repository<EventRecurrence>,
     @InjectRepository(Community)
     private readonly communities: Repository<Community>,
     @InjectRepository(CommunityMember)
@@ -245,7 +250,90 @@ export class EventsService {
       meetupNote?: string | null;
     },
   ): Promise<Event> {
-    return this.repo.save(await this.buildEvent(dto, userId, host));
+    const first = await this.buildEvent(dto, userId, host);
+    if (!dto.recurrence) return this.repo.save(first);
+    return this.dataSource.transaction((manager) =>
+      this.saveSeries(manager, first, dto.recurrence!, userId),
+    );
+  }
+
+  /**
+   * Saves `first` plus its repeats. Each occurrence is a real event so it can
+   * be edited, RSVPed to or deleted on its own. Returns the first one.
+   */
+  private async saveSeries(
+    manager: EntityManager,
+    first: Event,
+    recurrence: RecurrenceDto,
+    userId?: string,
+  ): Promise<Event> {
+    assertTimeZone(recurrence.timezone);
+    const starts = occurrenceStarts(
+      first.startDate,
+      recurrence.frequency,
+      recurrence.timezone,
+      {
+        until: recurrence.until ? new Date(recurrence.until) : undefined,
+        count: recurrence.count,
+      },
+    );
+    const series = await manager.save(
+      this.recurrences.create({
+        frequency: recurrence.frequency,
+        timezone: recurrence.timezone,
+        createdById: userId ?? null,
+      }),
+    );
+    const base = first.startDate.getTime();
+    const events = starts.map((start, index) => {
+      if (index === 0) return Object.assign(first, { recurrenceId: series.id });
+      const shift = start.getTime() - base;
+      const moved = (date: Date | null | undefined): Date | undefined =>
+        date ? new Date(date.getTime() + shift) : undefined;
+      return this.repo.create({
+        ...first,
+        id: undefined,
+        recurrenceId: series.id,
+        startDate: start,
+        endDate: moved(first.endDate),
+        registrationDeadline: moved(first.registrationDeadline),
+        meetupAt: first.meetupAt ? moved(first.meetupAt) : null,
+      });
+    });
+    const saved = await manager.save(events);
+    return saved[0];
+  }
+
+  /**
+   * Stops a repeating series at this event: this occurrence and every later
+   * one are removed, earlier ones stay. Deleting a single occurrence is the
+   * normal event delete.
+   */
+  async stopSeries(
+    id: string,
+    user?: { id: string; isAdmin: boolean },
+  ): Promise<{ removed: number }> {
+    const event = await this.findEntity(id);
+    if (!user)
+      throw new ForbiddenException('You can only modify your own events');
+    await this.assertCanMutate(event, user);
+    if (!event.recurrenceId) {
+      throw new BadRequestException('This event is not part of a series');
+    }
+    const later = await this.repo
+      .createQueryBuilder('event')
+      .select('event.id', 'id')
+      .where('event.recurrenceId = :recurrenceId', {
+        recurrenceId: event.recurrenceId,
+      })
+      .andWhere('event.startDate >= :from', { from: event.startDate })
+      .getRawMany<{ id: string }>();
+    for (const row of later) await this.uploads.remove('events', row.id);
+    if (later.length > 0) {
+      await this.repo.delete(later.map((row) => row.id));
+    }
+    await this.recurrences.update(event.recurrenceId, { endedAt: new Date() });
+    return { removed: later.length };
   }
 
   private async buildEvent(
@@ -272,8 +360,10 @@ export class EventsService {
       if (geo) coordinates = geo;
     }
 
+    const { recurrence: _recurrence, ...eventFields } = dto;
+    void _recurrence;
     const entity = this.repo.create({
-      ...dto,
+      ...eventFields,
       source: userId ? EventSource.MANUAL : (dto.source ?? EventSource.MANUAL),
       createdById: userId ?? undefined,
       startDate: new Date(dto.startDate),
@@ -760,7 +850,9 @@ export class EventsService {
       meetupNote: dto.meetupNote,
     });
     const event = await this.dataSource.transaction(async (manager) => {
-      const saved = await manager.save(entity);
+      const saved = dto.recurrence
+        ? await this.saveSeries(manager, entity, dto.recurrence, userId)
+        : await manager.save(entity);
       await this.notifications.eventCreated(
         {
           actorId: userId,
@@ -1113,7 +1205,13 @@ export class EventsService {
       ? await this.goingCounts([event.id], audience!)
       : new Map<string, number>();
     const hostCommunity = await this.hostCommunityFor(event, audience);
+    const recurrence = event.recurrenceId
+      ? await this.recurrences.findOne({ where: { id: event.recurrenceId } })
+      : null;
     return this.serializeEvent(event, {
+      recurrence: recurrence
+        ? { id: recurrence.id, frequency: recurrence.frequency }
+        : null,
       ...(isMember ? { rsvpCount: counts.get(event.id) ?? 0 } : {}),
       myRsvp: mine?.status ?? null,
       canRsvp: isMember,

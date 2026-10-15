@@ -21,6 +21,8 @@ export interface CyclingEvent {
   meetupNote?: string | null;
   rsvpCount?: number;
   myRsvp?: EventRsvpStatus | null;
+  recurrenceId?: string | null;
+  recurrence?: { id: string; frequency: RecurrenceFrequency } | null;
   canRsvp?: boolean;
   shared?: boolean;
   hostCommunity?: { name: string; slug: string } | null;
@@ -35,6 +37,15 @@ export interface CyclingEvent {
   createdById?: string;
   createdAt: string;
   distance?: number;
+}
+
+export type RecurrenceFrequency = 'weekly' | 'biweekly';
+
+export interface RecurrenceDto {
+  frequency: RecurrenceFrequency;
+  until?: string;
+  count?: number;
+  timezone: string;
 }
 
 export type EventRsvpStatus = 'going' | 'maybe' | 'declined';
@@ -60,6 +71,7 @@ export interface CreateEventDto {
   meetupAt?: string;
   meetupNote?: string;
   disciplineSlug: string;
+  recurrence?: RecurrenceDto;
 }
 
 export type UpdateEventDto = Partial<CreateEventDto>;

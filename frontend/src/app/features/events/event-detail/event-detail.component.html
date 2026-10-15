@@ -67,8 +67,21 @@
           </a>
           <ui-button variant="danger" size="sm" [loading]="deleteLoading()" (click)="deleteEvent()">
             <span class="material-symbols-outlined text-[16px]">delete</span>
-            {{ 'event.actions.delete' | transloco }}
+            {{
+              (event.recurrenceId ? 'event.series.deleteOne' : 'event.actions.delete') | transloco
+            }}
           </ui-button>
+          @if (event.recurrenceId) {
+            <ui-button
+              variant="danger"
+              size="sm"
+              [loading]="deleteLoading()"
+              (click)="stopSeries()"
+            >
+              <span class="material-symbols-outlined text-[16px]">event_busy</span>
+              {{ 'event.series.stop' | transloco }}
+            </ui-button>
+          }
         }
       </div>
     </div>
@@ -91,6 +104,12 @@
     <div class="mt-5 flex flex-wrap items-center gap-2">
       <app-discipline-chip [discipline]="event.discipline" />
       <app-event-status-badge [status]="event.status" />
+      @if (event.recurrence) {
+        <ui-chip>
+          <span class="material-symbols-outlined text-[14px]" aria-hidden="true">repeat</span>
+          {{ 'event.series.' + event.recurrence.frequency | transloco }}
+        </ui-chip>
+      }
       <span class="flex-1"></span>
       <app-add-to-calendar [event]="event" [iconOnly]="true" />
     </div>

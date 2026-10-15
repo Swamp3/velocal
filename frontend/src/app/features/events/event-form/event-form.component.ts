@@ -19,7 +19,7 @@ import { RichTextComponent } from '@shared/components/rich-text/rich-text.compon
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
-import { CyclingEvent, Discipline } from '@shared/models';
+import { CyclingEvent, Discipline, RecurrenceDto } from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
 import {
   toDisplayDate as toDisplayDateUtil,
@@ -118,6 +118,15 @@ export class EventFormComponent implements OnInit {
     externalUrl: new FormControl('', { nonNullable: true }),
     status: new FormControl('published', { nonNullable: true }),
     listing: new FormControl<'public' | 'members'>('members', { nonNullable: true }),
+    repeat: new FormControl<'none' | 'weekly' | 'biweekly'>('none', { nonNullable: true }),
+    repeatCount: new FormControl(12, {
+      nonNullable: true,
+      validators: [Validators.min(2), Validators.max(104)],
+    }),
+    repeatUntil: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)],
+    }),
     stravaUrl: new FormControl('', { nonNullable: true }),
     meetupPlace: new FormControl('', { nonNullable: true }),
     meetupDate: new FormControl('', { nonNullable: true }),
@@ -184,6 +193,7 @@ export class EventFormComponent implements OnInit {
         ? this.combineDatetime(raw.registrationDeadline, raw.registrationDeadlineTime)
         : undefined,
       externalUrl: raw.externalUrl || undefined,
+      recurrence: undefined as RecurrenceDto | undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
       ...(this.hosted()
         ? {
@@ -196,12 +206,23 @@ export class EventFormComponent implements OnInit {
         : {}),
     };
 
+    const recurrence =
+      !this.isEdit() && raw.repeat !== 'none'
+        ? {
+            frequency: raw.repeat,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            ...(raw.repeatUntil
+              ? { until: this.combineDatetime(raw.repeatUntil, '23:59') }
+              : { count: raw.repeatCount }),
+          }
+        : undefined;
     const community = this.communitySlug();
+    const createDto = { ...dto, recurrence };
     const action = this.isEdit()
       ? this.eventService.updateEvent(this.eventId()!, dto)
       : community
-        ? this.communities.createEvent(community, dto, this.subgroupSlug() ?? undefined)
-        : this.eventService.createEvent(dto);
+        ? this.communities.createEvent(community, createDto, this.subgroupSlug() ?? undefined)
+        : this.eventService.createEvent(createDto);
 
     action.subscribe({
       next: (event) => {

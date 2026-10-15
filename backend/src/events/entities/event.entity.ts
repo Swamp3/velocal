@@ -140,6 +140,11 @@ export class Event {
   @Column({ type: 'text', name: 'meetup_note', nullable: true })
   meetupNote: string | null;
 
+  /** Set when the event is one occurrence of a repeating series. */
+  @Index('IDX_events_recurrence_id')
+  @Column({ type: 'uuid', name: 'recurrence_id', nullable: true })
+  recurrenceId: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

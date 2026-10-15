@@ -170,6 +170,15 @@ export class EventsController {
     return this.eventsService.remove(id, user);
   }
 
+  @Post(':id/series/stop')
+  @UseGuards(JwtAuthGuard)
+  stopSeries(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
+  ): Promise<{ removed: number }> {
+    return this.eventsService.stopSeries(id, user);
+  }
+
   @Post(':id/image')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
