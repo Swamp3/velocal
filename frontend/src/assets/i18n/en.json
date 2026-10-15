@@ -778,7 +778,15 @@
       "votes": "{{count}} votes",
       "hidden": "Results are hidden",
       "delete": "Delete poll",
-      "deleteConfirm": "Delete this poll?"
+      "deleteConfirm": "Delete this poll?",
+      "editTitle": "Edit poll",
+      "options": "Options",
+      "removeOption": "Remove option",
+      "removeOptionConfirm": "Remove this option? Votes for it are deleted.",
+      "multipleFixed": "This poll allows several choices. That can't be changed after creation.",
+      "singleFixed": "This poll allows one choice. That can't be changed after creation.",
+      "deadlineHint": "Empty means the poll never closes.",
+      "updated": "Poll updated"
     },
     "events": {
       "title": "Events",

@@ -321,6 +321,20 @@ export class CommunityService {
     });
   }
 
+  updatePoll(
+    communitySlug: string,
+    pollId: string,
+    dto: {
+      question: string;
+      resultsVisibility: PollResultsVisibility;
+      closesAt: string | null;
+      options: { id?: string; label: string }[];
+    },
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPoll> {
+    return this.api.patch(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}`, dto);
+  }
+
   deletePoll(
     communitySlug: string,
     pollId: string,

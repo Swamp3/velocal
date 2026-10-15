@@ -778,7 +778,15 @@
       "votes": "{{count}} Stimmen",
       "hidden": "Ergebnisse sind verborgen",
       "delete": "Umfrage löschen",
-      "deleteConfirm": "Diese Umfrage löschen?"
+      "deleteConfirm": "Diese Umfrage löschen?",
+      "editTitle": "Umfrage bearbeiten",
+      "options": "Antworten",
+      "removeOption": "Antwort entfernen",
+      "removeOptionConfirm": "Diese Antwort entfernen? Stimmen dafür werden gelöscht.",
+      "multipleFixed": "Diese Umfrage erlaubt mehrere Antworten. Das lässt sich nach dem Erstellen nicht ändern.",
+      "singleFixed": "Diese Umfrage erlaubt eine Antwort. Das lässt sich nach dem Erstellen nicht ändern.",
+      "deadlineHint": "Leer bedeutet: Die Umfrage endet nie.",
+      "updated": "Umfrage aktualisiert"
     },
     "events": {
       "title": "Events",

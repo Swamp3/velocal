@@ -139,6 +139,7 @@ export interface CommunityPoll {
   closesAt: string | null;
   closed: boolean;
   canSeeResults: boolean;
+  canEdit: boolean;
   canDelete: boolean;
   options: CommunityPollOption[];
   createdAt: string;
