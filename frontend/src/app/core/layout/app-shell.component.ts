@@ -16,7 +16,7 @@ import { SeoService } from '@core/services/seo.service';
 import { UserService } from '@core/services/user.service';
 import { ThemeService } from '@core/theme.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ToastContainerComponent } from '@shared/ui';
+import { ToastContainerComponent } from '@shared/ui/toast/toast-container.component';
 import { filter } from 'rxjs';
 import { NavDropdownComponent } from './nav-dropdown/nav-dropdown.component';
 import { UpdateBannerComponent } from './update-banner/update-banner.component';

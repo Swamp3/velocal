@@ -2,7 +2,7 @@ import { Controller, Get, Header, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Response } from 'express';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 
 import {
   Event,
@@ -140,16 +140,22 @@ export class SitemapController {
     const cutoff = new Date(
       Date.now() - ARCHIVE_CUTOFF_DAYS * 24 * 60 * 60 * 1000,
     );
-    const events = await this.events.find({
-      where: {
-        status: EventStatus.PUBLISHED,
-        listing: EventListing.PUBLIC,
-        startDate: MoreThanOrEqual(cutoff),
-      },
-      select: { id: true, updatedAt: true, startDate: true },
-      order: { startDate: 'DESC' },
-      take: MAX_URLS_PER_FILE,
-    });
+    // Events of suspended communities stay out of the sitemap.
+    const events = await this.events
+      .createQueryBuilder('event')
+      .select(['event.id', 'event.updatedAt', 'event.startDate'])
+      .where('event.status = :status', { status: EventStatus.PUBLISHED })
+      .andWhere('event.listing = :listing', { listing: EventListing.PUBLIC })
+      .andWhere('event.startDate >= :cutoff', { cutoff })
+      .andWhere(
+        `(event.community_id IS NULL OR NOT EXISTS (
+          SELECT 1 FROM communities sc
+          WHERE sc.id = event.community_id AND sc.suspended_at IS NOT NULL
+        ))`,
+      )
+      .orderBy('event.startDate', 'DESC')
+      .take(MAX_URLS_PER_FILE)
+      .getMany();
     const entries = events.map((e) =>
       urlEntry({
         loc: `${site}/events/${e.id}`,
