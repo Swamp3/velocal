@@ -12,7 +12,9 @@
       "news": "News",
       "communities": "Communities",
       "admin": "Admin",
-      "routes": "Routes"
+      "routes": "Routes",
+      "eventList": "List",
+      "account": "Account"
     },
     "update": {
       "available": "A new version of VeloCal is available.",

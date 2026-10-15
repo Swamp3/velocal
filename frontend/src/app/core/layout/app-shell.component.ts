@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -17,6 +18,7 @@ import { ThemeService } from '@core/theme.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui';
 import { filter } from 'rxjs';
+import { NavDropdownComponent } from './nav-dropdown/nav-dropdown.component';
 import { UpdateBannerComponent } from './update-banner/update-banner.component';
 import { version as APP_VERSION } from '../../../../package.json';
 
@@ -31,9 +33,16 @@ const NAV_LINKS: NavLink[] = [
   { path: '/calendar', key: 'app.nav.calendar' },
   { path: '/map', key: 'app.nav.map' },
   { path: '/communities', key: 'app.nav.communities' },
-  { path: '/routes', key: 'app.nav.routes' },
   // { path: '/series', key: 'app.nav.series' },
 ];
+
+/** Desktop groups these under one "Events" dropdown; mobile lists them flat. */
+const EVENT_LINKS = [
+  { path: '/events', key: 'app.nav.eventList', icon: 'list' },
+  { path: '/calendar', key: 'app.nav.calendar', icon: 'calendar_month' },
+  { path: '/map', key: 'app.nav.map', icon: 'map' },
+];
+const USER_PATHS = /^\/(profile|routes|admin)(\/|$)/;
 
 const ADMIN_NAV: NavLink = { path: '/admin', key: 'app.nav.admin' };
 const AUTH_NAV: NavLink = { path: '/profile', key: 'app.nav.profile' };
@@ -124,6 +133,7 @@ const DEFAULT_SEO: RouteSeo = {
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NavDropdownComponent,
     UpdateBannerComponent,
     RouterOutlet,
     RouterLink,
@@ -149,6 +159,16 @@ export class AppShellComponent {
   protected readonly mobileMenuOpen = signal(false);
   protected readonly isFullViewport = signal(false);
   protected readonly navLinks = NAV_LINKS;
+  protected readonly eventLinks = EVENT_LINKS;
+  protected readonly currentUrl = signal('/');
+  protected readonly eventsGroupActive = computed(() =>
+    EVENT_LINKS.some((link) => this.currentUrl().startsWith(link.path)),
+  );
+  protected readonly userGroupActive = computed(() => USER_PATHS.test(this.currentUrl()));
+  protected readonly topLinkClass =
+    'rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200';
+  protected readonly menuItemClass =
+    'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-colors';
   protected readonly adminNav = ADMIN_NAV;
   protected readonly authNav = AUTH_NAV;
   protected readonly appVersion = APP_VERSION;
@@ -161,6 +181,7 @@ export class AppShellComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((e) => {
+        this.currentUrl.set(e.urlAfterRedirects);
         this.isFullViewport.set(/^\/map(\?|$)/.test(e.urlAfterRedirects));
         this.applyRouteDefaults(e.urlAfterRedirects);
         this.refreshUnread();

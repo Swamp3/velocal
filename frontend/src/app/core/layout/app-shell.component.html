@@ -16,29 +16,37 @@
 
     <!-- Desktop nav -->
     <nav class="hidden items-center gap-1 md:flex" aria-label="Main navigation">
-      @for (link of navLinks; track link.path) {
-        <a
-          [routerLink]="link.path"
-          routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-          class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-        >
-          {{ link.key | transloco }}
-        </a>
-      }
+      <a
+        routerLink="/news"
+        routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+        [class]="topLinkClass"
+      >
+        {{ 'app.nav.news' | transloco }}
+      </a>
+
+      <app-nav-dropdown [label]="'app.nav.events' | transloco" [active]="eventsGroupActive()">
+        @for (link of eventLinks; track link.path) {
+          <a [routerLink]="link.path" role="menuitem" [class]="menuItemClass">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{
+              link.icon
+            }}</span>
+            {{ link.key | transloco }}
+          </a>
+        }
+      </app-nav-dropdown>
+
+      <a
+        routerLink="/communities"
+        routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+        [class]="topLinkClass"
+      >
+        {{ 'app.nav.communities' | transloco }}
+      </a>
 
       <div class="mx-2 h-5 w-px bg-[var(--color-border)]"></div>
 
       @if (auth.hydrated()) {
         @if (auth.isAuthenticated()) {
-          @if (auth.currentUser()?.isAdmin) {
-            <a
-              [routerLink]="adminNav.path"
-              routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-              class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
-            >
-              {{ adminNav.key | transloco }}
-            </a>
-          }
           <a
             routerLink="/notifications"
             class="relative rounded-lg p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
@@ -66,19 +74,34 @@
               </span>
             }
           </a>
-          <a
-            [routerLink]="authNav.path"
-            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
-            class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+
+          <app-nav-dropdown
+            icon="account_circle"
+            [label]="auth.currentUser()?.displayName || ('app.nav.account' | transloco)"
+            [active]="userGroupActive()"
           >
-            {{ authNav.key | transloco }}
-          </a>
-          <button
-            class="rounded-lg px-3.5 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
-            (click)="onLogout()"
-          >
-            {{ 'app.nav.logout' | transloco }}
-          </button>
+            <a [routerLink]="authNav.path" role="menuitem" [class]="menuItemClass">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person</span>
+              {{ authNav.key | transloco }}
+            </a>
+            <a routerLink="/routes" role="menuitem" [class]="menuItemClass">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">route</span>
+              {{ 'app.nav.routes' | transloco }}
+            </a>
+            @if (auth.currentUser()?.isAdmin) {
+              <a [routerLink]="adminNav.path" role="menuitem" [class]="menuItemClass">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+                  >admin_panel_settings</span
+                >
+                {{ adminNav.key | transloco }}
+              </a>
+            }
+            <div class="my-1 h-px bg-[var(--color-border)]"></div>
+            <button type="button" role="menuitem" [class]="menuItemClass" (click)="onLogout()">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
+              {{ 'app.nav.logout' | transloco }}
+            </button>
+          </app-nav-dropdown>
         } @else {
           <a
             routerLink="/auth/login"
@@ -286,6 +309,14 @@
             (click)="mobileMenuOpen.set(false)"
           >
             {{ authNav.key | transloco }}
+          </a>
+          <a
+            routerLink="/routes"
+            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            {{ 'app.nav.routes' | transloco }}
           </a>
           <button
             class="rounded-lg px-4 py-2.5 text-sm font-medium text-left text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
