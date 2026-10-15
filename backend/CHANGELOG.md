@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0] - 2026-10-15
+
+### Added
+
+- `DELETE /notifications/:id` and `DELETE /notifications`
+- `canEditMeetup` on events shared with a community; `POST /communities/:slug/events/shared` updates the meetup details of an existing share
+
+### Changed
+
+- NestJS 12 (ESM-only; tests run with `--experimental-vm-modules`), TypeORM 1.1, sharp 0.35, ESLint 10
+- Relation counts for communities and series come from grouped queries, since TypeORM 1 removed `loadRelationCountAndMap`
+- CI uses current GitHub Actions on the Node 24 runtime; `.nvmrc` pins Node 24
+
 ## [0.8.0] - 2026-10-15
 
 ### Added

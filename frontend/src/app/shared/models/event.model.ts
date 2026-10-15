@@ -29,6 +29,7 @@ export interface CyclingEvent {
   recurrenceId?: string | null;
   recurrence?: { id: string; frequency: RecurrenceFrequency } | null;
   canRsvp?: boolean;
+  canEditMeetup?: boolean;
   shared?: boolean;
   hostCommunity?: { name: string; slug: string } | null;
   canComment?: boolean;

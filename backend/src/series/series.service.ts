@@ -48,8 +48,7 @@ export class SeriesService {
   async findAll(params: SeriesSearchDto): Promise<PaginatedSeries> {
     const qb = this.repo
       .createQueryBuilder('series')
-      .leftJoinAndSelect('series.discipline', 'discipline')
-      .loadRelationCountAndMap('series.eventCount', 'series.seriesEvents');
+      .leftJoinAndSelect('series.discipline', 'discipline');
 
     if (params.q) {
       qb.andWhere('series.name ILIKE :q', { q: `%${params.q}%` });
@@ -69,6 +68,11 @@ export class SeriesService {
       .take(params.limit);
 
     const [data, total] = await qb.getManyAndCount();
+    const counts = await this.eventCounts(data.map((s) => s.id));
+    for (const s of data) {
+      (s as RaceSeries & { eventCount?: number }).eventCount =
+        counts.get(s.id) ?? 0;
+    }
 
     return {
       data: data.map((s) => this.serialize(s)),
@@ -78,10 +82,27 @@ export class SeriesService {
     };
   }
 
+  private async eventCounts(ids: string[]): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (ids.length === 0) return counts;
+    const rows = await this.seriesEventRepo
+      .createQueryBuilder('rse')
+      .select('rse.seriesId', 'seriesId')
+      .addSelect('COUNT(*)', 'count')
+      .where('rse.seriesId IN (:...ids)', { ids })
+      .groupBy('rse.seriesId')
+      .getRawMany<{ seriesId: string; count: string }>();
+    for (const row of rows) counts.set(row.seriesId, Number(row.count));
+    return counts;
+  }
+
   async findBySlug(slug: string): Promise<Record<string, unknown>> {
     const series = await this.repo.findOne({
       where: { slug },
-      relations: ['discipline', 'seriesEvents', 'seriesEvents.event', 'seriesEvents.event.discipline'],
+      relations: {
+        discipline: true,
+        seriesEvents: { event: { discipline: true } },
+      },
     });
     if (!series) {
       throw new NotFoundException(`Series "${slug}" not found`);
@@ -108,7 +129,9 @@ export class SeriesService {
   async findByEventId(eventId: string): Promise<SerializedSeries[]> {
     const entries = await this.seriesEventRepo.find({
       where: { eventId },
-      relations: ['series', 'series.discipline', 'series.seriesEvents'],
+      relations: {
+        series: { discipline: true, seriesEvents: true },
+      },
     });
 
     return entries.map((e) => this.serialize(e.series));
@@ -304,7 +327,8 @@ export class SeriesService {
       discipline: series.discipline ?? undefined,
       imageUrl: series.imageUrl ?? undefined,
       externalUrl: series.externalUrl ?? undefined,
-      eventCount: (series as any).eventCount ?? series.seriesEvents?.length ?? 0,
+      eventCount:
+        (series as any).eventCount ?? series.seriesEvents?.length ?? 0,
       createdAt: series.createdAt,
     };
   }

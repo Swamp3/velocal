@@ -50,6 +50,17 @@ export class NotificationService {
       .pipe(tap(() => this.unread.update((count) => Math.max(0, count - 1))));
   }
 
+  /** Deletes one notification; `wasUnread` keeps the bell badge in step. */
+  remove(id: string, wasUnread: boolean): Observable<void> {
+    return this.api
+      .delete<void>(`/notifications/${id}`)
+      .pipe(tap(() => wasUnread && this.unread.update((count) => Math.max(0, count - 1))));
+  }
+
+  removeAll(): Observable<void> {
+    return this.api.delete<void>('/notifications').pipe(tap(() => this.unread.set(0)));
+  }
+
   markAllRead(): Observable<void> {
     return this.api.post<void>('/notifications/read', {}).pipe(tap(() => this.unread.set(0)));
   }

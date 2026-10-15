@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0] - 2026-10-15
+
+### Added
+
+- Delete one or all notifications in the inbox
+- "Edit meetup details" for public events added to a club
+
+### Changed
+
+- Highlighted members-only area on the event page
+- Edit, cancel and save keep the club view of an event
+- Angular 22, TypeScript 6.0, Vitest 5, jsdom 30, http-proxy-middleware 4
+
 ## [0.8.0] - 2026-10-15
 
 ### Added

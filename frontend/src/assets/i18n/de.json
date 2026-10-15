@@ -33,7 +33,10 @@
     "decisionApproved": "Beitritt zu {{communityName}} angenommen",
     "decisionRejected": "Beitritt zu {{communityName}} abgelehnt",
     "decisionSubgroupApproved": "Beitritt zu {{subgroupName}} angenommen",
-    "decisionSubgroupRejected": "Beitritt zu {{subgroupName}} abgelehnt"
+    "decisionSubgroupRejected": "Beitritt zu {{subgroupName}} abgelehnt",
+    "delete": "Löschen",
+    "deleteAll": "Alle löschen",
+    "deleteAllConfirm": "Alle Benachrichtigungen löschen?"
   },
   "events": {
     "title": "Radsport-Events finden",
@@ -117,7 +120,11 @@
         "ics": ".ics-Datei herunterladen"
       },
       "community": "Community",
-      "backToCommunity": "Zurück zur Community"
+      "backToCommunity": "Zurück zur Community",
+      "editMeetup": "Treffpunkt bearbeiten",
+      "meetupSaved": "Treffpunkt gespeichert",
+      "meetupError": "Treffpunkt konnte nicht gespeichert werden",
+      "membersOnly": "Nur für Mitglieder"
     },
     "status": {
       "published": "Ausgeschrieben",

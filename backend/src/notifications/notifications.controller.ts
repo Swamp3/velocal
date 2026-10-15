@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -43,5 +44,20 @@ export class NotificationsController {
     @CurrentUser() user: { id: string },
   ): Promise<void> {
     return this.notifications.markRead(user.id, id);
+  }
+
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeAll(@CurrentUser() user: { id: string }): Promise<void> {
+    return this.notifications.removeAll(user.id);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<void> {
+    return this.notifications.remove(user.id, id);
   }
 }

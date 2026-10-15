@@ -72,6 +72,17 @@ export class NotificationInboxComponent implements OnInit {
     });
   }
 
+  protected remove(row: AppNotification): void {
+    this.notifications.remove(row.id, !row.readAt).subscribe({
+      next: () => this.rows.update((rows) => (rows ?? []).filter((r) => r.id !== row.id)),
+    });
+  }
+
+  protected removeAll(): void {
+    if (!window.confirm(this.transloco.translate('notifications.deleteAllConfirm'))) return;
+    this.notifications.removeAll().subscribe({ next: () => this.rows.set([]) });
+  }
+
   private load(): void {
     this.loadError.set(false);
     this.notifications.list().subscribe({

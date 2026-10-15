@@ -215,10 +215,16 @@ export class EventFormComponent implements OnInit {
   }
 
   protected readonly hosted = signal(false);
+  /** Community the event was opened from (shared public events); kept across edit and cancel. */
+  private readonly contextCommunity = signal<string | null>(null);
+  private readonly contextSubgroup = signal<string | null>(null);
   protected readonly communitySlug = signal<string | null>(null);
   protected readonly subgroupSlug = signal<string | null>(null);
 
   ngOnInit(): void {
+    const query = this.route.snapshot.queryParamMap;
+    this.contextCommunity.set(query.get('community'));
+    this.contextSubgroup.set(query.get('subgroup'));
     this.communitySlug.set(this.route.snapshot.paramMap.get('slug'));
     this.subgroupSlug.set(this.route.snapshot.paramMap.get('subgroupSlug'));
     this.hosted.set(!!this.communitySlug());
@@ -240,6 +246,14 @@ export class EventFormComponent implements OnInit {
   protected onCoordinatesChange(coords: { lat: number; lng: number }): void {
     this.form.patchValue({ lat: coords.lat, lng: coords.lng });
     this.mapCoordinates.set(coords);
+  }
+
+  /** Query params that return the user to the same community view of the event. */
+  protected backQuery(): Record<string, string> {
+    const community = this.contextCommunity();
+    if (!this.isEdit() || !community) return {};
+    const subgroup = this.contextSubgroup();
+    return subgroup ? { community, subgroup } : { community };
   }
 
   protected backCommands(): string[] {
@@ -337,9 +351,11 @@ export class EventFormComponent implements OnInit {
         this.submitting.set(false);
         const key = this.isEdit() ? 'event.form.success.update' : 'event.form.success.create';
         this.toast.success(this.transloco.translate(key));
-        this.router.navigate(
-          community && !this.isEdit() ? this.backCommands() : ['/events', event.id],
-        );
+        if (community && !this.isEdit()) {
+          void this.router.navigate(this.backCommands());
+        } else {
+          void this.router.navigate(['/events', event.id], { queryParams: this.backQuery() });
+        }
       },
       error: (err: ApiError) => {
         this.submitting.set(false);
@@ -383,7 +399,7 @@ export class EventFormComponent implements OnInit {
   private patchForm(event: CyclingEvent): void {
     if (!this.canManage(event)) {
       this.loading.set(false);
-      void this.router.navigate(['/events', event.id]);
+      void this.router.navigate(['/events', event.id], { queryParams: this.backQuery() });
       return;
     }
     this.form.patchValue({

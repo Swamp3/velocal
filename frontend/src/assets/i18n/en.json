@@ -33,7 +33,10 @@
     "decisionApproved": "You're in {{communityName}}",
     "decisionRejected": "Join request for {{communityName}} was declined",
     "decisionSubgroupApproved": "You're in {{subgroupName}}",
-    "decisionSubgroupRejected": "Join request for {{subgroupName}} was declined"
+    "decisionSubgroupRejected": "Join request for {{subgroupName}} was declined",
+    "delete": "Delete",
+    "deleteAll": "Delete all",
+    "deleteAllConfirm": "Delete all notifications?"
   },
   "events": {
     "title": "Find Cycling Events",
@@ -117,7 +120,11 @@
         "ics": "Download .ics file"
       },
       "community": "Community",
-      "backToCommunity": "Back to community"
+      "backToCommunity": "Back to community",
+      "editMeetup": "Edit meetup details",
+      "meetupSaved": "Meetup details saved",
+      "meetupError": "Could not save the meetup details",
+      "membersOnly": "Members only"
     },
     "status": {
       "published": "Published",
