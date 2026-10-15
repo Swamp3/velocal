@@ -8,7 +8,6 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { PostService } from '@core/services/post.service';
@@ -45,7 +44,6 @@ export class NewsDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly postService = inject(PostService);
   private readonly seo = inject(SeoService);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -55,7 +53,7 @@ export class NewsDetailComponent implements OnInit {
   protected readonly error = signal(false);
   protected readonly deleteLoading = signal(false);
   protected readonly publishLoading = signal(false);
-  protected readonly renderedBody = signal<SafeHtml>('');
+  protected readonly renderedBody = signal('');
 
   protected readonly isAdmin = computed(() => !!this.auth.currentUser()?.isAdmin);
 
@@ -103,7 +101,7 @@ export class NewsDetailComponent implements OnInit {
     this.postService.getPost(slug).subscribe({
       next: (post) => {
         this.post.set(post);
-        this.renderedBody.set(this.sanitizer.bypassSecurityTrustHtml(post.body));
+        this.renderedBody.set(post.body);
         this.loading.set(false);
         this.applySeo(post);
       },
