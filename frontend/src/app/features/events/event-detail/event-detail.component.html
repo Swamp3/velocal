@@ -272,6 +272,14 @@
       </div>
     }
 
+    @if (event.canEditMeetup) {
+      <app-event-meetup-edit
+        [event]="event"
+        [hostContext]="hostContext"
+        (updated)="onMeetupUpdated($event)"
+      />
+    }
+
     @if (event.route || event.stravaLinks?.length || event.paceGroups?.length) {
       <section class="mt-8" aria-labelledby="ride-heading">
         <h2 id="ride-heading" class="text-lg font-semibold text-[var(--color-text)]">

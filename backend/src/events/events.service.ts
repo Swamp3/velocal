@@ -1496,6 +1496,8 @@ export class EventsService {
       canRsvp: isMember,
       canComment: isMember,
       canSeeRsvps: isMember,
+      // Managers of the club can edit the meetup of a public event shared with it.
+      canEditMeetup: !!audience?.share && !!audience.manager,
       canInvite: !!event.communityId && access.manager,
       canEdit: !!event.communityId && access.manager,
       hostCommunity,

@@ -117,7 +117,10 @@
         "ics": ".ics-Datei herunterladen"
       },
       "community": "Community",
-      "backToCommunity": "Zurück zur Community"
+      "backToCommunity": "Zurück zur Community",
+      "editMeetup": "Treffpunkt bearbeiten",
+      "meetupSaved": "Treffpunkt gespeichert",
+      "meetupError": "Treffpunkt konnte nicht gespeichert werden"
     },
     "status": {
       "published": "Ausgeschrieben",
