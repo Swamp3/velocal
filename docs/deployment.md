@@ -1,6 +1,6 @@
 # Automated deployment
 
-Every push to `main` runs `.github/workflows/deploy.yml`:
+Every push to `release` runs `.github/workflows/deploy.yml`:
 
 1. **test** - backend typecheck + unit tests, frontend production build.
 2. **deploy** - only if `test` passed: SSH into the server, which runs
@@ -83,8 +83,8 @@ Then delete the local `velocal_deploy` private key file.
 
 - Membership of the `docker` group is effectively root on that machine. The
   forced command stops the key from being used directly, but anyone who can
-  change `deploy.sh` (i.e. anyone who can push to `main`) controls the server.
-  Protect `main` (required reviews/status checks) and keep the `production`
+  change `deploy.sh` (i.e. anyone who can push to `release`) controls the server.
+  Protect `release` (required reviews/status checks) and keep the `production`
   environment's approval rule if more people get write access. Rootless Docker
   for the `velocaldeploy` user removes this caveat.
 - Rotate the key by generating a new pair, replacing the line in
