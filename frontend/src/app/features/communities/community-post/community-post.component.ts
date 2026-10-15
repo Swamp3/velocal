@@ -16,6 +16,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyStateComponent, RichTextComponent, RichTextViewComponent } from '@shared/components';
 import { CommunityComment, CommunityPost } from '@shared/models';
 import { ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { CommentEditDialogComponent } from '../comment-edit-dialog/comment-edit-dialog.component';
 import { communityErrorKey } from '../community-error';
 
 @Component({
@@ -31,6 +32,7 @@ import { communityErrorKey } from '../community-error';
     EmptyStateComponent,
     RichTextComponent,
     RichTextViewComponent,
+    CommentEditDialogComponent,
   ],
   templateUrl: './community-post.component.html',
 })
@@ -48,6 +50,8 @@ export class CommunityPostComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly missing = signal(false);
   protected readonly submitting = signal(false);
+  protected readonly editingComment = signal<CommunityComment | null>(null);
+  protected readonly savingComment = signal(false);
   protected readonly communitySlug = signal('');
   protected readonly subgroupSlug = signal<string | null>(null);
   protected readonly form = this.fb.nonNullable.group({
@@ -135,6 +139,29 @@ export class CommunityPostComponent implements OnInit {
       .subscribe({
         next: () => void this.router.navigate(this.backLink()),
         error: (err: ApiError) => {
+          this.toast.error(this.transloco.translate(communityErrorKey(err)));
+        },
+      });
+  }
+
+  protected saveComment(body: string): void {
+    const post = this.post();
+    const comment = this.editingComment();
+    if (!post || !comment || this.savingComment()) return;
+    this.savingComment.set(true);
+    this.communityService
+      .updateComment(this.communitySlug(), post.id, comment.id, body, this.subgroupSlug())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.comments.update((rows) =>
+            rows.map((row) => (row.id === updated.id ? updated : row)),
+          );
+          this.savingComment.set(false);
+          this.editingComment.set(null);
+        },
+        error: (err: ApiError) => {
+          this.savingComment.set(false);
           this.toast.error(this.transloco.translate(communityErrorKey(err)));
         },
       });

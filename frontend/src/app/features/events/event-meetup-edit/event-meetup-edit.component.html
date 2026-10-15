@@ -8,80 +8,56 @@
 </button>
 
 @if (open()) {
-  <div
-    class="fixed inset-0 z-[1000] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
-    (click)="onBackdrop($event)"
-    (keydown.escape)="hide()"
-    tabindex="-1"
-  >
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="meetup-dialog-title"
-      class="w-full max-w-lg rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-elevated)] sm:rounded-2xl"
-    >
-      <div
-        class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4"
-      >
-        <h2 id="meetup-dialog-title" class="text-base font-semibold text-[var(--color-text)]">
-          {{ 'events.detail.editMeetup' | transloco }}
-        </h2>
-        <button
-          type="button"
-          class="inline-flex size-9 items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]"
-          [attr.aria-label]="'common.close' | transloco"
-          (click)="hide()"
-        >
-          <span class="material-symbols-outlined text-[22px]" aria-hidden="true">close</span>
-        </button>
+  <ui-modal [title]="'events.detail.editMeetup' | transloco" (closed)="hide()">
+    <form id="meetup-form" [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+      <div>
+        <label for="meetup-place" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'events.detail.meetupPlace' | transloco }}
+        </label>
+        <input
+          id="meetup-place"
+          type="text"
+          formControlName="meetupPlace"
+          maxlength="200"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
       </div>
-
-      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4 px-5 py-5">
-        <div>
-          <label for="meetup-place" class="block text-sm font-medium text-[var(--color-text)]">
-            {{ 'events.detail.meetupPlace' | transloco }}
-          </label>
-          <input
-            #firstField
-            id="meetup-place"
-            type="text"
-            formControlName="meetupPlace"
-            maxlength="200"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
-          />
-        </div>
-        <div>
-          <label for="meetup-at" class="block text-sm font-medium text-[var(--color-text)]">
-            {{ 'events.detail.meetupTime' | transloco }}
-          </label>
-          <input
-            id="meetup-at"
-            type="datetime-local"
-            formControlName="meetupAt"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
-          />
-        </div>
-        <div>
-          <label for="meetup-note" class="block text-sm font-medium text-[var(--color-text)]">
-            {{ 'events.detail.meetupNote' | transloco }}
-          </label>
-          <textarea
-            id="meetup-note"
-            rows="4"
-            formControlName="meetupNote"
-            maxlength="2000"
-            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
-          ></textarea>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <ui-button type="button" variant="ghost" (click)="hide()">
-            {{ 'common.cancel' | transloco }}
-          </ui-button>
-          <ui-button type="submit" [loading]="saving()" [disabled]="saving() || form.invalid">
-            {{ 'common.save' | transloco }}
-          </ui-button>
-        </div>
-      </form>
-    </div>
-  </div>
+      <div>
+        <label for="meetup-at" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'events.detail.meetupTime' | transloco }}
+        </label>
+        <input
+          id="meetup-at"
+          type="datetime-local"
+          formControlName="meetupAt"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        />
+      </div>
+      <div>
+        <label for="meetup-note" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'events.detail.meetupNote' | transloco }}
+        </label>
+        <textarea
+          id="meetup-note"
+          rows="4"
+          formControlName="meetupNote"
+          maxlength="2000"
+          class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+        ></textarea>
+      </div>
+    </form>
+    <ng-container footer>
+      <ui-button type="button" variant="ghost" (click)="hide()">
+        {{ 'common.cancel' | transloco }}
+      </ui-button>
+      <ui-button
+        type="submit"
+        form="meetup-form"
+        [loading]="saving()"
+        [disabled]="saving() || form.invalid"
+      >
+        {{ 'common.save' | transloco }}
+      </ui-button>
+    </ng-container>
+  </ui-modal>
 }

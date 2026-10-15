@@ -70,21 +70,35 @@
               <p class="text-sm font-medium text-[var(--color-text)]">
                 {{ authorName(comment.authorName) }}
               </p>
-              @if (comment.canDelete) {
-                <button
-                  type="button"
-                  class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-                  (click)="deleteComment(comment)"
-                >
-                  {{ 'communities.posts.delete' | transloco }}
-                </button>
-              }
+              <div class="flex shrink-0 gap-3">
+                @if (comment.canEdit) {
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                    (click)="editingComment.set(comment)"
+                  >
+                    {{ 'communities.posts.edit' | transloco }}
+                  </button>
+                }
+                @if (comment.canDelete) {
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                    (click)="deleteComment(comment)"
+                  >
+                    {{ 'communities.posts.delete' | transloco }}
+                  </button>
+                }
+              </div>
             </div>
             <app-rich-text-view class="mt-1 block" [value]="comment.body" />
             <p class="mt-2 text-xs text-[var(--color-text-muted)]">
               <time [attr.datetime]="comment.createdAt">{{
                 comment.createdAt | date: 'medium'
               }}</time>
+              @if (isEdited(comment)) {
+                · {{ 'communities.posts.edited' | transloco }}
+              }
             </p>
           </li>
         }
@@ -102,4 +116,13 @@
       </ui-button>
     </form>
   </article>
+}
+
+@if (editingComment(); as editing) {
+  <app-comment-edit-dialog
+    [initial]="editing.body"
+    [saving]="savingComment()"
+    (saved)="saveComment($event)"
+    (closed)="editingComment.set(null)"
+  />
 }

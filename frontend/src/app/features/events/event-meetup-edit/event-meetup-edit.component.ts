@@ -1,22 +1,10 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostListener,
-  inject,
-  Injector,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommunityService } from '@core/services/community.service';
 import { EventHostContext } from '@core/services/event.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CyclingEvent } from '@shared/models';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ModalComponent, ToastService } from '@shared/ui';
 
 /** `YYYY-MM-DDTHH:mm` in local time, the value format of a datetime-local input. */
 function toLocalInput(iso: string | null | undefined): string {
@@ -33,7 +21,7 @@ function toLocalInput(iso: string | null | undefined): string {
 @Component({
   selector: 'app-event-meetup-edit',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent],
+  imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent, ModalComponent],
   templateUrl: './event-meetup-edit.component.html',
 })
 export class EventMeetupEditComponent {
@@ -59,9 +47,6 @@ export class EventMeetupEditComponent {
     }),
   });
 
-  private readonly injector = inject(Injector);
-  private readonly firstField = viewChild<ElementRef<HTMLInputElement>>('firstField');
-
   protected show(): void {
     const event = this.event();
     this.form.setValue({
@@ -70,16 +55,10 @@ export class EventMeetupEditComponent {
       meetupNote: event.meetupNote ?? '',
     });
     this.open.set(true);
-    afterNextRender(() => this.firstField()?.nativeElement.focus(), { injector: this.injector });
   }
 
-  @HostListener('document:keydown.escape')
   protected hide(): void {
     if (!this.saving()) this.open.set(false);
-  }
-
-  protected onBackdrop(event: MouseEvent): void {
-    if (event.target === event.currentTarget) this.hide();
   }
 
   protected save(): void {

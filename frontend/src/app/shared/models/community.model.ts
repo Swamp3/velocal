@@ -147,8 +147,10 @@ export interface CommunityComment {
   body: string;
   authorId: string;
   authorName: string | null;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 /** Badge color for a community visibility value. */

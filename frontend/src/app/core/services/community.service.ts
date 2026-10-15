@@ -232,6 +232,19 @@ export class CommunityService {
     });
   }
 
+  updateComment(
+    communitySlug: string,
+    postId: string,
+    commentId: string,
+    body: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityComment> {
+    return this.api.patch(
+      `${this.postsPath(communitySlug, subgroupSlug)}/${postId}/comments/${commentId}`,
+      { body },
+    );
+  }
+
   deleteComment(
     communitySlug: string,
     postId: string,
