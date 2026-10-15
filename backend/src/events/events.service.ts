@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
@@ -10,6 +11,16 @@ import { EventComment } from './entities/event-comment.entity';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRecurrence } from './entities/event-recurrence.entity';
+import { EventPaceGroup } from './entities/event-pace-group.entity';
+import { EventStravaLink } from './entities/event-strava-link.entity';
+import { Route } from '../routes/entities/route.entity';
+import { serializeRoute } from '../routes/serialize';
+import {
+  PaceGroupDto,
+  SetPaceGroupsDto,
+  SetStravaLinksDto,
+  StravaLinkDto,
+} from './dto/pace-groups.dto';
 import { assertTimeZone, occurrenceStarts } from './recurrence';
 import {
   CommunityMember,
@@ -40,6 +51,7 @@ import {
   EventSource,
   EventStatus,
 } from './entities/event.entity';
+import { BadWordService } from '../common/bad-words';
 import { CreateEventDto, RecurrenceDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSearchDto, EventSort } from './dto/event-search.dto';
@@ -92,6 +104,12 @@ export class EventsService {
     private readonly shares: Repository<EventShare>,
     @InjectRepository(EventRecurrence)
     private readonly recurrences: Repository<EventRecurrence>,
+    @InjectRepository(EventPaceGroup)
+    private readonly paceGroups: Repository<EventPaceGroup>,
+    @InjectRepository(EventStravaLink)
+    private readonly stravaLinks: Repository<EventStravaLink>,
+    @InjectRepository(Route)
+    private readonly routes: Repository<Route>,
     @InjectRepository(Community)
     private readonly communities: Repository<Community>,
     @InjectRepository(CommunityMember)
@@ -107,6 +125,7 @@ export class EventsService {
     private readonly imageAccess: ImageAccessService,
     private readonly notifications: NotificationsService,
     private readonly dataSource: DataSource,
+    private readonly badWords: BadWordService,
   ) {}
 
   async findAll(
@@ -251,10 +270,42 @@ export class EventsService {
     },
   ): Promise<Event> {
     const first = await this.buildEvent(dto, userId, host);
-    if (!dto.recurrence) return this.repo.save(first);
-    return this.dataSource.transaction((manager) =>
-      this.saveSeries(manager, first, dto.recurrence!, userId),
-    );
+    const user = { id: userId ?? '', isAdmin: false };
+    if (dto.paceGroups?.length)
+      await this.validatePaceGroups(dto.paceGroups, user);
+    return this.dataSource.transaction(async (manager) => {
+      const saved = dto.recurrence
+        ? await this.saveSeries(manager, first, dto.recurrence, userId)
+        : await manager.save(first);
+      await this.writeRideDetails(manager, saved, dto);
+      return saved;
+    });
+  }
+
+  /** Pace groups and Strava links given at creation go on every occurrence. */
+  private async writeRideDetails(
+    manager: EntityManager,
+    saved: Event,
+    dto: Pick<CreateEventDto, 'paceGroups' | 'stravaLinks'>,
+  ): Promise<void> {
+    if (!dto.paceGroups?.length && !dto.stravaLinks?.length) return;
+    const ids = saved.recurrenceId
+      ? (
+          await manager.find(Event, {
+            where: { recurrenceId: saved.recurrenceId },
+            select: { id: true },
+          })
+        ).map((row) => row.id)
+      : [saved.id];
+    await this.writePaceGroups(manager, ids, dto.paceGroups ?? []);
+    for (const eventId of ids) {
+      await this.writeStravaLinks(
+        manager,
+        eventId,
+        null,
+        dto.stravaLinks ?? [],
+      );
+    }
   }
 
   /**
@@ -309,6 +360,198 @@ export class EventsService {
    * one are removed, earlier ones stay. Deleting a single occurrence is the
    * normal event delete.
    */
+  private async assertOwnsRoute(
+    routeId: string,
+    userId?: string,
+    user?: { isAdmin: boolean },
+  ): Promise<void> {
+    const route = await this.routes.findOne({ where: { id: routeId } });
+    if (!route) throw new NotFoundException('Route not found');
+    if (user?.isAdmin) return;
+    if (!userId || route.createdById !== userId) {
+      throw new ForbiddenException('You can only use your own routes');
+    }
+  }
+
+  /** True when `userId` can see an event that uses the route. */
+  async canViewRoute(routeId: string, userId?: string): Promise<boolean> {
+    const rows = await this.repo
+      .createQueryBuilder('event')
+      .where('event.routeId = :routeId', { routeId })
+      .orWhere(
+        'event.id IN (SELECT event_id FROM event_pace_groups WHERE route_id = :routeId)',
+        { routeId },
+      )
+      .getMany();
+    for (const event of rows) {
+      if (await this.canSee(event, userId)) return true;
+    }
+    return false;
+  }
+
+  async setPaceGroups(
+    id: string,
+    dto: SetPaceGroupsDto,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    await this.assertCanMutate(event, user);
+    await this.validatePaceGroups(dto.paceGroups, user);
+    await this.dataSource.transaction(async (manager) => {
+      // Replacing the list also removes the groups' own Strava links (cascade).
+      await manager.delete(EventPaceGroup, { eventId: id });
+      await this.writePaceGroups(manager, [id], dto.paceGroups);
+    });
+    return this.present(event, user.id);
+  }
+
+  private async validatePaceGroups(
+    groups: PaceGroupDto[],
+    user: { id: string; isAdmin: boolean },
+  ): Promise<void> {
+    const violations = groups.flatMap((group, index) => {
+      const texts = [
+        group.name,
+        ...(group.stravaLinks ?? []).map((link) => link.label ?? ''),
+      ];
+      return this.badWords
+        .checkFields({ name: texts.join(' ') }, ['name'])
+        .violations.map(() => ({ field: `paceGroups.${index}` }));
+    });
+    if (violations.length > 0) {
+      throw new UnprocessableEntityException({
+        statusCode: 422,
+        error: 'content_policy_violation',
+        message: 'Content contains inappropriate language',
+        violations,
+      });
+    }
+    for (const group of groups) {
+      if (group.speedMaxKmh < group.speedMinKmh) {
+        throw new BadRequestException('Max speed must not be below min speed');
+      }
+      if (group.routeId) {
+        await this.assertOwnsRoute(group.routeId, user.id, user);
+      }
+    }
+  }
+
+  private async writePaceGroups(
+    manager: EntityManager,
+    eventIds: string[],
+    groups: PaceGroupDto[],
+  ): Promise<void> {
+    for (const eventId of eventIds) {
+      for (const [index, group] of groups.entries()) {
+        const saved = await manager.save(
+          this.paceGroups.create({
+            eventId,
+            name: group.name.trim(),
+            category: group.category,
+            speedMinKmh: group.speedMinKmh,
+            speedMaxKmh: group.speedMaxKmh,
+            routeId: group.routeId || null,
+            sortOrder: index,
+          }),
+        );
+        await this.writeStravaLinks(
+          manager,
+          eventId,
+          saved.id,
+          group.stravaLinks ?? [],
+        );
+      }
+    }
+  }
+
+  private async writeStravaLinks(
+    manager: EntityManager,
+    eventId: string,
+    paceGroupId: string | null,
+    links: StravaLinkDto[],
+  ): Promise<void> {
+    for (const [index, link] of links.entries()) {
+      await manager.save(
+        this.stravaLinks.create({
+          eventId,
+          paceGroupId,
+          url: link.url.trim(),
+          label: link.label?.trim() || null,
+          sortOrder: index,
+        }),
+      );
+    }
+  }
+
+  async setStravaLinks(
+    id: string,
+    dto: SetStravaLinksDto,
+    user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    const event = await this.findEntity(id);
+    await this.assertCanMutate(event, user);
+    await this.dataSource.transaction(async (manager) => {
+      await manager.delete(EventStravaLink, {
+        eventId: id,
+        paceGroupId: IsNull(),
+      });
+      await this.writeStravaLinks(manager, id, null, dto.links);
+    });
+    return this.present(event, user.id);
+  }
+
+  private async rideDetails(event: Event, viewerId?: string) {
+    const [groups, links] = await Promise.all([
+      this.paceGroups.find({
+        where: { eventId: event.id },
+        order: { sortOrder: 'ASC' },
+      }),
+      this.stravaLinks.find({
+        where: { eventId: event.id },
+        order: { sortOrder: 'ASC' },
+      }),
+    ]);
+    const routeIds = [
+      ...new Set(
+        [event.routeId, ...groups.map((group) => group.routeId)].filter(
+          (value): value is string => !!value,
+        ),
+      ),
+    ];
+    const routeRows = routeIds.length
+      ? await this.routes.find({
+          where: { id: In(routeIds) },
+          relations: { files: true },
+        })
+      : [];
+    const routeById = new Map(
+      routeRows.map((route) => [
+        route.id,
+        serializeRoute(route, !!viewerId && route.createdById === viewerId),
+      ]),
+    );
+    const linkView = (link: EventStravaLink) => ({
+      id: link.id,
+      url: link.url,
+      label: link.label,
+    });
+    return {
+      route: event.routeId ? (routeById.get(event.routeId) ?? null) : null,
+      stravaLinks: links.filter((l) => !l.paceGroupId).map(linkView),
+      paceGroups: groups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        category: group.category,
+        speedMinKmh: group.speedMinKmh,
+        speedMaxKmh: group.speedMaxKmh,
+        route: group.routeId ? (routeById.get(group.routeId) ?? null) : null,
+        stravaLinks: links
+          .filter((l) => l.paceGroupId === group.id)
+          .map(linkView),
+      })),
+    };
+  }
+
   async stopSeries(
     id: string,
     user?: { id: string; isAdmin: boolean },
@@ -360,8 +603,16 @@ export class EventsService {
       if (geo) coordinates = geo;
     }
 
-    const { recurrence: _recurrence, ...eventFields } = dto;
+    if (dto.routeId) await this.assertOwnsRoute(dto.routeId, userId);
+    const {
+      recurrence: _recurrence,
+      paceGroups: _paceGroups,
+      stravaLinks: _stravaLinks,
+      ...eventFields
+    } = dto;
     void _recurrence;
+    void _paceGroups;
+    void _stravaLinks;
     const entity = this.repo.create({
       ...eventFields,
       source: userId ? EventSource.MANUAL : (dto.source ?? EventSource.MANUAL),
@@ -417,6 +668,11 @@ export class EventsService {
       if (dto.meetupAt !== undefined) {
         partial.meetupAt = dto.meetupAt ? new Date(dto.meetupAt) : null;
       }
+    }
+
+    if (dto.routeId !== undefined) {
+      if (dto.routeId) await this.assertOwnsRoute(dto.routeId, user.id, user);
+      partial.routeId = dto.routeId || null;
     }
 
     if (dto.startDate) partial.startDate = new Date(dto.startDate);
@@ -839,6 +1095,12 @@ export class EventsService {
       subgroupSlug,
       true,
     );
+    if (dto.paceGroups?.length) {
+      await this.validatePaceGroups(dto.paceGroups, {
+        id: userId,
+        isAdmin: false,
+      });
+    }
     const listing = dto.listing ?? EventListing.MEMBERS;
     const entity = await this.buildEvent(dto, userId, {
       communityId: host.community.id,
@@ -853,6 +1115,7 @@ export class EventsService {
       const saved = dto.recurrence
         ? await this.saveSeries(manager, entity, dto.recurrence, userId)
         : await manager.save(entity);
+      await this.writeRideDetails(manager, saved, dto);
       await this.notifications.eventCreated(
         {
           actorId: userId,
@@ -1208,7 +1471,9 @@ export class EventsService {
     const recurrence = event.recurrenceId
       ? await this.recurrences.findOne({ where: { id: event.recurrenceId } })
       : null;
+    const ride = await this.rideDetails(event, userId);
     return this.serializeEvent(event, {
+      ...ride,
       recurrence: recurrence
         ? { id: recurrence.id, frequency: recurrence.frequency }
         : null,

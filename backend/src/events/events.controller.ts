@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -26,6 +27,7 @@ import { EventSearchDto } from './dto/event-search.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { CreateEventCommentDto } from './dto/create-event-comment.dto';
 import { InviteEventDto } from './dto/invite-event.dto';
+import { SetPaceGroupsDto, SetStravaLinksDto } from './dto/pace-groups.dto';
 import { SetEventRsvpDto } from './dto/set-event-rsvp.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -168,6 +170,26 @@ export class EventsController {
     @CurrentUser() user: { id: string; isAdmin: boolean },
   ): Promise<void> {
     return this.eventsService.remove(id, user);
+  }
+
+  @Put(':id/pace-groups')
+  @UseGuards(JwtAuthGuard)
+  setPaceGroups(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetPaceGroupsDto,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    return this.eventsService.setPaceGroups(id, dto, user);
+  }
+
+  @Put(':id/strava-links')
+  @UseGuards(JwtAuthGuard)
+  setStravaLinks(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetStravaLinksDto,
+    @CurrentUser() user: { id: string; isAdmin: boolean },
+  ): Promise<SerializedEvent> {
+    return this.eventsService.setStravaLinks(id, dto, user);
   }
 
   @Post(':id/series/stop')

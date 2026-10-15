@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsISO8601,
   IsNumber,
+  IsUUID,
   IsOptional,
   IsString,
   IsUrl,
@@ -86,6 +87,10 @@ export class UpdateEventDto {
   @IsOptional()
   @IsString()
   disciplineSlug?: string;
+
+  @IsOptional()
+  @IsUUID()
+  routeId?: string | null;
 
   @IsOptional()
   @IsEnum(EventListing)

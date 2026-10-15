@@ -1,0 +1,85 @@
+export interface GpxStats {
+  distanceM: number | null;
+  ascentM: number | null;
+  /** [minLat, minLon, maxLat, maxLon] */
+  bounds: [number, number, number, number] | null;
+  points: number;
+}
+
+const EARTH_RADIUS_M = 6_371_000;
+/** Ignore elevation wiggles smaller than this when summing the climb (GPS noise). */
+const ASCENT_THRESHOLD_M = 3;
+
+export function looksLikeGpx(text: string): boolean {
+  return /<gpx[\s>]/i.test(text.slice(0, 4096));
+}
+
+function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lon2 - lon1) * rad;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/**
+ * Reads track (or route) points from GPX text with plain string matching. No
+ * XML parser is involved, so entity-expansion tricks in uploaded files have
+ * nothing to hook into.
+ */
+export function gpxStats(text: string): GpxStats {
+  const pointTag = /<(trkpt|rtept)\b([^>]*?)(\/?)>/gi;
+  let distance = 0;
+  let ascent = 0;
+  let count = 0;
+  let prev: { lat: number; lon: number } | null = null;
+  let anchorEle: number | null = null;
+  let minLat = 90;
+  let minLon = 180;
+  let maxLat = -90;
+  let maxLon = -180;
+
+  for (const match of text.matchAll(pointTag)) {
+    const attrs = match[2];
+    const lat = Number(/\blat\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]);
+    const lon = Number(/\blon\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+
+    count += 1;
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLon = Math.min(minLon, lon);
+    maxLon = Math.max(maxLon, lon);
+    if (prev) distance += haversine(prev.lat, prev.lon, lat, lon);
+    prev = { lat, lon };
+
+    if (match[3] !== '/') {
+      const start = (match.index ?? 0) + match[0].length;
+      const end = text.indexOf(`</${match[1]}`, start);
+      const inner = text.slice(start, end === -1 ? start : end);
+      const ele = Number(/<ele>\s*([^<\s]+)\s*<\/ele>/i.exec(inner)?.[1]);
+      if (Number.isFinite(ele)) {
+        if (anchorEle === null) anchorEle = ele;
+        else if (ele - anchorEle >= ASCENT_THRESHOLD_M) {
+          ascent += ele - anchorEle;
+          anchorEle = ele;
+        } else if (anchorEle - ele >= ASCENT_THRESHOLD_M) {
+          anchorEle = ele;
+        }
+      }
+    }
+  }
+
+  if (count < 2) {
+    return { distanceM: null, ascentM: null, bounds: null, points: count };
+  }
+  return {
+    distanceM: Math.round(distance),
+    ascentM: anchorEle === null ? null : Math.round(ascent),
+    bounds: [minLat, minLon, maxLat, maxLon],
+    points: count,
+  };
+}

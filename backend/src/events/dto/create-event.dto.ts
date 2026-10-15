@@ -1,10 +1,14 @@
 import { Type } from 'class-transformer';
+import { PaceGroupDto, StravaLinkDto } from './pace-groups.dto';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsEnum,
   IsInt,
   MaxLength,
   IsISO8601,
   IsNumber,
+  IsUUID,
   IsOptional,
   IsString,
   IsUrl,
@@ -99,7 +103,25 @@ export class CreateEventDto {
   disciplineSlug: string;
 
   @IsOptional()
+  @IsUUID()
+  routeId?: string | null;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => RecurrenceDto)
   recurrence?: RecurrenceDto;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => PaceGroupDto)
+  paceGroups?: PaceGroupDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => StravaLinkDto)
+  stravaLinks?: StravaLinkDto[];
 }

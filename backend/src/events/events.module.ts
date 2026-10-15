@@ -10,6 +10,10 @@ import { SubgroupMember } from '../communities/entities/subgroup-member.entity';
 import { Subgroup } from '../communities/entities/subgroup.entity';
 import { EventComment } from './entities/event-comment.entity';
 import { EventRecurrence } from './entities/event-recurrence.entity';
+import { EventPaceGroup } from './entities/event-pace-group.entity';
+import { EventStravaLink } from './entities/event-strava-link.entity';
+import { Route } from '../routes/entities/route.entity';
+import { RouteFile } from '../routes/entities/route-file.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRsvp } from './entities/event-rsvp.entity';
 import { Event } from './entities/event.entity';
@@ -24,6 +28,10 @@ import { User } from '../users/entities/user.entity';
       EventRsvp,
       EventComment,
       EventShare,
+      EventPaceGroup,
+      EventStravaLink,
+      Route,
+      RouteFile,
       EventRecurrence,
       Community,
       CommunityMember,
