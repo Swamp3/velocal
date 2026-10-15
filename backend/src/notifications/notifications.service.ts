@@ -64,6 +64,15 @@ export class NotificationsService {
     }
   }
 
+  async remove(userId: string, id: string): Promise<void> {
+    const result = await this.notifications.delete({ id, userId });
+    if (!result.affected) throw new NotFoundException('Notification not found');
+  }
+
+  async removeAll(userId: string): Promise<void> {
+    await this.notifications.delete({ userId });
+  }
+
   async markAllRead(userId: string): Promise<void> {
     await this.notifications
       .createQueryBuilder()
