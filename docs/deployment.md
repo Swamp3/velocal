@@ -17,7 +17,7 @@ thing: run `deploy.sh`.
 ### 1. Dedicated deploy user (`velocaldeploy`)
 
 ```bash
-sudo adduser --disabled-password --gecos "" velocaldeploy
+sudo useradd --create-home --shell /bin/bash velocaldeploy   # no password set = password login impossible
 sudo usermod -aG docker velocaldeploy      # needed to run docker compose (see note below)
 sudo chown -R velocaldeploy:velocaldeploy /opt/velocal
 ```
