@@ -86,7 +86,12 @@ app.use(
     index: false,
     redirect: false,
     setHeaders: (res, path) => {
-      if (path.endsWith('.html')) {
+      // The service worker and its manifest must always be revalidated, or
+      // browsers would never notice a new version.
+      if (
+        path.endsWith('.html') ||
+        /(^|[\\/])(ngsw\.json|ngsw-worker\.js|safety-worker\.js|worker-basic\.min\.js|site\.webmanifest)$/.test(path)
+      ) {
         res.setHeader('Cache-Control', 'no-cache');
       } else if (/\/assets\/i18n\//.test(path)) {
         res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');

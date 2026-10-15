@@ -13,6 +13,10 @@
       "communities": "Gemeinschaften",
       "admin": "Admin",
       "routes": "Strecken"
+    },
+    "update": {
+      "available": "Eine neue Version von VeloCal ist verfügbar.",
+      "reload": "Neu laden"
     }
   },
   "notifications": {

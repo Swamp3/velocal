@@ -13,6 +13,10 @@
       "communities": "Communities",
       "admin": "Admin",
       "routes": "Routes"
+    },
+    "update": {
+      "available": "A new version of VeloCal is available.",
+      "reload": "Reload"
     }
   },
   "notifications": {

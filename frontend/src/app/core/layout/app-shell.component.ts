@@ -17,6 +17,7 @@ import { ThemeService } from '@core/theme.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui';
 import { filter } from 'rxjs';
+import { UpdateBannerComponent } from './update-banner/update-banner.component';
 import { version as APP_VERSION } from '../../../../package.json';
 
 interface NavLink {
@@ -122,7 +123,14 @@ const DEFAULT_SEO: RouteSeo = {
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastContainerComponent, TranslocoPipe],
+  imports: [
+    UpdateBannerComponent,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ToastContainerComponent,
+    TranslocoPipe,
+  ],
   templateUrl: './app-shell.component.html',
 })
 export class AppShellComponent {
