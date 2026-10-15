@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0] - 2026-10-15
+
+### Added
+
+- Edit posts and comments (comments in a dialog) with an "edited" label
+- Shared `ui-modal` dialog component
+- First name, last name and Strava profile fields on the profile page
+- Strava link next to members in member lists
+
+### Changed
+
+- Meetup details of a shared event are edited in a dialog from the club section header
+
 ## [0.9.0] - 2026-10-15
 
 ### Added
