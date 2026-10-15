@@ -114,6 +114,7 @@ export interface CommunityPost {
   authorId: string;
   authorName: string | null;
   commentCount: number;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: string;
   updatedAt: string;

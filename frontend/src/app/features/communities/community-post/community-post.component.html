@@ -29,13 +29,25 @@
           </p>
           <p class="text-xs text-[var(--color-text-muted)]">
             <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'medium' }}</time>
+            @if (isEdited(post)) {
+              · {{ 'communities.posts.edited' | transloco }}
+            }
           </p>
         </div>
-        @if (post.canDelete) {
-          <ui-button variant="outline" (click)="deletePost()">
-            {{ 'communities.posts.delete' | transloco }}
-          </ui-button>
-        }
+        <div class="flex shrink-0 gap-2">
+          @if (post.canEdit) {
+            <a [routerLink]="editLink()">
+              <ui-button variant="outline" type="button">
+                {{ 'communities.posts.edit' | transloco }}
+              </ui-button>
+            </a>
+          }
+          @if (post.canDelete) {
+            <ui-button variant="outline" (click)="deletePost()">
+              {{ 'communities.posts.delete' | transloco }}
+            </ui-button>
+          }
+        </div>
       </div>
       <app-rich-text-view class="mt-4 block" [value]="post.body" />
     </div>

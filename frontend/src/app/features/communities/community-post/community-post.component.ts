@@ -88,6 +88,15 @@ export class CommunityPostComponent implements OnInit {
       : ['/communities', this.communitySlug(), 'posts'];
   }
 
+  protected editLink(): string[] {
+    return [...this.backLink(), this.post()?.id ?? '', 'edit'];
+  }
+
+  /** True when the post was changed after it was written (ignores save-time jitter). */
+  protected isEdited(post: { createdAt: string; updatedAt: string }): boolean {
+    return new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 2000;
+  }
+
   protected authorName(name: string | null): string {
     return name ?? this.transloco.translate('communities.members.unnamed');
   }

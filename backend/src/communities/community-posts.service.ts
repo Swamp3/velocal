@@ -28,6 +28,7 @@ export interface SerializedCommunityPost {
   authorId: string;
   authorName: string | null;
   commentCount: number;
+  canEdit: boolean;
   canDelete: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -113,6 +114,32 @@ export class CommunityPostsService {
     const post = await this.requireHostPost(host, postId);
     const counts = await this.commentCounts([post.id]);
     return this.serializePost(post, userId, host, counts);
+  }
+
+  /** Only the author edits a post; moderators can still delete it. */
+  async update(
+    communitySlug: string,
+    postId: string,
+    userId: string,
+    dto: CreateCommunityPostDto,
+    subgroupSlug?: string,
+  ): Promise<SerializedCommunityPost> {
+    const host = await this.requireHost(communitySlug, userId, subgroupSlug);
+    const post = await this.requireHostPost(host, postId);
+    if (post.authorId !== userId) {
+      throw new ForbiddenException('Only the author can edit this post');
+    }
+    await this.posts.update(post.id, {
+      title: dto.title.trim(),
+      body: dto.body.trim(),
+    });
+    const counts = await this.commentCounts([post.id]);
+    return this.serializePost(
+      await this.requirePost(post.id),
+      userId,
+      host,
+      counts,
+    );
   }
 
   async remove(
@@ -292,6 +319,7 @@ export class CommunityPostsService {
       authorId: post.authorId,
       authorName: post.author?.displayName ?? null,
       commentCount: counts.get(post.id) ?? 0,
+      canEdit: post.authorId === userId,
       canDelete: post.authorId === userId || host.canModerate,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,

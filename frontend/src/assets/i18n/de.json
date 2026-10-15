@@ -812,7 +812,13 @@
       "commentCount": "{{count}} Kommentare",
       "back": "Zurück zu den Beiträgen",
       "notFoundTitle": "Beitrag nicht gefunden",
-      "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen."
+      "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen.",
+      "edit": "Bearbeiten",
+      "editTitle": "Beitrag bearbeiten",
+      "saveChanges": "Änderungen speichern",
+      "updated": "Beitrag aktualisiert",
+      "edited": "bearbeitet",
+      "backToPost": "Zurück zum Beitrag"
     },
     "strava": "Auf Strava ansehen"
   },
