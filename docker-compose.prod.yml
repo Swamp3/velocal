@@ -34,9 +34,10 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@velocal.cc}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
       IMPORT_COOLDOWN_MINUTES: ${IMPORT_COOLDOWN_MINUTES:-5}
+      RACE_RESULT_COUNTRIES: ${RACE_RESULT_COUNTRIES:-276,528}
       SITE_URL: ${SITE_URL:-https://velocal.cc}
       RESEND_API_KEY: ${RESEND_API_KEY}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@velocal.cc}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@system.velocal.cc}
       RESEND_FROM_NAME: ${RESEND_FROM_NAME:-VeloCal}
     networks:
       - default
@@ -63,8 +64,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 80
-      # Backend always listens on :3000 inside its container; this is an
-      # in-network hop, not a host-port mapping, so don't pull from `BACKEND_PORT`.
+      # Backend always listens on :3000 inside its container.
       BACKEND_INTERNAL_URL: http://backend:3000
       SITE_URL: ${SITE_URL:-https://velocal.cc}
       NG_ALLOWED_HOSTS: ${NG_ALLOWED_HOSTS:-velocal.cc,www.velocal.cc,localhost}

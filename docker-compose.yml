@@ -35,7 +35,7 @@ services:
       ADMIN_EMAIL: admin@velocal.cc
       ADMIN_PASSWORD: admin1234
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@velocal.cc}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@system.velocal.cc}
       RESEND_FROM_NAME: ${RESEND_FROM_NAME:-VeloCal}
     depends_on:
       postgres:

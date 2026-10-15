@@ -33,13 +33,13 @@ Restores a database volume (`velocal_pgdata_*`) or the uploads volume (`velocal_
 
 ```bash
 # Stop services first
-docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml down
 
 # Restore (interactive confirmation prompt)
 ./scripts/restore.sh ./backups/velocal_pgdata_20260326_120000.tar.gz
 
 # Start services again
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ## SQL dump (logical backup via pg_dump)
@@ -58,7 +58,7 @@ Restore a SQL dump:
 
 ```bash
 gunzip -c ./backups/velocal_dump_20260326_120000.sql.gz \
-  | docker exec -i $(docker compose ps -q postgres) psql -U velocal velocal
+  | docker exec -i $(docker compose -f docker-compose.prod.yml ps -q postgres) psql -U velocal velocal
 ```
 
 ## Copying volumes between machines

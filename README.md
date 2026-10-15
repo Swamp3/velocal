@@ -70,7 +70,7 @@ velocal/
 │   │   ├── assets/i18n/       Translation files (de, en)
 │   │   └── environments/
 │   ├── Dockerfile
-│   └── nginx.conf             Production reverse proxy config
+│   └── nginx.conf             Unused; production frontend is the SSR server
 │
 ├── backend/           NestJS REST API
 │   ├── src/
@@ -132,10 +132,11 @@ velocal/
 ## Production
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-This builds optimized images (Angular AOT + nginx, NestJS compiled) and serves the frontend on port 80 with `/api/` proxied to the backend.
+Angular SSR on container port 80, Nest API behind it. Caddy reverse-proxies
+`velocal-frontend:80`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Environment Variables
 

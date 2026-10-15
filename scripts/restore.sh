@@ -53,11 +53,11 @@ echo "  Source:  $BACKUP_FILE"
 echo ""
 
 # Check if postgres is running
-if [ "$KIND" = pgdata ] && docker compose -f "$PROJECT_DIR/docker-compose.yml" -f "$PROJECT_DIR/docker-compose.prod.yml" \
+if [ "$KIND" = pgdata ] && docker compose -f "$PROJECT_DIR/docker-compose.prod.yml" \
   ps --status running 2>/dev/null | grep -q postgres; then
   echo "ERROR: The postgres container is still running."
   echo "Stop services first:"
-  echo "  docker compose -f docker-compose.yml -f docker-compose.prod.yml down"
+  echo "  docker compose -f docker-compose.prod.yml down"
   exit 1
 fi
 
@@ -82,4 +82,4 @@ docker run --rm \
 
 echo ""
 echo "✓ Restore complete. Start services:"
-echo "  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+echo "  docker compose -f docker-compose.prod.yml up -d"
