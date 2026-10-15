@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/events/calendar.routes'),
   },
   {
+    path: 'routes',
+    loadChildren: () => import('./features/routes/routes.routes'),
+  },
+  {
     path: 'series',
     loadChildren: () => import('./features/series/series.routes'),
   },

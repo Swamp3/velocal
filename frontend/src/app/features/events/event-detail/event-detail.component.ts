@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
+import { RouteService } from '@core/services/route.service';
 import { EventHostContext, EventService } from '@core/services/event.service';
 import { FavoriteService } from '@core/services/favorite.service';
 import { PostService } from '@core/services/post.service';
@@ -26,7 +27,7 @@ import {
   NewsCardComponent,
   RichTextViewComponent,
 } from '@shared/components';
-import { CyclingEvent, PostListItem, RaceSeries } from '@shared/models';
+import { CyclingEvent, formatDistance, PostListItem, RaceSeries } from '@shared/models';
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
 import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
@@ -76,6 +77,7 @@ export class EventDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
+  private readonly routeService = inject(RouteService);
   private readonly favoriteService = inject(FavoriteService);
   private readonly seriesService = inject(SeriesService);
   private readonly postService = inject(PostService);
@@ -155,6 +157,12 @@ export class EventDetailComponent implements OnInit {
       },
       error: () => this.deleteLoading.set(false),
     });
+  }
+
+  protected readonly distance = formatDistance;
+
+  protected downloadGpx(routeId: string, fileId: string, label: string): void {
+    this.routeService.download(routeId, fileId, label);
   }
 
   protected stopSeries(): void {

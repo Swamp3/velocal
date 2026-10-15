@@ -11,7 +11,8 @@
       "logout": "Logout",
       "news": "News",
       "communities": "Communities",
-      "admin": "Admin"
+      "admin": "Admin",
+      "routes": "Routes"
     }
   },
   "notifications": {
@@ -160,6 +161,23 @@
         "hint": "Creates one event per date, at the same local time. Each can be edited or deleted on its own.",
         "count": "Number of events",
         "until": "Or repeat until (date)"
+      },
+      "ride": {
+        "title": "Ride details",
+        "route": "Route (GPX)",
+        "noRoute": "No route",
+        "manageRoutes": "Manage routes and GPX files",
+        "strava": "Strava links for the whole event",
+        "stravaHint": "One link per line, optionally followed by a label. Only strava.com links.",
+        "groups": "Pace groups",
+        "groupName": "Group name",
+        "category": "Category",
+        "speedMin": "Min speed (km/h)",
+        "speedMax": "Max speed (km/h)",
+        "groupRoute": "Route of this group",
+        "groupStrava": "Strava links of this group (one per line)",
+        "addGroup": "Add pace group",
+        "removeGroup": "Remove group"
       }
     },
     "actions": {
@@ -175,6 +193,18 @@
       "stop": "Stop series from here",
       "stopConfirm": "Stop the series? This and all later events will be deleted. Earlier events stay.",
       "stopped": "Series stopped"
+    },
+    "ride": {
+      "title": "Ride",
+      "route": "Route",
+      "strava": "Strava event"
+    },
+    "pace": {
+      "social": "Social",
+      "endurance": "Endurance",
+      "training": "Training",
+      "dropride": "Drop ride",
+      "race": "Race"
     }
   },
   "map": {
@@ -779,5 +809,26 @@
     "offline": "No server connection",
     "serverError": "Server error. Please try again later.",
     "timeout": "The request took too long. Please try again."
+  },
+  "routes": {
+    "title": "My routes",
+    "subtitle": "A route can hold several GPX files, for example variants or stages.",
+    "newName": "Name of the new route",
+    "create": "Create route",
+    "empty": "No routes yet",
+    "fileCount": "{{count}} GPX files",
+    "name": "Name",
+    "description": "Description",
+    "saved": "Route saved",
+    "error": "Something went wrong",
+    "notFound": "Route not found",
+    "files": "GPX files",
+    "total": "total",
+    "addFiles": "Add GPX files",
+    "noFiles": "No GPX files yet",
+    "download": "Download",
+    "remove": "Remove",
+    "delete": "Delete route",
+    "deleteConfirm": "Delete this route and all its GPX files?"
   }
 }

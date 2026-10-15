@@ -6,20 +6,29 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
 import { CommunityService } from '@core/services/community.service';
 import { EventService } from '@core/services/event.service';
+import { RouteService } from '@core/services/route.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
-import { CyclingEvent, Discipline, RecurrenceDto } from '@shared/models';
+import {
+  CyclingEvent,
+  Discipline,
+  PACE_CATEGORIES,
+  PaceGroupInput,
+  RecurrenceDto,
+  Route,
+} from '@shared/models';
 import { ButtonComponent, ToastService } from '@shared/ui';
 import {
   toDisplayDate as toDisplayDateUtil,
@@ -50,6 +59,7 @@ export class EventFormComponent implements OnInit {
   private readonly communities = inject(CommunityService);
   private readonly disciplineService = inject(DisciplineService);
   private readonly auth = inject(AuthService);
+  private readonly routeService = inject(RouteService);
   private readonly toast = inject(ToastService);
   private readonly uploadService = inject(UploadService);
   private readonly transloco = inject(TranslocoService);
@@ -127,6 +137,9 @@ export class EventFormComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)],
     }),
+    routeId: new FormControl('', { nonNullable: true }),
+    stravaLinksText: new FormControl('', { nonNullable: true }),
+    paceGroups: new FormArray<ReturnType<EventFormComponent['newPaceGroup']>>([]),
     stravaUrl: new FormControl('', { nonNullable: true }),
     meetupPlace: new FormControl('', { nonNullable: true }),
     meetupDate: new FormControl('', { nonNullable: true }),
@@ -136,6 +149,70 @@ export class EventFormComponent implements OnInit {
     }),
     meetupNote: new FormControl('', { nonNullable: true }),
   });
+
+  protected readonly myRoutes = signal<Route[]>([]);
+  private readonly usedRoutes = signal<Route[]>([]);
+  /** Own routes plus routes the event already uses, so saving never drops one silently. */
+  protected readonly routeOptions = computed(() => {
+    const mine = this.myRoutes();
+    const extra = this.usedRoutes().filter((r) => !mine.some((m) => m.id === r.id));
+    return [...extra, ...mine];
+  });
+  protected readonly paceCategories = PACE_CATEGORIES;
+
+  protected newPaceGroup(init?: {
+    name?: string;
+    category?: PaceGroupInput['category'];
+    speedMinKmh?: number;
+    speedMaxKmh?: number;
+    routeId?: string;
+    stravaText?: string;
+  }) {
+    return new FormGroup({
+      name: new FormControl(init?.name ?? '', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(80)],
+      }),
+      category: new FormControl<PaceGroupInput['category']>(init?.category ?? 'social', {
+        nonNullable: true,
+      }),
+      speedMinKmh: new FormControl(init?.speedMinKmh ?? 25, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(5), Validators.max(80)],
+      }),
+      speedMaxKmh: new FormControl(init?.speedMaxKmh ?? 28, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(5), Validators.max(80)],
+      }),
+      routeId: new FormControl(init?.routeId ?? '', { nonNullable: true }),
+      stravaText: new FormControl(init?.stravaText ?? '', { nonNullable: true }),
+    });
+  }
+
+  protected addPaceGroup(): void {
+    this.form.controls.paceGroups.push(this.newPaceGroup());
+  }
+
+  protected removePaceGroup(index: number): void {
+    this.form.controls.paceGroups.removeAt(index);
+  }
+
+  /** One Strava link per line, optionally followed by a label. */
+  private parseLinks(text: string): { url: string; label?: string }[] {
+    return text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [url, ...rest] = line.split(/\s+/);
+        const label = rest.join(' ');
+        return label ? { url, label } : { url };
+      });
+  }
+
+  private linksToText(links: { url: string; label?: string | null }[] | undefined): string {
+    return (links ?? []).map((l) => (l.label ? `${l.url} ${l.label}` : l.url)).join('\n');
+  }
 
   protected readonly hosted = signal(false);
   protected readonly communitySlug = signal<string | null>(null);
@@ -152,6 +229,12 @@ export class EventFormComponent implements OnInit {
     }
 
     this.disciplineService.getDisciplines().subscribe((d) => this.disciplines.set(d));
+    if (this.auth.isAuthenticated()) {
+      this.routeService.listMine().subscribe({
+        next: (routes) => this.myRoutes.set(routes),
+        error: () => this.myRoutes.set([]),
+      });
+    }
   }
 
   protected onCoordinatesChange(coords: { lat: number; lng: number }): void {
@@ -217,9 +300,34 @@ export class EventFormComponent implements OnInit {
           }
         : undefined;
     const community = this.communitySlug();
-    const createDto = { ...dto, recurrence };
+    const paceGroups: PaceGroupInput[] = raw.paceGroups.map((group) => ({
+      name: group.name.trim(),
+      category: group.category,
+      speedMinKmh: group.speedMinKmh,
+      speedMaxKmh: group.speedMaxKmh,
+      routeId: group.routeId || null,
+      stravaLinks: this.parseLinks(group.stravaText),
+    }));
+    const stravaLinks = this.parseLinks(raw.stravaLinksText);
+    const createDto = {
+      ...dto,
+      recurrence,
+      routeId: raw.routeId || undefined,
+      paceGroups: paceGroups.length ? paceGroups : undefined,
+      stravaLinks: stravaLinks.length ? stravaLinks : undefined,
+    };
     const action = this.isEdit()
-      ? this.eventService.updateEvent(this.eventId()!, dto)
+      ? this.eventService
+          .updateEvent(this.eventId()!, { ...dto, routeId: raw.routeId || null })
+          .pipe(
+            switchMap(() =>
+              forkJoin([
+                this.eventService.setPaceGroups(this.eventId()!, paceGroups),
+                this.eventService.setStravaLinks(this.eventId()!, stravaLinks),
+              ]),
+            ),
+            switchMap(([event]) => of(event)),
+          )
       : community
         ? this.communities.createEvent(community, createDto, this.subgroupSlug() ?? undefined)
         : this.eventService.createEvent(createDto);
@@ -305,7 +413,27 @@ export class EventFormComponent implements OnInit {
       meetupDate: event.meetupAt ? this.toDateString(event.meetupAt) : '',
       meetupTime: event.meetupAt ? this.toTimeString(event.meetupAt) : '',
       meetupNote: event.meetupNote ?? '',
+      routeId: event.routeId ?? '',
+      stravaLinksText: this.linksToText(event.stravaLinks),
     });
+    this.usedRoutes.set(
+      [event.route, ...(event.paceGroups ?? []).map((group) => group.route)].filter(
+        (route): route is Route => !!route,
+      ),
+    );
+    this.form.controls.paceGroups.clear();
+    for (const group of event.paceGroups ?? []) {
+      this.form.controls.paceGroups.push(
+        this.newPaceGroup({
+          name: group.name,
+          category: group.category,
+          speedMinKmh: group.speedMinKmh,
+          speedMaxKmh: group.speedMaxKmh,
+          routeId: group.route?.id ?? '',
+          stravaText: this.linksToText(group.stravaLinks),
+        }),
+      );
+    }
     if (event.communityId) this.hosted.set(true);
 
     if (event.coordinates) {

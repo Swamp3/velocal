@@ -1,0 +1,136 @@
+@if (loading()) {
+  <div class="mx-auto max-w-3xl space-y-4">
+    <ui-skeleton width="12rem" height="1.5rem" />
+    <ui-skeleton height="6rem" />
+  </div>
+} @else if (notFound()) {
+  <app-empty-state icon="search_off" [title]="'routes.notFound' | transloco" />
+} @else if (data(); as route) {
+  <div class="mx-auto max-w-3xl">
+    @if (route.canEdit) {
+      <a
+        routerLink="/routes"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+      >
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+        {{ 'routes.title' | transloco }}
+      </a>
+    }
+
+    @if (route.canEdit) {
+      <form [formGroup]="form" (ngSubmit)="save()" class="mt-5 space-y-4">
+        <div>
+          <label for="rname" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'routes.name' | transloco }}
+          </label>
+          <input
+            id="rname"
+            type="text"
+            formControlName="name"
+            maxlength="200"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
+        <div>
+          <label for="rdesc" class="block text-sm font-medium text-[var(--color-text)]">
+            {{ 'routes.description' | transloco }}
+          </label>
+          <textarea
+            id="rdesc"
+            formControlName="description"
+            rows="3"
+            maxlength="5000"
+            class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          ></textarea>
+        </div>
+        <ui-button type="submit" [loading]="busy()" [disabled]="busy() || form.invalid">
+          {{ 'common.save' | transloco }}
+        </ui-button>
+      </form>
+    } @else {
+      <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">{{ route.name }}</h1>
+      @if (route.description) {
+        <p class="mt-2 whitespace-pre-line text-sm text-[var(--color-text)]">
+          {{ route.description }}
+        </p>
+      }
+    }
+
+    <section class="mt-8" aria-labelledby="gpx-heading">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="gpx-heading" class="text-lg font-semibold text-[var(--color-text)]">
+          {{ 'routes.files' | transloco }}
+          @if (route.totalDistanceM) {
+            <span class="text-sm font-normal text-[var(--color-text-muted)]">
+              · {{ 'routes.total' | transloco }} {{ distance(route.totalDistanceM) }}
+            </span>
+          }
+        </h2>
+        @if (route.canEdit) {
+          <label
+            class="inline-flex cursor-pointer items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--color-primary)]"
+          >
+            {{ 'routes.addFiles' | transloco }}
+            <input
+              type="file"
+              multiple
+              accept=".gpx,application/gpx+xml"
+              class="sr-only"
+              [disabled]="busy()"
+              (change)="onFiles($event)"
+            />
+          </label>
+        }
+      </div>
+
+      @if (route.files.length === 0) {
+        <p class="mt-3 text-sm text-[var(--color-text-muted)]">
+          {{ 'routes.noFiles' | transloco }}
+        </p>
+      } @else {
+        <ul class="mt-3 flex flex-col gap-2">
+          @for (file of route.files; track file.id) {
+            <li
+              class="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3"
+            >
+              <span class="min-w-0">
+                <span class="block break-words font-medium text-[var(--color-text)]">{{
+                  file.label
+                }}</span>
+                <span class="text-sm text-[var(--color-text-muted)]">
+                  {{ distance(file.distanceM) }}
+                  @if (file.ascentM !== null) {
+                    · ↑ {{ file.ascentM }} m
+                  }
+                </span>
+              </span>
+              <span class="flex gap-2">
+                <ui-button size="sm" variant="outline" (click)="download(file.id, file.label)">
+                  {{ 'routes.download' | transloco }}
+                </ui-button>
+                @if (route.canEdit) {
+                  <ui-button
+                    size="sm"
+                    variant="danger"
+                    [disabled]="busy()"
+                    (click)="removeFile(file.id)"
+                  >
+                    {{ 'routes.remove' | transloco }}
+                  </ui-button>
+                }
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    @if (route.canEdit) {
+      <div class="mt-10">
+        <ui-button variant="danger" [disabled]="busy()" (click)="deleteRoute()">
+          {{ 'routes.delete' | transloco }}
+        </ui-button>
+      </div>
+    }
+  </div>
+}

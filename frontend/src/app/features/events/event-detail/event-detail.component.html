@@ -272,6 +272,109 @@
       </div>
     }
 
+    @if (event.route || event.stravaLinks?.length || event.paceGroups?.length) {
+      <section class="mt-8" aria-labelledby="ride-heading">
+        <h2 id="ride-heading" class="text-lg font-semibold text-[var(--color-text)]">
+          {{ 'event.ride.title' | transloco }}
+        </h2>
+
+        @if (event.route; as route) {
+          <div class="mt-3">
+            <p class="text-sm font-medium text-[var(--color-text)]">
+              {{ 'event.ride.route' | transloco }}: {{ route.name }}
+              @if (route.totalDistanceM) {
+                <span class="font-normal text-[var(--color-text-muted)]">
+                  · {{ distance(route.totalDistanceM) }}
+                </span>
+              }
+            </p>
+            <ul class="mt-1 flex flex-col gap-1">
+              @for (file of route.files; track file.id) {
+                <li class="flex items-center justify-between gap-3 text-sm">
+                  <span class="min-w-0 break-words text-[var(--color-text)]">{{ file.label }}</span>
+                  <button
+                    type="button"
+                    class="shrink-0 font-medium text-[var(--color-primary)] hover:underline"
+                    (click)="downloadGpx(route.id, file.id, file.label)"
+                  >
+                    GPX
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (event.stravaLinks?.length) {
+          <ul class="mt-3 flex flex-col gap-1 text-sm">
+            @for (link of event.stravaLinks; track link.id) {
+              <li>
+                <a
+                  [href]="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium text-[var(--color-primary)] hover:underline"
+                  >{{ link.label || ('event.ride.strava' | transloco) }}</a
+                >
+              </li>
+            }
+          </ul>
+        }
+
+        @if (event.paceGroups?.length) {
+          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+            @for (group of event.paceGroups; track group.id) {
+              <li
+                class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 shadow-[var(--shadow-card)]"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <p class="min-w-0 break-words font-semibold text-[var(--color-text)]">
+                    {{ group.name }}
+                  </p>
+                  <ui-chip>{{ 'event.pace.' + group.category | transloco }}</ui-chip>
+                </div>
+                <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+                  {{ group.speedMinKmh }}–{{ group.speedMaxKmh }} km/h
+                </p>
+                @if (group.route; as groupRoute) {
+                  <ul class="mt-2 flex flex-col gap-1 text-sm">
+                    @for (file of groupRoute.files; track file.id) {
+                      <li class="flex items-center justify-between gap-3">
+                        <span class="min-w-0 break-words">
+                          {{ groupRoute.name }} · {{ file.label }}
+                          @if (file.distanceM) {
+                            <span class="text-[var(--color-text-muted)]">
+                              · {{ distance(file.distanceM) }}</span
+                            >
+                          }
+                        </span>
+                        <button
+                          type="button"
+                          class="shrink-0 font-medium text-[var(--color-primary)] hover:underline"
+                          (click)="downloadGpx(groupRoute.id, file.id, file.label)"
+                        >
+                          GPX
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+                @for (link of group.stravaLinks; track link.id) {
+                  <a
+                    [href]="link.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-2 block text-sm font-medium text-[var(--color-primary)] hover:underline"
+                    >{{ link.label || ('event.ride.strava' | transloco) }}</a
+                  >
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
     @if (event.hostCommunity) {
       <p class="mt-6 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
         <span

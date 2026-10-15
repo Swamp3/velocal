@@ -3,6 +3,7 @@ import {
   CreateEventDto,
   CyclingEvent,
   EventRsvpStatus,
+  PaceGroupInput,
   PaginatedResponse,
   UpdateEventDto,
 } from '@shared/models';
@@ -62,6 +63,14 @@ export class EventService {
 
   deleteEvent(id: string): Observable<void> {
     return this.api.delete(`/events/${id}`);
+  }
+
+  setPaceGroups(id: string, paceGroups: PaceGroupInput[]): Observable<CyclingEvent> {
+    return this.api.put(`/events/${id}/pace-groups`, { paceGroups });
+  }
+
+  setStravaLinks(id: string, links: { url: string; label?: string }[]): Observable<CyclingEvent> {
+    return this.api.put(`/events/${id}/strava-links`, { links });
   }
 
   stopSeries(id: string): Observable<{ removed: number }> {

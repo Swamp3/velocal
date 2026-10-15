@@ -396,7 +396,14 @@ export class EventsService {
   ): Promise<SerializedEvent> {
     const event = await this.findEntity(id);
     await this.assertCanMutate(event, user);
-    await this.validatePaceGroups(dto.paceGroups, user);
+    // Routes the event already uses stay valid even if another editor owns them.
+    const existing = await this.paceGroups.find({ where: { eventId: id } });
+    const keep = new Set(
+      [event.routeId, ...existing.map((group) => group.routeId)].filter(
+        (value): value is string => !!value,
+      ),
+    );
+    await this.validatePaceGroups(dto.paceGroups, user, keep);
     await this.dataSource.transaction(async (manager) => {
       // Replacing the list also removes the groups' own Strava links (cascade).
       await manager.delete(EventPaceGroup, { eventId: id });
@@ -408,6 +415,7 @@ export class EventsService {
   private async validatePaceGroups(
     groups: PaceGroupDto[],
     user: { id: string; isAdmin: boolean },
+    keep: Set<string> = new Set(),
   ): Promise<void> {
     const violations = groups.flatMap((group, index) => {
       const texts = [
@@ -430,7 +438,7 @@ export class EventsService {
       if (group.speedMaxKmh < group.speedMinKmh) {
         throw new BadRequestException('Max speed must not be below min speed');
       }
-      if (group.routeId) {
+      if (group.routeId && !keep.has(group.routeId)) {
         await this.assertOwnsRoute(group.routeId, user.id, user);
       }
     }
@@ -671,7 +679,9 @@ export class EventsService {
     }
 
     if (dto.routeId !== undefined) {
-      if (dto.routeId) await this.assertOwnsRoute(dto.routeId, user.id, user);
+      if (dto.routeId && dto.routeId !== event.routeId) {
+        await this.assertOwnsRoute(dto.routeId, user.id, user);
+      }
       partial.routeId = dto.routeId || null;
     }
 
