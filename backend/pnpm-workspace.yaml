@@ -1,4 +1,6 @@
 allowBuilds:
+  # Only used by `nest start --watch`; the native build is not needed.
+  "@parcel/watcher": false
   "@nestjs/core": true
   bcrypt: true
   sharp: true
