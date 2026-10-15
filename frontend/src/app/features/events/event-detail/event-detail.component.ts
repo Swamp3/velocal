@@ -107,6 +107,13 @@ export class EventDetailComponent implements OnInit {
     return this.favoriteService.isFavorite(ev.id);
   });
 
+  /** Query params that keep the community context when leaving to edit and coming back. */
+  protected hostQuery(): Record<string, string> {
+    const { community, subgroup } = this.hostContext;
+    if (!community) return {};
+    return subgroup ? { community, subgroup } : { community };
+  }
+
   /** Where "back" leads: the community the event was opened from, else the event list. */
   protected readonly back = computed(() => {
     const ev = this.event();

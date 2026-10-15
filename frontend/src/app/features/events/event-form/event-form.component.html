@@ -4,6 +4,7 @@
     <div>
       <a
         [routerLink]="backCommands()"
+        [queryParams]="backQuery()"
         class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
       >
         <span class="material-symbols-outlined text-[16px]">arrow_back</span>
@@ -12,7 +13,7 @@
     </div>
     @if (!loading()) {
       <div class="flex items-center gap-3">
-        <a [routerLink]="backCommands()">
+        <a [routerLink]="backCommands()" [queryParams]="backQuery()">
           <ui-button variant="ghost" type="button">
             {{ 'event.form.cancel' | transloco }}
           </ui-button>

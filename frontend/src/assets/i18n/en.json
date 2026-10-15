@@ -123,7 +123,8 @@
       "backToCommunity": "Back to community",
       "editMeetup": "Edit meetup details",
       "meetupSaved": "Meetup details saved",
-      "meetupError": "Could not save the meetup details"
+      "meetupError": "Could not save the meetup details",
+      "membersOnly": "Members only"
     },
     "status": {
       "published": "Published",

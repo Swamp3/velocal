@@ -59,7 +59,11 @@
         }
 
         @if (canEdit()) {
-          <a [routerLink]="['/events', event.id, 'edit']" class="inline-flex">
+          <a
+            [routerLink]="['/events', event.id, 'edit']"
+            [queryParams]="hostQuery()"
+            class="inline-flex"
+          >
             <ui-button variant="outline" size="sm">
               <span class="material-symbols-outlined text-[16px]">edit</span>
               {{ 'event.actions.edit' | transloco }}
@@ -236,39 +240,116 @@
       }
     </dl>
 
-    @if (event.meetupPlace || event.meetupAt || event.meetupNote) {
-      <div class="mt-6">
+    <!-- Community-only area: everything inside is visible to members only -->
+    @if (event.hostCommunity && (event.canRsvp || event.canComment)) {
+      <section
+        class="mt-8 overflow-hidden rounded-2xl border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5"
+        aria-labelledby="community-area-heading"
+      >
+        <header
+          class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-5 py-3"
+        >
+          <h2
+            id="community-area-heading"
+            class="flex items-center gap-2 text-base font-semibold text-[var(--color-text)]"
+          >
+            <span
+              class="material-symbols-outlined text-[20px] text-[var(--color-primary)]"
+              aria-hidden="true"
+              >groups</span
+            >
+            <a [routerLink]="['/communities', event.hostCommunity.slug]" class="hover:underline">{{
+              event.hostCommunity.name
+            }}</a>
+          </h2>
+          <span
+            class="inline-flex items-center gap-1 rounded-full bg-[var(--color-primary)] px-2.5 py-0.5 text-xs font-medium text-white"
+          >
+            <span class="material-symbols-outlined text-[14px]" aria-hidden="true">lock</span>
+            {{ 'events.detail.membersOnly' | transloco }}
+          </span>
+        </header>
+        <div class="px-5 pb-5">
+          @if (event.meetupPlace || event.meetupAt || event.meetupNote) {
+            <div class="mt-6">
+              <h2 class="text-lg font-semibold text-[var(--color-text)]">
+                {{ 'events.detail.meetup' | transloco }}
+              </h2>
+              <dl class="mt-3 space-y-2 text-sm">
+                @if (event.meetupPlace) {
+                  <div>
+                    <dt class="text-[var(--color-text-muted)]">
+                      {{ 'events.detail.meetupPlace' | transloco }}
+                    </dt>
+                    <dd class="font-medium text-[var(--color-text)]">{{ event.meetupPlace }}</dd>
+                  </div>
+                }
+                @if (event.meetupAt) {
+                  <div>
+                    <dt class="text-[var(--color-text-muted)]">
+                      {{ 'events.detail.meetupTime' | transloco }}
+                    </dt>
+                    <dd class="font-medium text-[var(--color-text)]">
+                      <time [attr.datetime]="event.meetupAt">{{
+                        event.meetupAt | date: 'medium'
+                      }}</time>
+                    </dd>
+                  </div>
+                }
+                @if (event.meetupNote) {
+                  <div>
+                    <dt class="text-[var(--color-text-muted)]">
+                      {{ 'events.detail.meetupNote' | transloco }}
+                    </dt>
+                    <dd class="text-[var(--color-text)]">{{ event.meetupNote }}</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+          }
+
+          @if (event.canRsvp) {
+            <app-event-rsvp
+              [eventId]="event.id"
+              [count]="event.rsvpCount ?? 0"
+              [myRsvp]="event.myRsvp ?? null"
+              [canSeeList]="!!event.canSeeRsvps"
+              [hostContext]="hostContext"
+            />
+          }
+
+          @if (event.canInvite) {
+            <app-event-invite [eventId]="event.id" />
+          }
+
+          @if (event.canComment) {
+            <app-event-comments [eventId]="event.id" [hostContext]="hostContext" />
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Series membership -->
+    @if (eventSeries().length > 0) {
+      <div class="mt-6 flex flex-wrap items-center gap-2">
+        <span class="text-sm text-[var(--color-text-muted)]"
+          >{{ 'series.partOf' | transloco }}:</span
+        >
+        @for (s of eventSeries(); track s.id) {
+          <a [routerLink]="['/series', s.slug]">
+            <ui-chip>{{ s.name }}</ui-chip>
+          </a>
+        }
+      </div>
+    }
+
+    <!-- Description -->
+    @if (event.description) {
+      <div class="mt-8">
         <h2 class="text-lg font-semibold text-[var(--color-text)]">
-          {{ 'events.detail.meetup' | transloco }}
+          {{ 'events.detail.description' | transloco }}
         </h2>
-        <dl class="mt-3 space-y-2 text-sm">
-          @if (event.meetupPlace) {
-            <div>
-              <dt class="text-[var(--color-text-muted)]">
-                {{ 'events.detail.meetupPlace' | transloco }}
-              </dt>
-              <dd class="font-medium text-[var(--color-text)]">{{ event.meetupPlace }}</dd>
-            </div>
-          }
-          @if (event.meetupAt) {
-            <div>
-              <dt class="text-[var(--color-text-muted)]">
-                {{ 'events.detail.meetupTime' | transloco }}
-              </dt>
-              <dd class="font-medium text-[var(--color-text)]">
-                <time [attr.datetime]="event.meetupAt">{{ event.meetupAt | date: 'medium' }}</time>
-              </dd>
-            </div>
-          }
-          @if (event.meetupNote) {
-            <div>
-              <dt class="text-[var(--color-text-muted)]">
-                {{ 'events.detail.meetupNote' | transloco }}
-              </dt>
-              <dd class="text-[var(--color-text)]">{{ event.meetupNote }}</dd>
-            </div>
-          }
-        </dl>
+        <app-rich-text-view class="mt-3 block" [value]="event.description" />
       </div>
     }
 
@@ -381,64 +462,6 @@
           </ul>
         }
       </section>
-    }
-
-    @if (event.hostCommunity) {
-      <p class="mt-6 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-        <span
-          class="material-symbols-outlined text-[18px] text-[var(--color-primary)]"
-          aria-hidden="true"
-          >groups</span
-        >
-        <span>{{ 'events.detail.community' | transloco }}:</span>
-        <a
-          [routerLink]="['/communities', event.hostCommunity.slug]"
-          class="font-medium text-[var(--color-primary)] hover:underline"
-          >{{ event.hostCommunity.name }}</a
-        >
-      </p>
-    }
-
-    @if (event.canRsvp) {
-      <app-event-rsvp
-        [eventId]="event.id"
-        [count]="event.rsvpCount ?? 0"
-        [myRsvp]="event.myRsvp ?? null"
-        [canSeeList]="!!event.canSeeRsvps"
-        [hostContext]="hostContext"
-      />
-    }
-
-    @if (event.canInvite) {
-      <app-event-invite [eventId]="event.id" />
-    }
-
-    <!-- Series membership -->
-    @if (eventSeries().length > 0) {
-      <div class="mt-6 flex flex-wrap items-center gap-2">
-        <span class="text-sm text-[var(--color-text-muted)]"
-          >{{ 'series.partOf' | transloco }}:</span
-        >
-        @for (s of eventSeries(); track s.id) {
-          <a [routerLink]="['/series', s.slug]">
-            <ui-chip>{{ s.name }}</ui-chip>
-          </a>
-        }
-      </div>
-    }
-
-    <!-- Description -->
-    @if (event.description) {
-      <div class="mt-8">
-        <h2 class="text-lg font-semibold text-[var(--color-text)]">
-          {{ 'events.detail.description' | transloco }}
-        </h2>
-        <app-rich-text-view class="mt-3 block" [value]="event.description" />
-      </div>
-    }
-
-    @if (event.canComment) {
-      <app-event-comments [eventId]="event.id" [hostContext]="hostContext" />
     }
 
     <!-- Mini map (click to expand into interactive dialog) -->
