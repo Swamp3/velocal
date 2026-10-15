@@ -1,4 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  Injector,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommunityService } from '@core/services/community.service';
 import { EventHostContext } from '@core/services/event.service';
@@ -47,16 +59,27 @@ export class EventMeetupEditComponent {
     }),
   });
 
-  protected toggle(): void {
-    if (!this.open()) {
-      const event = this.event();
-      this.form.setValue({
-        meetupPlace: event.meetupPlace ?? '',
-        meetupAt: toLocalInput(event.meetupAt),
-        meetupNote: event.meetupNote ?? '',
-      });
-    }
-    this.open.update((value) => !value);
+  private readonly injector = inject(Injector);
+  private readonly firstField = viewChild<ElementRef<HTMLInputElement>>('firstField');
+
+  protected show(): void {
+    const event = this.event();
+    this.form.setValue({
+      meetupPlace: event.meetupPlace ?? '',
+      meetupAt: toLocalInput(event.meetupAt),
+      meetupNote: event.meetupNote ?? '',
+    });
+    this.open.set(true);
+    afterNextRender(() => this.firstField()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  @HostListener('document:keydown.escape')
+  protected hide(): void {
+    if (!this.saving()) this.open.set(false);
+  }
+
+  protected onBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.hide();
   }
 
   protected save(): void {
