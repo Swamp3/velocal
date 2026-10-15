@@ -28,6 +28,7 @@ import {
   RichTextViewComponent,
 } from '@shared/components';
 import { CyclingEvent, formatDistance, PostListItem, RaceSeries } from '@shared/models';
+import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit.component';
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
 import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
@@ -69,6 +70,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     EventRsvpComponent,
     EventInviteComponent,
     EventCommentsComponent,
+    EventMeetupEditComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -177,6 +179,10 @@ export class EventDetailComponent implements OnInit {
   }
 
   protected readonly distance = formatDistance;
+
+  protected onMeetupUpdated(updated: CyclingEvent): void {
+    this.event.set(updated);
+  }
 
   protected downloadGpx(routeId: string, fileId: string, label: string): void {
     this.routeService.download(routeId, fileId, label);

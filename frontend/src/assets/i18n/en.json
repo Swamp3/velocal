@@ -117,7 +117,10 @@
         "ics": "Download .ics file"
       },
       "community": "Community",
-      "backToCommunity": "Back to community"
+      "backToCommunity": "Back to community",
+      "editMeetup": "Edit meetup details",
+      "meetupSaved": "Meetup details saved",
+      "meetupError": "Could not save the meetup details"
     },
     "status": {
       "published": "Published",
