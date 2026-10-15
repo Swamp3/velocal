@@ -380,7 +380,8 @@
     "back": "Back",
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "typeToConfirm": "Type “{{text}}” to confirm"
   },
   "country": {
     "select": "Select country...",
@@ -452,7 +453,8 @@
       "imports": "Imports",
       "users": "Users",
       "missingData": "Data Quality",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "communities": "Communities"
     },
     "imports": {
       "title": "Import Status",
@@ -553,6 +555,44 @@
         "7d": "7 days",
         "30d": "30 days",
         "90d": "90 days"
+      }
+    },
+    "communities": {
+      "title": "Communities",
+      "subtitle": "Review every community, including private ones, and remove content that does not belong.",
+      "search": "Search by name or address…",
+      "all": "All",
+      "sortBy": "Sort by",
+      "sort": {
+        "createdAt": "Newest",
+        "name": "Name",
+        "members": "Members",
+        "pending": "Open requests"
+      },
+      "empty": "No communities found",
+      "createdBy": "by",
+      "members": "Members",
+      "subgroups": "Subgroups",
+      "posts": "Posts",
+      "polls": "Polls",
+      "events": "Events",
+      "pendingLabel": "Open requests",
+      "pending": "{{count}} open requests",
+      "notFound": "Community not found",
+      "openPublic": "Open public page",
+      "admins": "Admins",
+      "none": "None",
+      "recentPosts": "Recent posts",
+      "recentEvents": "Recent events",
+      "deleted": "Deleted",
+      "deleteError": "Could not delete",
+      "delete": {
+        "community": "Delete community",
+        "communityMessage": "Delete “{{name}}” with everything in it? This cannot be undone.",
+        "subgroup": "Delete subgroup",
+        "subgroupMessage": "Delete the subgroup “{{name}}” with everything in it? This cannot be undone.",
+        "post": "Delete post",
+        "postMessage": "Delete the post “{{name}}” and its comments? This cannot be undone."
       }
     }
   },
@@ -740,7 +780,12 @@
         "open": "Open",
         "request": "Request to join",
         "invite": "Invite only"
-      }
+      },
+      "delete": "Delete subgroup",
+      "deleteWarning": "Deleting the subgroup permanently removes its members, posts, polls and events. This cannot be undone.",
+      "deleteConfirm": "Delete the subgroup “{{name}}” with everything in it? This cannot be undone.",
+      "deleted": "Subgroup deleted",
+      "deleteError": "Could not delete the subgroup"
     },
     "invite": {
       "email": "Email",
@@ -837,7 +882,13 @@
       "edited": "edited",
       "backToPost": "Back to post"
     },
-    "strava": "Strava"
+    "strava": "Strava",
+    "dangerZone": "Danger zone",
+    "delete": "Delete community",
+    "deleteWarning": "Deleting the community permanently removes its members, subgroups, posts, polls, events and files. This cannot be undone.",
+    "deleteConfirm": "Delete “{{name}}” with everything in it? This cannot be undone.",
+    "deleted": "Community deleted",
+    "deleteError": "Could not delete the community"
   },
   "errors": {
     "notFound": "Page not found",

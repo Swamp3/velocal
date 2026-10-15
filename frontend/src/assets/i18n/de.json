@@ -380,7 +380,8 @@
     "back": "Zurück",
     "switchToLight": "Zum hellen Design wechseln",
     "switchToDark": "Zum dunklen Design wechseln",
-    "toggleMenu": "Menü umschalten"
+    "toggleMenu": "Menü umschalten",
+    "typeToConfirm": "Tippe „{{text}}“ zur Bestätigung"
   },
   "country": {
     "select": "Land auswählen...",
@@ -452,7 +453,8 @@
       "imports": "Importe",
       "users": "Benutzer",
       "missingData": "Datenqualität",
-      "analytics": "Statistiken"
+      "analytics": "Statistiken",
+      "communities": "Communities"
     },
     "imports": {
       "title": "Import-Status",
@@ -553,6 +555,44 @@
         "7d": "7 Tage",
         "30d": "30 Tage",
         "90d": "90 Tage"
+      }
+    },
+    "communities": {
+      "title": "Communities",
+      "subtitle": "Alle Communities prüfen, auch private, und unpassende Inhalte entfernen.",
+      "search": "Nach Name oder Adresse suchen…",
+      "all": "Alle",
+      "sortBy": "Sortieren nach",
+      "sort": {
+        "createdAt": "Neueste",
+        "name": "Name",
+        "members": "Mitglieder",
+        "pending": "Offene Anfragen"
+      },
+      "empty": "Keine Communities gefunden",
+      "createdBy": "von",
+      "members": "Mitglieder",
+      "subgroups": "Untergruppen",
+      "posts": "Beiträge",
+      "polls": "Umfragen",
+      "events": "Events",
+      "pendingLabel": "Offene Anfragen",
+      "pending": "{{count}} offene Anfragen",
+      "notFound": "Community nicht gefunden",
+      "openPublic": "Öffentliche Seite öffnen",
+      "admins": "Admins",
+      "none": "Keine",
+      "recentPosts": "Neueste Beiträge",
+      "recentEvents": "Neueste Events",
+      "deleted": "Gelöscht",
+      "deleteError": "Konnte nicht gelöscht werden",
+      "delete": {
+        "community": "Community löschen",
+        "communityMessage": "„{{name}}“ mit allem Inhalt löschen? Das lässt sich nicht rückgängig machen.",
+        "subgroup": "Untergruppe löschen",
+        "subgroupMessage": "Die Untergruppe „{{name}}“ mit allem Inhalt löschen? Das lässt sich nicht rückgängig machen.",
+        "post": "Beitrag löschen",
+        "postMessage": "Den Beitrag „{{name}}“ und seine Kommentare löschen? Das lässt sich nicht rückgängig machen."
       }
     }
   },
@@ -740,7 +780,12 @@
         "open": "Offen",
         "request": "Auf Anfrage",
         "invite": "Nur auf Einladung"
-      }
+      },
+      "delete": "Untergruppe löschen",
+      "deleteWarning": "Beim Löschen werden Mitglieder, Beiträge, Umfragen und Events der Untergruppe endgültig entfernt. Das lässt sich nicht rückgängig machen.",
+      "deleteConfirm": "Die Untergruppe „{{name}}“ mit allem Inhalt löschen? Das lässt sich nicht rückgängig machen.",
+      "deleted": "Untergruppe gelöscht",
+      "deleteError": "Untergruppe konnte nicht gelöscht werden"
     },
     "invite": {
       "email": "E-Mail",
@@ -837,7 +882,13 @@
       "edited": "bearbeitet",
       "backToPost": "Zurück zum Beitrag"
     },
-    "strava": "Auf Strava ansehen"
+    "strava": "Auf Strava ansehen",
+    "dangerZone": "Gefahrenbereich",
+    "delete": "Community löschen",
+    "deleteWarning": "Beim Löschen werden Mitglieder, Untergruppen, Beiträge, Umfragen, Events und Dateien der Community endgültig entfernt. Das lässt sich nicht rückgängig machen.",
+    "deleteConfirm": "„{{name}}“ mit allem Inhalt löschen? Das lässt sich nicht rückgängig machen.",
+    "deleted": "Community gelöscht",
+    "deleteError": "Community konnte nicht gelöscht werden"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

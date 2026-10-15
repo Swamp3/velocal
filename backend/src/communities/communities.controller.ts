@@ -157,6 +157,16 @@ export class CommunitiesController {
     return this.communitiesService.leave(id, user.id);
   }
 
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { id: string; isAdmin?: boolean },
+  ): Promise<void> {
+    return this.communitiesService.remove(id, user);
+  }
+
   @Get(':id/members')
   @UseGuards(JwtAuthGuard)
   listMembers(

@@ -22,6 +22,9 @@ import { CommunityPollsController } from './community-polls.controller';
 import { CommunityPollsService } from './community-polls.service';
 import { CommunityPostsController } from './community-posts.controller';
 import { CommunityPostsService } from './community-posts.service';
+import { CommunityCleanupService } from './community-cleanup.service';
+import { AdminCommunitiesController } from './admin-communities.controller';
+import { AdminCommunitiesService } from './admin-communities.service';
 import { SubgroupsController } from './subgroups.controller';
 import { SubgroupsService } from './subgroups.service';
 
@@ -51,12 +54,15 @@ import { SubgroupsService } from './subgroups.service';
     CommunityPostsController,
     CommunityPollsController,
     CommunityEventsController,
+    AdminCommunitiesController,
   ],
   providers: [
     CommunitiesService,
     SubgroupsService,
     CommunityPostsService,
     CommunityPollsService,
+    CommunityCleanupService,
+    AdminCommunitiesService,
   ],
   exports: [CommunitiesService, SubgroupsService],
 })

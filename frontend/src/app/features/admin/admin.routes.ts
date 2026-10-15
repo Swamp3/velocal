@@ -4,6 +4,8 @@ import { ImportStatusComponent } from './import-status/import-status.component';
 import { MissingDataComponent } from './missing-data/missing-data.component';
 import { UserListComponent } from './user-list/user-list.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
+import { CommunityListComponent } from './community-list/community-list.component';
+import { CommunityReviewComponent } from './community-review/community-review.component';
 
 export default [
   {
@@ -13,6 +15,8 @@ export default [
       { path: '', redirectTo: 'imports', pathMatch: 'full' as const },
       { path: 'imports', component: ImportStatusComponent },
       { path: 'users', component: UserListComponent },
+      { path: 'communities', component: CommunityListComponent },
+      { path: 'communities/:id', component: CommunityReviewComponent },
       { path: 'missing-data', component: MissingDataComponent },
       { path: 'analytics', component: AnalyticsComponent },
     ],

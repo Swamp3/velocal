@@ -9,6 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
+import { CommunityCleanupService } from './community-cleanup.service';
 import { isLastAdminRemoval } from './community-admin.policy';
 import { pickSlug, RESERVED_COMMUNITY_SLUGS, slugBase } from './community-slug';
 import {
@@ -109,6 +110,7 @@ export class CommunitiesService {
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
     private readonly notifications: NotificationsService,
+    private readonly cleanup: CommunityCleanupService,
   ) {}
 
   async create(
@@ -277,6 +279,16 @@ export class CommunitiesService {
       return row;
     });
     return this.serializeFor(saved, userId);
+  }
+
+  /** Deletes the community and everything in it. Only its admins, or a site admin. */
+  async remove(
+    id: string,
+    actor: { id: string; isAdmin?: boolean },
+  ): Promise<void> {
+    await this.findCommunity(id);
+    if (!actor.isAdmin) await this.assertAdmin(id, actor.id);
+    await this.cleanup.deleteCommunity(id);
   }
 
   async setHero(

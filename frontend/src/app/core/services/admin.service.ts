@@ -34,6 +34,60 @@ export interface AdminUserSearchParams {
   order?: 'ASC' | 'DESC';
 }
 
+export interface AdminCommunityRow {
+  id: string;
+  slug: string;
+  name: string;
+  visibility: 'public' | 'request' | 'private';
+  location: string | null;
+  createdAt: string;
+  createdByName: string | null;
+  createdByEmail: string | null;
+  memberCount: number;
+  subgroupCount: number;
+  postCount: number;
+  pollCount: number;
+  eventCount: number;
+  pendingRequests: number;
+}
+
+export interface AdminCommunityDetail extends AdminCommunityRow {
+  description: string | null;
+  stravaUrl: string | null;
+  admins: { userId: string; displayName: string | null; email: string }[];
+  subgroups: {
+    id: string;
+    slug: string;
+    name: string;
+    visibility: string;
+    memberCount: number;
+    postCount: number;
+  }[];
+  recentPosts: {
+    id: string;
+    title: string;
+    createdAt: string;
+    authorName: string | null;
+    subgroupName: string | null;
+  }[];
+  recentEvents: {
+    id: string;
+    name: string;
+    startDate: string;
+    listing: string;
+    subgroupName: string | null;
+  }[];
+}
+
+export interface AdminCommunitySearchParams {
+  q?: string;
+  visibility?: 'public' | 'request' | 'private';
+  sort?: 'createdAt' | 'name' | 'members' | 'pending';
+  order?: 'ASC' | 'DESC';
+  page?: number;
+  limit?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly api = inject(ApiService);
@@ -63,6 +117,33 @@ export class AdminService {
       '/admin/users',
       params as Record<string, string | number | boolean>,
     );
+  }
+
+  // --- Communities ---
+
+  getCommunities(
+    params: AdminCommunitySearchParams = {},
+  ): Observable<PaginatedResponse<AdminCommunityRow>> {
+    return this.api.get<PaginatedResponse<AdminCommunityRow>>(
+      '/admin/communities',
+      params as Record<string, string | number | boolean>,
+    );
+  }
+
+  getCommunity(id: string): Observable<AdminCommunityDetail> {
+    return this.api.get<AdminCommunityDetail>(`/admin/communities/${id}`);
+  }
+
+  deleteCommunity(id: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}`);
+  }
+
+  deleteCommunitySubgroup(id: string, subgroupId: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}/subgroups/${subgroupId}`);
+  }
+
+  deleteCommunityPost(id: string, postId: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}/posts/${postId}`);
   }
 
   getUser(id: string): Observable<AdminUser> {

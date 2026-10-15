@@ -172,6 +172,14 @@ export class CommunityService {
     );
   }
 
+  deleteCommunity(id: string): Observable<void> {
+    return this.api.delete(`/communities/${id}`);
+  }
+
+  deleteSubgroup(communitySlug: string, slug: string): Observable<void> {
+    return this.api.delete(`/communities/${communitySlug}/subgroups/${slug}`);
+  }
+
   inviteToSubgroup(communitySlug: string, slug: string, userId: string): Observable<Subgroup> {
     return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { userId });
   }

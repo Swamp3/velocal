@@ -107,4 +107,36 @@
       </div>
     </form>
   }
+
+  @if (isEdit() && loaded()) {
+    <section
+      class="mt-8 rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"
+      aria-labelledby="community-danger-heading"
+    >
+      <h2
+        id="community-danger-heading"
+        class="text-base font-semibold text-red-800 dark:text-red-400"
+      >
+        {{ 'communities.dangerZone' | transloco }}
+      </h2>
+      <p class="mt-1 text-sm text-red-800/90 dark:text-red-400/90">
+        {{ 'communities.deleteWarning' | transloco }}
+      </p>
+      <ui-button class="mt-4" variant="danger" type="button" (click)="confirmingDelete.set(true)">
+        {{ 'communities.delete' | transloco }}
+      </ui-button>
+    </section>
+  }
 </div>
+
+@if (confirmingDelete()) {
+  <app-confirm-delete-dialog
+    [title]="'communities.delete' | transloco"
+    [message]="'communities.deleteConfirm' | transloco: { name: communityName() }"
+    [confirmText]="communityName()"
+    [confirmLabel]="'communities.delete' | transloco"
+    [busy]="deleting()"
+    (confirmed)="deleteCommunity()"
+    (cancelled)="confirmingDelete.set(false)"
+  />
+}

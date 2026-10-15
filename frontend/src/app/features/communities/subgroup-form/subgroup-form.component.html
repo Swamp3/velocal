@@ -103,4 +103,36 @@
       </div>
     </form>
   }
+
+  @if (isEdit() && loaded() && canDelete()) {
+    <section
+      class="mt-8 rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"
+      aria-labelledby="subgroup-danger-heading"
+    >
+      <h2
+        id="subgroup-danger-heading"
+        class="text-base font-semibold text-red-800 dark:text-red-400"
+      >
+        {{ 'communities.dangerZone' | transloco }}
+      </h2>
+      <p class="mt-1 text-sm text-red-800/90 dark:text-red-400/90">
+        {{ 'communities.subgroups.deleteWarning' | transloco }}
+      </p>
+      <ui-button class="mt-4" variant="danger" type="button" (click)="confirmingDelete.set(true)">
+        {{ 'communities.subgroups.delete' | transloco }}
+      </ui-button>
+    </section>
+  }
 </div>
+
+@if (confirmingDelete()) {
+  <app-confirm-delete-dialog
+    [title]="'communities.subgroups.delete' | transloco"
+    [message]="'communities.subgroups.deleteConfirm' | transloco: { name: subgroupName() }"
+    [confirmText]="subgroupName()"
+    [confirmLabel]="'communities.subgroups.delete' | transloco"
+    [busy]="deleting()"
+    (confirmed)="deleteSubgroup()"
+    (cancelled)="confirmingDelete.set(false)"
+  />
+}

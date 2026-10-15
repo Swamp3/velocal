@@ -29,6 +29,7 @@ import {
   SubgroupMember,
   SubgroupMemberRole,
 } from './entities/subgroup-member.entity';
+import { CommunityCleanupService } from './community-cleanup.service';
 import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
 import { Subgroup, SubgroupVisibility } from './entities/subgroup.entity';
@@ -93,6 +94,7 @@ export class SubgroupsService {
     private readonly uploads: UploadsService,
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
+    private readonly cleanup: CommunityCleanupService,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -224,9 +226,7 @@ export class SubgroupsService {
       userId,
     );
     await this.assertCommunityAdmin(community.id, userId);
-    await this.uploads.remove('community-heroes', subgroup.id);
-    await this.uploads.remove('community-logos', subgroup.id);
-    await this.subgroups.remove(subgroup);
+    await this.cleanup.deleteSubgroup(subgroup.id);
   }
 
   async setHero(

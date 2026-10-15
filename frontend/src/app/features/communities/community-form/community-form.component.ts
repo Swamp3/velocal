@@ -12,7 +12,11 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommunityService } from '@core/services/community.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ImageUploadComponent, RichTextComponent } from '@shared/components';
+import {
+  ConfirmDeleteDialogComponent,
+  ImageUploadComponent,
+  RichTextComponent,
+} from '@shared/components';
 import { CommunityVisibility } from '@shared/models';
 import { ButtonComponent, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { map, Observable } from 'rxjs';
@@ -29,6 +33,7 @@ import { map, Observable } from 'rxjs';
     SkeletonComponent,
     ImageUploadComponent,
     RichTextComponent,
+    ConfirmDeleteDialogComponent,
   ],
   templateUrl: './community-form.component.html',
 })
@@ -47,6 +52,9 @@ export class CommunityFormComponent implements OnInit {
   protected readonly loaded = signal(false);
   protected readonly slug = signal('');
   protected readonly communityId = signal('');
+  protected readonly communityName = signal('');
+  protected readonly confirmingDelete = signal(false);
+  protected readonly deleting = signal(false);
   protected readonly heroUrl = signal<string | null>(null);
   protected readonly logoUrl = signal<string | null>(null);
   protected readonly visibilities: readonly CommunityVisibility[] = [
@@ -99,6 +107,7 @@ export class CommunityFormComponent implements OnInit {
           }
           this.communityId.set(community.id);
           this.slug.set(community.slug);
+          this.communityName.set(community.name);
           this.heroUrl.set(community.heroUrl);
           this.logoUrl.set(community.logoUrl);
           this.form.patchValue({
@@ -112,6 +121,24 @@ export class CommunityFormComponent implements OnInit {
         },
         error: () => {
           void this.router.navigateByUrl('/communities');
+        },
+      });
+  }
+
+  protected deleteCommunity(): void {
+    if (this.deleting()) return;
+    this.deleting.set(true);
+    this.communityService
+      .deleteCommunity(this.communityId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success(this.transloco.translate('communities.deleted'));
+          void this.router.navigateByUrl('/communities');
+        },
+        error: () => {
+          this.deleting.set(false);
+          this.toast.error(this.transloco.translate('communities.deleteError'));
         },
       });
   }
