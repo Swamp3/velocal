@@ -11,6 +11,7 @@ import { DataSource, IsNull, Repository } from 'typeorm';
 import {
   CommunityErrorCode,
   communityConflict,
+  assertCommunityActive,
   communityForbidden,
 } from './community-error';
 import { CreateCommunityPollDto } from './dto/create-community-poll.dto';
@@ -397,6 +398,7 @@ export class CommunityPollsService {
     ) {
       throw new NotFoundException('Community not found');
     }
+    assertCommunityActive(community);
     const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
     if (!subgroupSlug) {
       if (!communityMember)

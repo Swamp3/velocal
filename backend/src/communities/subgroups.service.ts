@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import {
+  assertCommunityActive,
   CommunityErrorCode,
   communityForbidden,
   communityNotFound,
@@ -29,6 +30,7 @@ import {
   SubgroupMember,
   SubgroupMemberRole,
 } from './entities/subgroup-member.entity';
+import { AuditService } from '../audit/audit.service';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
@@ -95,6 +97,7 @@ export class SubgroupsService {
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
     private readonly cleanup: CommunityCleanupService,
+    private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -226,7 +229,16 @@ export class SubgroupsService {
       userId,
     );
     await this.assertCommunityAdmin(community.id, userId);
-    await this.cleanup.deleteSubgroup(subgroup.id);
+    await this.cleanup.deleteSubgroup(subgroup.id, userId);
+    await this.audit.record({
+      actorId: userId,
+      action: 'subgroup.delete',
+      targetType: 'subgroup',
+      targetId: subgroup.id,
+      targetLabel: subgroup.name,
+      communityId: community.id,
+      details: { via: 'community-admin' },
+    });
   }
 
   async setHero(
@@ -655,6 +667,7 @@ export class SubgroupsService {
         : null;
       if (!membership) throw new NotFoundException('Community not found');
     }
+    assertCommunityActive(community);
     return community;
   }
 

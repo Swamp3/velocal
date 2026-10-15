@@ -9,10 +9,12 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
+import { AuditService } from '../audit/audit.service';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { isLastAdminRemoval } from './community-admin.policy';
 import { pickSlug, RESERVED_COMMUNITY_SLUGS, slugBase } from './community-slug';
 import {
+  assertCommunityActive,
   CommunityErrorCode,
   communityConflict,
   communityNotFound,
@@ -48,6 +50,8 @@ export interface SerializedCommunity {
   subgroupCount?: number;
   pollCount?: number;
   postCount?: number;
+  suspended: boolean;
+  suspendedReason: string | null;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
   createdAt: Date;
@@ -111,6 +115,7 @@ export class CommunitiesService {
     private readonly dataSource: DataSource,
     private readonly notifications: NotificationsService,
     private readonly cleanup: CommunityCleanupService,
+    private readonly audit: AuditService,
   ) {}
 
   async create(
@@ -157,7 +162,8 @@ export class CommunitiesService {
       .createQueryBuilder('community')
       .where('community.visibility IN (:...visibilities)', {
         visibilities: [CommunityVisibility.PUBLIC, CommunityVisibility.REQUEST],
-      });
+      })
+      .andWhere('community.suspendedAt IS NULL');
 
     if (params.q) {
       qb.andWhere('community.name ILIKE :q', { q: `%${params.q}%` });
@@ -230,6 +236,18 @@ export class CommunitiesService {
       }
     }
 
+    // A suspended community is only visible to its own members.
+    if (community.suspendedAt) {
+      const membership = userId
+        ? await this.members.findOne({
+            where: { communityId: community.id, userId },
+          })
+        : null;
+      if (!membership) {
+        throw new NotFoundException(`Community "${slug}" not found`);
+      }
+    }
+
     return this.serializeFor(community, userId);
   }
 
@@ -286,9 +304,18 @@ export class CommunitiesService {
     id: string,
     actor: { id: string; isAdmin?: boolean },
   ): Promise<void> {
-    await this.findCommunity(id);
+    const community = await this.findCommunity(id);
     if (!actor.isAdmin) await this.assertAdmin(id, actor.id);
-    await this.cleanup.deleteCommunity(id);
+    await this.cleanup.deleteCommunity(id, actor.id);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'community.delete',
+      targetType: 'community',
+      targetId: id,
+      targetLabel: community.name,
+      communityId: id,
+      details: { via: actor.isAdmin ? 'site-admin' : 'community-admin' },
+    });
   }
 
   async setHero(
@@ -317,6 +344,7 @@ export class CommunitiesService {
 
   async join(id: string, userId: string): Promise<JoinCommunityResult> {
     const community = await this.findCommunity(id);
+    assertCommunityActive(community);
     const membership = await this.members.findOne({
       where: { communityId: id, userId },
     });
@@ -958,6 +986,8 @@ export class CommunitiesService {
       subgroupCount: viewer.subgroupCount,
       pollCount: viewer.pollCount,
       postCount: viewer.postCount,
+      suspended: !!community.suspendedAt,
+      suspendedReason: viewer.myRole ? community.suspendedReason : null,
       myRole: viewer.myRole,
       myJoinRequest: viewer.myJoinRequest,
       createdAt: community.createdAt,

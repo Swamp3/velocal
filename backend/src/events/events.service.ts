@@ -39,6 +39,7 @@ import {
   SubgroupVisibility,
 } from '../communities/entities/subgroup.entity';
 import {
+  assertCommunityActive,
   communityForbidden,
   communityNotFound,
   CommunityErrorCode,
@@ -1173,6 +1174,7 @@ export class EventsService {
     ) {
       throw new NotFoundException('Community not found');
     }
+    assertCommunityActive(community);
     const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
     if (!subgroupSlug) {
       if (forCreate && !isAdmin) {
@@ -1218,6 +1220,13 @@ export class EventsService {
     qb: ReturnType<Repository<Event>['createQueryBuilder']>,
     userId?: string,
   ): void {
+    // Events of a suspended community disappear from every list.
+    qb.andWhere(
+      `(event.community_id IS NULL OR NOT EXISTS (
+        SELECT 1 FROM communities sc
+        WHERE sc.id = event.community_id AND sc.suspended_at IS NOT NULL
+      ))`,
+    );
     if (!userId) {
       qb.andWhere('event.listing = :publicListing', {
         publicListing: EventListing.PUBLIC,
@@ -1554,9 +1563,20 @@ export class EventsService {
   }
 
   private async canSee(event: Event, userId?: string): Promise<boolean> {
+    if (event.communityId && (await this.isSuspended(event.communityId))) {
+      return false;
+    }
     if (event.listing !== EventListing.MEMBERS) return true;
     const access = await this.hostRole(event, userId);
     return access.member;
+  }
+
+  private async isSuspended(communityId: string): Promise<boolean> {
+    const community = await this.communities.findOne({
+      where: { id: communityId },
+      select: { id: true, suspendedAt: true },
+    });
+    return !!community?.suspendedAt;
   }
 
   private async hostRole(

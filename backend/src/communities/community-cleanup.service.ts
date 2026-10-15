@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UploadsService } from '../uploads/uploads.service';
 
 /**
@@ -13,13 +14,28 @@ export class CommunityCleanupService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly uploads: UploadsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
-  async deleteCommunity(communityId: string): Promise<void> {
-    const [community] = await this.dataSource.query<{ slug: string }[]>(
-      `SELECT "slug" FROM "communities" WHERE "id" = $1`,
-      [communityId],
-    );
+  /**
+   * `actorId` is the person who deleted it; they are not notified. Everyone else
+   * who was a member gets an inbox message, written after the delete so the
+   * clean-up of notifications that point at the page does not remove it.
+   */
+  async deleteCommunity(communityId: string, actorId?: string): Promise<void> {
+    const [community] = await this.dataSource.query<
+      { slug: string; name: string }[]
+    >(`SELECT "slug", "name" FROM "communities" WHERE "id" = $1`, [
+      communityId,
+    ]);
+    const memberIds = (
+      await this.dataSource.query<{ user_id: string }[]>(
+        `SELECT "user_id" FROM "community_members" WHERE "community_id" = $1`,
+        [communityId],
+      )
+    )
+      .map((row) => row.user_id)
+      .filter((id) => id !== actorId);
     const eventIds = await this.ids(
       `SELECT "id" FROM "events" WHERE "community_id" = $1`,
       communityId,
@@ -29,6 +45,12 @@ export class CommunityCleanupService {
       communityId,
     );
     await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `UPDATE "reports" SET "status" = 'resolved', "resolved_at" = now(),
+                "resolution_note" = 'Community deleted'
+         WHERE "community_id" = $1 AND "status" = 'open'`,
+        [communityId],
+      );
       await manager.query(`DELETE FROM "communities" WHERE "id" = $1`, [
         communityId,
       ]);
@@ -41,17 +63,37 @@ export class CommunityCleanupService {
       await this.dropEmptyRecurrences(manager);
     });
     await this.removeFiles(eventIds, [communityId, ...subgroupIds]);
+    if (community) {
+      await this.notifications.notifyUsers(memberIds, 'community.deleted', {
+        communityName: community.name,
+        communitySlug: '',
+      });
+    }
   }
 
-  async deleteSubgroup(subgroupId: string): Promise<void> {
+  async deleteSubgroup(subgroupId: string, actorId?: string): Promise<void> {
     const [subgroup] = await this.dataSource.query<
-      { slug: string; communitySlug: string }[]
+      {
+        slug: string;
+        name: string;
+        communitySlug: string;
+        communityName: string;
+      }[]
     >(
-      `SELECT s."slug" AS "slug", c."slug" AS "communitySlug"
+      `SELECT s."slug" AS "slug", s."name" AS "name",
+              c."slug" AS "communitySlug", c."name" AS "communityName"
        FROM "subgroups" s JOIN "communities" c ON c."id" = s."community_id"
        WHERE s."id" = $1`,
       [subgroupId],
     );
+    const memberIds = (
+      await this.dataSource.query<{ user_id: string }[]>(
+        `SELECT "user_id" FROM "subgroup_members" WHERE "subgroup_id" = $1`,
+        [subgroupId],
+      )
+    )
+      .map((row) => row.user_id)
+      .filter((id) => id !== actorId);
     const eventIds = await this.ids(
       `SELECT "id" FROM "events" WHERE "subgroup_id" = $1`,
       subgroupId,
@@ -70,6 +112,13 @@ export class CommunityCleanupService {
       await this.dropEmptyRecurrences(manager);
     });
     await this.removeFiles(eventIds, [subgroupId]);
+    if (subgroup) {
+      await this.notifications.notifyUsers(memberIds, 'subgroup.deleted', {
+        communityName: subgroup.communityName,
+        communitySlug: '',
+        subgroupName: subgroup.name,
+      });
+    }
   }
 
   private async ids(sql: string, param: string): Promise<string[]> {

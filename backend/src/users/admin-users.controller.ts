@@ -11,13 +11,17 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuditService } from '../audit/audit.service';
 import { UsersService } from './users.service';
 import { AdminUserSearchDto } from './dto/admin-user-search.dto';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminUsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly audit: AuditService,
+  ) {}
 
   @Get()
   async list(@Query() dto: AdminUserSearchDto) {
@@ -42,6 +46,13 @@ export class AdminUsersController {
     }
 
     const user = await this.usersService.toggleAdmin(targetId);
+    await this.audit.record({
+      actorId: caller.id,
+      action: user.isAdmin ? 'user.promote' : 'user.demote',
+      targetType: 'user',
+      targetId,
+      targetLabel: user.displayName || user.email,
+    });
     const { passwordHash: _, ...rest } = user;
     return rest;
   }

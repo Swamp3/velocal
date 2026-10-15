@@ -36,7 +36,11 @@
     "decisionSubgroupRejected": "Beitritt zu {{subgroupName}} abgelehnt",
     "delete": "Löschen",
     "deleteAll": "Alle löschen",
-    "deleteAllConfirm": "Alle Benachrichtigungen löschen?"
+    "deleteAllConfirm": "Alle Benachrichtigungen löschen?",
+    "communityDeleted": "Die Community {{communityName}} wurde gelöscht",
+    "subgroupDeleted": "Die Untergruppe {{subgroupName}} von {{communityName}} wurde gelöscht",
+    "communitySuspended": "{{communityName}} wurde gesperrt: {{reason}}",
+    "communityUnsuspended": "{{communityName}} ist wieder verfügbar"
   },
   "events": {
     "title": "Radsport-Events finden",

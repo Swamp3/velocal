@@ -12,6 +12,8 @@ export const CommunityErrorCode = {
   inviteOnly: 'community.inviteOnly',
   membersOnly: 'community.membersOnly',
   pollClosed: 'community.pollClosed',
+  suspended: 'community.suspended',
+  alreadyReported: 'community.alreadyReported',
 } as const;
 
 export type CommunityErrorCode =
@@ -30,4 +32,13 @@ export function communityForbidden(
 
 export function communityNotFound(code: CommunityErrorCode): NotFoundException {
   return new NotFoundException({ code, message: code });
+}
+
+/** Blocks every read and write inside a community that a site admin suspended. */
+export function assertCommunityActive(community: {
+  suspendedAt?: Date | null;
+}): void {
+  if (community.suspendedAt) {
+    throw communityForbidden(CommunityErrorCode.suspended);
+  }
 }

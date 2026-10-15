@@ -11,8 +11,8 @@ export class AdminCommunitySearchDto {
   visibility?: 'public' | 'request' | 'private';
 
   @IsOptional()
-  @IsIn(['createdAt', 'name', 'members', 'pending'])
-  sort?: 'createdAt' | 'name' | 'members' | 'pending';
+  @IsIn(['createdAt', 'name', 'members', 'pending', 'reports'])
+  sort?: 'createdAt' | 'name' | 'members' | 'pending' | 'reports';
 
   @IsOptional()
   @IsIn(['ASC', 'DESC'])

@@ -13,7 +13,11 @@ export type NotificationType =
   | 'event.created'
   | 'event.invite'
   | 'join.request'
-  | 'join.decision';
+  | 'join.decision'
+  | 'community.deleted'
+  | 'subgroup.deleted'
+  | 'community.suspended'
+  | 'community.unsuspended';
 
 export interface NotificationPayload {
   communityName: string;
@@ -24,6 +28,8 @@ export interface NotificationPayload {
   eventName?: string;
   actorName?: string;
   decision?: 'approved' | 'rejected';
+  /** Why a community was suspended, shown to its members. */
+  reason?: string;
 }
 
 @Entity('notifications')

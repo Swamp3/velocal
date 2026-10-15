@@ -36,7 +36,11 @@
     "decisionSubgroupRejected": "Join request for {{subgroupName}} was declined",
     "delete": "Delete",
     "deleteAll": "Delete all",
-    "deleteAllConfirm": "Delete all notifications?"
+    "deleteAllConfirm": "Delete all notifications?",
+    "communityDeleted": "The community {{communityName}} was deleted",
+    "subgroupDeleted": "The subgroup {{subgroupName}} of {{communityName}} was deleted",
+    "communitySuspended": "{{communityName}} was suspended: {{reason}}",
+    "communityUnsuspended": "{{communityName}} is available again"
   },
   "events": {
     "title": "Find Cycling Events",

@@ -22,6 +22,11 @@ import { CommunityPollsController } from './community-polls.controller';
 import { CommunityPollsService } from './community-polls.service';
 import { CommunityPostsController } from './community-posts.controller';
 import { CommunityPostsService } from './community-posts.service';
+import { AuditModule } from '../audit/audit.module';
+import { Report } from './entities/report.entity';
+import { ReportsController } from './reports.controller';
+import { ReportsService } from './reports.service';
+import { AdminReportsController } from './admin-reports.controller';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { AdminCommunitiesController } from './admin-communities.controller';
 import { AdminCommunitiesService } from './admin-communities.service';
@@ -42,11 +47,13 @@ import { SubgroupsService } from './subgroups.service';
       CommunityPoll,
       CommunityPollOption,
       CommunityPollVote,
+      Report,
       User,
     ]),
     UploadsModule,
     EventsModule,
     NotificationsModule,
+    AuditModule,
   ],
   controllers: [
     CommunitiesController,
@@ -55,6 +62,8 @@ import { SubgroupsService } from './subgroups.service';
     CommunityPollsController,
     CommunityEventsController,
     AdminCommunitiesController,
+    ReportsController,
+    AdminReportsController,
   ],
   providers: [
     CommunitiesService,
@@ -63,6 +72,7 @@ import { SubgroupsService } from './subgroups.service';
     CommunityPollsService,
     CommunityCleanupService,
     AdminCommunitiesService,
+    ReportsService,
   ],
   exports: [CommunitiesService, SubgroupsService],
 })

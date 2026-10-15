@@ -8,11 +8,13 @@ import { User } from './entities/user.entity';
 import { UserFavorite } from './entities/user-favorite.entity';
 import { UserDisciplinePref } from './entities/user-discipline-pref.entity';
 import { EventsModule } from '../events/events.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserFavorite, UserDisciplinePref]),
     EventsModule,
+    AuditModule,
   ],
   controllers: [UsersController, AdminUsersController],
   providers: [UsersService, AdminSeeder],

@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { AdminCommunitySearchDto } from './dto/admin-community-search.dto';
 
@@ -18,6 +20,9 @@ export interface AdminCommunityRow {
   pollCount: number;
   eventCount: number;
   pendingRequests: number;
+  openReports: number;
+  suspendedAt: Date | null;
+  suspendedReason: string | null;
 }
 
 const SORT_SQL = {
@@ -25,6 +30,7 @@ const SORT_SQL = {
   name: 'LOWER(c."name")',
   members: '"memberCount"',
   pending: '"pendingRequests"',
+  reports: '"openReports"',
 } as const;
 
 /** Site-admin view of every community, private ones included. */
@@ -33,6 +39,8 @@ export class AdminCommunitiesService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly cleanup: CommunityCleanupService,
+    private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async list(dto: AdminCommunitySearchDto) {
@@ -66,7 +74,10 @@ export class AdminCommunitiesService {
               (SELECT COUNT(*)::int FROM "community_polls" l WHERE l."community_id" = c."id") AS "pollCount",
               (SELECT COUNT(*)::int FROM "events" e WHERE e."community_id" = c."id") AS "eventCount",
               (SELECT COUNT(*)::int FROM "community_join_requests" r
-                 WHERE r."community_id" = c."id" AND r."status" = 'pending') AS "pendingRequests"
+                 WHERE r."community_id" = c."id" AND r."status" = 'pending') AS "pendingRequests",
+              (SELECT COUNT(*)::int FROM "reports" rp
+                 WHERE rp."community_id" = c."id" AND rp."status" = 'open') AS "openReports",
+              c."suspended_at" AS "suspendedAt", c."suspended_reason" AS "suspendedReason"
        FROM "communities" c
        LEFT JOIN "users" u ON u."id" = c."created_by_id"
        ${whereSql}
@@ -93,7 +104,10 @@ export class AdminCommunitiesService {
               (SELECT COUNT(*)::int FROM "community_polls" l WHERE l."community_id" = c."id") AS "pollCount",
               (SELECT COUNT(*)::int FROM "events" e WHERE e."community_id" = c."id") AS "eventCount",
               (SELECT COUNT(*)::int FROM "community_join_requests" r
-                 WHERE r."community_id" = c."id" AND r."status" = 'pending') AS "pendingRequests"
+                 WHERE r."community_id" = c."id" AND r."status" = 'pending') AS "pendingRequests",
+              (SELECT COUNT(*)::int FROM "reports" rp
+                 WHERE rp."community_id" = c."id" AND rp."status" = 'open') AS "openReports",
+              c."suspended_at" AS "suspendedAt", c."suspended_reason" AS "suspendedReason"
        FROM "communities" c
        LEFT JOIN "users" u ON u."id" = c."created_by_id"
        WHERE c."id" = $1`,
@@ -141,31 +155,195 @@ export class AdminCommunitiesService {
     };
   }
 
-  async removeCommunity(id: string): Promise<void> {
-    const [row] = await this.dataSource.query<{ id: string }[]>(
-      `SELECT "id" FROM "communities" WHERE "id" = $1`,
+  async removeCommunity(id: string, actorId: string): Promise<void> {
+    const [row] = await this.dataSource.query<
+      { id: string; name: string; members: number }[]
+    >(
+      `SELECT c."id", c."name",
+              (SELECT COUNT(*)::int FROM "community_members" m WHERE m."community_id" = c."id") AS "members"
+       FROM "communities" c WHERE c."id" = $1`,
       [id],
     );
     if (!row) throw new NotFoundException('Community not found');
-    await this.cleanup.deleteCommunity(id);
+    await this.cleanup.deleteCommunity(id, actorId);
+    await this.audit.record({
+      actorId,
+      action: 'community.delete',
+      targetType: 'community',
+      targetId: id,
+      targetLabel: row.name,
+      communityId: id,
+      details: { members: row.members, via: 'admin' },
+    });
   }
 
-  async removeSubgroup(communityId: string, subgroupId: string): Promise<void> {
-    const [row] = await this.dataSource.query<{ id: string }[]>(
-      `SELECT "id" FROM "subgroups" WHERE "id" = $1 AND "community_id" = $2`,
+  async removeSubgroup(
+    communityId: string,
+    subgroupId: string,
+    actorId: string,
+  ): Promise<void> {
+    const [row] = await this.dataSource.query<{ id: string; name: string }[]>(
+      `SELECT "id", "name" FROM "subgroups" WHERE "id" = $1 AND "community_id" = $2`,
       [subgroupId, communityId],
     );
     if (!row) throw new NotFoundException('Subgroup not found');
-    await this.cleanup.deleteSubgroup(subgroupId);
+    await this.cleanup.deleteSubgroup(subgroupId, actorId);
+    await this.audit.record({
+      actorId,
+      action: 'subgroup.delete',
+      targetType: 'subgroup',
+      targetId: subgroupId,
+      targetLabel: row.name,
+      communityId,
+      details: { via: 'admin' },
+    });
   }
 
-  async removePost(communityId: string, postId: string): Promise<void> {
-    const result = await this.dataSource.query(
-      `DELETE FROM "community_posts" WHERE "id" = $1 AND "community_id" = $2 RETURNING "id"`,
+  async removePost(
+    communityId: string,
+    postId: string,
+    actorId: string,
+  ): Promise<void> {
+    const rows = await this.dataSource.query<{ title: string }[]>(
+      `DELETE FROM "community_posts" WHERE "id" = $1 AND "community_id" = $2 RETURNING "title"`,
       [postId, communityId],
     );
     // pg returns [rows, count] for DELETE ... RETURNING
-    const deleted = Array.isArray(result[0]) ? result[0].length : result.length;
-    if (!deleted) throw new NotFoundException('Post not found');
+    const deleted = Array.isArray(rows[0])
+      ? (rows[0] as unknown as { title: string }[])
+      : rows;
+    if (!deleted.length) throw new NotFoundException('Post not found');
+    await this.closeReports('post', postId, actorId, 'Content removed');
+    await this.audit.record({
+      actorId,
+      action: 'post.delete',
+      targetType: 'post',
+      targetId: postId,
+      targetLabel: deleted[0].title,
+      communityId,
+    });
+  }
+
+  async removeComment(
+    communityId: string,
+    commentId: string,
+    actorId: string,
+  ): Promise<void> {
+    const [found] = await this.dataSource.query<{ body: string }[]>(
+      `SELECT c."body" FROM "community_post_comments" c
+       JOIN "community_posts" p ON p."id" = c."post_id"
+       WHERE c."id" = $1 AND p."community_id" = $2`,
+      [commentId, communityId],
+    );
+    if (!found) throw new NotFoundException('Comment not found');
+    await this.dataSource.query(
+      `DELETE FROM "community_post_comments" WHERE "id" = $1`,
+      [commentId],
+    );
+    await this.closeReports('comment', commentId, actorId, 'Content removed');
+    await this.audit.record({
+      actorId,
+      action: 'comment.delete',
+      targetType: 'comment',
+      targetId: commentId,
+      targetLabel: found.body
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 120),
+      communityId,
+    });
+  }
+
+  /** Hides the community and makes it read-only until it is lifted. */
+  async suspend(id: string, reason: string, actorId: string): Promise<void> {
+    const [row] = await this.dataSource
+      .query<{ id: string; name: string; slug: string }[]>(
+        `UPDATE "communities" SET "suspended_at" = now(), "suspended_reason" = $2
+       WHERE "id" = $1 AND "suspended_at" IS NULL RETURNING "id", "name", "slug"`,
+        [id, reason.trim()],
+      )
+      .then((res) => (Array.isArray(res[0]) ? res[0] : res));
+    if (!row)
+      throw new NotFoundException('Community not found or already suspended');
+    await this.notifyAdmins(
+      id,
+      'community.suspended',
+      row.name,
+      row.slug,
+      reason.trim(),
+      actorId,
+    );
+    await this.audit.record({
+      actorId,
+      action: 'community.suspend',
+      targetType: 'community',
+      targetId: id,
+      targetLabel: row.name,
+      communityId: id,
+      details: { reason: reason.trim() },
+    });
+  }
+
+  async unsuspend(id: string, actorId: string): Promise<void> {
+    const [row] = await this.dataSource
+      .query<{ id: string; name: string; slug: string }[]>(
+        `UPDATE "communities" SET "suspended_at" = NULL, "suspended_reason" = NULL
+       WHERE "id" = $1 AND "suspended_at" IS NOT NULL RETURNING "id", "name", "slug"`,
+        [id],
+      )
+      .then((res) => (Array.isArray(res[0]) ? res[0] : res));
+    if (!row)
+      throw new NotFoundException('Community not found or not suspended');
+    await this.notifyAdmins(
+      id,
+      'community.unsuspended',
+      row.name,
+      row.slug,
+      undefined,
+      actorId,
+    );
+    await this.audit.record({
+      actorId,
+      action: 'community.unsuspend',
+      targetType: 'community',
+      targetId: id,
+      targetLabel: row.name,
+      communityId: id,
+    });
+  }
+
+  private async notifyAdmins(
+    communityId: string,
+    type: 'community.suspended' | 'community.unsuspended',
+    name: string,
+    slug: string,
+    reason: string | undefined,
+    actorId: string,
+  ): Promise<void> {
+    const admins = await this.dataSource.query<{ user_id: string }[]>(
+      `SELECT "user_id" FROM "community_members" WHERE "community_id" = $1 AND "role" = 'admin' AND "user_id" <> $2`,
+      [communityId, actorId],
+    );
+    await this.notifications.notifyUsers(
+      admins.map((row) => row.user_id),
+      type,
+      { communityName: name, communitySlug: slug, reason },
+    );
+  }
+
+  /** Reports about content that has been removed are done. */
+  private async closeReports(
+    targetType: string,
+    targetId: string,
+    actorId: string,
+    note: string,
+  ): Promise<void> {
+    await this.dataSource.query(
+      `UPDATE "reports" SET "status" = 'resolved', "resolved_by_id" = $3,
+              "resolved_at" = now(), "resolution_note" = $4
+       WHERE "target_type" = $1 AND "target_id" = $2 AND "status" = 'open'`,
+      [targetType, targetId, actorId, note],
+    );
   }
 }
