@@ -624,7 +624,10 @@
       "description": "Description",
       "visibility": "Visibility",
       "hero": "Cover image",
-      "logo": "Logo"
+      "logo": "Logo",
+      "location": "Location",
+      "strava": "Strava link",
+      "stravaInvalid": "Please enter a link to strava.com (https://…)"
     },
     "members": {
       "title": "Members",
@@ -748,7 +751,8 @@
       "back": "Back to posts",
       "notFoundTitle": "Post not found",
       "notFoundMessage": "This post does not exist or you cannot see it."
-    }
+    },
+    "strava": "Strava"
   },
   "errors": {
     "notFound": "Page not found",

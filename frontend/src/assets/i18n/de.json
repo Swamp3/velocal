@@ -624,7 +624,10 @@
       "description": "Beschreibung",
       "visibility": "Sichtbarkeit",
       "hero": "Titelbild",
-      "logo": "Logo"
+      "logo": "Logo",
+      "location": "Standort",
+      "strava": "Strava-Link",
+      "stravaInvalid": "Bitte einen Link zu strava.com angeben (https://…)"
     },
     "members": {
       "title": "Mitglieder",
@@ -748,7 +751,8 @@
       "back": "Zurück zu den Beiträgen",
       "notFoundTitle": "Beitrag nicht gefunden",
       "notFoundMessage": "Dieser Beitrag existiert nicht oder du kannst ihn nicht sehen."
-    }
+    },
+    "strava": "Auf Strava ansehen"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

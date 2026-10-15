@@ -7,12 +7,15 @@ export interface Community {
   slug: string;
   name: string;
   description: string | null;
+  location: string | null;
+  stravaUrl: string | null;
   visibility: CommunityVisibility;
   heroUrl: string | null;
   logoUrl: string | null;
   memberCount: number;
   subgroupCount?: number;
   pollCount?: number;
+  postCount?: number;
   myRole: CommunityRole | null;
   myJoinRequest: 'pending' | null;
   createdAt: string;
@@ -36,12 +39,16 @@ export interface CommunityJoinRequest {
 export interface CreateCommunityDto {
   name: string;
   description?: string;
+  location?: string;
+  stravaUrl?: string;
   visibility?: CommunityVisibility;
 }
 
 export interface UpdateCommunityDto {
   name?: string;
   description?: string | null;
+  location?: string | null;
+  stravaUrl?: string | null;
   visibility?: CommunityVisibility;
 }
 
@@ -65,6 +72,7 @@ export interface Subgroup {
   logoUrl: string | null;
   memberCount: number;
   pollCount?: number;
+  postCount?: number;
   myRole: SubgroupRole | null;
   myJoinRequest: 'pending' | null;
   viewerIsCommunityAdmin: boolean;

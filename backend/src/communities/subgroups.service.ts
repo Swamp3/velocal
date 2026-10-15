@@ -29,6 +29,7 @@ import {
   SubgroupMember,
   SubgroupMemberRole,
 } from './entities/subgroup-member.entity';
+import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
 import { Subgroup, SubgroupVisibility } from './entities/subgroup.entity';
 
@@ -44,6 +45,7 @@ export interface SerializedSubgroup {
   logoUrl: string | null;
   memberCount: number;
   pollCount: number;
+  postCount: number;
   myRole: SubgroupMemberRole | null;
   myJoinRequest: 'pending' | null;
   viewerIsCommunityAdmin: boolean;
@@ -82,6 +84,8 @@ export class SubgroupsService {
     private readonly communities: Repository<Community>,
     @InjectRepository(CommunityMember)
     private readonly communityMembers: Repository<CommunityMember>,
+    @InjectRepository(CommunityPost)
+    private readonly posts: Repository<CommunityPost>,
     @InjectRepository(CommunityPoll)
     private readonly polls: Repository<CommunityPoll>,
     @InjectRepository(User)
@@ -851,6 +855,9 @@ export class SubgroupsService {
     const memberCount = await this.members.count({
       where: { subgroupId: subgroup.id },
     });
+    const postCount = await this.posts.count({
+      where: { subgroupId: subgroup.id },
+    });
     const pollCount = await this.polls.count({
       where: { subgroupId: subgroup.id },
     });
@@ -890,6 +897,7 @@ export class SubgroupsService {
       ),
       memberCount,
       pollCount,
+      postCount,
       myRole: membership?.role ?? null,
       myJoinRequest: pending ? 'pending' : null,
       viewerIsCommunityAdmin,

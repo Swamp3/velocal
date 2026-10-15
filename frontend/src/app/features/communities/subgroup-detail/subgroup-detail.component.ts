@@ -91,7 +91,12 @@ export class SubgroupDetailComponent implements OnInit {
     if (!subgroup.myRole && !subgroup.viewerIsCommunityAdmin) return [];
     const base = ['/communities', subgroup.communitySlug, 'subgroups', subgroup.slug];
     return [
-      { icon: 'forum', labelKey: 'communities.posts.title', commands: [...base, 'posts'] },
+      {
+        icon: 'forum',
+        labelKey: 'communities.posts.title',
+        commands: [...base, 'posts'],
+        count: subgroup.postCount,
+      },
       {
         icon: 'ballot',
         labelKey: 'communities.polls.title',

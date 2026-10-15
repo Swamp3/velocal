@@ -66,6 +66,34 @@
       </app-community-hero>
     </div>
 
+    @if (c.stravaUrl) {
+      <p class="mt-2 flex items-center gap-1.5 text-sm">
+        <span
+          class="material-symbols-outlined text-[18px] text-[var(--color-primary)]"
+          aria-hidden="true"
+          >route</span
+        >
+        <a
+          [href]="c.stravaUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium text-[var(--color-primary)] hover:underline"
+          >{{ 'communities.strava' | transloco }}</a
+        >
+      </p>
+    }
+
+    @if (c.location) {
+      <p class="mt-4 flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
+        <span
+          class="material-symbols-outlined text-[18px] text-[var(--color-primary)]"
+          aria-hidden="true"
+          >location_on</span
+        >
+        {{ c.location }}
+      </p>
+    }
+
     @if (c.description) {
       <app-rich-text-view class="mt-6 block" [value]="c.description" />
     }

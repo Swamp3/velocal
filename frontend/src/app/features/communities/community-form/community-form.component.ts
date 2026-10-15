@@ -78,6 +78,8 @@ export class CommunityFormComponent implements OnInit {
   protected readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     description: [''],
+    location: [''],
+    stravaUrl: ['', Validators.pattern(/^(https:\/\/(www\.)?strava\.com\/.+)?$/i)],
     visibility: this.fb.nonNullable.control<CommunityVisibility>('public', Validators.required),
   });
 
@@ -102,6 +104,8 @@ export class CommunityFormComponent implements OnInit {
           this.form.patchValue({
             name: community.name,
             description: community.description ?? '',
+            location: community.location ?? '',
+            stravaUrl: community.stravaUrl ?? '',
             visibility: community.visibility,
           });
           this.loaded.set(true);
@@ -123,15 +127,21 @@ export class CommunityFormComponent implements OnInit {
 
     this.saving.set(true);
     const description = raw.description.trim();
+    const location = raw.location.trim();
+    const stravaUrl = raw.stravaUrl.trim();
     const request$ = this.isEdit()
       ? this.communityService.update(this.communityId(), {
           name: raw.name.trim(),
           description: description || null,
+          location: location || null,
+          stravaUrl: stravaUrl || null,
           visibility: raw.visibility,
         })
       : this.communityService.create({
           name: raw.name.trim(),
           description: description || undefined,
+          location: location || undefined,
+          stravaUrl: stravaUrl || undefined,
           visibility: raw.visibility,
         });
 
