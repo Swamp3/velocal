@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.0] - 2026-10-15
+
+### Added
+
+- Admin endpoints for community review and removal of communities, subgroups, posts and comments (`/admin/communities`)
+- Community and subgroup deletion with cleanup of uploads, notifications and empty recurrences; `community.deleted` and `subgroup.deleted` notifications
+- Community suspension (`suspended_at`, `suspended_reason`): hidden, read-only, excluded from event lists and the sitemap; shared `notInSuspendedCommunitySql` helper
+- Reports (`POST /communities/:slug/reports`, `/admin/reports`) and admin audit log (`GET /admin/audit`)
+- User blocking (`POST /admin/users/:id/ban`, `/unban`, `status=banned` filter); blocked users cannot log in
+- Edit community polls
+- Migrations `AddModeration` and `AddUserBan`
+
+### Changed
+
+- `JwtStrategy` loads the user on every request, so blocks and role changes apply immediately
+
 ## [0.10.0] - 2026-10-15
 
 ### Added
