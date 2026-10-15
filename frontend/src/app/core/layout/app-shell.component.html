@@ -45,7 +45,7 @@
 
       <div class="mx-2 h-5 w-px bg-[var(--color-border)]"></div>
 
-      @if (auth.hydrated()) {
+      @if (auth.hydrated() && auth.initialized()) {
         @if (auth.isAuthenticated()) {
           <a
             routerLink="/notifications"
@@ -276,7 +276,7 @@
 
       <div class="my-2 h-px bg-[var(--color-border)]"></div>
 
-      @if (auth.hydrated()) {
+      @if (auth.hydrated() && auth.initialized()) {
         @if (auth.isAuthenticated()) {
           @if (auth.currentUser()?.isAdmin) {
             <a

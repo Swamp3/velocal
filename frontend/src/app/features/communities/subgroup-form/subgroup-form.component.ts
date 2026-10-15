@@ -12,7 +12,11 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommunityService } from '@core/services/community.service';
 import { UploadService } from '@core/services/upload.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ImageUploadComponent, RichTextComponent } from '@shared/components';
+import {
+  ConfirmDeleteDialogComponent,
+  ImageUploadComponent,
+  RichTextComponent,
+} from '@shared/components';
 import { SubgroupVisibility } from '@shared/models';
 import { ButtonComponent, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { map, Observable } from 'rxjs';
@@ -29,6 +33,7 @@ import { map, Observable } from 'rxjs';
     SkeletonComponent,
     ImageUploadComponent,
     RichTextComponent,
+    ConfirmDeleteDialogComponent,
   ],
   templateUrl: './subgroup-form.component.html',
 })
@@ -51,6 +56,11 @@ export class SubgroupFormComponent implements OnInit {
   protected readonly logoUrl = signal<string | null>(null);
   protected readonly visibilities: readonly SubgroupVisibility[] = ['open', 'request', 'invite'];
   protected readonly canChangeVisibility = signal(true);
+  /** Deleting a subgroup is reserved for community admins. */
+  protected readonly canDelete = signal(false);
+  protected readonly subgroupName = signal('');
+  protected readonly confirmingDelete = signal(false);
+  protected readonly deleting = signal(false);
 
   protected readonly uploadHeroFn = (file: File): Observable<{ imageUrl?: string | null }> =>
     this.uploadService
@@ -100,6 +110,8 @@ export class SubgroupFormComponent implements OnInit {
           }
           this.subgroupSlug.set(subgroup.slug);
           this.canChangeVisibility.set(subgroup.viewerIsCommunityAdmin);
+          this.canDelete.set(subgroup.viewerIsCommunityAdmin);
+          this.subgroupName.set(subgroup.name);
           this.heroUrl.set(subgroup.heroUrl);
           this.logoUrl.set(subgroup.logoUrl);
           this.form.patchValue({
@@ -111,6 +123,24 @@ export class SubgroupFormComponent implements OnInit {
         },
         error: () => {
           void this.router.navigate(['/communities', communitySlug]);
+        },
+      });
+  }
+
+  protected deleteSubgroup(): void {
+    if (this.deleting()) return;
+    this.deleting.set(true);
+    this.communityService
+      .deleteSubgroup(this.communitySlug(), this.subgroupSlug())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success(this.transloco.translate('communities.subgroups.deleted'));
+          void this.router.navigate(['/communities', this.communitySlug(), 'subgroups']);
+        },
+        error: () => {
+          this.deleting.set(false);
+          this.toast.error(this.transloco.translate('communities.subgroups.deleteError'));
         },
       });
   }

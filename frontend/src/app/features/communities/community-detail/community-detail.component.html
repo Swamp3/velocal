@@ -32,6 +32,22 @@
       {{ 'communities.backToList' | transloco }}
     </a>
 
+    @if (c.suspended) {
+      <div
+        class="mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+        role="alert"
+      >
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">block</span>
+        <div>
+          <p class="font-medium">{{ 'communities.suspendedTitle' | transloco }}</p>
+          @if (c.suspendedReason) {
+            <p class="mt-0.5">{{ c.suspendedReason }}</p>
+          }
+          <p class="mt-0.5 text-xs opacity-80">{{ 'communities.suspendedHint' | transloco }}</p>
+        </div>
+      </div>
+    }
+
     <div class="mt-5">
       <app-community-hero [name]="c.name" [heroUrl]="c.heroUrl" [logoUrl]="c.logoUrl">
         @if (!auth.isAuthenticated()) {
@@ -108,7 +124,30 @@
       </span>
     </div>
 
-    <app-community-section-nav [links]="sections(c)" />
-    <app-community-events [communitySlug]="c.slug" [canCreate]="c.myRole === 'admin'" />
+    @if (!c.suspended) {
+      <app-community-section-nav [links]="sections(c)" />
+      <app-community-events [communitySlug]="c.slug" [canCreate]="c.myRole === 'admin'" />
+    }
+
+    @if (auth.isAuthenticated()) {
+      <p class="mt-8 text-right">
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+          (click)="reporting.set(true)"
+        >
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">flag</span>
+          {{ 'report.title.community' | transloco }}
+        </button>
+      </p>
+    }
+
+    @if (reporting()) {
+      <app-report-dialog
+        [communitySlug]="c.slug"
+        [target]="{ type: 'community' }"
+        (closed)="reporting.set(false)"
+      />
+    }
   </div>
 }

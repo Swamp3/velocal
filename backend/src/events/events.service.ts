@@ -5,6 +5,7 @@ import {
   BadRequestException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { notInSuspendedCommunitySql } from '../communities/community-suspension';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
@@ -39,6 +40,7 @@ import {
   SubgroupVisibility,
 } from '../communities/entities/subgroup.entity';
 import {
+  assertCommunityActive,
   communityForbidden,
   communityNotFound,
   CommunityErrorCode,
@@ -54,7 +56,11 @@ import {
 import { BadWordService } from '../common/bad-words';
 import { CreateEventDto, RecurrenceDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { EventSearchDto, EventSort } from './dto/event-search.dto';
+import {
+  EventListView,
+  EventSearchDto,
+  EventSort,
+} from './dto/event-search.dto';
 import {
   AdminMissingDataDto,
   MissingDataType,
@@ -143,9 +149,23 @@ export class EventsService {
     }
 
     const hasGeo = lat != null && lng != null;
-    const qb = this.repo
-      .createQueryBuilder('event')
-      .leftJoinAndSelect('event.discipline', 'discipline');
+    const marker = params.view === EventListView.MARKER;
+    const qb = this.repo.createQueryBuilder('event');
+    if (marker) {
+      qb.leftJoin('event.discipline', 'discipline').select([
+        'event.id',
+        'event.name',
+        'event.startDate',
+        'event.locationName',
+        'event.coordinates',
+        'event.disciplineSlug',
+        'event.status',
+        'discipline.slug',
+        'discipline.nameTranslations',
+      ]);
+    } else {
+      qb.leftJoinAndSelect('event.discipline', 'discipline');
+    }
 
     const status = params.status ?? EventStatus.PUBLISHED;
     qb.andWhere('event.status = :status', { status });
@@ -201,14 +221,14 @@ export class EventsService {
     if (hasGeo) {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
-      const access = await this.accessMap(entities, userId);
+      const access = marker ? null : await this.accessMap(entities, userId);
 
       const data = entities.map((entity, i) =>
-        this.serializeEvent(entity, {
+        this.toListEvent(entity, marker, {
           distance: raw[i]?.distance_m
             ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
             : undefined,
-          includeCommunityFields: access.get(entity.id)?.member ?? false,
+          includeCommunityFields: access?.get(entity.id)?.member ?? false,
         }),
       );
 
@@ -222,11 +242,11 @@ export class EventsService {
     }
 
     const [rows, total] = await qb.getManyAndCount();
-    const access = await this.accessMap(rows, userId);
+    const access = marker ? null : await this.accessMap(rows, userId);
     return {
       data: rows.map((event) =>
-        this.serializeEvent(event, {
-          includeCommunityFields: access.get(event.id)?.member ?? false,
+        this.toListEvent(event, marker, {
+          includeCommunityFields: access?.get(event.id)?.member ?? false,
         }),
       ),
       total,
@@ -355,11 +375,6 @@ export class EventsService {
     return saved[0];
   }
 
-  /**
-   * Stops a repeating series at this event: this occurrence and every later
-   * one are removed, earlier ones stay. Deleting a single occurrence is the
-   * normal event delete.
-   */
   private async assertOwnsRoute(
     routeId: string,
     userId?: string,
@@ -560,6 +575,11 @@ export class EventsService {
     };
   }
 
+  /**
+   * Stops a repeating series at this event: this occurrence and every later
+   * one are removed, earlier ones stay. Deleting a single occurrence is the
+   * normal event delete.
+   */
   async stopSeries(
     id: string,
     user?: { id: string; isAdmin: boolean },
@@ -579,12 +599,11 @@ export class EventsService {
       })
       .andWhere('event.startDate >= :from', { from: event.startDate })
       .getRawMany<{ id: string }>();
-    for (const row of later) await this.uploads.remove('events', row.id);
-    if (later.length > 0) {
-      await this.repo.delete(later.map((row) => row.id));
-    }
+    const ids = later.map((row) => row.id);
+    if (ids.length > 0) await this.repo.delete(ids);
     await this.recurrences.update(event.recurrenceId, { endedAt: new Date() });
-    return { removed: later.length };
+    for (const id of ids) await this.uploads.remove('events', id);
+    return { removed: ids.length };
   }
 
   private async buildEvent(
@@ -911,7 +930,10 @@ export class EventsService {
       .slice(0, 20);
     const counts = host.canSeeMembers
       ? await this.goingCounts(
-          all.map(({ event }) => event.id),
+          all.map(({ event, share }) => ({
+            eventId: event.id,
+            shareId: share?.id ?? null,
+          })),
           scope,
         )
       : new Map<string, number>();
@@ -959,11 +981,18 @@ export class EventsService {
       host.community.id,
       subgroupId,
     );
-    const fields = {
-      meetupPlace: dto.meetupPlace?.trim() || null,
-      meetupAt: dto.meetupAt ? new Date(dto.meetupAt) : null,
-      meetupNote: dto.meetupNote?.trim() || null,
-    };
+    // Only keys the caller sent are written, so a second share call that
+    // omits the meetup does not wipe one that is already stored.
+    const fields: Partial<EventShare> = {};
+    if (dto.meetupPlace !== undefined) {
+      fields.meetupPlace = dto.meetupPlace.trim() || null;
+    }
+    if (dto.meetupAt !== undefined) {
+      fields.meetupAt = dto.meetupAt ? new Date(dto.meetupAt) : null;
+    }
+    if (dto.meetupNote !== undefined) {
+      fields.meetupNote = dto.meetupNote.trim() || null;
+    }
     let share: EventShare;
     if (existing) {
       share = await this.shares.save({ ...existing, ...fields });
@@ -975,6 +1004,9 @@ export class EventsService {
             communityId: host.community.id,
             subgroupId,
             createdById: userId,
+            meetupPlace: null,
+            meetupAt: null,
+            meetupNote: null,
             ...fields,
           }),
         );
@@ -1173,6 +1205,7 @@ export class EventsService {
     ) {
       throw new NotFoundException('Community not found');
     }
+    assertCommunityActive(community);
     const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
     if (!subgroupSlug) {
       if (forCreate && !isAdmin) {
@@ -1218,6 +1251,8 @@ export class EventsService {
     qb: ReturnType<Repository<Event>['createQueryBuilder']>,
     userId?: string,
   ): void {
+    // Events of a suspended community disappear from every list.
+    qb.andWhere(notInSuspendedCommunitySql('event'));
     if (!userId) {
       qb.andWhere('event.listing = :publicListing', {
         publicListing: EventListing.PUBLIC,
@@ -1313,11 +1348,38 @@ export class EventsService {
     const scope = await this.attendeeScope(event, userId, ctx);
     if (!scope?.member)
       throw communityForbidden(CommunityErrorCode.membersOnly);
-    await this.rsvps.upsert(
-      { eventId: id, userId, status },
-      { conflictPaths: ['eventId', 'userId'] },
-    );
+    await this.saveRsvp(id, userId, scope.share?.id ?? null, status);
     return this.present(event, userId, scope);
+  }
+
+  /**
+   * Partial unique indexes cannot be targeted by TypeORM's `upsert`, so the
+   * conflict clause is written out. A null share is a hosted event; a set
+   * share is one club's copy of a public event.
+   */
+  private async saveRsvp(
+    eventId: string,
+    userId: string,
+    shareId: string | null,
+    status: EventRsvpStatus,
+  ): Promise<void> {
+    if (shareId) {
+      await this.rsvps.query(
+        `INSERT INTO "event_rsvps" ("event_id", "user_id", "share_id", "status")
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT ("event_id", "user_id", "share_id") WHERE "share_id" IS NOT NULL
+         DO UPDATE SET "status" = EXCLUDED."status", "updatedAt" = now()`,
+        [eventId, userId, shareId, status],
+      );
+      return;
+    }
+    await this.rsvps.query(
+      `INSERT INTO "event_rsvps" ("event_id", "user_id", "status")
+       VALUES ($1, $2, $3)
+       ON CONFLICT ("event_id", "user_id") WHERE "share_id" IS NULL
+       DO UPDATE SET "status" = EXCLUDED."status", "updatedAt" = now()`,
+      [eventId, userId, status],
+    );
   }
 
   async listRsvps(
@@ -1336,6 +1398,11 @@ export class EventsService {
       .innerJoinAndSelect('rsvp.user', 'user')
       .where('rsvp.eventId = :id', { id })
       .orderBy('rsvp.createdAt', 'ASC');
+    if (scope.share) {
+      qb.andWhere('rsvp.shareId = :shareId', { shareId: scope.share.id });
+    } else {
+      qb.andWhere('rsvp.shareId IS NULL');
+    }
     this.restrictToAudience(qb, 'rsvp.userId', scope);
     const rows = await qb.getMany();
     return rows.map((row) => ({
@@ -1474,12 +1541,19 @@ export class EventsService {
       audience = await this.attendeeScope(event, userId);
     }
     const isMember = !!audience?.member;
+    const shareId = audience?.share?.id ?? null;
     const mine =
       userId && isMember
-        ? await this.rsvps.findOne({ where: { eventId: event.id, userId } })
+        ? await this.rsvps.findOne({
+            where: {
+              eventId: event.id,
+              userId,
+              shareId: shareId ?? IsNull(),
+            },
+          })
         : null;
     const counts = isMember
-      ? await this.goingCounts([event.id], audience!)
+      ? await this.goingCounts([{ eventId: event.id, shareId }], audience!)
       : new Map<string, number>();
     const hostCommunity = await this.hostCommunityFor(event, audience);
     const recurrence = event.recurrenceId
@@ -1519,16 +1593,31 @@ export class EventsService {
   }
 
   private async goingCounts(
-    ids: string[],
+    entries: { eventId: string; shareId: string | null }[],
     scope: { communityId: string; subgroupId: string | null },
   ): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
-    if (ids.length === 0) return counts;
+    if (entries.length === 0) return counts;
+    const hostedIds = entries
+      .filter((entry) => !entry.shareId)
+      .map((entry) => entry.eventId);
+    const shareIds = entries
+      .map((entry) => entry.shareId)
+      .filter((id): id is string => !!id);
+    const parts: string[] = [];
+    if (hostedIds.length > 0) {
+      parts.push('(rsvp.shareId IS NULL AND rsvp.eventId IN (:...hostedIds))');
+    }
+    if (shareIds.length > 0) parts.push('rsvp.shareId IN (:...shareIds)');
+    if (parts.length === 0) return counts;
     const qb = this.rsvps
       .createQueryBuilder('rsvp')
       .select('rsvp.eventId', 'eventId')
       .addSelect('COUNT(*)', 'count')
-      .where('rsvp.eventId IN (:...ids)', { ids })
+      .where(`(${parts.join(' OR ')})`, {
+        ...(hostedIds.length > 0 ? { hostedIds } : {}),
+        ...(shareIds.length > 0 ? { shareIds } : {}),
+      })
       .andWhere('rsvp.status = :going', { going: EventRsvpStatus.GOING });
     this.restrictToAudience(qb, 'rsvp.user_id', scope);
     const rows = await qb
@@ -1554,9 +1643,20 @@ export class EventsService {
   }
 
   private async canSee(event: Event, userId?: string): Promise<boolean> {
+    if (event.communityId && (await this.isSuspended(event.communityId))) {
+      return false;
+    }
     if (event.listing !== EventListing.MEMBERS) return true;
     const access = await this.hostRole(event, userId);
     return access.member;
+  }
+
+  private async isSuspended(communityId: string): Promise<boolean> {
+    const community = await this.communities.findOne({
+      where: { id: communityId },
+      select: { id: true, suspendedAt: true },
+    });
+    return !!community?.suspendedAt;
   }
 
   private async hostRole(
@@ -1676,6 +1776,41 @@ export class EventsService {
       });
     }
     return map;
+  }
+
+  /** List rows omit the rich-text description. Marker rows are only what the map popup renders. */
+  private toListEvent(
+    event: Event,
+    marker: boolean,
+    extra?: Record<string, unknown>,
+  ): SerializedEvent {
+    if (!marker) {
+      const serialized = this.serializeEvent(event, extra);
+      delete serialized.description;
+      return serialized;
+    }
+
+    const coords = event.coordinates;
+    const distance = extra?.['distance'];
+    return {
+      id: event.id,
+      name: event.name,
+      startDate: event.startDate,
+      locationName: event.locationName,
+      status: event.status,
+      disciplineSlug: event.disciplineSlug,
+      discipline: event.discipline
+        ? {
+            slug: event.discipline.slug,
+            nameTranslations: event.discipline.nameTranslations,
+          }
+        : undefined,
+      coordinates:
+        coords?.type === 'Point'
+          ? { lat: coords.coordinates[1], lng: coords.coordinates[0] }
+          : null,
+      ...(typeof distance === 'number' ? { distance } : {}),
+    };
   }
 
   private serializeEvent(

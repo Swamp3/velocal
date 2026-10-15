@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
   UseGuards,
@@ -19,6 +20,7 @@ import {
   SerializedPoll,
 } from './community-polls.service';
 import { CreateCommunityPollDto } from './dto/create-community-poll.dto';
+import { UpdateCommunityPollDto } from './dto/update-community-poll.dto';
 import { VoteCommunityPollDto } from './dto/vote-community-poll.dto';
 
 @Controller()
@@ -53,6 +55,18 @@ export class CommunityPollsController {
     @CurrentUser() user: { id: string },
   ): Promise<SerializedPoll> {
     return this.polls.vote(communitySlug, pollId, user.id, dto.optionIds);
+  }
+
+  @Patch('communities/:communitySlug/polls/:pollId')
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('question')
+  updateCommunity(
+    @Param('communitySlug') communitySlug: string,
+    @Param('pollId', ParseUUIDPipe) pollId: string,
+    @Body() dto: UpdateCommunityPollDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedPoll> {
+    return this.polls.update(communitySlug, pollId, user.id, dto);
   }
 
   @Delete('communities/:communitySlug/polls/:pollId')
@@ -114,5 +128,18 @@ export class CommunityPollsController {
     @CurrentUser() user: { id: string },
   ): Promise<void> {
     return this.polls.remove(communitySlug, pollId, user.id, subgroupSlug);
+  }
+
+  @Patch('communities/:communitySlug/subgroups/:subgroupSlug/polls/:pollId')
+  @UseInterceptors(BadWordInterceptor)
+  @CheckBadWords('question')
+  updateSubgroup(
+    @Param('communitySlug') communitySlug: string,
+    @Param('subgroupSlug') subgroupSlug: string,
+    @Param('pollId', ParseUUIDPipe) pollId: string,
+    @Body() dto: UpdateCommunityPollDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<SerializedPoll> {
+    return this.polls.update(communitySlug, pollId, user.id, dto, subgroupSlug);
   }
 }

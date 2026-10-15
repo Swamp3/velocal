@@ -1,4 +1,7 @@
-<nav class="mt-8 grid grid-cols-2 gap-3" [attr.aria-label]="'communities.sections' | transloco">
+<nav
+  class="mt-8 grid grid-cols-1 gap-3 min-[30rem]:grid-cols-2"
+  [attr.aria-label]="'communities.sections' | transloco"
+>
   @for (link of links(); track link.labelKey) {
     <a
       [routerLink]="link.commands"

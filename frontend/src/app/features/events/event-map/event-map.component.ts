@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ViewEncapsulation,
   DestroyRef,
   ElementRef,
   inject,
@@ -55,8 +56,14 @@ function disciplineColor(slug: string): string {
 @Component({
   selector: 'app-event-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   imports: [TranslocoPipe, DisciplineFilterComponent],
   templateUrl: './event-map.component.html',
+  styleUrls: [
+    '../../../../../node_modules/leaflet/dist/leaflet.css',
+    '../../../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css',
+    '../../../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css',
+  ],
   host: {
     class: 'block fixed top-14 right-0 bottom-0 left-0 z-0',
   },
@@ -177,6 +184,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
           const params: Record<string, string | number | boolean | undefined> = {
             limit: MAX_EVENTS,
             sort: 'distance',
+            view: 'marker',
           };
 
           if (this.userLat() != null && this.userLng() != null) {
@@ -377,7 +385,11 @@ export class EventMapComponent implements OnInit, AfterViewInit {
     this.loading.set(true);
     const from = this.dateFrom();
     forkJoin({
-      events: this.eventService.getEvents({ limit: MAX_EVENTS, ...(from ? { from } : {}) }),
+      events: this.eventService.getEvents({
+        limit: MAX_EVENTS,
+        view: 'marker',
+        ...(from ? { from } : {}),
+      }),
       disciplines: this.disciplineService.getDisciplines(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))

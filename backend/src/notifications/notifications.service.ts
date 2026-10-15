@@ -224,6 +224,15 @@ export class NotificationsService {
     });
   }
 
+  /** Writes the same inbox entry for each user. Used for messages that are not tied to a page. */
+  async notifyUsers(
+    userIds: string[],
+    type: NotificationType,
+    payload: NotificationPayload,
+  ): Promise<void> {
+    await this.insertMany(userIds, type, payload);
+  }
+
   private async insertMany(
     userIds: string[],
     type: NotificationType,

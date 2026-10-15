@@ -1,0 +1,96 @@
+<ui-modal [title]="'communities.polls.editTitle' | transloco" (closed)="closed.emit()">
+  <form id="poll-edit-form" [formGroup]="form" (ngSubmit)="save()" class="space-y-5">
+    <ui-input [label]="'communities.polls.question' | transloco" formControlName="question" />
+
+    <div class="space-y-3">
+      <p class="text-sm font-medium text-[var(--color-text)]">
+        {{ 'communities.polls.options' | transloco }}
+      </p>
+      <div formArrayName="options" class="space-y-2">
+        @for (group of options.controls; track group; let i = $index) {
+          <div [formGroupName]="i" class="flex items-center gap-2">
+            <input
+              type="text"
+              formControlName="label"
+              maxlength="120"
+              [attr.aria-label]="('communities.polls.option' | transloco) + ' ' + (i + 1)"
+              class="min-w-0 flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            />
+            <button
+              type="button"
+              class="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] disabled:opacity-40"
+              [disabled]="options.length <= 2"
+              [attr.aria-label]="'communities.polls.removeOption' | transloco"
+              (click)="removeOption(i)"
+            >
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">delete</span>
+            </button>
+          </div>
+        }
+      </div>
+      @if (options.length < 12) {
+        <button
+          type="button"
+          class="text-sm font-medium text-[var(--color-primary)]"
+          (click)="addOption()"
+        >
+          {{ 'communities.polls.addOption' | transloco }}
+        </button>
+      }
+      <p class="text-xs text-[var(--color-text-muted)]">
+        {{
+          (poll().multiple ? 'communities.polls.multipleFixed' : 'communities.polls.singleFixed')
+            | transloco
+        }}
+      </p>
+    </div>
+
+    <div>
+      <label
+        for="poll-edit-results"
+        class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
+      >
+        {{ 'communities.polls.results' | transloco }}
+      </label>
+      <select
+        id="poll-edit-results"
+        formControlName="resultsVisibility"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+      >
+        <option value="members">{{ 'communities.polls.resultsMembers' | transloco }}</option>
+        <option value="managers">{{ 'communities.polls.resultsManagers' | transloco }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label
+        for="poll-edit-deadline"
+        class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"
+      >
+        {{ 'communities.polls.deadline' | transloco }}
+      </label>
+      <input
+        id="poll-edit-deadline"
+        type="datetime-local"
+        formControlName="closesAt"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+      />
+      <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+        {{ 'communities.polls.deadlineHint' | transloco }}
+      </p>
+    </div>
+  </form>
+  <ng-container footer>
+    <ui-button type="button" variant="ghost" (click)="closed.emit()">
+      {{ 'common.cancel' | transloco }}
+    </ui-button>
+    <ui-button
+      type="submit"
+      form="poll-edit-form"
+      [loading]="saving()"
+      [disabled]="saving() || !canSave()"
+    >
+      {{ 'common.save' | transloco }}
+    </ui-button>
+  </ng-container>
+</ui-modal>

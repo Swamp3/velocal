@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, LessThan, MoreThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomBytes, randomInt } from 'crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
@@ -39,6 +40,8 @@ const OTP_COOLDOWN_SECONDS = 60;
 const OTP_MAX_PER_HOUR = 5;
 const RESET_TOKEN_TTL_HOURS = 4;
 const RESET_MAX_PER_HOUR = 3;
+/** Compared against when the account is unknown, so timing doesn't reveal it. */
+const DUMMY_HASH = bcrypt.hashSync('velocal-dummy-password', 12);
 
 @Injectable()
 export class AuthService {
@@ -71,15 +74,18 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const user = await this.usersService.findByEmail(dto.email);
+    const valid = await bcrypt.compare(
+      dto.password,
+      user?.passwordHash ?? DUMMY_HASH,
+    );
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    this.assertNotBanned(user);
     return this.buildAuthResponse(user);
   }
 
@@ -87,6 +93,9 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase().trim();
 
     await this.enforceOtpRateLimit(normalizedEmail);
+
+    const existing = await this.usersService.findByEmail(normalizedEmail);
+    if (existing?.bannedAt) return { message: 'OTP sent' };
 
     await this.otpRepository.delete({
       email: normalizedEmail,
@@ -131,22 +140,37 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired code');
     }
 
-    if (token.attempts >= OTP_MAX_ATTEMPTS) {
+    // Claim an attempt atomically so concurrent guesses can't dodge the cap.
+    const claimed = await this.otpRepository
+      .createQueryBuilder()
+      .update()
+      .set({ attempts: () => 'attempts + 1' })
+      .where('id = :id AND attempts < :max', {
+        id: token.id,
+        max: OTP_MAX_ATTEMPTS,
+      })
+      .execute();
+    if (!claimed.affected) {
       await this.otpRepository.delete({ id: token.id });
       throw new UnauthorizedException('Too many attempts. Request a new code.');
     }
 
     const incomingHash = createHash('sha256').update(code).digest('hex');
 
-    if (incomingHash !== token.codeHash) {
-      token.attempts += 1;
-      await this.otpRepository.save(token);
+    const matches =
+      incomingHash.length === token.codeHash.length &&
+      timingSafeEqual(Buffer.from(incomingHash), Buffer.from(token.codeHash));
+
+    if (!matches) {
       throw new UnauthorizedException('Invalid or expired code');
     }
 
+    const existing = await this.usersService.findByEmail(normalizedEmail);
+    if (existing?.bannedAt) this.assertNotBanned(existing);
+
     await this.otpRepository.delete({ email: normalizedEmail });
 
-    let user = await this.usersService.findByEmail(normalizedEmail);
+    let user = existing;
     if (!user) {
       user = await this.usersService.create({
         email: normalizedEmail,
@@ -164,7 +188,7 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await this.usersService.findByEmail(normalizedEmail);
 
-    if (user) {
+    if (user && !user.bannedAt) {
       await this.enforceResetRateLimit(user.id);
       await this.sendResetEmail(user);
     }
@@ -195,6 +219,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid or expired reset token');
     }
+    this.assertNotBanned(user);
 
     user.passwordHash = passwordHash;
     if (!user.emailVerified) user.emailVerified = true;
@@ -225,6 +250,15 @@ export class AuthService {
     await this.sendResetEmail(user);
 
     return { message: 'Reset email sent.' };
+  }
+
+  private assertNotBanned(user: User): void {
+    if (!user.bannedAt) return;
+    throw new ForbiddenException({
+      statusCode: 403,
+      code: 'accountBanned',
+      message: 'This account has been blocked.',
+    });
   }
 
   private async sendResetEmail(user: User): Promise<void> {
@@ -270,6 +304,7 @@ export class AuthService {
   }
 
   buildAuthResponse(user: User): AuthResponse {
+    this.assertNotBanned(user);
     const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
     return {
       accessToken: this.jwtService.sign(payload),

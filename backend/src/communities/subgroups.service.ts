@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import {
+  assertCommunityActive,
   CommunityErrorCode,
   communityForbidden,
   communityNotFound,
@@ -29,6 +30,8 @@ import {
   SubgroupMember,
   SubgroupMemberRole,
 } from './entities/subgroup-member.entity';
+import { AuditService } from '../audit/audit.service';
+import { CommunityCleanupService } from './community-cleanup.service';
 import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
 import { Subgroup, SubgroupVisibility } from './entities/subgroup.entity';
@@ -93,6 +96,8 @@ export class SubgroupsService {
     private readonly uploads: UploadsService,
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
+    private readonly cleanup: CommunityCleanupService,
+    private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -105,6 +110,7 @@ export class SubgroupsService {
       communitySlug,
       userId,
     );
+    assertCommunityActive(community);
     await this.assertCommunityAdmin(community.id, userId);
     const slug = await this.generateSlug(community.id, dto.name);
     // The creator leads the new subgroup from the start.
@@ -181,6 +187,7 @@ export class SubgroupsService {
       slug,
       userId,
     );
+    assertCommunityActive(community);
     if (dto.name !== undefined) subgroup.name = dto.name;
     if (dto.description !== undefined) subgroup.description = dto.description;
     const opening =
@@ -223,10 +230,18 @@ export class SubgroupsService {
       slug,
       userId,
     );
+    assertCommunityActive(community);
     await this.assertCommunityAdmin(community.id, userId);
-    await this.uploads.remove('community-heroes', subgroup.id);
-    await this.uploads.remove('community-logos', subgroup.id);
-    await this.subgroups.remove(subgroup);
+    await this.cleanup.deleteSubgroup(subgroup.id, userId);
+    await this.audit.record({
+      actorId: userId,
+      action: 'subgroup.delete',
+      targetType: 'subgroup',
+      targetId: subgroup.id,
+      targetLabel: subgroup.name,
+      communityId: community.id,
+      details: { via: 'community-admin' },
+    });
   }
 
   async setHero(
@@ -273,6 +288,7 @@ export class SubgroupsService {
       slug,
       userId,
     );
+    assertCommunityActive(community);
     const communityMember = await this.communityMembers.findOne({
       where: { communityId: community.id, userId },
     });
@@ -423,6 +439,7 @@ export class SubgroupsService {
       slug,
       actorId,
     );
+    assertCommunityActive(community);
     await this.assertCommunityAdmin(community.id, actorId);
     const membership = await this.members.findOne({
       where: { subgroupId: subgroup.id, userId: targetUserId },
@@ -446,11 +463,12 @@ export class SubgroupsService {
     targetUserId: string,
     actorId: string,
   ): Promise<void> {
-    const { subgroup, isAdmin } = await this.requireManageable(
+    const { subgroup, community, isAdmin } = await this.requireManageable(
       communitySlug,
       slug,
       actorId,
     );
+    assertCommunityActive(community);
     const membership = await this.members.findOne({
       where: { subgroupId: subgroup.id, userId: targetUserId },
     });
@@ -495,6 +513,7 @@ export class SubgroupsService {
       slug,
       actorId,
     );
+    assertCommunityActive(community);
     await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, community.id);
       const request = await manager.findOne(SubgroupJoinRequest, {
@@ -541,6 +560,7 @@ export class SubgroupsService {
       slug,
       actorId,
     );
+    assertCommunityActive(community);
     await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, community.id);
       const request = await manager.findOne(SubgroupJoinRequest, {
@@ -578,6 +598,7 @@ export class SubgroupsService {
       slug,
       actorId,
     );
+    assertCommunityActive(community);
     // Only existing community members can be added; unknown ids get the same answer.
     const user = await this.users.findOne({ where: { id: userId } });
     const communityMember = await this.communityMembers.findOne({
@@ -616,6 +637,7 @@ export class SubgroupsService {
       slug,
       userId,
     );
+    assertCommunityActive(community);
     const subject =
       field === 'heroUrl' ? 'community-heroes' : 'community-logos';
     if (file) {
@@ -647,13 +669,17 @@ export class SubgroupsService {
   ): Promise<Community> {
     const community = await this.communities.findOne({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
-    if (community.visibility === CommunityVisibility.PRIVATE) {
-      const membership = userId
-        ? await this.communityMembers.findOne({
-            where: { communityId: community.id, userId },
-          })
-        : null;
-      if (!membership) throw new NotFoundException('Community not found');
+    const membership = userId
+      ? await this.communityMembers.findOne({
+          where: { communityId: community.id, userId },
+        })
+      : null;
+    if (
+      (community.visibility === CommunityVisibility.PRIVATE ||
+        community.suspendedAt) &&
+      !membership
+    ) {
+      throw new NotFoundException('Community not found');
     }
     return community;
   }

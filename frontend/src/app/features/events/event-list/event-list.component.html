@@ -18,15 +18,15 @@
     <!-- Panel header / toggle -->
     <button
       class="flex w-full items-center justify-between px-5 py-4 cursor-pointer"
-      (click)="filterPanelOpen.set(!filterPanelOpen())"
-      [attr.aria-expanded]="filterPanelOpen()"
+      (click)="toggleFilters()"
+      [attr.aria-expanded]="filtersExpanded()"
     >
       <div class="flex items-center gap-2.5">
         <span class="material-symbols-outlined text-[20px] text-[var(--color-primary)]">tune</span>
         <span class="text-sm font-semibold text-[var(--color-text)]">
           {{ 'events.filter' | transloco }}
         </span>
-        @if (!filterPanelOpen() && activeFilterCount() > 0) {
+        @if (!filtersExpanded() && activeFilterCount() > 0) {
           <span
             class="flex size-5 items-center justify-center rounded-full bg-[var(--color-primary)] text-[11px] font-bold text-white"
           >
@@ -36,14 +36,17 @@
       </div>
       <span
         class="material-symbols-outlined text-[20px] text-[var(--color-text-muted)] transition-transform duration-200"
-        [class.rotate-180]="filterPanelOpen()"
+        [class.rotate-180]="filtersExpanded()"
       >
         expand_more
       </span>
     </button>
 
-    @if (filterPanelOpen()) {
-      <div class="border-t border-[var(--color-border)] px-5 pb-5 pt-4">
+      <div
+        class="border-t border-[var(--color-border)] px-5 pb-5 pt-4"
+        [class.max-md:hidden]="!filterTouched()"
+        [class.hidden]="filterTouched() && !filterPanelOpen()"
+      >
         <!-- Search input -->
         <div class="relative mb-5">
           <span
@@ -272,7 +275,6 @@
           </div>
         </div>
       </div>
-    }
   </div>
 
   <!-- Result count -->

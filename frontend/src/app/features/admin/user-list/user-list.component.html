@@ -22,7 +22,7 @@
   </div>
 
   <div class="flex items-center gap-1 rounded-lg border border-[var(--color-border)] p-0.5">
-    @for (opt of ['all', 'admin', 'user']; track opt) {
+    @for (opt of ['all', 'admin', 'user', 'banned']; track opt) {
       <button
         [class]="
           'rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ' +
@@ -100,6 +100,9 @@
                 <span class="font-medium text-[var(--color-text)]">
                   {{ user.displayName || '—' }}
                 </span>
+                @if (user.bannedAt) {
+                  <ui-badge variant="danger" [title]="user.banReason ?? ''">{{ 'admin.users.banned' | transloco }}</ui-badge>
+                }
               </div>
             </td>
             <td class="px-4 py-3 text-[var(--color-text-muted)]">
@@ -143,6 +146,17 @@
                   (click)="requestToggleRole(user)"
                 >
                   {{ (user.isAdmin ? 'admin.users.removeAdmin' : 'admin.users.makeAdmin') | transloco }}
+                </ui-button>
+              }
+              @if (user.id !== currentUserId() && (user.bannedAt || !user.isAdmin)) {
+                <ui-button
+                  class="ml-2"
+                  [variant]="user.bannedAt ? 'outline' : 'danger'"
+                  size="sm"
+                  [loading]="banningId() === user.id"
+                  (click)="user.bannedAt ? unban(user) : requestBan(user)"
+                >
+                  {{ (user.bannedAt ? 'admin.users.unban' : 'admin.users.ban') | transloco }}
                 </ui-button>
               }
             </td>
@@ -203,6 +217,23 @@
             </ui-button>
           }
         </div>
+        @if (user.bannedAt) {
+          <p class="mt-2 break-words text-xs text-red-600 dark:text-red-400">
+            {{ 'admin.users.banned' | transloco }}: {{ user.banReason }}
+          </p>
+        }
+        @if (user.id !== currentUserId() && (user.bannedAt || !user.isAdmin)) {
+          <div class="mt-3 flex justify-end">
+            <ui-button
+              [variant]="user.bannedAt ? 'outline' : 'danger'"
+              size="sm"
+              [loading]="banningId() === user.id"
+              (click)="user.bannedAt ? unban(user) : requestBan(user)"
+            >
+              {{ (user.bannedAt ? 'admin.users.unban' : 'admin.users.ban') | transloco }}
+            </ui-button>
+          </div>
+        }
       </div>
     }
   </div>
@@ -223,4 +254,36 @@
   <p class="mt-4 text-center text-xs text-[var(--color-text-muted)]">
     {{ 'admin.users.totalCount' | transloco: { count: total() } }}
   </p>
+}
+
+@if (banTarget(); as target) {
+  <ui-modal [title]="'admin.users.banTitle' | transloco" (closed)="banTarget.set(null)">
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ target.displayName || target.email }} — {{ 'admin.users.banHint' | transloco }}
+    </p>
+    <label class="mt-4 block text-sm font-medium text-[var(--color-text)]" for="ban-reason">
+      {{ 'admin.users.banReason' | transloco }}
+    </label>
+    <textarea
+      id="ban-reason"
+      rows="3"
+      maxlength="500"
+      class="mt-2 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)]"
+      [ngModel]="banReason()"
+      (ngModelChange)="banReason.set($event)"
+    ></textarea>
+    <div class="mt-4 flex justify-end gap-2">
+      <ui-button variant="ghost" (click)="banTarget.set(null)">
+        {{ 'common.cancel' | transloco }}
+      </ui-button>
+      <ui-button
+        variant="danger"
+        [loading]="banningId() === target.id"
+        [disabled]="banReason().trim().length < 3"
+        (click)="confirmBan(target)"
+      >
+        {{ 'admin.users.ban' | transloco }}
+      </ui-button>
+    </div>
+  </ui-modal>
 }

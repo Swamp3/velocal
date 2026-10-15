@@ -6,7 +6,15 @@
       "name": "app",
       "installMode": "prefetch",
       "resources": {
-        "files": ["/favicon.ico", "/index.csr.html", "/*.css", "/*.js"]
+        "files": ["/favicon.ico", "/index.csr.html", "/*.css"]
+      }
+    },
+    {
+      "name": "scripts",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": ["/*.js"]
       }
     },
     {

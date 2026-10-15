@@ -40,6 +40,10 @@ export class AuthService {
    */
   private readonly _hydrated = signal(false);
   private readonly _initPromise: Promise<void>;
+  private readonly _hydratedReady: Promise<void>;
+  private resolveHydrated: () => void = () => {};
+  /** Session user held back until after the first client render, so SSR HTML can hydrate. */
+  private pendingUser: User | null = null;
 
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
@@ -47,16 +51,37 @@ export class AuthService {
   readonly hydrated = this._hydrated.asReadonly();
 
   constructor() {
+    this._hydratedReady = this.isBrowser
+      ? new Promise((resolve) => {
+          this.resolveHydrated = resolve;
+        })
+      : Promise.resolve();
     this._initPromise = this.restoreSession();
     if (this.isBrowser) {
-      afterNextRender(() => this._hydrated.set(true));
-    } else {
-      this._hydrated.set(true);
+      afterNextRender(() => {
+        this._hydrated.set(true);
+        this.publishPendingUser();
+        this.resolveHydrated();
+      });
     }
   }
 
+  /** Resolves when the session request has finished. Does not wait for hydration. */
   whenReady(): Promise<void> {
     return this._initPromise;
+  }
+
+  /**
+   * Resolves once the session is loaded and the first client render has committed.
+   * Route guards use this so a logged-in user is visible before a protected page runs.
+   */
+  whenInteractive(): Promise<void> {
+    return this._initPromise.then(() => this._hydratedReady);
+  }
+
+  /** Restored user, including one not yet published onto `currentUser`. */
+  sessionUser(): User | null {
+    return this._currentUser() ?? this.pendingUser;
   }
 
   login(email: string, password: string): Observable<AuthResponse> {
@@ -101,6 +126,7 @@ export class AuthService {
 
   logout(): void {
     if (this.isBrowser) localStorage.removeItem(TOKEN_KEY);
+    this.pendingUser = null;
     this._currentUser.set(null);
   }
 
@@ -116,6 +142,7 @@ export class AuthService {
         setTimeout(() => window.location.reload(), 200);
       }
     }
+    this.pendingUser = res.user;
     this._currentUser.set(res.user);
   }
 
@@ -148,7 +175,8 @@ export class AuthService {
 
       const user: User = await res.json();
       this.syncLocalePrefs(user);
-      this._currentUser.set(user);
+      this.pendingUser = user;
+      this.publishPendingUser();
     } catch {
       this.logout();
     } finally {
@@ -169,5 +197,11 @@ export class AuthService {
     localStorage.setItem(LANG_KEY, lang);
     localStorage.setItem(LOCALE_KEY, locale);
     return prevLocale !== null && prevLocale !== locale;
+  }
+
+  /** Publishes the restored user only after hydration, so the first client render stays anonymous. */
+  private publishPendingUser(): void {
+    if (!this._hydrated() || !this.pendingUser) return;
+    this._currentUser.set(this.pendingUser);
   }
 }

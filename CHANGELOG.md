@@ -4,6 +4,32 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.0] — 2026-10-15
+
+### Added
+
+- **Admin: review communities** — site admins get a Communities page with search, sorting and a detail view per club (members, subgroups, posts, events). They can remove posts, comments and subgroups there.
+- **Delete communities and subgroups** — club admins can delete a club or subgroup by typing its name. Members get a notification, and posts, events, uploads and notifications that belonged to it are removed.
+- **Suspend communities** — admins can hide a club and make it read-only, with a reason shown to members. Its events leave lists, the map and the sitemap until the suspension is lifted. Club admins are notified.
+- **Reports** — members can report a club, a post or a comment. Admins work through a reports queue: resolve, dismiss or remove the content.
+- **Audit log** — a searchable log of admin actions (deletions, suspensions, content removal, resolved reports, role changes, blocked users).
+- **Block users** — admins can block a user with an internal reason. The user is signed out right away and cannot log in until unblocked. Admins cannot be blocked.
+- **Edit polls** in clubs and subgroups.
+
+### Changed
+
+- The app loads faster: unused form and dialog code no longer ships with the first page.
+- Removing admin rights now takes effect immediately, not when the login expires.
+- The first page paint no longer waits for sign-in state, and the font icons use a small subset file.
+
+### Fixed
+
+- Text in comments no longer breaks in the middle of a word.
+- Buttons in the club section no longer wrap their text on small screens.
+- Dialogs keep keyboard focus inside while open.
+- Your RSVP now belongs to the club event it was given for.
+- Uploading a route without a GPX file is refused with a clear message.
+
 ## [0.10.0] — 2026-10-15
 
 ### Added

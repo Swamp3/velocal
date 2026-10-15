@@ -9,9 +9,12 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { User } from '../users/entities/user.entity';
 import { ImageAccessService } from '../uploads/image-access.service';
 import { UploadedFile, UploadsService } from '../uploads/uploads.service';
+import { AuditService } from '../audit/audit.service';
+import { CommunityCleanupService } from './community-cleanup.service';
 import { isLastAdminRemoval } from './community-admin.policy';
 import { pickSlug, RESERVED_COMMUNITY_SLUGS, slugBase } from './community-slug';
 import {
+  assertCommunityActive,
   CommunityErrorCode,
   communityConflict,
   communityNotFound,
@@ -47,6 +50,8 @@ export interface SerializedCommunity {
   subgroupCount?: number;
   pollCount?: number;
   postCount?: number;
+  suspended: boolean;
+  suspendedReason: string | null;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
   createdAt: Date;
@@ -109,6 +114,8 @@ export class CommunitiesService {
     private readonly imageAccess: ImageAccessService,
     private readonly dataSource: DataSource,
     private readonly notifications: NotificationsService,
+    private readonly cleanup: CommunityCleanupService,
+    private readonly audit: AuditService,
   ) {}
 
   async create(
@@ -155,7 +162,8 @@ export class CommunitiesService {
       .createQueryBuilder('community')
       .where('community.visibility IN (:...visibilities)', {
         visibilities: [CommunityVisibility.PUBLIC, CommunityVisibility.REQUEST],
-      });
+      })
+      .andWhere('community.suspendedAt IS NULL');
 
     if (params.q) {
       qb.andWhere('community.name ILIKE :q', { q: `%${params.q}%` });
@@ -228,6 +236,18 @@ export class CommunitiesService {
       }
     }
 
+    // A suspended community is only visible to its own members.
+    if (community.suspendedAt) {
+      const membership = userId
+        ? await this.members.findOne({
+            where: { communityId: community.id, userId },
+          })
+        : null;
+      if (!membership) {
+        throw new NotFoundException(`Community "${slug}" not found`);
+      }
+    }
+
     return this.serializeFor(community, userId);
   }
 
@@ -237,6 +257,7 @@ export class CommunitiesService {
     userId: string,
   ): Promise<SerializedCommunity> {
     const community = await this.findCommunity(id);
+    assertCommunityActive(community);
     await this.assertAdmin(id, userId);
 
     if (dto.name !== undefined) {
@@ -279,6 +300,26 @@ export class CommunitiesService {
     return this.serializeFor(saved, userId);
   }
 
+  /** Deletes the community and everything in it. Only its admins, or a site admin. */
+  async remove(
+    id: string,
+    actor: { id: string; isAdmin?: boolean },
+  ): Promise<void> {
+    const community = await this.findCommunity(id);
+    assertCommunityActive(community);
+    if (!actor.isAdmin) await this.assertAdmin(id, actor.id);
+    await this.cleanup.deleteCommunity(id, actor.id);
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'community.delete',
+      targetType: 'community',
+      targetId: id,
+      targetLabel: community.name,
+      communityId: id,
+      details: { via: actor.isAdmin ? 'site-admin' : 'community-admin' },
+    });
+  }
+
   async setHero(
     id: string,
     file: UploadedFile,
@@ -305,6 +346,7 @@ export class CommunitiesService {
 
   async join(id: string, userId: string): Promise<JoinCommunityResult> {
     const community = await this.findCommunity(id);
+    assertCommunityActive(community);
     const membership = await this.members.findOne({
       where: { communityId: id, userId },
     });
@@ -426,6 +468,7 @@ export class CommunitiesService {
   ): Promise<SerializedMember> {
     return this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, communityId);
+      await this.assertActiveTx(manager, communityId);
       await this.assertAdminTx(manager, communityId, actorId);
 
       const membership = await manager.findOne(CommunityMember, {
@@ -458,6 +501,7 @@ export class CommunitiesService {
   ): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
       await this.lockCommunity(manager, communityId);
+      await this.assertActiveTx(manager, communityId);
       await this.assertAdminTx(manager, communityId, actorId);
 
       const membership = await manager.findOne(CommunityMember, {
@@ -484,6 +528,7 @@ export class CommunitiesService {
     actorId: string,
   ): Promise<SerializedCommunity> {
     const community = await this.findCommunity(communityId);
+    assertCommunityActive(community);
     await this.assertAdmin(communityId, actorId);
     const trimmed = email.trim();
     const user = await this.users
@@ -544,6 +589,7 @@ export class CommunitiesService {
       if (!community) {
         throw new NotFoundException(`Community ${communityId} not found`);
       }
+      assertCommunityActive(community);
       await this.assertAdminTx(manager, communityId, actorId);
 
       const request = await manager.findOne(CommunityJoinRequest, {
@@ -588,6 +634,7 @@ export class CommunitiesService {
       if (!community) {
         throw new NotFoundException(`Community ${communityId} not found`);
       }
+      assertCommunityActive(community);
       await this.assertAdminTx(manager, communityId, actorId);
 
       const request = await manager.findOne(CommunityJoinRequest, {
@@ -621,6 +668,7 @@ export class CommunitiesService {
     file: UploadedFile | null,
   ): Promise<SerializedCommunity> {
     const community = await this.findCommunity(id);
+    assertCommunityActive(community);
     await this.assertAdmin(community.id, userId);
 
     if (file) {
@@ -640,6 +688,16 @@ export class CommunitiesService {
       throw new NotFoundException(`Community ${id} not found`);
     }
     return community;
+  }
+
+  /** Suspension is checked under the row lock, so a freeze wins the race. */
+  private async assertActiveTx(
+    manager: EntityManager,
+    id: string,
+  ): Promise<void> {
+    const community = await manager.findOne(Community, { where: { id } });
+    if (!community) throw new NotFoundException(`Community ${id} not found`);
+    assertCommunityActive(community);
   }
 
   /** Locks the community row so concurrent admin removals cannot both succeed. */
@@ -946,6 +1004,8 @@ export class CommunitiesService {
       subgroupCount: viewer.subgroupCount,
       pollCount: viewer.pollCount,
       postCount: viewer.postCount,
+      suspended: !!community.suspendedAt,
+      suspendedReason: viewer.myRole ? community.suspendedReason : null,
       myRole: viewer.myRole,
       myJoinRequest: viewer.myJoinRequest,
       createdAt: community.createdAt,

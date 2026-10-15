@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsIn,
   IsISO8601,
   IsNumber,
   IsOptional,
@@ -14,6 +15,12 @@ export enum EventSort {
   DATE = 'date',
   DISTANCE = 'distance',
   NAME = 'name',
+}
+
+/** `marker` drops description and other fields the map popup does not render. */
+export enum EventListView {
+  FULL = 'full',
+  MARKER = 'marker',
 }
 
 export class EventSearchDto {
@@ -82,4 +89,8 @@ export class EventSearchDto {
   @IsOptional()
   @IsEnum(EventSort)
   sort?: EventSort;
+
+  @IsOptional()
+  @IsIn([EventListView.FULL, EventListView.MARKER])
+  view?: EventListView;
 }

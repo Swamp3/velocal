@@ -14,10 +14,11 @@ import {
   AdminUserSearchParams,
 } from '@core/services/admin.service';
 import { AuthService } from '@core/services/auth.service';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   BadgeComponent,
   ButtonComponent,
+  ModalComponent,
   PaginationComponent,
   SkeletonComponent,
   ToastService,
@@ -30,6 +31,7 @@ import {
     TranslocoPipe,
     BadgeComponent,
     ButtonComponent,
+    ModalComponent,
     PaginationComponent,
     SkeletonComponent,
     DatePipe,
@@ -41,6 +43,7 @@ export class UserListComponent implements OnInit {
   private readonly admin = inject(AdminService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly transloco = inject(TranslocoService);
 
   protected readonly users = signal<AdminUser[]>([]);
   protected readonly total = signal(0);
@@ -48,9 +51,12 @@ export class UserListComponent implements OnInit {
   protected readonly page = signal(1);
   protected readonly limit = signal(20);
   protected readonly searchQuery = signal('');
-  protected readonly roleFilter = signal<'all' | 'admin' | 'user'>('all');
+  protected readonly roleFilter = signal<'all' | 'admin' | 'user' | 'banned'>('all');
   protected readonly togglingId = signal<string | null>(null);
   protected readonly confirmingId = signal<string | null>(null);
+  protected readonly banTarget = signal<AdminUser | null>(null);
+  protected readonly banReason = signal('');
+  protected readonly banningId = signal<string | null>(null);
 
   protected readonly currentUserId = computed(() => this.auth.currentUser()?.id);
 
@@ -64,7 +70,7 @@ export class UserListComponent implements OnInit {
     this.loadUsers();
   }
 
-  protected onRoleFilter(role: 'all' | 'admin' | 'user'): void {
+  protected onRoleFilter(role: 'all' | 'admin' | 'user' | 'banned'): void {
     this.roleFilter.set(role);
     this.page.set(1);
     this.loadUsers();
@@ -106,6 +112,40 @@ export class UserListComponent implements OnInit {
     });
   }
 
+  protected requestBan(user: AdminUser): void {
+    this.banReason.set('');
+    this.banTarget.set(user);
+  }
+
+  protected confirmBan(user: AdminUser): void {
+    this.banningId.set(user.id);
+    this.admin.banUser(user.id, this.banReason().trim()).subscribe({
+      next: (updated) => {
+        this.replace(updated);
+        this.banTarget.set(null);
+        this.banningId.set(null);
+        this.toast.success(this.transloco.translate('admin.users.banDone'));
+      },
+      error: () => this.banningId.set(null),
+    });
+  }
+
+  protected unban(user: AdminUser): void {
+    this.banningId.set(user.id);
+    this.admin.unbanUser(user.id).subscribe({
+      next: (updated) => {
+        this.replace(updated);
+        this.banningId.set(null);
+        this.toast.success(this.transloco.translate('admin.users.unbanDone'));
+      },
+      error: () => this.banningId.set(null),
+    });
+  }
+
+  private replace(updated: AdminUser): void {
+    this.users.update((list) => list.map((u) => (u.id === updated.id ? { ...u, ...updated } : u)));
+  }
+
   private loadUsers(): void {
     const params: AdminUserSearchParams = {
       page: this.page(),
@@ -116,7 +156,8 @@ export class UserListComponent implements OnInit {
     if (q) params.q = q;
 
     const role = this.roleFilter();
-    if (role !== 'all') params.role = role;
+    if (role === 'banned') params.status = 'banned';
+    else if (role !== 'all') params.role = role;
 
     this.admin.getUsers(params).subscribe({
       next: (res) => {

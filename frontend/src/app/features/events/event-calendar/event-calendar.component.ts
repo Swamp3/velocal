@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -90,6 +91,8 @@ export class EventCalendarComponent implements OnInit {
   });
 
   constructor() {
+    afterNextRender(() => this.setupMediaQuery());
+
     effect(() => {
       this.currentDate();
       this.viewMode();
@@ -100,8 +103,6 @@ export class EventCalendarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.setupMediaQuery();
-
     this.disciplineService
       .getDisciplines()
       .pipe(takeUntilDestroyed(this.destroyRef))

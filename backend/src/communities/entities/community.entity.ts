@@ -51,6 +51,13 @@ export class Community {
   @Column({ type: 'varchar', nullable: true })
   logoUrl: string | null;
 
+  /** Set by a site admin: the community is hidden and read-only for everyone. */
+  @Column({ type: 'timestamptz', name: 'suspended_at', nullable: true })
+  suspendedAt: Date | null;
+
+  @Column({ type: 'text', name: 'suspended_reason', nullable: true })
+  suspendedReason: string | null;
+
   @Column({ type: 'uuid', name: 'created_by_id', nullable: true })
   createdById: string | null;
 

@@ -47,6 +47,10 @@ export class NotificationInboxComponent implements OnInit {
         : 'notifications.joinCommunity';
     }
     if (row.type === 'event.invite') return 'notifications.eventInvite';
+    if (row.type === 'community.deleted') return 'notifications.communityDeleted';
+    if (row.type === 'subgroup.deleted') return 'notifications.subgroupDeleted';
+    if (row.type === 'community.suspended') return 'notifications.communitySuspended';
+    if (row.type === 'community.unsuspended') return 'notifications.communityUnsuspended';
     return 'notifications.eventCreated';
   }
 
@@ -95,6 +99,10 @@ export class NotificationInboxComponent implements OnInit {
   }
 
   private target(row: AppNotification): string {
+    // The page is gone for deleted communities and subgroups.
+    if (row.type === 'community.deleted' || row.type === 'subgroup.deleted') {
+      return '/communities';
+    }
     if (row.type === 'event.created' || row.type === 'event.invite') {
       return row.payload.eventId ? `/events/${row.payload.eventId}` : '/notifications';
     }

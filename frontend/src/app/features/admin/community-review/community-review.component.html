@@ -1,0 +1,293 @@
+<a
+  routerLink="/admin/communities"
+  class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+>
+  <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+  {{ 'admin.communities.title' | transloco }}
+</a>
+
+@if (loading()) {
+  <div class="mt-6 space-y-3">
+    <ui-skeleton class="block h-8 w-64" />
+    <ui-skeleton class="block h-32 w-full" />
+  </div>
+} @else if (missing() || !community()) {
+  <p class="mt-6 text-sm text-[var(--color-text-muted)]">
+    {{ 'admin.communities.notFound' | transloco }}
+  </p>
+} @else if (community(); as c) {
+  <div class="mt-5 flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="break-words text-2xl font-bold text-[var(--color-text)]">{{ c.name }}</h1>
+      <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+        /{{ c.slug }} · {{ 'admin.communities.createdBy' | transloco }}
+        {{ c.createdByName || c.createdByEmail || '—' }} · {{ c.createdAt | date: 'medium' }}
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      @if (c.suspendedAt) {
+        <ui-badge variant="danger">{{ 'admin.communities.suspended' | transloco }}</ui-badge>
+      }
+      <ui-badge [variant]="badge(c.visibility)">
+        {{ 'communities.visibility.' + c.visibility | transloco }}
+      </ui-badge>
+      @if (c.visibility !== 'private') {
+        <a
+          [routerLink]="['/communities', c.slug]"
+          class="text-sm font-medium text-[var(--color-primary)] hover:underline"
+          >{{ 'admin.communities.openPublic' | transloco }}</a
+        >
+      }
+    </div>
+  </div>
+
+  @if (c.suspendedAt) {
+    <div
+      class="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+      role="status"
+    >
+      <p class="font-medium">
+        {{ 'admin.communities.suspendedSince' | transloco }} {{ c.suspendedAt | date: 'medium' }}
+      </p>
+      @if (c.suspendedReason) {
+        <p class="mt-0.5 break-words">{{ c.suspendedReason }}</p>
+      }
+    </div>
+  }
+
+  <dl class="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
+    @for (
+      stat of [
+        { k: 'members', v: c.memberCount },
+        { k: 'subgroups', v: c.subgroupCount },
+        { k: 'posts', v: c.postCount },
+        { k: 'polls', v: c.pollCount },
+        { k: 'events', v: c.eventCount },
+        { k: 'pendingLabel', v: c.pendingRequests },
+      ];
+      track stat.k
+    ) {
+      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-3">
+        <dt class="text-xs text-[var(--color-text-muted)]">
+          {{ 'admin.communities.' + stat.k | transloco }}
+        </dt>
+        <dd class="text-lg font-semibold text-[var(--color-text)]">{{ stat.v }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (c.description || c.location || c.stravaUrl) {
+    <section
+      class="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 text-sm"
+    >
+      @if (c.description) {
+        <p class="whitespace-pre-line break-words text-[var(--color-text)]">{{ c.description }}</p>
+      }
+      @if (c.location) {
+        <p class="mt-2 text-[var(--color-text-muted)]">{{ c.location }}</p>
+      }
+      @if (c.stravaUrl) {
+        <a
+          [href]="c.stravaUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-2 inline-block break-all text-[var(--color-primary)] hover:underline"
+          >{{ c.stravaUrl }}</a
+        >
+      }
+    </section>
+  }
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.admins' | transloco }}
+    </h2>
+    <ul class="mt-2 text-sm text-[var(--color-text)]">
+      @for (a of c.admins; track a.userId) {
+        <li>
+          {{ a.displayName || '—' }}
+          <span class="text-[var(--color-text-muted)]">· {{ a.email }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.subgroups' | transloco }}
+    </h2>
+    @if (c.subgroups.length === 0) {
+      <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+        {{ 'admin.communities.none' | transloco }}
+      </p>
+    } @else {
+      <ul
+        class="mt-2 divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+      >
+        @for (s of c.subgroups; track s.id) {
+          <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+            <span class="min-w-0 break-words font-medium text-[var(--color-text)]"
+              >{{ s.name }}
+              <span class="font-normal text-[var(--color-text-muted)]">
+                · {{ s.memberCount }} {{ 'admin.communities.members' | transloco }} ·
+                {{ s.postCount }} {{ 'admin.communities.posts' | transloco }}
+              </span>
+            </span>
+            <ui-button
+              size="sm"
+              variant="danger"
+              (click)="pending.set({ kind: 'subgroup', id: s.id, name: s.name })"
+            >
+              {{ 'admin.communities.delete.subgroup' | transloco }}
+            </ui-button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.recentPosts' | transloco }}
+    </h2>
+    @if (c.recentPosts.length === 0) {
+      <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+        {{ 'admin.communities.none' | transloco }}
+      </p>
+    } @else {
+      <ul
+        class="mt-2 divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+      >
+        @for (p of c.recentPosts; track p.id) {
+          <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+            <span class="min-w-0 break-words">
+              <span class="font-medium text-[var(--color-text)]">{{ p.title }}</span>
+              <span class="block text-xs text-[var(--color-text-muted)]">
+                {{ p.authorName || '—' }} · {{ p.createdAt | date: 'medium' }}
+                @if (p.subgroupName) {
+                  · {{ p.subgroupName }}
+                }
+              </span>
+            </span>
+            <ui-button
+              size="sm"
+              variant="outline"
+              (click)="pending.set({ kind: 'post', id: p.id, name: p.title })"
+            >
+              {{ 'admin.communities.delete.post' | transloco }}
+            </ui-button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.recentEvents' | transloco }}
+    </h2>
+    @if (c.recentEvents.length === 0) {
+      <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+        {{ 'admin.communities.none' | transloco }}
+      </p>
+    } @else {
+      <ul
+        class="mt-2 divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+      >
+        @for (e of c.recentEvents; track e.id) {
+          <li class="px-4 py-3 text-sm">
+            <span class="font-medium text-[var(--color-text)]">{{ e.name }}</span>
+            <span class="block text-xs text-[var(--color-text-muted)]">
+              {{ e.startDate | date: 'medium' }} ·
+              {{
+                'communities.events.listing' + (e.listing === 'public' ? 'Public' : 'Members')
+                  | transloco
+              }}
+              @if (e.subgroupName) {
+                · {{ e.subgroupName }}
+              }
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="mt-10 rounded-2xl border border-amber-300 p-6 dark:border-amber-800">
+    <h2 class="text-base font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.suspendTitle' | transloco }}
+    </h2>
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      {{ 'admin.communities.suspendHint' | transloco }}
+    </p>
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      @if (c.suspendedAt) {
+        <ui-button variant="secondary" [loading]="busy()" (click)="unsuspend()">
+          {{ 'admin.communities.unsuspend' | transloco }}
+        </ui-button>
+      } @else {
+        <ui-button variant="secondary" (click)="suspending.set(true)">
+          {{ 'admin.communities.suspend' | transloco }}
+        </ui-button>
+      }
+      @if (c.openReports) {
+        <a
+          routerLink="/admin/reports"
+          class="text-sm font-medium text-[var(--color-primary)] hover:underline"
+        >
+          {{ 'admin.communities.reportsBadge' | transloco: { count: c.openReports } }}
+        </a>
+      }
+    </div>
+  </section>
+
+  @if (suspending()) {
+    <ui-modal [title]="'admin.communities.suspend' | transloco" (closed)="suspending.set(false)">
+      <label class="block text-sm font-medium text-[var(--color-text)]" for="suspend-reason">
+        {{ 'admin.communities.suspendReason' | transloco }}
+      </label>
+      <textarea
+        id="suspend-reason"
+        rows="4"
+        maxlength="500"
+        class="mt-2 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm"
+        [ngModel]="suspendReason()"
+        (ngModelChange)="suspendReason.set($event)"
+      ></textarea>
+      <div class="mt-4 flex justify-end gap-2">
+        <ui-button variant="secondary" (click)="suspending.set(false)">
+          {{ 'common.cancel' | transloco }}
+        </ui-button>
+        <ui-button [loading]="busy()" [disabled]="!suspendReason().trim()" (click)="suspend()">
+          {{ 'admin.communities.suspend' | transloco }}
+        </ui-button>
+      </div>
+    </ui-modal>
+  }
+
+  <section
+    class="mt-10 rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"
+  >
+    <h2 class="text-base font-semibold text-red-800 dark:text-red-400">
+      {{ 'communities.dangerZone' | transloco }}
+    </h2>
+    <p class="mt-1 text-sm text-red-800/90 dark:text-red-400/90">
+      {{ 'communities.deleteWarning' | transloco }}
+    </p>
+    <ui-button class="mt-4" variant="danger" (click)="pending.set({ kind: 'community' })">
+      {{ 'communities.delete' | transloco }}
+    </ui-button>
+  </section>
+
+  @if (pending(); as p) {
+    <app-confirm-delete-dialog
+      [title]="dialogTitle(p)"
+      [message]="dialogMessage(p, c)"
+      [confirmText]="confirmText(p, c)"
+      [confirmLabel]="dialogTitle(p)"
+      [busy]="busy()"
+      (confirmed)="confirm()"
+      (cancelled)="pending.set(null)"
+    />
+  }
+}

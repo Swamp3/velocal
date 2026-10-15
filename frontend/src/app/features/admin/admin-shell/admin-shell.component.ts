@@ -11,8 +11,11 @@ interface AdminNavItem {
 const NAV_ITEMS: AdminNavItem[] = [
   { path: 'imports', key: 'admin.nav.imports', icon: 'cloud_sync' },
   { path: 'users', key: 'admin.nav.users', icon: 'group' },
+  { path: 'communities', key: 'admin.nav.communities', icon: 'diversity_3' },
+  { path: 'reports', key: 'admin.nav.reports', icon: 'flag' },
   { path: 'missing-data', key: 'admin.nav.missingData', icon: 'report' },
   { path: 'analytics', key: 'admin.nav.analytics', icon: 'analytics' },
+  { path: 'audit', key: 'admin.nav.audit', icon: 'history' },
 ];
 
 @Component({

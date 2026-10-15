@@ -8,6 +8,7 @@ const ERROR_KEYS: Record<string, string> = {
   'community.inviteOnly': 'communities.errors.inviteOnly',
   'community.membersOnly': 'communities.errors.membersOnly',
   'community.pollClosed': 'communities.errors.pollClosed',
+  'community.suspended': 'communities.errors.suspended',
 };
 
 /** Translation key for a community API error. Never the server's English string. */

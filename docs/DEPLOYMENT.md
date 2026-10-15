@@ -163,3 +163,7 @@ Then delete the local `velocal_deploy` private key file.
 - `deploy.sh` stops the stack before rebuilding, so each deploy has downtime
   for the length of the build, and database migrations run on every deploy.
   Back up the database first when a change adds migrations.
+
+## Security hardening
+
+Outstanding security work and the production-migration checklist live in [SECURITY-HARDENING.md](SECURITY-HARDENING.md).

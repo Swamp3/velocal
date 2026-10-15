@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   OnInit,
@@ -11,11 +12,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
+import { AuthService } from '@core/services/auth.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyStateComponent, RichTextComponent, RichTextViewComponent } from '@shared/components';
 import { CommunityComment, CommunityPost } from '@shared/models';
 import { ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ReportDialogComponent, ReportTarget } from '../report-dialog/report-dialog.component';
 import { CommentEditDialogComponent } from '../comment-edit-dialog/comment-edit-dialog.component';
 import { communityErrorKey } from '../community-error';
 
@@ -33,6 +36,7 @@ import { communityErrorKey } from '../community-error';
     RichTextComponent,
     RichTextViewComponent,
     CommentEditDialogComponent,
+    ReportDialogComponent,
   ],
   templateUrl: './community-post.component.html',
 })
@@ -40,6 +44,7 @@ export class CommunityPostComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
   private readonly communityService = inject(CommunityService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
@@ -51,6 +56,8 @@ export class CommunityPostComponent implements OnInit {
   protected readonly missing = signal(false);
   protected readonly submitting = signal(false);
   protected readonly editingComment = signal<CommunityComment | null>(null);
+  protected readonly reportTarget = signal<ReportTarget | null>(null);
+  protected readonly myId = computed(() => this.auth.currentUser()?.id);
   protected readonly savingComment = signal(false);
   protected readonly communitySlug = signal('');
   protected readonly subgroupSlug = signal<string | null>(null);

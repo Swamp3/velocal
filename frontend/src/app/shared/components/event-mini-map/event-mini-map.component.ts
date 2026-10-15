@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ViewEncapsulation,
   ElementRef,
   inject,
   input,
@@ -18,6 +19,8 @@ const DEFAULT_ZOOM = 13;
 @Component({
   selector: 'app-event-mini-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['../../../../../node_modules/leaflet/dist/leaflet.css'],
   template: `
     <div
       #mapContainer

@@ -4,7 +4,13 @@
   >
     <div class="h-48 sm:h-64">
       @if (heroUrl(); as heroUrl) {
-        <img [src]="heroUrl" alt="" class="h-full w-full object-cover" decoding="async" />
+        <img
+          [src]="heroUrl"
+          alt=""
+          class="h-full w-full object-cover"
+          fetchpriority="high"
+          decoding="async"
+        />
       } @else {
         <div
           class="flex h-full w-full flex-col items-center justify-center gap-2 text-[var(--color-text-muted)]"

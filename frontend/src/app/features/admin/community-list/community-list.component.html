@@ -1,0 +1,148 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-[var(--color-text)]">
+    {{ 'admin.communities.title' | transloco }}
+  </h1>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+    {{ 'admin.communities.subtitle' | transloco }}
+  </p>
+</div>
+
+<div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
+  <div class="relative flex-1">
+    <span
+      class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--color-text-muted)]"
+      >search</span
+    >
+    <input
+      type="search"
+      [placeholder]="'admin.communities.search' | transloco"
+      [ngModel]="query()"
+      (ngModelChange)="onSearch($event)"
+      class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pl-10 pr-4 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+    />
+  </div>
+
+  <div
+    class="flex flex-wrap items-center gap-1 rounded-lg border border-[var(--color-border)] p-0.5"
+  >
+    @for (opt of visibilityOptions; track opt) {
+      <button
+        type="button"
+        [class]="
+          'cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-all ' +
+          (visibility() === opt
+            ? 'bg-[var(--color-primary)] text-white shadow-sm'
+            : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]')
+        "
+        (click)="onVisibility(opt)"
+      >
+        {{
+          (opt === 'all' ? 'admin.communities.all' : 'communities.visibility.' + opt) | transloco
+        }}
+      </button>
+    }
+  </div>
+
+  <label class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+    {{ 'admin.communities.sortBy' | transloco }}
+    <select
+      [ngModel]="sort()"
+      (ngModelChange)="onSort($event)"
+      class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5 text-sm text-[var(--color-text)]"
+    >
+      @for (opt of sortOptions; track opt) {
+        <option [value]="opt">{{ 'admin.communities.sort.' + opt | transloco }}</option>
+      }
+    </select>
+  </label>
+</div>
+
+@if (loading()) {
+  <div class="space-y-3">
+    @for (_ of [1, 2, 3, 4]; track $index) {
+      <ui-skeleton class="block h-16 w-full" />
+    }
+  </div>
+} @else if (rows().length === 0) {
+  <p
+    class="rounded-xl border border-dashed border-[var(--color-border)] py-12 text-center text-sm text-[var(--color-text-muted)]"
+  >
+    {{ 'admin.communities.empty' | transloco }}
+  </p>
+} @else {
+  <ul class="space-y-3">
+    @for (row of rows(); track row.id) {
+      <li>
+        <a
+          [routerLink]="['/admin/communities', row.id]"
+          class="block rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+        >
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="break-words font-semibold text-[var(--color-text)]">{{ row.name }}</p>
+              <p class="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                /{{ row.slug }} ·
+                {{ 'admin.communities.createdBy' | transloco }}
+                {{ row.createdByName || row.createdByEmail || '—' }} ·
+                {{ row.createdAt | date: 'mediumDate' }}
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              @if (row.suspendedAt) {
+                <ui-badge variant="danger">{{
+                  'admin.communities.suspended' | transloco
+                }}</ui-badge>
+              }
+              @if (row.openReports > 0) {
+                <ui-badge variant="danger">
+                  {{ 'admin.communities.reportsBadge' | transloco: { count: row.openReports } }}
+                </ui-badge>
+              }
+              @if (row.pendingRequests > 0) {
+                <ui-badge variant="warning">
+                  {{ 'admin.communities.pending' | transloco: { count: row.pendingRequests } }}
+                </ui-badge>
+              }
+              <ui-badge [variant]="badge(row.visibility)">
+                {{ 'communities.visibility.' + row.visibility | transloco }}
+              </ui-badge>
+            </div>
+          </div>
+          <dl
+            class="mt-3 grid grid-cols-3 gap-2 text-xs text-[var(--color-text-muted)] sm:grid-cols-5"
+          >
+            <div>
+              <dt>{{ 'admin.communities.members' | transloco }}</dt>
+              <dd class="text-sm font-medium text-[var(--color-text)]">{{ row.memberCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'admin.communities.subgroups' | transloco }}</dt>
+              <dd class="text-sm font-medium text-[var(--color-text)]">{{ row.subgroupCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'admin.communities.posts' | transloco }}</dt>
+              <dd class="text-sm font-medium text-[var(--color-text)]">{{ row.postCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'admin.communities.polls' | transloco }}</dt>
+              <dd class="text-sm font-medium text-[var(--color-text)]">{{ row.pollCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'admin.communities.events' | transloco }}</dt>
+              <dd class="text-sm font-medium text-[var(--color-text)]">{{ row.eventCount }}</dd>
+            </div>
+          </dl>
+        </a>
+      </li>
+    }
+  </ul>
+
+  <div class="mt-6">
+    <ui-pagination
+      [page]="page()"
+      [total]="total()"
+      [limit]="limit"
+      (pageChange)="onPage($event)"
+    />
+  </div>
+}

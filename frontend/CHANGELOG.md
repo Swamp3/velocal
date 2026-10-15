@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.11.0] - 2026-10-15
+
+### Added
+
+- Admin pages for communities (list, review, suspend, delete content), reports queue and audit log
+- Report dialog for communities, posts and comments; suspended-community banner
+- Delete dialogs for communities and subgroups; poll editing
+- Block / unblock users in the admin user list, with a blocked filter and a login message
+
+### Changed
+
+- Initial bundle reduced from 592 kB to 517 kB: the app shell and error interceptor import the toast code directly instead of the whole UI barrel (no more `@angular/forms` in the first load)
+
+### Fixed
+
+- Mid-word text breaks in rich text; stacked buttons on narrow screens
+
 ## [0.10.0] - 2026-10-15
 
 ### Added

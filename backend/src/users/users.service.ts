@@ -48,6 +48,8 @@ export class UsersService {
         'u.displayName',
         'u.isAdmin',
         'u.emailVerified',
+        'u.bannedAt',
+        'u.banReason',
         'u.createdAt',
       ]);
 
@@ -63,6 +65,10 @@ export class UsersService {
       qb.andWhere('u.isAdmin = false');
     }
 
+    if (dto.status === 'banned') {
+      qb.andWhere('u.bannedAt IS NOT NULL');
+    }
+
     const sort = dto.sort ?? 'createdAt';
     const order = dto.order ?? 'DESC';
     qb.orderBy(`u.${sort}`, order);
@@ -74,6 +80,14 @@ export class UsersService {
     const [data, total] = await qb.getManyAndCount();
 
     return { data, total, page, limit };
+  }
+
+  async setBan(userId: string, reason: string | null): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('User not found');
+    user.bannedAt = reason === null ? null : new Date();
+    user.banReason = reason;
+    return this.userRepository.save(user);
   }
 
   async toggleAdmin(userId: string): Promise<User> {

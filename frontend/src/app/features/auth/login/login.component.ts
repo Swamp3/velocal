@@ -105,6 +105,7 @@ export class LoginComponent {
       next: () => this.router.navigateByUrl('/events'),
       error: (err) => {
         this.loading.set(false);
+        if (this.showIfBanned(err)) return;
         this.toast.error(
           err.status === 401
             ? (err.message ?? this.transloco.translate('auth.otpInvalid'))
@@ -199,6 +200,7 @@ export class LoginComponent {
       next: () => this.router.navigateByUrl('/events'),
       error: (err) => {
         this.loading.set(false);
+        if (this.showIfBanned(err)) return;
         this.toast.error(
           err.status === 401
             ? this.transloco.translate('auth.invalidCredentials')
@@ -206,6 +208,12 @@ export class LoginComponent {
         );
       },
     });
+  }
+
+  private showIfBanned(err: { error?: { code?: string } }): boolean {
+    if (err.error?.code !== 'accountBanned') return false;
+    this.toast.error(this.transloco.translate('auth.accountBanned'));
+    return true;
   }
 
   protected emailError(): string {

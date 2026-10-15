@@ -172,6 +172,26 @@ export class CommunityService {
     );
   }
 
+  report(
+    communitySlug: string,
+    dto: {
+      targetType: 'community' | 'post' | 'comment';
+      targetId?: string;
+      reason: string;
+      note?: string;
+    },
+  ): Observable<{ alreadyReported: boolean }> {
+    return this.api.post(`/communities/${communitySlug}/reports`, dto);
+  }
+
+  deleteCommunity(id: string): Observable<void> {
+    return this.api.delete(`/communities/${id}`);
+  }
+
+  deleteSubgroup(communitySlug: string, slug: string): Observable<void> {
+    return this.api.delete(`/communities/${communitySlug}/subgroups/${slug}`);
+  }
+
   inviteToSubgroup(communitySlug: string, slug: string, userId: string): Observable<Subgroup> {
     return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { userId });
   }
@@ -319,6 +339,20 @@ export class CommunityService {
     return this.api.post(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}/votes`, {
       optionIds,
     });
+  }
+
+  updatePoll(
+    communitySlug: string,
+    pollId: string,
+    dto: {
+      question: string;
+      resultsVisibility: PollResultsVisibility;
+      closesAt: string | null;
+      options: { id?: string; label: string }[];
+    },
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPoll> {
+    return this.api.patch(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}`, dto);
   }
 
   deletePoll(

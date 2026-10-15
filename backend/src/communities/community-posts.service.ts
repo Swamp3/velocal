@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
-import { CommunityErrorCode, communityForbidden } from './community-error';
+import {
+  assertCommunityActive,
+  CommunityErrorCode,
+  communityForbidden,
+} from './community-error';
 import { CreateCommunityCommentDto } from './dto/create-community-comment.dto';
 import { CreateCommunityPostDto } from './dto/create-community-post.dto';
 import { CommunityPostComment } from './entities/community-post-comment.entity';
@@ -263,6 +267,7 @@ export class CommunityPostsService {
     ) {
       throw new NotFoundException('Community not found');
     }
+    assertCommunityActive(community);
 
     const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
     if (!subgroupSlug) {

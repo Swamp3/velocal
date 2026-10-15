@@ -11,9 +11,11 @@ import { DataSource, IsNull, Repository } from 'typeorm';
 import {
   CommunityErrorCode,
   communityConflict,
+  assertCommunityActive,
   communityForbidden,
 } from './community-error';
 import { CreateCommunityPollDto } from './dto/create-community-poll.dto';
+import { UpdateCommunityPollDto } from './dto/update-community-poll.dto';
 import { CommunityPollOption } from './entities/community-poll-option.entity';
 import { CommunityPollVote } from './entities/community-poll-vote.entity';
 import {
@@ -46,6 +48,7 @@ export interface SerializedPoll {
   closesAt: Date | null;
   closed: boolean;
   canSeeResults: boolean;
+  canEdit: boolean;
   canDelete: boolean;
   options: SerializedPollOption[];
   createdAt: Date;
@@ -139,6 +142,75 @@ export class CommunityPollsService {
     return this.serialize(loaded, userId, host);
   }
 
+  /**
+   * Only the author edits a poll. Options that keep their id keep their votes;
+   * options left out are removed together with their votes.
+   */
+  async update(
+    communitySlug: string,
+    pollId: string,
+    userId: string,
+    dto: UpdateCommunityPollDto,
+    subgroupSlug?: string,
+  ): Promise<SerializedPoll> {
+    const host = await this.requireHost(communitySlug, userId, subgroupSlug);
+    const poll = await this.requireHostPoll(host, pollId);
+    if (poll.authorId !== userId) {
+      throw new ForbiddenException('Only the author can edit this poll');
+    }
+    const labels = dto.options.map((option) => option.label).join('\n');
+    if (!this.badWords.checkFields({ labels }, ['labels']).clean) {
+      throw new UnprocessableEntityException({
+        statusCode: 422,
+        error: 'content_policy_violation',
+        message: 'Content contains inappropriate language',
+        violations: [{ field: 'options' }],
+      });
+    }
+    const existing = new Set((poll.options ?? []).map((option) => option.id));
+    const keptIds = dto.options
+      .map((option) => option.id)
+      .filter((id): id is string => !!id);
+    if (
+      keptIds.some((id) => !existing.has(id)) ||
+      new Set(keptIds).size !== keptIds.length
+    ) {
+      throw new BadRequestException('Unknown poll option');
+    }
+
+    await this.dataSource.transaction(async (manager) => {
+      await manager.update(CommunityPoll, poll.id, {
+        question: dto.question.trim(),
+        resultsVisibility: dto.resultsVisibility ?? poll.resultsVisibility,
+        ...(dto.closesAt !== undefined
+          ? { closesAt: dto.closesAt ? new Date(dto.closesAt) : null }
+          : {}),
+      });
+      const removed = [...existing].filter((id) => !keptIds.includes(id));
+      if (removed.length > 0) {
+        await manager.delete(CommunityPollOption, removed);
+      }
+      for (const [position, option] of dto.options.entries()) {
+        if (option.id) {
+          await manager.update(CommunityPollOption, option.id, {
+            label: option.label.trim(),
+            position,
+          });
+        } else {
+          await manager.save(
+            manager.create(CommunityPollOption, {
+              pollId: poll.id,
+              label: option.label.trim(),
+              position,
+            }),
+          );
+        }
+      }
+    });
+    const loaded = await this.requirePoll(pollId);
+    return this.serialize(loaded, userId, host);
+  }
+
   async vote(
     communitySlug: string,
     pollId: string,
@@ -228,6 +300,7 @@ export class CommunityPollsService {
       closesAt: poll.closesAt,
       closed: this.isClosed(poll.closesAt),
       canSeeResults,
+      canEdit: poll.authorId === userId,
       canDelete: poll.authorId === userId || host.canModerate,
       options: options.map((option) => ({
         id: option.id,
@@ -325,6 +398,7 @@ export class CommunityPollsService {
     ) {
       throw new NotFoundException('Community not found');
     }
+    assertCommunityActive(community);
     const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
     if (!subgroupSlug) {
       if (!communityMember)

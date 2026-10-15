@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   forwardRef,
+  ViewEncapsulation,
   inject,
   input,
   PLATFORM_ID,
@@ -15,8 +16,10 @@ import { normalizeRichText } from './rich-text';
 @Component({
   selector: 'app-rich-text',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   imports: [FormsModule, QuillEditorComponent],
   templateUrl: './rich-text.component.html',
+  styleUrls: ['../../../../../node_modules/quill/dist/quill.snow.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

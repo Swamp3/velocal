@@ -2,7 +2,15 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
 
-export type NotificationType = 'event.created' | 'event.invite' | 'join.request' | 'join.decision';
+export type NotificationType =
+  | 'event.created'
+  | 'event.invite'
+  | 'join.request'
+  | 'join.decision'
+  | 'community.deleted'
+  | 'subgroup.deleted'
+  | 'community.suspended'
+  | 'community.unsuspended';
 
 export interface AppNotification {
   id: string;
@@ -16,6 +24,7 @@ export interface AppNotification {
     eventName?: string;
     actorName?: string;
     decision?: 'approved' | 'rejected';
+    reason?: string;
   };
   readAt: string | null;
   createdAt: string;

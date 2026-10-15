@@ -39,6 +39,8 @@ export interface EventSearchParams {
   to?: string;
   page?: number;
   limit?: number;
+  /** `marker` asks the API for the map popup fields only. */
+  view?: 'marker';
 }
 
 @Injectable({ providedIn: 'root' })

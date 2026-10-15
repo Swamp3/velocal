@@ -8,9 +8,17 @@ export function plainText(value: string | null | undefined): string {
     .trim();
 }
 
+/**
+ * Quill's `getSemanticHTML()` writes every space as `&nbsp;`. Non-breaking spaces never wrap,
+ * so a long comment would only break inside words. Turn them back into normal spaces.
+ */
+export function normalSpaces(html: string): string {
+  return html.replace(/&nbsp;|\u00a0/gi, ' ');
+}
+
 /** Stores `''` when the editor has no visible text. */
 export function normalizeRichText(value: string | null | undefined): string {
-  const raw = value ?? '';
+  const raw = normalSpaces(value ?? '');
   return plainText(raw) ? raw : '';
 }
 
@@ -26,6 +34,7 @@ function escapeHtml(value: string): string {
 export function toDisplayHtml(value: string | null | undefined): string {
   const raw = value?.trim() ?? '';
   if (!raw) return '';
-  if (/<[a-z][\s\S]*>/i.test(raw)) return raw;
+  // Older content was saved with `&nbsp;` for every space; show it with normal, wrappable spaces.
+  if (/<[a-z][\s\S]*>/i.test(raw)) return normalSpaces(raw);
   return escapeHtml(raw).replace(/\n/g, '<br>');
 }

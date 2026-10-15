@@ -22,16 +22,108 @@ export interface AdminUser {
   displayName: string | null;
   isAdmin: boolean;
   emailVerified: boolean;
+  bannedAt?: string | null;
+  banReason?: string | null;
   createdAt: string;
 }
 
 export interface AdminUserSearchParams {
   q?: string;
   role?: 'admin' | 'user';
+  status?: 'banned';
   page?: number;
   limit?: number;
   sort?: 'createdAt' | 'email' | 'displayName';
   order?: 'ASC' | 'DESC';
+}
+
+export interface AdminCommunityRow {
+  id: string;
+  slug: string;
+  name: string;
+  visibility: 'public' | 'request' | 'private';
+  location: string | null;
+  createdAt: string;
+  createdByName: string | null;
+  createdByEmail: string | null;
+  memberCount: number;
+  subgroupCount: number;
+  postCount: number;
+  pollCount: number;
+  eventCount: number;
+  pendingRequests: number;
+  openReports: number;
+  suspendedAt: string | null;
+  suspendedReason: string | null;
+}
+
+export interface AdminCommunityDetail extends AdminCommunityRow {
+  description: string | null;
+  stravaUrl: string | null;
+  admins: { userId: string; displayName: string | null; email: string }[];
+  subgroups: {
+    id: string;
+    slug: string;
+    name: string;
+    visibility: string;
+    memberCount: number;
+    postCount: number;
+  }[];
+  recentPosts: {
+    id: string;
+    title: string;
+    createdAt: string;
+    authorName: string | null;
+    subgroupName: string | null;
+  }[];
+  recentEvents: {
+    id: string;
+    name: string;
+    startDate: string;
+    listing: string;
+    subgroupName: string | null;
+  }[];
+}
+
+export interface AdminCommunitySearchParams {
+  q?: string;
+  visibility?: 'public' | 'request' | 'private';
+  sort?: 'createdAt' | 'name' | 'members' | 'pending' | 'reports';
+  order?: 'ASC' | 'DESC';
+  page?: number;
+  limit?: number;
+}
+
+export type ReportStatus = 'open' | 'resolved' | 'dismissed';
+
+export interface AdminReport {
+  id: string;
+  status: ReportStatus;
+  targetType: 'community' | 'post' | 'comment';
+  targetId: string;
+  targetLabel: string;
+  reason: 'spam' | 'abuse' | 'inappropriate' | 'illegal' | 'other';
+  note: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  resolutionNote: string | null;
+  communityId: string | null;
+  communityName: string | null;
+  communitySlug: string | null;
+  reporterName: string | null;
+  reporterEmail: string | null;
+  reportsOnTarget: number;
+}
+
+export interface AuditEntry {
+  id: string;
+  actorLabel: string;
+  action: string;
+  targetType: string | null;
+  targetLabel: string | null;
+  communityId: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -65,8 +157,84 @@ export class AdminService {
     );
   }
 
+  // --- Communities ---
+
+  getCommunities(
+    params: AdminCommunitySearchParams = {},
+  ): Observable<PaginatedResponse<AdminCommunityRow>> {
+    return this.api.get<PaginatedResponse<AdminCommunityRow>>(
+      '/admin/communities',
+      params as Record<string, string | number | boolean>,
+    );
+  }
+
+  getCommunity(id: string): Observable<AdminCommunityDetail> {
+    return this.api.get<AdminCommunityDetail>(`/admin/communities/${id}`);
+  }
+
+  deleteCommunity(id: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}`);
+  }
+
+  deleteCommunitySubgroup(id: string, subgroupId: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}/subgroups/${subgroupId}`);
+  }
+
+  deleteCommunityComment(id: string, commentId: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}/comments/${commentId}`);
+  }
+
+  suspendCommunity(id: string, reason: string): Observable<void> {
+    return this.api.post<void>(`/admin/communities/${id}/suspend`, { reason });
+  }
+
+  unsuspendCommunity(id: string): Observable<void> {
+    return this.api.post<void>(`/admin/communities/${id}/unsuspend`, {});
+  }
+
+  // --- Reports ---
+
+  getReports(status: ReportStatus, page = 1): Observable<PaginatedResponse<AdminReport>> {
+    return this.api.get<PaginatedResponse<AdminReport>>('/admin/reports', { status, page });
+  }
+
+  getOpenReportCount(): Observable<{ count: number }> {
+    return this.api.get<{ count: number }>('/admin/reports/open-count');
+  }
+
+  resolveReport(
+    id: string,
+    status: 'resolved' | 'dismissed',
+    note?: string,
+  ): Observable<{ status: string }> {
+    return this.api.patch<{ status: string }>(`/admin/reports/${id}`, { status, note });
+  }
+
+  // --- Audit log ---
+
+  getAuditLog(
+    params: { q?: string; action?: string; page?: number } = {},
+  ): Observable<PaginatedResponse<AuditEntry>> {
+    return this.api.get<PaginatedResponse<AuditEntry>>(
+      '/admin/audit',
+      params as Record<string, string | number | boolean>,
+    );
+  }
+
+  deleteCommunityPost(id: string, postId: string): Observable<void> {
+    return this.api.delete<void>(`/admin/communities/${id}/posts/${postId}`);
+  }
+
   getUser(id: string): Observable<AdminUser> {
     return this.api.get<AdminUser>(`/admin/users/${id}`);
+  }
+
+  banUser(id: string, reason: string): Observable<AdminUser> {
+    return this.api.post<AdminUser>(`/admin/users/${id}/ban`, { reason });
+  }
+
+  unbanUser(id: string): Observable<AdminUser> {
+    return this.api.post<AdminUser>(`/admin/users/${id}/unban`, {});
   }
 
   toggleUserRole(id: string): Observable<AdminUser> {
@@ -78,7 +246,10 @@ export class AdminService {
   getMissingData(
     params: MissingDataSearchParams = {},
   ): Observable<PaginatedResponse<CyclingEvent & { missingFields: string[] }>> {
-    return this.api.get('/admin/events/missing-data', params as Record<string, string | number | boolean>);
+    return this.api.get(
+      '/admin/events/missing-data',
+      params as Record<string, string | number | boolean>,
+    );
   }
 
   getMissingDataStats(): Observable<Record<string, number>> {
@@ -88,15 +259,13 @@ export class AdminService {
   // --- Analytics ---
 
   getTopPages(days = 30, limit = 20): Observable<{ path: string; views: number }[]> {
-    return this.api.get<{ path: string; views: number }[]>(
-      '/admin/analytics/top-pages',
-      { days, limit },
-    );
+    return this.api.get<{ path: string; views: number }[]>('/admin/analytics/top-pages', {
+      days,
+      limit,
+    });
   }
 
-  getAnalyticsOverview(
-    days = 30,
-  ): Observable<AnalyticsOverview> {
+  getAnalyticsOverview(days = 30): Observable<AnalyticsOverview> {
     return this.api.get<AnalyticsOverview>('/admin/analytics/overview', { days });
   }
 }
