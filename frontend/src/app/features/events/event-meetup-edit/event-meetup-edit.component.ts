@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommunityService } from '@core/services/community.service';
 import { EventHostContext } from '@core/services/event.service';
@@ -20,7 +20,6 @@ function toLocalInput(iso: string | null | undefined): string {
  */
 @Component({
   selector: 'app-event-meetup-edit',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent, ModalComponent],
   templateUrl: './event-meetup-edit.component.html',
 })
@@ -72,7 +71,7 @@ export class EventMeetupEditComponent {
         {
           eventId: this.event().id,
           meetupPlace: meetupPlace.trim(),
-          meetupAt: meetupAt ? new Date(meetupAt).toISOString() : undefined,
+          meetupAt: meetupAt ? new Date(meetupAt).toISOString() : '',
           meetupNote: meetupNote.trim(),
         },
         subgroup,

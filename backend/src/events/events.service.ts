@@ -357,11 +357,6 @@ export class EventsService {
     return saved[0];
   }
 
-  /**
-   * Stops a repeating series at this event: this occurrence and every later
-   * one are removed, earlier ones stay. Deleting a single occurrence is the
-   * normal event delete.
-   */
   private async assertOwnsRoute(
     routeId: string,
     userId?: string,
@@ -562,6 +557,11 @@ export class EventsService {
     };
   }
 
+  /**
+   * Stops a repeating series at this event: this occurrence and every later
+   * one are removed, earlier ones stay. Deleting a single occurrence is the
+   * normal event delete.
+   */
   async stopSeries(
     id: string,
     user?: { id: string; isAdmin: boolean },
@@ -581,12 +581,11 @@ export class EventsService {
       })
       .andWhere('event.startDate >= :from', { from: event.startDate })
       .getRawMany<{ id: string }>();
-    for (const row of later) await this.uploads.remove('events', row.id);
-    if (later.length > 0) {
-      await this.repo.delete(later.map((row) => row.id));
-    }
+    const ids = later.map((row) => row.id);
+    if (ids.length > 0) await this.repo.delete(ids);
     await this.recurrences.update(event.recurrenceId, { endedAt: new Date() });
-    return { removed: later.length };
+    for (const id of ids) await this.uploads.remove('events', id);
+    return { removed: ids.length };
   }
 
   private async buildEvent(
@@ -913,7 +912,10 @@ export class EventsService {
       .slice(0, 20);
     const counts = host.canSeeMembers
       ? await this.goingCounts(
-          all.map(({ event }) => event.id),
+          all.map(({ event, share }) => ({
+            eventId: event.id,
+            shareId: share?.id ?? null,
+          })),
           scope,
         )
       : new Map<string, number>();
@@ -961,11 +963,18 @@ export class EventsService {
       host.community.id,
       subgroupId,
     );
-    const fields = {
-      meetupPlace: dto.meetupPlace?.trim() || null,
-      meetupAt: dto.meetupAt ? new Date(dto.meetupAt) : null,
-      meetupNote: dto.meetupNote?.trim() || null,
-    };
+    // Only keys the caller sent are written, so a second share call that
+    // omits the meetup does not wipe one that is already stored.
+    const fields: Partial<EventShare> = {};
+    if (dto.meetupPlace !== undefined) {
+      fields.meetupPlace = dto.meetupPlace.trim() || null;
+    }
+    if (dto.meetupAt !== undefined) {
+      fields.meetupAt = dto.meetupAt ? new Date(dto.meetupAt) : null;
+    }
+    if (dto.meetupNote !== undefined) {
+      fields.meetupNote = dto.meetupNote.trim() || null;
+    }
     let share: EventShare;
     if (existing) {
       share = await this.shares.save({ ...existing, ...fields });
@@ -977,6 +986,9 @@ export class EventsService {
             communityId: host.community.id,
             subgroupId,
             createdById: userId,
+            meetupPlace: null,
+            meetupAt: null,
+            meetupNote: null,
             ...fields,
           }),
         );
@@ -1318,11 +1330,38 @@ export class EventsService {
     const scope = await this.attendeeScope(event, userId, ctx);
     if (!scope?.member)
       throw communityForbidden(CommunityErrorCode.membersOnly);
-    await this.rsvps.upsert(
-      { eventId: id, userId, status },
-      { conflictPaths: ['eventId', 'userId'] },
-    );
+    await this.saveRsvp(id, userId, scope.share?.id ?? null, status);
     return this.present(event, userId, scope);
+  }
+
+  /**
+   * Partial unique indexes cannot be targeted by TypeORM's `upsert`, so the
+   * conflict clause is written out. A null share is a hosted event; a set
+   * share is one club's copy of a public event.
+   */
+  private async saveRsvp(
+    eventId: string,
+    userId: string,
+    shareId: string | null,
+    status: EventRsvpStatus,
+  ): Promise<void> {
+    if (shareId) {
+      await this.rsvps.query(
+        `INSERT INTO "event_rsvps" ("event_id", "user_id", "share_id", "status")
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT ("event_id", "user_id", "share_id") WHERE "share_id" IS NOT NULL
+         DO UPDATE SET "status" = EXCLUDED."status", "updatedAt" = now()`,
+        [eventId, userId, shareId, status],
+      );
+      return;
+    }
+    await this.rsvps.query(
+      `INSERT INTO "event_rsvps" ("event_id", "user_id", "status")
+       VALUES ($1, $2, $3)
+       ON CONFLICT ("event_id", "user_id") WHERE "share_id" IS NULL
+       DO UPDATE SET "status" = EXCLUDED."status", "updatedAt" = now()`,
+      [eventId, userId, status],
+    );
   }
 
   async listRsvps(
@@ -1341,6 +1380,11 @@ export class EventsService {
       .innerJoinAndSelect('rsvp.user', 'user')
       .where('rsvp.eventId = :id', { id })
       .orderBy('rsvp.createdAt', 'ASC');
+    if (scope.share) {
+      qb.andWhere('rsvp.shareId = :shareId', { shareId: scope.share.id });
+    } else {
+      qb.andWhere('rsvp.shareId IS NULL');
+    }
     this.restrictToAudience(qb, 'rsvp.userId', scope);
     const rows = await qb.getMany();
     return rows.map((row) => ({
@@ -1479,12 +1523,19 @@ export class EventsService {
       audience = await this.attendeeScope(event, userId);
     }
     const isMember = !!audience?.member;
+    const shareId = audience?.share?.id ?? null;
     const mine =
       userId && isMember
-        ? await this.rsvps.findOne({ where: { eventId: event.id, userId } })
+        ? await this.rsvps.findOne({
+            where: {
+              eventId: event.id,
+              userId,
+              shareId: shareId ?? IsNull(),
+            },
+          })
         : null;
     const counts = isMember
-      ? await this.goingCounts([event.id], audience!)
+      ? await this.goingCounts([{ eventId: event.id, shareId }], audience!)
       : new Map<string, number>();
     const hostCommunity = await this.hostCommunityFor(event, audience);
     const recurrence = event.recurrenceId
@@ -1524,16 +1575,31 @@ export class EventsService {
   }
 
   private async goingCounts(
-    ids: string[],
+    entries: { eventId: string; shareId: string | null }[],
     scope: { communityId: string; subgroupId: string | null },
   ): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
-    if (ids.length === 0) return counts;
+    if (entries.length === 0) return counts;
+    const hostedIds = entries
+      .filter((entry) => !entry.shareId)
+      .map((entry) => entry.eventId);
+    const shareIds = entries
+      .map((entry) => entry.shareId)
+      .filter((id): id is string => !!id);
+    const parts: string[] = [];
+    if (hostedIds.length > 0) {
+      parts.push('(rsvp.shareId IS NULL AND rsvp.eventId IN (:...hostedIds))');
+    }
+    if (shareIds.length > 0) parts.push('rsvp.shareId IN (:...shareIds)');
+    if (parts.length === 0) return counts;
     const qb = this.rsvps
       .createQueryBuilder('rsvp')
       .select('rsvp.eventId', 'eventId')
       .addSelect('COUNT(*)', 'count')
-      .where('rsvp.eventId IN (:...ids)', { ids })
+      .where(`(${parts.join(' OR ')})`, {
+        ...(hostedIds.length > 0 ? { hostedIds } : {}),
+        ...(shareIds.length > 0 ? { shareIds } : {}),
+      })
       .andWhere('rsvp.status = :going', { going: EventRsvpStatus.GOING });
     this.restrictToAudience(qb, 'rsvp.user_id', scope);
     const rows = await qb

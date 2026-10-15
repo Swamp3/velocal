@@ -6,7 +6,6 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
@@ -18,8 +17,13 @@ export enum EventRsvpStatus {
   DECLINED = 'declined',
 }
 
+/**
+ * One RSVP per person per audience. Hosted events use a null `shareId`
+ * (partial unique index `UQ_event_rsvps_hosted`). A public event shared with
+ * a club uses that share's id (`UQ_event_rsvps_share`), so the same person
+ * can answer differently in each club.
+ */
 @Entity('event_rsvps')
-@Unique('UQ_event_rsvps_event_user', ['eventId', 'userId'])
 export class EventRsvp {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -38,6 +42,14 @@ export class EventRsvp {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  /**
+   * Set when the RSVP belongs to a public event shared with a community.
+   * Null for community-hosted events.
+   */
+  @Index('IDX_event_rsvps_share_id')
+  @Column({ type: 'uuid', name: 'share_id', nullable: true })
+  shareId: string | null;
 
   @Column({
     type: 'enum',
