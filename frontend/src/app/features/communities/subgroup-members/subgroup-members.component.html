@@ -41,10 +41,7 @@
 
     @if (canManage()) {
       <div class="mt-6">
-        <label
-          for="member-search"
-          class="block text-sm font-medium text-[var(--color-text)]"
-        >
+        <label for="member-search" class="block text-sm font-medium text-[var(--color-text)]">
           {{ 'communities.members.addFromCommunity' | transloco }}
         </label>
         <input
@@ -82,14 +79,6 @@
           </ul>
         }
       </div>
-      <div class="mt-6">
-        <app-invite-by-email
-          [label]="'communities.invite.email' | transloco"
-          [action]="'communities.invite.action' | transloco"
-          [submitting]="mutating()"
-          (invited)="onInvite($event)"
-        />
-      </div>
     }
 
     <div class="mt-6">
@@ -103,6 +92,5 @@
         />
       }
     </div>
-
   </div>
 }

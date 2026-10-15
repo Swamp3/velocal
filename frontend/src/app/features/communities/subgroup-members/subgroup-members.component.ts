@@ -12,12 +12,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  EmptyStateComponent,
-  InviteByEmailComponent,
-  MemberListComponent,
-  MemberListItem,
-} from '@shared/components';
+import { EmptyStateComponent, MemberListComponent, MemberListItem } from '@shared/components';
 import { CommunityMember, Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
 import { SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -25,14 +20,7 @@ import { communityErrorKey } from '../community-error';
 @Component({
   selector: 'app-subgroup-members',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    RouterLink,
-    TranslocoPipe,
-    SkeletonComponent,
-    EmptyStateComponent,
-    MemberListComponent,
-    InviteByEmailComponent,
-  ],
+  imports: [RouterLink, TranslocoPipe, SkeletonComponent, EmptyStateComponent, MemberListComponent],
   templateUrl: './subgroup-members.component.html',
 })
 export class SubgroupMembersComponent implements OnInit {
@@ -167,7 +155,7 @@ export class SubgroupMembersComponent implements OnInit {
     if (!subgroup || this.mutating()) return;
     this.mutating.set(true);
     this.communityService
-      .inviteToSubgroup(subgroup.communitySlug, subgroup.slug, { userId })
+      .inviteToSubgroup(subgroup.communitySlug, subgroup.slug, userId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -181,22 +169,6 @@ export class SubgroupMembersComponent implements OnInit {
 
   protected onQuery(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
-  }
-
-  protected onInvite(email: string): void {
-    const subgroup = this.subgroup();
-    if (!subgroup || this.mutating()) return;
-    this.mutating.set(true);
-    this.communityService
-      .inviteToSubgroup(subgroup.communitySlug, subgroup.slug, { email })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.toast.success(this.transloco.translate('communities.invite.sent'));
-          this.refresh(subgroup);
-        },
-        error: (err: ApiError) => this.fail(err),
-      });
   }
 
   private refresh(subgroup: Subgroup): void {

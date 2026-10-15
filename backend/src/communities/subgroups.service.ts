@@ -564,7 +564,7 @@ export class SubgroupsService {
   async invite(
     communitySlug: string,
     slug: string,
-    target: { email?: string; userId?: string },
+    userId: string,
     actorId: string,
   ): Promise<SerializedSubgroup> {
     const { subgroup, community } = await this.requireManageable(
@@ -572,14 +572,12 @@ export class SubgroupsService {
       slug,
       actorId,
     );
-    const user = target.userId
-      ? await this.users.findOne({ where: { id: target.userId } })
-      : await this.findUserByEmail(target.email ?? '');
-    if (!user) throw communityNotFound(CommunityErrorCode.userNotFound);
+    // Only existing community members can be added; unknown ids get the same answer.
+    const user = await this.users.findOne({ where: { id: userId } });
     const communityMember = await this.communityMembers.findOne({
-      where: { communityId: community.id, userId: user.id },
+      where: { communityId: community.id, userId },
     });
-    if (!communityMember) {
+    if (!user || !communityMember) {
       throw communityNotFound(CommunityErrorCode.notCommunityMember);
     }
 
@@ -727,15 +725,6 @@ export class SubgroupsService {
     if (!(await this.isCommunityAdmin(communityId, userId))) {
       throw new ForbiddenException('Community admin access required');
     }
-  }
-
-  private async findUserByEmail(email: string): Promise<User | null> {
-    const trimmed = email.trim();
-    if (!trimmed) return null;
-    return this.users
-      .createQueryBuilder('user')
-      .where('LOWER(user.email) = LOWER(:email)', { email: trimmed })
-      .getOne();
   }
 
   private async generateSlug(

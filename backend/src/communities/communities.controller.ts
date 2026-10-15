@@ -195,7 +195,7 @@ export class CommunitiesController {
     @Body() dto: InviteMemberDto,
     @CurrentUser() user: { id: string },
   ): Promise<SerializedCommunity> {
-    return this.communitiesService.invite(id, dto.email ?? '', user.id);
+    return this.communitiesService.invite(id, dto.email, user.id);
   }
 
   @Get(':id/join-requests')
