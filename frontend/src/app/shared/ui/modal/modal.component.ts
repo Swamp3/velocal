@@ -1,16 +1,27 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
-  HostListener,
   inject,
   Injector,
   input,
   output,
+  PLATFORM_ID,
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+
+const FOCUSABLE = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[contenteditable="true"]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
 
 /**
  * Dialog shell: backdrop, title, close button, Escape and backdrop-click to close.
@@ -19,8 +30,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
  */
 @Component({
   selector: 'ui-modal',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoPipe],
+  host: {
+    '(document:keydown.escape)': 'onEscape($event)',
+    '(keydown)': 'onKeydown($event)',
+  },
   template: `
     <div
       class="fixed inset-0 z-[1000] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
@@ -60,12 +74,17 @@ import { TranslocoPipe } from '@jsverse/transloco';
 export class ModalComponent {
   private readonly injector = inject(Injector);
   private readonly panel = viewChild.required<ElementRef<HTMLElement>>('panel');
+  private previouslyFocused: HTMLElement | null = null;
 
   readonly title = input.required<string>();
   /** Emitted for Escape, the close button, and a click on the backdrop. */
   readonly closed = output<void>();
 
   constructor() {
+    if (isPlatformBrowser(inject(PLATFORM_ID)) && document.activeElement instanceof HTMLElement) {
+      this.previouslyFocused = document.activeElement;
+    }
+
     // Move focus into the dialog so keyboard users start there; an autofocus field wins.
     afterNextRender(
       () => {
@@ -75,11 +94,39 @@ export class ModalComponent {
       },
       { injector: this.injector },
     );
+
+    inject(DestroyRef).onDestroy(() => {
+      if (this.previouslyFocused?.isConnected) this.previouslyFocused.focus();
+    });
   }
 
-  @HostListener('document:keydown.escape')
-  protected onEscape(): void {
+  protected onEscape(event: Event): void {
+    event.preventDefault();
     this.closed.emit();
+  }
+
+  /** Keeps Tab inside the dialog. */
+  protected onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') return;
+    const panel = this.panel()?.nativeElement;
+    if (!panel) return;
+    const items = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)];
+    if (items.length === 0) {
+      event.preventDefault();
+      panel.focus();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    const inside = active instanceof Node && panel.contains(active);
+    if (event.shiftKey && (!inside || active === first)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (!inside || active === last)) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   protected onBackdrop(event: MouseEvent): void {
