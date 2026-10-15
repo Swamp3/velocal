@@ -4,6 +4,19 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.9.0] — 2026-10-15
+
+### Added
+
+- **Delete notifications** — remove a single notification from the inbox, or clear all of them. The bell count follows.
+- **Edit meetup details of a shared event** — club admins and subgroup moderators can change the meetup place, time and note of a public event that was added to their club.
+
+### Changed
+
+- The event page shows everything that only club members see (meetup, who is coming, comments) in one highlighted "Members only" area with the club name.
+- Editing an event and then cancelling or saving brings you back to the same club view.
+- Under the hood: Angular 22, NestJS 12, TypeORM 1 and current build tooling, with Node 24 (current LTS) in the build pipeline.
+
 ## [0.8.0] — 2026-10-15
 
 ### Added
