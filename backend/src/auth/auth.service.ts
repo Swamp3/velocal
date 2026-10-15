@@ -23,6 +23,8 @@ export interface AuthResponse {
     id: string;
     email: string;
     displayName: string;
+    firstName: string | null;
+    lastName: string | null;
     preferredLanguage: string;
     preferredLocale: string;
     isAdmin: boolean;
@@ -114,10 +116,7 @@ export class AuthService {
     return { message: 'OTP sent' };
   }
 
-  async verifyOtp(
-    email: string,
-    code: string,
-  ): Promise<AuthResponse> {
+  async verifyOtp(email: string, code: string): Promise<AuthResponse> {
     const normalizedEmail = email.toLowerCase().trim();
 
     const token = await this.otpRepository.findOne({
@@ -239,9 +238,7 @@ export class AuthService {
 
     const rawToken = randomBytes(32).toString('base64url');
     const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-    const expiresAt = new Date(
-      Date.now() + RESET_TOKEN_TTL_HOURS * 3600_000,
-    );
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_HOURS * 3600_000);
 
     await this.resetRepository.save(
       this.resetRepository.create({
@@ -280,6 +277,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         displayName: user.displayName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         preferredLanguage: user.preferredLanguage,
         preferredLocale: user.preferredLocale,
         isAdmin: user.isAdmin,

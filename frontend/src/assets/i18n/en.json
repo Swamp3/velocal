@@ -314,7 +314,10 @@
     "passwordChangeHint": "We'll send a reset link to your email address.",
     "passwordSetHint": "You signed up without a password. Set one to enable password login.",
     "passwordResetSent": "Reset email sent. Check your inbox.",
-    "passwordResetError": "Failed to send reset email. Please try again."
+    "passwordResetError": "Failed to send reset email. Please try again.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "namesHint": "Only you and admins can see your first and last name. Other members see your display name."
   },
   "series": {
     "title": "Race Series",

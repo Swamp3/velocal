@@ -23,6 +23,13 @@ export class User {
   @Column({ nullable: true })
   displayName: string;
 
+  /** Real name; private to the user (and admins). Others only see the display name. */
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  firstName: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  lastName: string | null;
+
   @Column({ nullable: true })
   homeZip: string;
 

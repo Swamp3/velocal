@@ -86,6 +86,10 @@ export class UsersService {
     const user = await this.userRepository.findOneByOrFail({ id: userId });
 
     Object.assign(user, dto);
+    // Blank names are stored as "not set".
+    if (dto.firstName !== undefined)
+      user.firstName = dto.firstName.trim() || null;
+    if (dto.lastName !== undefined) user.lastName = dto.lastName.trim() || null;
 
     if (dto.homeZip !== undefined || dto.homeCountry !== undefined) {
       const zip = dto.homeZip ?? user.homeZip;

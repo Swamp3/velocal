@@ -64,6 +64,8 @@ export class ProfileComponent implements OnInit {
   );
 
   protected readonly profileForm = this.fb.nonNullable.group({
+    firstName: [''],
+    lastName: [''],
     displayName: [''],
     homeZip: [''],
     homeCountry: [''],
@@ -92,6 +94,8 @@ export class ProfileComponent implements OnInit {
     if (!user) return;
 
     this.profileForm.patchValue({
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
       displayName: user.displayName ?? '',
       homeZip: user.homeZip ?? '',
       homeCountry: user.homeCountry ?? '',
@@ -146,9 +150,7 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.passwordActionLoading.set(false);
         this.passwordActionSent.set(true);
-        this.toast.success(
-          this.transloco.translate('profile.passwordResetSent'),
-        );
+        this.toast.success(this.transloco.translate('profile.passwordResetSent'));
       },
       error: () => {
         this.passwordActionLoading.set(false);
@@ -189,19 +191,14 @@ export class ProfileComponent implements OnInit {
 
   private loadFavorites(): void {
     this.loadingFavorites.set(true);
-    this.userService
-      .getFavorites(this.favoritesPage(), FAVORITES_PAGE_SIZE)
-      .subscribe({
-        next: (res) => {
-          this.favoriteEvents.update((prev) => [
-            ...prev,
-            ...res.data.map((f) => f.event),
-          ]);
-          this.favoritesTotal.set(res.total);
-          this.loadingFavorites.set(false);
-        },
-        error: () => this.loadingFavorites.set(false),
-      });
+    this.userService.getFavorites(this.favoritesPage(), FAVORITES_PAGE_SIZE).subscribe({
+      next: (res) => {
+        this.favoriteEvents.update((prev) => [...prev, ...res.data.map((f) => f.event)]);
+        this.favoritesTotal.set(res.total);
+        this.loadingFavorites.set(false);
+      },
+      error: () => this.loadingFavorites.set(false),
+    });
   }
 
   protected onLoadMore(): void {
@@ -212,9 +209,7 @@ export class ProfileComponent implements OnInit {
   protected onRemoveFavorite(eventId: string): void {
     this.favoriteService.removeFavorite(eventId).subscribe({
       next: () => {
-        this.favoriteEvents.update((list) =>
-          list.filter((e) => e.id !== eventId),
-        );
+        this.favoriteEvents.update((list) => list.filter((e) => e.id !== eventId));
         this.favoritesTotal.update((t) => t - 1);
       },
     });

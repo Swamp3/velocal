@@ -314,7 +314,10 @@
     "passwordChangeHint": "Wir senden einen Link zum Zurücksetzen an deine E-Mail-Adresse.",
     "passwordSetHint": "Du hast dich ohne Passwort registriert. Lege eines fest, um dich auch mit Passwort anmelden zu können.",
     "passwordResetSent": "E-Mail zum Zurücksetzen gesendet. Prüfe deinen Posteingang.",
-    "passwordResetError": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut."
+    "passwordResetError": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "namesHint": "Vor- und Nachname sehen nur du und Admins. Andere Mitglieder sehen deinen Anzeigenamen."
   },
   "series": {
     "title": "Rennserien",
