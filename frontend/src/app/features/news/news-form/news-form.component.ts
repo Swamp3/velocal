@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ViewEncapsulation,
   inject,
   OnInit,
   signal,
@@ -19,6 +20,7 @@ import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
 @Component({
   selector: 'app-news-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -29,6 +31,7 @@ import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
     ImageUploadComponent,
   ],
   templateUrl: './news-form.component.html',
+  styleUrls: ['../../../../../node_modules/quill/dist/quill.snow.css'],
 })
 export class NewsFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

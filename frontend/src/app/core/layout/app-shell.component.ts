@@ -189,6 +189,7 @@ export class AppShellComponent {
 
     effect(() => {
       if (!this.auth.hydrated()) return;
+      this.auth.currentUser();
       this.refreshUnread();
     });
   }

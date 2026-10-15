@@ -1,10 +1,12 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
   effect,
   inject,
+  untracked,
   OnInit,
   signal,
 } from '@angular/core';
@@ -83,8 +85,13 @@ export class EventListComponent implements OnInit {
   readonly disciplines = signal<Discipline[]>([]);
 
   readonly radiusOptions = RADIUS_OPTIONS;
-  readonly filterPanelOpen = signal(
-    typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  readonly filterPanelOpen = signal(false);
+  /** False until the user toggles the panel, so desktop can default open via CSS. */
+  readonly filterTouched = signal(false);
+  /** Desktop starts open in CSS. This catches up aria after hydration without moving layout. */
+  private readonly filtersDesktop = signal(false);
+  protected readonly filtersExpanded = computed(() =>
+    this.filterTouched() ? this.filterPanelOpen() : this.filtersDesktop(),
   );
 
   readonly geoActive = computed(
@@ -101,12 +108,28 @@ export class EventListComponent implements OnInit {
     return count;
   });
 
+  /** True once the list has been fetched for the signed-in viewer, so hydration does not fetch twice. */
+  private viewerFetchDone = false;
+
   private readonly search$ = new Subject<void>();
   private readonly searchInput$ = new Subject<string>();
   private readonly zipInput$ = new Subject<string>();
   private skipNextUrlSync = false;
 
   constructor() {
+    afterNextRender(() => {
+      this.filtersDesktop.set(window.matchMedia('(min-width: 768px)').matches);
+    });
+
+    effect(() => {
+      const user = this.authService.currentUser();
+      if (!user || this.viewerFetchDone) return;
+      this.viewerFetchDone = true;
+      untracked(() => {
+        if (!this.prefillFromUser()) this.search$.next();
+      });
+    });
+
     this.searchInput$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((q) => {
@@ -161,8 +184,20 @@ export class EventListComponent implements OnInit {
         error: () => this.loading.set(false),
       });
 
+    const authed = this.authService.isAuthenticated();
+    this.viewerFetchDone = authed;
     this.readUrlParams();
-    this.prefillFromUser();
+    if (authed) this.prefillFromUser();
+  }
+
+  protected toggleFilters(): void {
+    const desktop = window.matchMedia('(min-width: 768px)').matches;
+    if (!this.filterTouched()) {
+      this.filterTouched.set(true);
+      this.filterPanelOpen.set(desktop ? false : true);
+      return;
+    }
+    this.filterPanelOpen.update((open) => !open);
   }
 
   onSearchInput(event: Event): void {
@@ -266,15 +301,15 @@ export class EventListComponent implements OnInit {
     this.syncUrlAndFetch();
   }
 
-  private prefillFromUser(): void {
+  /** Applies the viewer's home zip. Returns true when that already started a fetch. */
+  private prefillFromUser(): boolean {
     const user = this.authService.currentUser();
-    if (user?.homeZip && !this.zip() && this.userLat() == null) {
-      this.zip.set(user.homeZip);
-      if (user.homeCountry) {
-        this.country.set(user.homeCountry);
-      }
-      this.syncUrlAndFetch();
-    }
+    if (!user?.homeZip || this.zip() || this.userLat() != null) return false;
+    if (this.route.snapshot.queryParamMap.has('zip')) return false;
+    this.zip.set(user.homeZip);
+    if (user.homeCountry) this.country.set(user.homeCountry);
+    this.syncUrlAndFetch();
+    return true;
   }
 
   private readUrlParams(): void {

@@ -56,7 +56,11 @@ import {
 import { BadWordService } from '../common/bad-words';
 import { CreateEventDto, RecurrenceDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { EventSearchDto, EventSort } from './dto/event-search.dto';
+import {
+  EventListView,
+  EventSearchDto,
+  EventSort,
+} from './dto/event-search.dto';
 import {
   AdminMissingDataDto,
   MissingDataType,
@@ -145,9 +149,23 @@ export class EventsService {
     }
 
     const hasGeo = lat != null && lng != null;
-    const qb = this.repo
-      .createQueryBuilder('event')
-      .leftJoinAndSelect('event.discipline', 'discipline');
+    const marker = params.view === EventListView.MARKER;
+    const qb = this.repo.createQueryBuilder('event');
+    if (marker) {
+      qb.leftJoin('event.discipline', 'discipline').select([
+        'event.id',
+        'event.name',
+        'event.startDate',
+        'event.locationName',
+        'event.coordinates',
+        'event.disciplineSlug',
+        'event.status',
+        'discipline.slug',
+        'discipline.nameTranslations',
+      ]);
+    } else {
+      qb.leftJoinAndSelect('event.discipline', 'discipline');
+    }
 
     const status = params.status ?? EventStatus.PUBLISHED;
     qb.andWhere('event.status = :status', { status });
@@ -203,14 +221,14 @@ export class EventsService {
     if (hasGeo) {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
-      const access = await this.accessMap(entities, userId);
+      const access = marker ? null : await this.accessMap(entities, userId);
 
       const data = entities.map((entity, i) =>
-        this.serializeEvent(entity, {
+        this.toListEvent(entity, marker, {
           distance: raw[i]?.distance_m
             ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
             : undefined,
-          includeCommunityFields: access.get(entity.id)?.member ?? false,
+          includeCommunityFields: access?.get(entity.id)?.member ?? false,
         }),
       );
 
@@ -224,11 +242,11 @@ export class EventsService {
     }
 
     const [rows, total] = await qb.getManyAndCount();
-    const access = await this.accessMap(rows, userId);
+    const access = marker ? null : await this.accessMap(rows, userId);
     return {
       data: rows.map((event) =>
-        this.serializeEvent(event, {
-          includeCommunityFields: access.get(event.id)?.member ?? false,
+        this.toListEvent(event, marker, {
+          includeCommunityFields: access?.get(event.id)?.member ?? false,
         }),
       ),
       total,
@@ -1758,6 +1776,41 @@ export class EventsService {
       });
     }
     return map;
+  }
+
+  /** List rows omit the rich-text description. Marker rows are only what the map popup renders. */
+  private toListEvent(
+    event: Event,
+    marker: boolean,
+    extra?: Record<string, unknown>,
+  ): SerializedEvent {
+    if (!marker) {
+      const serialized = this.serializeEvent(event, extra);
+      delete serialized.description;
+      return serialized;
+    }
+
+    const coords = event.coordinates;
+    const distance = extra?.['distance'];
+    return {
+      id: event.id,
+      name: event.name,
+      startDate: event.startDate,
+      locationName: event.locationName,
+      status: event.status,
+      disciplineSlug: event.disciplineSlug,
+      discipline: event.discipline
+        ? {
+            slug: event.discipline.slug,
+            nameTranslations: event.discipline.nameTranslations,
+          }
+        : undefined,
+      coordinates:
+        coords?.type === 'Point'
+          ? { lat: coords.coordinates[1], lng: coords.coordinates[0] }
+          : null,
+      ...(typeof distance === 'number' ? { distance } : {}),
+    };
   }
 
   private serializeEvent(

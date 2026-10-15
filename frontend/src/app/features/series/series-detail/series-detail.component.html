@@ -39,8 +39,8 @@
         <img
           [src]="s.imageUrl"
           [alt]="s.name"
-          class="block h-auto max-h-[420px] w-full object-cover"
-          loading="lazy"
+          class="block aspect-[2/1] max-h-[420px] w-full object-cover"
+          fetchpriority="high"
           decoding="async"
         />
       </div>

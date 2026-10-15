@@ -20,7 +20,13 @@ import { EventMapDialogComponent } from './event-map-dialog.component';
   imports: [EventMiniMapComponent, EventMapDialogComponent, TranslocoPipe],
   template: `
     <div class="relative group">
-      <app-event-mini-map [coordinates]="coordinates()" />
+      @defer (on viewport) {
+        <app-event-mini-map [coordinates]="coordinates()" />
+      } @placeholder {
+        <div
+          class="h-[300px] w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-alt)]"
+        ></div>
+      }
 
       <button
         type="button"

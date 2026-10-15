@@ -17,7 +17,8 @@ export class FilterStateService {
   readonly selectedDisciplines = computed(() => this._override() ?? this._userPrefs());
 
   constructor() {
-    this.loadFromStorage();
+    // Local storage is applied from the effect below, after the first render.
+    // Reading it here would make the client's first paint differ from SSR.
 
     effect(() => {
       if (this.authService.isAuthenticated()) {
