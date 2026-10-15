@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -88,6 +89,7 @@ export class RoutesController {
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,
   ): Promise<SerializedRoute> {
+    if (!file) throw new BadRequestException('GPX file is required');
     return this.routes.addFile(id, file, user);
   }
 
