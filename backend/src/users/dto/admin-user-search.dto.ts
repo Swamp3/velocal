@@ -22,6 +22,10 @@ export class AdminUserSearchDto {
   role?: 'admin' | 'user';
 
   @IsOptional()
+  @IsString()
+  status?: 'banned';
+
+  @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   @Min(1)

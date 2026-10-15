@@ -51,6 +51,13 @@ export class User {
   @Column({ default: false })
   isAdmin: boolean;
 
+  /** Set when an admin blocked the account: no login, no API access. */
+  @Column({ type: 'timestamptz', nullable: true })
+  bannedAt: Date | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  banReason: string | null;
+
   @Column({ default: 'de' })
   preferredLanguage: string;
 

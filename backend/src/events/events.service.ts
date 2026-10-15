@@ -5,6 +5,7 @@ import {
   BadRequestException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { notInSuspendedCommunitySql } from '../communities/community-suspension';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
@@ -1221,12 +1222,7 @@ export class EventsService {
     userId?: string,
   ): void {
     // Events of a suspended community disappear from every list.
-    qb.andWhere(
-      `(event.community_id IS NULL OR NOT EXISTS (
-        SELECT 1 FROM communities sc
-        WHERE sc.id = event.community_id AND sc.suspended_at IS NOT NULL
-      ))`,
-    );
+    qb.andWhere(notInSuspendedCommunitySql('event'));
     if (!userId) {
       qb.andWhere('event.listing = :publicListing', {
         publicListing: EventListing.PUBLIC,

@@ -1,4 +1,5 @@
 import { Controller, Get, Header, Res } from '@nestjs/common';
+import { notInSuspendedCommunitySql } from '../communities/community-suspension';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Response } from 'express';
@@ -147,12 +148,7 @@ export class SitemapController {
       .where('event.status = :status', { status: EventStatus.PUBLISHED })
       .andWhere('event.listing = :listing', { listing: EventListing.PUBLIC })
       .andWhere('event.startDate >= :cutoff', { cutoff })
-      .andWhere(
-        `(event.community_id IS NULL OR NOT EXISTS (
-          SELECT 1 FROM communities sc
-          WHERE sc.id = event.community_id AND sc.suspended_at IS NOT NULL
-        ))`,
-      )
+      .andWhere(notInSuspendedCommunitySql('event'))
       .orderBy('event.startDate', 'DESC')
       .take(MAX_URLS_PER_FILE)
       .getMany();

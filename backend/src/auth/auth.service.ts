@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -270,6 +271,13 @@ export class AuthService {
   }
 
   buildAuthResponse(user: User): AuthResponse {
+    if (user.bannedAt) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        code: 'accountBanned',
+        message: 'This account has been blocked.',
+      });
+    }
     const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
     return {
       accessToken: this.jwtService.sign(payload),

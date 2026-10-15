@@ -287,7 +287,8 @@
     "resetSuccess": "Password updated. You're now logged in.",
     "resetTokenMissing": "No reset token found. Please request a new reset link.",
     "resetTokenInvalid": "This reset link is invalid or has expired. Please request a new one.",
-    "resetFailed": "Failed to reset password. Please try again."
+    "resetFailed": "Failed to reset password. Please try again.",
+    "accountBanned": "This account has been blocked. Contact support if you think this is a mistake."
   },
   "profile": {
     "title": "Profile",
@@ -506,7 +507,8 @@
       "role": {
         "all": "All",
         "admin": "Admins",
-        "user": "Users"
+        "user": "Users",
+        "banned": "Blocked"
       },
       "col": {
         "user": "User",
@@ -515,7 +517,16 @@
         "verified": "Verified",
         "registered": "Registered",
         "actions": "Actions"
-      }
+      },
+      "ban": "Block",
+      "unban": "Unblock",
+      "banned": "Blocked",
+      "banTitle": "Block user",
+      "banHint": "The user is signed out immediately and can no longer log in. Their content stays as it is.",
+      "banReason": "Reason (internal)",
+      "banDone": "User blocked.",
+      "unbanDone": "User unblocked.",
+      "bannedSince": "Blocked on"
     },
     "missingData": {
       "title": "Data Quality",
@@ -651,7 +662,9 @@
         "report.resolve": "Resolved report",
         "report.dismiss": "Dismissed report",
         "user.promote": "Promoted user to admin",
-        "user.demote": "Removed admin role"
+        "user.demote": "Removed admin role",
+        "user.ban": "Blocked user",
+        "user.unban": "Unblocked user"
       }
     }
   },

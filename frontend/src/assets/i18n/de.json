@@ -287,7 +287,8 @@
     "resetSuccess": "Passwort aktualisiert. Du bist jetzt eingeloggt.",
     "resetTokenMissing": "Kein Reset-Token gefunden. Bitte fordere einen neuen Link an.",
     "resetTokenInvalid": "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
-    "resetFailed": "Passwort konnte nicht zurückgesetzt werden. Bitte versuche es erneut."
+    "resetFailed": "Passwort konnte nicht zurückgesetzt werden. Bitte versuche es erneut.",
+    "accountBanned": "Dieses Konto wurde gesperrt. Wende dich an den Support, falls das ein Irrtum ist."
   },
   "profile": {
     "title": "Profil",
@@ -506,7 +507,8 @@
       "role": {
         "all": "Alle",
         "admin": "Admins",
-        "user": "Benutzer"
+        "user": "Benutzer",
+        "banned": "Gesperrt"
       },
       "col": {
         "user": "Benutzer",
@@ -515,7 +517,16 @@
         "verified": "Verifiziert",
         "registered": "Registriert",
         "actions": "Aktionen"
-      }
+      },
+      "ban": "Sperren",
+      "unban": "Entsperren",
+      "banned": "Gesperrt",
+      "banTitle": "Nutzer sperren",
+      "banHint": "Der Nutzer wird sofort abgemeldet und kann sich nicht mehr anmelden. Seine Inhalte bleiben bestehen.",
+      "banReason": "Grund (intern)",
+      "banDone": "Nutzer gesperrt.",
+      "unbanDone": "Nutzer entsperrt.",
+      "bannedSince": "Gesperrt am"
     },
     "missingData": {
       "title": "Datenqualität",
@@ -651,7 +662,9 @@
         "report.resolve": "Meldung erledigt",
         "report.dismiss": "Meldung verworfen",
         "user.promote": "Nutzer zum Admin gemacht",
-        "user.demote": "Admin-Rolle entzogen"
+        "user.demote": "Admin-Rolle entzogen",
+        "user.ban": "Nutzer gesperrt",
+        "user.unban": "Nutzer entsperrt"
       }
     }
   },

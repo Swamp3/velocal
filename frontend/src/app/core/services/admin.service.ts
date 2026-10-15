@@ -22,12 +22,15 @@ export interface AdminUser {
   displayName: string | null;
   isAdmin: boolean;
   emailVerified: boolean;
+  bannedAt?: string | null;
+  banReason?: string | null;
   createdAt: string;
 }
 
 export interface AdminUserSearchParams {
   q?: string;
   role?: 'admin' | 'user';
+  status?: 'banned';
   page?: number;
   limit?: number;
   sort?: 'createdAt' | 'email' | 'displayName';
@@ -224,6 +227,14 @@ export class AdminService {
 
   getUser(id: string): Observable<AdminUser> {
     return this.api.get<AdminUser>(`/admin/users/${id}`);
+  }
+
+  banUser(id: string, reason: string): Observable<AdminUser> {
+    return this.api.post<AdminUser>(`/admin/users/${id}/ban`, { reason });
+  }
+
+  unbanUser(id: string): Observable<AdminUser> {
+    return this.api.post<AdminUser>(`/admin/users/${id}/unban`, {});
   }
 
   toggleUserRole(id: string): Observable<AdminUser> {
