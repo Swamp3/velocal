@@ -15,6 +15,12 @@ export class UpdateProfileDto {
   @MaxLength(100)
   lastName?: string;
 
+  /** Strava profile link or athlete id; normalized by the service. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  stravaUrl?: string;
+
   @IsOptional()
   @IsString()
   homeZip?: string;

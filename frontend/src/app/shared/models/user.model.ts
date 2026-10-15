@@ -4,6 +4,7 @@ export interface User {
   displayName?: string;
   firstName?: string | null;
   lastName?: string | null;
+  stravaUrl?: string | null;
   homeZip?: string;
   homeCountry?: string;
   preferredLanguage: string;

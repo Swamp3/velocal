@@ -37,7 +37,7 @@ const FAVORITES_PAGE_SIZE = 10;
 })
 export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly auth = inject(AuthService);
+  protected readonly auth = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly disciplineService = inject(DisciplineService);
   private readonly favoriteService = inject(FavoriteService);
@@ -67,6 +67,12 @@ export class ProfileComponent implements OnInit {
     firstName: [''],
     lastName: [''],
     displayName: [''],
+    stravaUrl: [
+      '',
+      Validators.pattern(
+        /^(\d{1,12}|https:\/\/(www\.)?strava\.com\/(athletes|pros)\/[A-Za-z0-9_.-]{1,60}\/?([?#].*)?)?$/i,
+      ),
+    ],
     homeZip: [''],
     homeCountry: [''],
     preferredLanguage: ['de', Validators.required],
@@ -97,6 +103,7 @@ export class ProfileComponent implements OnInit {
       firstName: user.firstName ?? '',
       lastName: user.lastName ?? '',
       displayName: user.displayName ?? '',
+      stravaUrl: user.stravaUrl ?? '',
       homeZip: user.homeZip ?? '',
       homeCountry: user.homeCountry ?? '',
       preferredLanguage: user.preferredLanguage ?? 'de',

@@ -22,6 +22,29 @@
         [placeholder]="'profile.displayNamePlaceholder' | transloco"
       />
 
+      <div>
+        <ui-input
+          [label]="'profile.strava' | transloco"
+          formControlName="stravaUrl"
+          [placeholder]="'profile.stravaPlaceholder' | transloco"
+          [error]="
+            profileForm.controls.stravaUrl.invalid ? ('profile.stravaInvalid' | transloco) : ''
+          "
+        />
+        <p class="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-[var(--color-text-muted)]">
+          <span>{{ 'profile.stravaHint' | transloco }}</span>
+          @if (auth.currentUser()?.stravaUrl; as stravaUrl) {
+            <a
+              [href]="stravaUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-[var(--color-primary)] hover:underline"
+              >{{ 'profile.stravaOpen' | transloco }}</a
+            >
+          }
+        </p>
+      </div>
+
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <ui-input
           [label]="'profile.zip' | transloco"

@@ -30,6 +30,10 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   lastName: string | null;
 
+  /** Canonical `https://www.strava.com/athletes/<id>` link the user chose to share. */
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  stravaUrl: string | null;
+
   @Column({ nullable: true })
   homeZip: string;
 

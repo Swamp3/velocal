@@ -25,6 +25,7 @@ export interface Community {
 export interface CommunityMember {
   userId: string;
   displayName: string | null;
+  stravaUrl: string | null;
   role: CommunityRole;
   joinedAt: string;
 }
@@ -83,6 +84,7 @@ export interface Subgroup {
 export interface SubgroupMember {
   userId: string;
   displayName: string | null;
+  stravaUrl: string | null;
   role: SubgroupRole;
   joinedAt: string;
 }

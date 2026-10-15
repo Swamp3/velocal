@@ -317,7 +317,12 @@
     "passwordResetError": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
     "firstName": "Vorname",
     "lastName": "Nachname",
-    "namesHint": "Vor- und Nachname sehen nur du und Admins. Andere Mitglieder sehen deinen Anzeigenamen."
+    "namesHint": "Vor- und Nachname sehen nur du und Admins. Andere Mitglieder sehen deinen Anzeigenamen.",
+    "strava": "Strava-Profil",
+    "stravaPlaceholder": "strava.com/athletes/… oder Athleten-ID",
+    "stravaHint": "Optional. Mitglieder deiner Communities sehen neben deinem Namen einen Link dazu.",
+    "stravaInvalid": "Gib einen strava.com-Profillink oder deine Athleten-ID ein",
+    "stravaOpen": "Auf Strava öffnen"
   },
   "series": {
     "title": "Rennserien",
@@ -706,7 +711,8 @@
       "roleMember": "Mitglied",
       "addFromCommunity": "Aus Community-Mitgliedern hinzufügen",
       "searchPlaceholder": "Namen eingeben…",
-      "noMatches": "Keine passenden Community-Mitglieder"
+      "noMatches": "Keine passenden Community-Mitglieder",
+      "stravaProfile": "Strava-Profil von {{name}}"
     },
     "requests": {
       "title": "Beitrittsanfragen",

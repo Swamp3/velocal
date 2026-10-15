@@ -63,6 +63,7 @@ export interface PaginatedCommunities {
 export interface SerializedMember {
   userId: string;
   displayName: string | null;
+  stravaUrl: string | null;
   role: 'member' | 'admin';
   joinedAt: Date;
 }
@@ -956,6 +957,7 @@ export class CommunitiesService {
     return {
       userId: member.userId,
       displayName: member.user?.displayName ?? null,
+      stravaUrl: member.user?.stravaUrl ?? null,
       role: member.role,
       joinedAt: member.createdAt,
     };
