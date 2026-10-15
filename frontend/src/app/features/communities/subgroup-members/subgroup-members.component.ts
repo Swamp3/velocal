@@ -18,7 +18,7 @@ import {
   MemberListComponent,
   MemberListItem,
 } from '@shared/components';
-import { Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
+import { CommunityMember, Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
 import { SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
@@ -54,6 +54,21 @@ export class SubgroupMembersComponent implements OnInit {
   protected readonly outlineLinkClass =
     'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
   private readonly members = signal<SubgroupMember[]>([]);
+  private readonly communityMembers = signal<CommunityMember[]>([]);
+  protected readonly query = signal('');
+
+  /** Community members who are not in the subgroup yet, narrowed by the typed text. */
+  protected readonly suggestions = computed(() => {
+    const inGroup = new Set(this.members().map((member) => member.userId));
+    const needle = this.query().trim().toLowerCase();
+    if (!needle) return [];
+    const unnamed = this.transloco.translate('communities.members.unnamed');
+    return this.communityMembers()
+      .filter((member) => !inGroup.has(member.userId))
+      .map((member) => ({ userId: member.userId, name: member.displayName ?? unnamed }))
+      .filter((member) => member.name.toLowerCase().includes(needle))
+      .slice(0, 8);
+  });
 
   protected readonly canManage = computed(() => {
     const subgroup = this.subgroup();
@@ -109,6 +124,7 @@ export class SubgroupMembersComponent implements OnInit {
           }
           this.subgroup.set(subgroup);
           this.loadPeople(subgroup);
+          this.loadCommunityMembers(subgroup);
         },
         error: () => {
           this.notFound.set(true);
@@ -146,12 +162,33 @@ export class SubgroupMembersComponent implements OnInit {
       });
   }
 
+  protected onPick(userId: string): void {
+    const subgroup = this.subgroup();
+    if (!subgroup || this.mutating()) return;
+    this.mutating.set(true);
+    this.communityService
+      .inviteToSubgroup(subgroup.communitySlug, subgroup.slug, { userId })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.query.set('');
+          this.toast.success(this.transloco.translate('communities.invite.sent'));
+          this.refresh(subgroup);
+        },
+        error: (err: ApiError) => this.fail(err),
+      });
+  }
+
+  protected onQuery(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
+  }
+
   protected onInvite(email: string): void {
     const subgroup = this.subgroup();
     if (!subgroup || this.mutating()) return;
     this.mutating.set(true);
     this.communityService
-      .inviteToSubgroup(subgroup.communitySlug, subgroup.slug, email)
+      .inviteToSubgroup(subgroup.communitySlug, subgroup.slug, { email })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -175,6 +212,21 @@ export class SubgroupMembersComponent implements OnInit {
           void this.router.navigate(['/communities', subgroup.communitySlug]);
         },
       });
+  }
+
+  private loadCommunityMembers(subgroup: Subgroup): void {
+    if (!this.canManageFor(subgroup)) return;
+    this.communityService
+      .members(subgroup.communityId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (members) => this.communityMembers.set(members),
+        error: () => this.communityMembers.set([]),
+      });
+  }
+
+  private canManageFor(subgroup: Subgroup): boolean {
+    return subgroup.viewerIsCommunityAdmin || subgroup.myRole === 'moderator';
   }
 
   private loadPeople(subgroup: Subgroup): void {

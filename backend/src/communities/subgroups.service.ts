@@ -103,15 +103,26 @@ export class SubgroupsService {
     );
     await this.assertCommunityAdmin(community.id, userId);
     const slug = await this.generateSlug(community.id, dto.name);
-    const saved = await this.subgroups.save(
-      this.subgroups.create({
-        communityId: community.id,
-        name: dto.name,
-        slug,
-        description: dto.description ?? null,
-        visibility: dto.visibility ?? SubgroupVisibility.OPEN,
-      }),
-    );
+    // The creator leads the new subgroup from the start.
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const subgroup = await manager.save(
+        this.subgroups.create({
+          communityId: community.id,
+          name: dto.name,
+          slug,
+          description: dto.description ?? null,
+          visibility: dto.visibility ?? SubgroupVisibility.OPEN,
+        }),
+      );
+      await manager.save(
+        this.members.create({
+          subgroupId: subgroup.id,
+          userId,
+          role: SubgroupMemberRole.MODERATOR,
+        }),
+      );
+      return subgroup;
+    });
     return this.serializeFor(saved, community, userId);
   }
 
@@ -553,7 +564,7 @@ export class SubgroupsService {
   async invite(
     communitySlug: string,
     slug: string,
-    email: string,
+    target: { email?: string; userId?: string },
     actorId: string,
   ): Promise<SerializedSubgroup> {
     const { subgroup, community } = await this.requireManageable(
@@ -561,7 +572,9 @@ export class SubgroupsService {
       slug,
       actorId,
     );
-    const user = await this.findUserByEmail(email);
+    const user = target.userId
+      ? await this.users.findOne({ where: { id: target.userId } })
+      : await this.findUserByEmail(target.email ?? '');
     if (!user) throw communityNotFound(CommunityErrorCode.userNotFound);
     const communityMember = await this.communityMembers.findOne({
       where: { communityId: community.id, userId: user.id },

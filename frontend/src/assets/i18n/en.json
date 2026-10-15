@@ -635,7 +635,10 @@
       "remove": "Remove member",
       "removeConfirm": "Remove this member?",
       "roleAdmin": "Admin",
-      "roleMember": "Member"
+      "roleMember": "Member",
+      "addFromCommunity": "Add from community members",
+      "searchPlaceholder": "Type a name…",
+      "noMatches": "No matching community members"
     },
     "requests": {
       "title": "Join requests",

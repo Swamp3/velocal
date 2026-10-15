@@ -635,7 +635,10 @@
       "remove": "Mitglied entfernen",
       "removeConfirm": "Dieses Mitglied entfernen?",
       "roleAdmin": "Admin",
-      "roleMember": "Mitglied"
+      "roleMember": "Mitglied",
+      "addFromCommunity": "Aus Community-Mitgliedern hinzufügen",
+      "searchPlaceholder": "Namen eingeben…",
+      "noMatches": "Keine passenden Community-Mitglieder"
     },
     "requests": {
       "title": "Beitrittsanfragen",
