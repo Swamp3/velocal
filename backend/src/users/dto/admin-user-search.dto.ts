@@ -1,4 +1,13 @@
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum UserSortField {
@@ -15,14 +24,15 @@ export enum SortOrder {
 export class AdminUserSearchDto {
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   q?: string;
 
   @IsOptional()
-  @IsString()
+  @IsIn(['admin', 'user'])
   role?: 'admin' | 'user';
 
   @IsOptional()
-  @IsString()
+  @IsIn(['banned'])
   status?: 'banned';
 
   @IsOptional()

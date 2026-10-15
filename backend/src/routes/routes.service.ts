@@ -19,6 +19,7 @@ import { SerializedRoute, serializeRoute } from './serialize';
 
 export const MAX_GPX_BYTES = 5 * 1024 * 1024;
 const MAX_FILES_PER_ROUTE = 20;
+const MAX_ROUTES_PER_USER = 100;
 
 type Viewer = { id: string; isAdmin?: boolean } | undefined;
 
@@ -33,6 +34,12 @@ export class RoutesService {
   ) {}
 
   async create(dto: CreateRouteDto, userId: string): Promise<SerializedRoute> {
+    if (
+      (await this.routes.countBy({ createdById: userId })) >=
+      MAX_ROUTES_PER_USER
+    ) {
+      throw new BadRequestException('Too many routes');
+    }
     const saved = await this.routes.save(
       this.routes.create({
         name: dto.name.trim(),
@@ -97,7 +104,7 @@ export class RoutesService {
       throw new BadRequestException('GPX file is too large');
     }
     const text = upload.buffer.toString('utf8');
-    if (!looksLikeGpx(text)) {
+    if (text.includes('\0') || !looksLikeGpx(text)) {
       throw new BadRequestException('This is not a GPX file');
     }
     const stats = gpxStats(text);
