@@ -146,7 +146,7 @@ export class SitemapController {
         listing: EventListing.PUBLIC,
         startDate: MoreThanOrEqual(cutoff),
       },
-      select: ['id', 'updatedAt', 'startDate'],
+      select: { id: true, updatedAt: true, startDate: true },
       order: { startDate: 'DESC' },
       take: MAX_URLS_PER_FILE,
     });
@@ -167,7 +167,7 @@ export class SitemapController {
   async sitemapSeries(@Res() res: Response): Promise<void> {
     const site = this.siteUrl();
     const series = await this.series.find({
-      select: ['slug', 'updatedAt'],
+      select: { slug: true, updatedAt: true },
       take: MAX_URLS_PER_FILE,
     });
     const entries = series.map((s) =>
@@ -191,7 +191,7 @@ export class SitemapController {
         status: PostStatus.PUBLISHED,
         publishedAt: LessThanOrEqual(new Date()),
       },
-      select: ['slug', 'updatedAt'],
+      select: { slug: true, updatedAt: true },
       take: MAX_URLS_PER_FILE,
     });
     const entries = posts.map((p) =>

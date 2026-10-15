@@ -45,20 +45,26 @@ export class PostsService {
     private readonly uploads: UploadsService,
   ) {}
 
-  async findAll(params: PostSearchDto, isAdmin = false): Promise<PaginatedPosts> {
+  async findAll(
+    params: PostSearchDto,
+    isAdmin = false,
+  ): Promise<PaginatedPosts> {
     const qb = this.repo
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.event', 'event')
       .leftJoinAndSelect('post.tags', 'tags');
 
-    const status = params.status ?? (isAdmin ? undefined : PostStatus.PUBLISHED);
+    const status =
+      params.status ?? (isAdmin ? undefined : PostStatus.PUBLISHED);
     if (status) {
       qb.andWhere('post.status = :status', { status });
     }
 
     if (params.q) {
-      qb.andWhere('(post.title ILIKE :q OR post.body ILIKE :q)', { q: `%${params.q}%` });
+      qb.andWhere('(post.title ILIKE :q OR post.body ILIKE :q)', {
+        q: `%${params.q}%`,
+      });
     }
 
     if (params.tag) {
@@ -96,7 +102,7 @@ export class PostsService {
   async findBySlug(slug: string): Promise<SerializedPost> {
     const post = await this.repo.findOne({
       where: { slug },
-      relations: ['author', 'event', 'tags'],
+      relations: { author: true, event: true, tags: true },
     });
     if (!post) throw new NotFoundException(`Post not found`);
     return this.serialize(post);
@@ -113,8 +119,14 @@ export class PostsService {
       eventId: dto.eventId,
       status: dto.status ?? PostStatus.PUBLISHED,
       isPinned: dto.isPinned ?? false,
-      publishedAt: (dto.status ?? PostStatus.PUBLISHED) === PostStatus.PUBLISHED ? new Date() : undefined,
-      tags: dto.tags?.map((tag) => ({ tag: tag.trim().toLowerCase() }) as PostTag) ?? [],
+      publishedAt:
+        (dto.status ?? PostStatus.PUBLISHED) === PostStatus.PUBLISHED
+          ? new Date()
+          : undefined,
+      tags:
+        dto.tags?.map(
+          (tag) => ({ tag: tag.trim().toLowerCase() }) as PostTag,
+        ) ?? [],
     });
 
     const saved = await this.repo.save(post);
@@ -124,7 +136,7 @@ export class PostsService {
   async update(id: string, dto: UpdatePostDto): Promise<SerializedPost> {
     const post = await this.repo.findOne({
       where: { id },
-      relations: ['tags'],
+      relations: { tags: true },
     });
     if (!post) throw new NotFoundException(`Post ${id} not found`);
 
@@ -134,7 +146,11 @@ export class PostsService {
     if (dto.isPinned !== undefined) post.isPinned = dto.isPinned;
 
     if (dto.status !== undefined) {
-      if (dto.status === PostStatus.PUBLISHED && post.status !== PostStatus.PUBLISHED && !post.publishedAt) {
+      if (
+        dto.status === PostStatus.PUBLISHED &&
+        post.status !== PostStatus.PUBLISHED &&
+        !post.publishedAt
+      ) {
         post.publishedAt = new Date();
       }
       post.status = dto.status;
@@ -200,7 +216,11 @@ export class PostsService {
         displayName: post.author?.displayName ?? 'Unknown',
       },
       event: post.event
-        ? { id: post.event.id, name: post.event.name, startDate: post.event.startDate?.toISOString() }
+        ? {
+            id: post.event.id,
+            name: post.event.name,
+            startDate: post.event.startDate?.toISOString(),
+          }
         : undefined,
       status: post.status,
       isPinned: post.isPinned,
