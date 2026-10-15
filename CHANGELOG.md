@@ -4,6 +4,31 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.8.0] — 2026-10-15
+
+### Added
+
+- **Repeating events** — create a weekly or every-two-weeks series, for example a Wednesday 18:30 evening ride. Each date is its own event at the same local time, also across the clock change. Delete a single date, or stop the series from a date on.
+- **Routes with several GPX files** — a route can hold multiple GPX files, such as variants or stages. Distance and climb are worked out on upload. Find them under "Routes" in the account menu.
+- **Pace groups** — an event can have groups with a speed range and a category (social, endurance, training, drop ride, race), each with its own route and Strava links.
+- **Strava links** — add one or more Strava events to an event or to a single pace group.
+- **Public events in a club** — club admins and subgroup moderators can add an event from the public list to the club, with their own meetup place, time, note, RSVPs and comments that only members see.
+- **Club details** — a location and a Strava link for each club. Posts, polls, subgroups and members now show a count on their buttons.
+- **App updates** — VeloCal is installable as an app and tells you when a new version is ready. It switches to it on your next click, or right away with "Reload".
+- **Automatic deploys** — pushes to the `release` branch are tested and deployed over a restricted SSH key.
+
+### Changed
+
+- The header is tidier: Events, Calendar and Map share one menu, and Profile, Routes, Admin and Log out sit in an account menu.
+- From a club's event list, the back link leads back to the club.
+- Backups now include uploaded images and GPX files, plus a consistent database dump.
+
+### Fixed
+
+- Who is coming to an event is no longer public. The RSVP count and list are limited to members of the club or subgroup, and plain public events have no RSVP.
+- Creating a subgroup now makes you its moderator.
+- Subgroup members are added by picking from the club's members, with name suggestions, and no longer by email.
+
 ## [0.7.0] — 2026-10-14
 
 ### Added
