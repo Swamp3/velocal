@@ -36,7 +36,7 @@ backend **will not start** unless a real secret is set. Set it first (step 1).
 | 7 | `@IsUrl` scheme restriction | Low | Low–medium (existing data) | After cutover |
 | 8 | Burst limits on invites, comments, RSVPs | Low | Low | After cutover |
 | 9 | Registration enumeration | Low | Product decision | Optional |
-| 10 | Upload and GPX hardening | Low | Low | After cutover |
+| 10 | Upload and GPX hardening | Low | Low | Done (quota open) |
 | 11 | Housekeeping (duplicate guards, image pinning, audit) | Low/Info | Low | Anytime |
 
 ---
@@ -389,23 +389,21 @@ removing it changes sign-up flow and needs an email-based verification step.
 
 ---
 
-## 10. Upload and GPX hardening
+## 10. Upload and GPX hardening — done
 
-**Why deferred:** Low risk today; changes are defensive.
+Implemented (no deployment dependency):
 
-**Steps**
+- Image uploads decode the header with `sharp(...).metadata()` and accept only
+  real JPEG/PNG/WebP, regardless of the client-sent mimetype (SVG is rejected).
+- `limitInputPixels` is capped at 50 MP for both the check and the re-encode.
+- Every image upload endpoint already had a 10 MB multer limit; GPX has 5 MB.
+- GPX uploads reject files containing NUL bytes; files stay download-only with
+  `Content-Disposition: attachment` and `nosniff`.
+- A user can own at most 100 routes (20 files per route already applied).
 
-1. Validate magic bytes server-side instead of trusting `file.mimetype`. `sharp`
-   already rejects non-images by failing to decode, so this only improves error
-   messages: use `sharp(buffer).metadata()` and check `format`.
-2. Make decode limits explicit: `sharp(buffer, { failOn: 'error', limitInputPixels: 50_000_000 })`
-   (the existing default is similar; this documents it).
-3. Confirm every image upload endpoint has a `FileInterceptor` size limit that
-   matches `MAX_BYTES` (10 MB). The routes endpoint already has one.
-4. Keep GPX files as downloads only (`Content-Disposition: attachment`,
-   `nosniff` already set). If you ever render GPX inline, parse and sanitise
-   first; never embed raw GPX text in HTML.
-5. Add disk quotas: cap total uploads per user and monitor the volume size.
+Still open: a global per-user storage quota and monitoring of the uploads volume
+size, which need product numbers and ops tooling. If GPX is ever rendered inline,
+parse and sanitise it first; never embed raw GPX text in HTML.
 
 ---
 
