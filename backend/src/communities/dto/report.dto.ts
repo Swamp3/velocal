@@ -1,4 +1,11 @@
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { REPORT_REASONS, REPORT_TARGETS } from '../entities/report.entity';
 import type { ReportReason, ReportTarget } from '../entities/report.entity';
 
@@ -32,6 +39,7 @@ export class ResolveReportDto {
 
 export class SuspendCommunityDto {
   @IsString()
+  @MinLength(1)
   @MaxLength(500)
   reason: string;
 }
