@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ViewEncapsulation,
   ElementRef,
   HostListener,
   inject,
@@ -21,7 +22,9 @@ const DIALOG_ZOOM = 14;
 @Component({
   selector: 'app-event-map-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, TranslocoPipe],
+  styleUrls: ['../../../../../node_modules/leaflet/dist/leaflet.css'],
   template: `
     <div
       class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm

@@ -34,7 +34,7 @@ export function communityNotFound(code: CommunityErrorCode): NotFoundException {
   return new NotFoundException({ code, message: code });
 }
 
-/** Blocks every read and write inside a community that a site admin suspended. */
+/** Rejects a mutation while a site admin has suspended the community. Reads stay open for members. */
 export function assertCommunityActive(community: {
   suspendedAt?: Date | null;
 }): void {

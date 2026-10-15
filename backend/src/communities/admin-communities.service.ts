@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -257,11 +261,13 @@ export class AdminCommunitiesService {
 
   /** Hides the community and makes it read-only until it is lifted. */
   async suspend(id: string, reason: string, actorId: string): Promise<void> {
+    const trimmed = reason.trim();
+    if (!trimmed) throw new BadRequestException('A reason is required');
     const [row] = await this.dataSource
       .query<{ id: string; name: string; slug: string }[]>(
         `UPDATE "communities" SET "suspended_at" = now(), "suspended_reason" = $2
        WHERE "id" = $1 AND "suspended_at" IS NULL RETURNING "id", "name", "slug"`,
-        [id, reason.trim()],
+        [id, trimmed],
       )
       .then((res) => (Array.isArray(res[0]) ? res[0] : res));
     if (!row)
@@ -271,7 +277,7 @@ export class AdminCommunitiesService {
       'community.suspended',
       row.name,
       row.slug,
-      reason.trim(),
+      trimmed,
       actorId,
     );
     await this.audit.record({
@@ -281,7 +287,7 @@ export class AdminCommunitiesService {
       targetId: id,
       targetLabel: row.name,
       communityId: id,
-      details: { reason: reason.trim() },
+      details: { reason: trimmed },
     });
   }
 

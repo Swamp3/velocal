@@ -1,5 +1,13 @@
 @use '@fontsource-variable/inter';
-@use '@fontsource-variable/material-symbols-outlined';
+
+/* Subset of Material Symbols Outlined (weight axis), ligatures only for icons this app renders. */
+@font-face {
+  font-family: 'Material Symbols Outlined Variable';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url('./assets/fonts/material-symbols-subset.woff2') format('woff2');
+}
 
 :root {
   --color-primary: #38bdf8;
@@ -79,6 +87,18 @@ body {
     'wght' 400,
     'GRAD' 0,
     'opsz' 24;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  flex-shrink: 0;
+  line-height: 1;
+  vertical-align: -0.125em;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
 }
 
 input[type='date'] {

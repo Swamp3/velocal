@@ -3,7 +3,14 @@ import { adminGuard } from '@core/guards/admin.guard';
 import { authGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'events', pathMatch: 'full' },
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/events/event-list/event-list.component').then(
+        (m) => m.EventListComponent,
+      ),
+  },
   {
     path: 'admin',
     canActivate: [adminGuard],

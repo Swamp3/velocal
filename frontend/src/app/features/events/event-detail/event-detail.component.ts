@@ -3,11 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   OnInit,
   Pipe,
   PipeTransform,
   signal,
+  untracked,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -100,6 +102,22 @@ export class EventDetailComponent implements OnInit {
   protected readonly startTime = computed(() => formatTime(this.event()?.startDate));
   protected readonly endTime = computed(() => formatTime(this.event()?.endDate));
   protected readonly deadlineTime = computed(() => formatTime(this.event()?.registrationDeadline));
+  private reloadedForViewer = false;
+  private loadedAnonymously = false;
+
+  constructor() {
+    effect(() => {
+      const user = this.auth.currentUser();
+      if (!user || !this.loadedAnonymously || this.reloadedForViewer) return;
+      this.reloadedForViewer = true;
+      untracked(() => {
+        const id = this.route.snapshot.paramMap.get('id');
+        if (!id) return;
+        this.loadEvent(id);
+        this.favoriteService.loadFavorites();
+      });
+    });
+  }
 
   protected readonly isFavorite = computed(() => {
     const ev = this.event();
@@ -144,9 +162,10 @@ export class EventDetailComponent implements OnInit {
     const query = this.route.snapshot.queryParamMap;
     this.hostContext.community = query.get('community') ?? undefined;
     this.hostContext.subgroup = query.get('subgroup') ?? undefined;
+    this.loadedAnonymously = !this.auth.isAuthenticated();
     this.loadEvent(id);
 
-    if (this.auth.isAuthenticated()) {
+    if (!this.loadedAnonymously) {
       this.favoriteService.loadFavorites();
     }
   }

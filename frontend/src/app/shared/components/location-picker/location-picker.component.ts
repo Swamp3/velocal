@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ViewEncapsulation,
   ElementRef,
   inject,
   input,
@@ -21,6 +22,8 @@ const MARKER_ZOOM = 13;
 @Component({
   selector: 'app-location-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['../../../../../node_modules/leaflet/dist/leaflet.css'],
   template: `
     <div
       #mapContainer

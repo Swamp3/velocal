@@ -34,9 +34,10 @@ export const appConfig: ApplicationConfig = {
       if (!isPlatformBrowser(inject(PLATFORM_ID))) return;
       const authService = inject(AuthService);
       const localeId = inject(LOCALE_ID);
-      return authService.whenReady().then(() => {
-        const user = authService.currentUser();
-        if (user && user.preferredLocale && user.preferredLocale !== localeId) {
+      // Do not await. Blocking bootstrap on /users/me delays hydration.
+      void authService.whenReady().then(() => {
+        const user = authService.sessionUser();
+        if (user?.preferredLocale && user.preferredLocale !== localeId) {
           window.location.reload();
         }
       });

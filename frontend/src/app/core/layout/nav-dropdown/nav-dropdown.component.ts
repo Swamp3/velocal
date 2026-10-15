@@ -1,20 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostListener,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { Component, ElementRef, inject, input, signal } from '@angular/core';
 
 /**
- * Header dropdown: a button that opens a panel of links (projected content).
+ * Header disclosure: a button that opens a panel of links (projected content).
  * Closes on outside click, Escape, or when a link inside is chosen.
  */
 @Component({
   selector: 'app-nav-dropdown',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'onEscape()',
+  },
   template: `
     <div class="relative">
       <button
@@ -25,7 +20,7 @@ import {
             ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
         "
-        aria-haspopup="menu"
+        aria-haspopup="true"
         [attr.aria-expanded]="open()"
         [attr.aria-label]="ariaLabel() || null"
         (click)="open.set(!open())"
@@ -41,11 +36,9 @@ import {
 
       @if (open()) {
         <div
-          role="menu"
           class="absolute right-0 z-50 mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-1 shadow-[var(--shadow-elevated)]"
           (click)="open.set(false)"
           (keydown.enter)="open.set(false)"
-          tabindex="-1"
         >
           <ng-content />
         </div>
@@ -63,14 +56,12 @@ export class NavDropdownComponent {
 
   protected readonly open = signal(false);
 
-  @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: Event): void {
     if (this.open() && !this.host.nativeElement.contains(event.target as Node)) {
       this.open.set(false);
     }
   }
 
-  @HostListener('document:keydown.escape')
   protected onEscape(): void {
     this.open.set(false);
   }

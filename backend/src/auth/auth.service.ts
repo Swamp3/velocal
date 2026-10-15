@@ -81,6 +81,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    this.assertNotBanned(user);
     return this.buildAuthResponse(user);
   }
 
@@ -88,6 +89,9 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase().trim();
 
     await this.enforceOtpRateLimit(normalizedEmail);
+
+    const existing = await this.usersService.findByEmail(normalizedEmail);
+    if (existing?.bannedAt) return { message: 'OTP sent' };
 
     await this.otpRepository.delete({
       email: normalizedEmail,
@@ -145,9 +149,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired code');
     }
 
+    const existing = await this.usersService.findByEmail(normalizedEmail);
+    if (existing?.bannedAt) this.assertNotBanned(existing);
+
     await this.otpRepository.delete({ email: normalizedEmail });
 
-    let user = await this.usersService.findByEmail(normalizedEmail);
+    let user = existing;
     if (!user) {
       user = await this.usersService.create({
         email: normalizedEmail,
@@ -165,7 +172,7 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await this.usersService.findByEmail(normalizedEmail);
 
-    if (user) {
+    if (user && !user.bannedAt) {
       await this.enforceResetRateLimit(user.id);
       await this.sendResetEmail(user);
     }
@@ -196,6 +203,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid or expired reset token');
     }
+    this.assertNotBanned(user);
 
     user.passwordHash = passwordHash;
     if (!user.emailVerified) user.emailVerified = true;
@@ -226,6 +234,15 @@ export class AuthService {
     await this.sendResetEmail(user);
 
     return { message: 'Reset email sent.' };
+  }
+
+  private assertNotBanned(user: User): void {
+    if (!user.bannedAt) return;
+    throw new ForbiddenException({
+      statusCode: 403,
+      code: 'accountBanned',
+      message: 'This account has been blocked.',
+    });
   }
 
   private async sendResetEmail(user: User): Promise<void> {
@@ -271,13 +288,7 @@ export class AuthService {
   }
 
   buildAuthResponse(user: User): AuthResponse {
-    if (user.bannedAt) {
-      throw new ForbiddenException({
-        statusCode: 403,
-        code: 'accountBanned',
-        message: 'This account has been blocked.',
-      });
-    }
+    this.assertNotBanned(user);
     const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
     return {
       accessToken: this.jwtService.sign(payload),

@@ -99,6 +99,22 @@ export class CommunityCleanupService {
       subgroupId,
     );
     await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `UPDATE "reports" SET "status" = 'resolved', "resolved_at" = now(),
+                "resolution_note" = 'Subgroup deleted'
+         WHERE "status" = 'open'
+           AND (
+             ("target_type" = 'post' AND "target_id" IN (
+               SELECT "id" FROM "community_posts" WHERE "subgroup_id" = $1
+             ))
+             OR ("target_type" = 'comment' AND "target_id" IN (
+               SELECT c."id" FROM "community_post_comments" c
+               JOIN "community_posts" p ON p."id" = c."post_id"
+               WHERE p."subgroup_id" = $1
+             ))
+           )`,
+        [subgroupId],
+      );
       await manager.query(`DELETE FROM "subgroups" WHERE "id" = $1`, [
         subgroupId,
       ]);
