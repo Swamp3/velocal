@@ -110,7 +110,8 @@
         "outlook": "Outlook",
         "ics": ".ics-Datei herunterladen"
       },
-      "community": "Community"
+      "community": "Community",
+      "backToCommunity": "Zurück zur Community"
     },
     "status": {
       "published": "Ausgeschrieben",

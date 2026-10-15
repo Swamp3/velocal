@@ -24,6 +24,14 @@ export class EventComment {
   @JoinColumn({ name: 'event_id' })
   event: Event;
 
+  /**
+   * Set when the comment belongs to a public event shared with a community:
+   * it is then visible to that audience only. Null for community-hosted events.
+   */
+  @Index('IDX_event_comments_share_id')
+  @Column({ type: 'uuid', name: 'share_id', nullable: true })
+  shareId: string | null;
+
   @Column({ type: 'uuid', name: 'author_id' })
   authorId: string;
 

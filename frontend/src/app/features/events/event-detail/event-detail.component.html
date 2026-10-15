@@ -29,11 +29,11 @@
     <!-- Top bar: back link + actions -->
     <div class="flex flex-wrap items-center justify-between gap-3">
       <a
-        routerLink="/events"
+        [routerLink]="back().commands"
         class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
       >
         <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-        {{ 'events.detail.backToList' | transloco }}
+        {{ back().labelKey | transloco }}
       </a>
 
       <div class="flex flex-wrap items-center gap-2">
@@ -430,7 +430,7 @@
     }
 
     @if (event.canComment) {
-      <app-event-comments [eventId]="event.id" />
+      <app-event-comments [eventId]="event.id" [hostContext]="hostContext" />
     }
 
     <!-- Mini map (click to expand into interactive dialog) -->

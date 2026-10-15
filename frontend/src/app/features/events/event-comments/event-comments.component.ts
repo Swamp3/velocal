@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } fro
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ApiError } from '@core/services/api.service';
-import { EventComment, EventService } from '@core/services/event.service';
+import { EventComment, EventHostContext, EventService } from '@core/services/event.service';
 import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { RichTextViewComponent } from '@shared/components/rich-text/rich-text-view.component';
 import { plainText } from '@shared/components/rich-text/rich-text';
@@ -28,6 +28,7 @@ export class EventCommentsComponent implements OnInit {
   private readonly transloco = inject(TranslocoService);
 
   readonly eventId = input.required<string>();
+  readonly hostContext = input<EventHostContext>();
 
   protected readonly comments = signal<EventComment[]>([]);
   protected readonly submitting = signal(false);
@@ -36,7 +37,7 @@ export class EventCommentsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.events.listComments(this.eventId()).subscribe({
+    this.events.listComments(this.eventId(), this.hostContext()).subscribe({
       next: (comments) => this.comments.set(comments),
     });
   }
@@ -45,7 +46,7 @@ export class EventCommentsComponent implements OnInit {
     const body = this.form.controls.body.value;
     if (!plainText(body) || this.submitting()) return;
     this.submitting.set(true);
-    this.events.addComment(this.eventId(), body).subscribe({
+    this.events.addComment(this.eventId(), body, this.hostContext()).subscribe({
       next: (comment) => {
         this.comments.update((comments) => [...comments, comment]);
         this.form.reset();
@@ -64,7 +65,7 @@ export class EventCommentsComponent implements OnInit {
 
   protected remove(comment: EventComment): void {
     if (!confirm(this.transloco.translate('events.comments.deleteConfirm'))) return;
-    this.events.deleteComment(this.eventId(), comment.id).subscribe({
+    this.events.deleteComment(this.eventId(), comment.id, this.hostContext()).subscribe({
       next: () => {
         this.comments.update((comments) => comments.filter((item) => item.id !== comment.id));
       },

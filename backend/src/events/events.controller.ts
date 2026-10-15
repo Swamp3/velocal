@@ -105,8 +105,13 @@ export class EventsController {
   listComments(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: { id: string },
+    @Query('community') community?: string,
+    @Query('subgroup') subgroup?: string,
   ) {
-    return this.eventsService.listComments(id, user.id);
+    return this.eventsService.listComments(id, user.id, {
+      community,
+      subgroup,
+    });
   }
 
   @Post(':id/comments')
@@ -117,8 +122,13 @@ export class EventsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateEventCommentDto,
     @CurrentUser() user: { id: string },
+    @Query('community') community?: string,
+    @Query('subgroup') subgroup?: string,
   ) {
-    return this.eventsService.addComment(id, user.id, dto.body);
+    return this.eventsService.addComment(id, user.id, dto.body, {
+      community,
+      subgroup,
+    });
   }
 
   @Delete(':id/comments/:commentId')
@@ -128,8 +138,13 @@ export class EventsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('commentId', ParseUUIDPipe) commentId: string,
     @CurrentUser() user: { id: string },
+    @Query('community') community?: string,
+    @Query('subgroup') subgroup?: string,
   ): Promise<void> {
-    return this.eventsService.deleteComment(id, commentId, user.id);
+    return this.eventsService.deleteComment(id, commentId, user.id, {
+      community,
+      subgroup,
+    });
   }
 
   @Post()
