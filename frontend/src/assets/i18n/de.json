@@ -123,7 +123,8 @@
       "backToCommunity": "Zurück zur Community",
       "editMeetup": "Treffpunkt bearbeiten",
       "meetupSaved": "Treffpunkt gespeichert",
-      "meetupError": "Treffpunkt konnte nicht gespeichert werden"
+      "meetupError": "Treffpunkt konnte nicht gespeichert werden",
+      "membersOnly": "Nur für Mitglieder"
     },
     "status": {
       "published": "Ausgeschrieben",
