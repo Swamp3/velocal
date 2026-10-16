@@ -6,12 +6,12 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityService } from '@core/services/community.service';
 import { EventService } from '@core/services/event.service';
 import { CyclingEvent } from '@shared/models';
-import { ToastService } from '@shared/ui';
+import { IconButtonComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-community-events',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, DatePipe, ReactiveFormsModule],
+  imports: [RouterLink, TranslocoPipe, DatePipe, ReactiveFormsModule, IconButtonComponent],
   templateUrl: './community-events.component.html',
 })
 export class CommunityEventsComponent implements OnInit {

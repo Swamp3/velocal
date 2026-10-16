@@ -103,10 +103,11 @@
   } @else {
     <ul class="flex flex-col gap-2">
       @for (event of events(); track event.id) {
-        <li class="flex items-center gap-2">
+        <li class="relative">
           <a
             [routerLink]="['/events', event.id]"
             [queryParams]="eventQuery()"
+            [class.pr-12]="canCreate() && event.shared"
             class="flex min-w-0 flex-1 flex-col items-start gap-1 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3 text-[var(--color-text)] shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:flex-row sm:items-center sm:justify-between sm:gap-3"
           >
             <span class="min-w-0">
@@ -135,9 +136,16 @@
             </time>
           </a>
           @if (canCreate() && event.shared) {
-            <button type="button" [class]="outlineLinkClass" (click)="unshare(event)">
-              {{ 'communities.events.shareRemove' | transloco }}
-            </button>
+            <button
+              type="button"
+              uiIconButton
+              icon="link_off"
+              size="sm"
+              variant="ghost"
+              class="absolute right-2 top-2 sm:top-1/2 sm:-translate-y-1/2"
+              [label]="'communities.events.shareRemove' | transloco"
+              (click)="unshare(event)"
+            ></button>
           }
         </li>
       }

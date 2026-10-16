@@ -4,6 +4,7 @@
 
 ### Added
 
+- `scripts/subset-icons.py` rebuilds the trimmed icon font from the icons used in the code
 - "My events" page (`/profile/events`) with an entry in the account menu
 - Data quality page with sections for missing data, possible duplicates and events gone at their source
 - Mobile calendar agenda folds past days of the current month, scrolls to the selected day or today
