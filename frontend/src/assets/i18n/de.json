@@ -722,6 +722,34 @@
         "user.unban": "Nutzer entsperrt",
         "user.delete": "Eigenes Konto gelöscht"
       }
+    },
+    "dataQuality": {
+      "section": {
+        "missing": "Fehlende Daten",
+        "duplicates": "Mögliche Duplikate",
+        "source": "Quelle fehlt"
+      }
+    },
+    "duplicates": {
+      "hint": "Events am selben Tag mit ähnlichem Namen und Ort. Bearbeite eines davon, lösche die überzählige Kopie oder bestätige, dass es verschiedene Events sind.",
+      "sourceHint": "Anstehende importierte Events, die ihre Quelle (z. B. Rad-net) nicht mehr listet. Sie könnten abgesagt, verschoben oder unter einem neuen Eintrag geführt sein.",
+      "includePast": "Vergangene Events einbeziehen",
+      "empty": "Keine möglichen Duplikate gefunden",
+      "sourceEmpty": "Alle importierten Events werden von ihrer Quelle noch gelistet",
+      "notDuplicate": "Kein Duplikat",
+      "dismissed": "Als verschiedene Events markiert.",
+      "deleted": "Event gelöscht.",
+      "delete": "Löschen",
+      "manual": "manuell",
+      "gone": "bei Quelle weg",
+      "goneSince": "nicht mehr gelistet seit",
+      "openSource": "Quelle öffnen",
+      "reason": {
+        "sameName": "gleicher Name",
+        "similarName": "ähnlicher Name",
+        "sameLocation": "gleicher Ort",
+        "nearby": "nah beieinander"
+      }
     }
   },
   "workouts": {

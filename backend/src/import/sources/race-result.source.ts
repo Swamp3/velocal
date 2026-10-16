@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  ImportSource,
-  RawEvent,
-} from '../interfaces/import-source.interface';
+import { ImportSource, RawEvent } from '../interfaces/import-source.interface';
 
 const BASE_URL = 'https://my.raceresult.com';
 const LIST_URL = `${BASE_URL}/RREvents/list`;
@@ -31,6 +28,7 @@ interface ListResponse {
 export class RaceResultSource implements ImportSource {
   readonly name = 'race-result';
   private readonly logger = new Logger(RaceResultSource.name);
+  lastFetchComplete = false;
   private readonly countries: number[];
   private readonly limit: number;
 
@@ -44,6 +42,7 @@ export class RaceResultSource implements ImportSource {
 
   async fetch(): Promise<RawEvent[]> {
     const events: RawEvent[] = [];
+    let complete = true;
 
     for (const country of this.countries) {
       for (const [type, disciplineSlug] of TYPE_DISCIPLINE_MAP) {
@@ -70,6 +69,7 @@ export class RaceResultSource implements ImportSource {
               this.logger.warn(
                 `HasMore=true for type=${type} country=${country} — consider increasing limit`,
               );
+              complete = false;
             }
           }
         } catch (error) {
@@ -77,10 +77,12 @@ export class RaceResultSource implements ImportSource {
             `Failed to fetch type=${type} country=${country} after ${MAX_RETRIES} attempts`,
             error,
           );
+          complete = false;
         }
       }
     }
 
+    this.lastFetchComplete = complete && events.length > 0;
     this.logger.log(`Total events fetched: ${events.length}`);
     return events;
   }
@@ -150,6 +152,7 @@ export class RaceResultSource implements ImportSource {
         lng: Number(t[8]),
         disciplineSlug,
         externalUrl: `${BASE_URL}/${t[0]}/info`,
+        sourceUrl: `${BASE_URL}/${t[0]}/info`,
         status: 'published',
       }));
   }

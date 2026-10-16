@@ -13,12 +13,19 @@ export interface RawEvent {
   lng?: number;
   registrationDeadline?: Date;
   externalUrl?: string;
+  /** The page of the source that lists this event. */
+  sourceUrl?: string;
   status: string;
 }
 
 export interface ImportSource {
   readonly name: string;
   fetch(): Promise<RawEvent[]>;
+  /**
+   * Whether the last `fetch()` covered everything the source lists. Events that
+   * are absent from an incomplete run are not reported as gone.
+   */
+  readonly lastFetchComplete: boolean;
 }
 
 export interface ImportResult {

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Fewer duplicate events and traceable sources** — the importer now remembers which source and page each event came from, recognises the same race even when its name or place is spelled differently (also against manually created events and the other source), and moves postponed events instead of duplicating them. Admin > Data quality has a new list of possible duplicates (edit, delete or mark as different) and a list of upcoming imported events their source no longer shows.
 - **Calmer mobile calendar** — in the current month, past days are folded into one line ("5 past days (5 events) – show"), so the list starts at today. Open them with a tap, and the Today button or a tapped day scrolls to its entry.
 - **Registration start (Anmeldestart)** — events can have a date and time when sign-up opens. The event page shows it before the deadline and tells visitors when registration has not opened yet. The start must not be after the deadline. Both dates can now be removed again when editing an event.
 - **Push notifications** — turn on push for each device in your profile and choose what you get: event invitations, membership, new events (off by default) and club updates. Works on Android, desktop browsers and iPhones with VeloCal added to the Home Screen. A test button checks that it works.

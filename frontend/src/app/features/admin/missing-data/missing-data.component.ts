@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DuplicateEventsComponent } from '../duplicate-events/duplicate-events.component';
 import {
   AdminService,
   MissingDataType,
@@ -23,6 +24,8 @@ import {
 interface MissingEvent extends CyclingEvent {
   missingFields: string[];
 }
+
+type Section = 'missing' | 'duplicates' | 'source';
 
 type FilterTab = 'all' | MissingDataType;
 
@@ -45,6 +48,7 @@ const FIELD_BADGE_VARIANT: Record<string, BadgeVariant> = {
     SkeletonComponent,
     DatePipe,
     RouterLink,
+    DuplicateEventsComponent,
   ],
   templateUrl: './missing-data.component.html',
 })
@@ -60,10 +64,29 @@ export class MissingDataComponent implements OnInit {
   protected readonly activeTab = signal<FilterTab>('all');
   protected readonly stats = signal<Record<string, number>>({});
   protected readonly tabOptions = TAB_OPTIONS;
+  protected readonly sections: Section[] = ['missing', 'duplicates', 'source'];
+  protected readonly section = signal<Section>('missing');
+  private readonly counts = signal<Partial<Record<Section, number>>>({});
 
   ngOnInit(): void {
     this.loadStats();
     this.loadEvents();
+    // Counts for the section tabs.
+    this.admin.getDuplicateGroups({ page: 1, limit: 1 }).subscribe({
+      next: (r) => this.counts.update((c) => ({ ...c, duplicates: r.total })),
+    });
+    this.admin.getMissingAtSource({ page: 1, limit: 1 }).subscribe({
+      next: (r) => this.counts.update((c) => ({ ...c, source: r.total })),
+    });
+  }
+
+  protected sectionCount(section: Section): number {
+    return this.counts()[section] ?? 0;
+  }
+
+  protected onCounted(count: number): void {
+    const section = this.section();
+    this.counts.update((c) => ({ ...c, [section]: count }));
   }
 
   protected disciplineName(d: Discipline | undefined): string {

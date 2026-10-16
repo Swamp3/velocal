@@ -800,6 +800,34 @@ export class EventsService {
     return this.present(saved, user.id);
   }
 
+  async findMissingAtSource(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedEvents> {
+    const [data, total] = await this.repo
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.discipline', 'discipline')
+      .where("event.source = 'imported'")
+      .andWhere('event.missingSince IS NOT NULL')
+      .andWhere('event.startDate >= NOW()')
+      .orderBy('event.missingSince', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+    return {
+      data: data.map((e) => ({
+        ...this.serializeEvent(e),
+        sourceName: e.sourceName,
+        sourceUrl: e.sourceUrl,
+        lastSeenAt: e.lastSeenAt,
+        missingSince: e.missingSince,
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
   async findMissingData(dto: AdminMissingDataDto): Promise<PaginatedEvents> {
     const qb = this.repo
       .createQueryBuilder('event')

@@ -722,6 +722,34 @@
         "user.unban": "Unblocked user",
         "user.delete": "Deleted own account"
       }
+    },
+    "dataQuality": {
+      "section": {
+        "missing": "Missing data",
+        "duplicates": "Possible duplicates",
+        "source": "Gone at source"
+      }
+    },
+    "duplicates": {
+      "hint": "Events on the same day with similar names and places. Edit one of them, delete the extra copy, or confirm that they are different events.",
+      "sourceHint": "Upcoming imported events that their source (for example Rad-net) no longer lists. They may have been cancelled, moved or listed under a new entry.",
+      "includePast": "Include past events",
+      "empty": "No possible duplicates found",
+      "sourceEmpty": "All imported events are still listed at their source",
+      "notDuplicate": "Not duplicates",
+      "dismissed": "Marked as different events.",
+      "deleted": "Event deleted.",
+      "delete": "Delete",
+      "manual": "manual",
+      "gone": "gone at source",
+      "goneSince": "not listed since",
+      "openSource": "Open source",
+      "reason": {
+        "sameName": "same name",
+        "similarName": "similar name",
+        "sameLocation": "same place",
+        "nearby": "close together"
+      }
     }
   },
   "workouts": {

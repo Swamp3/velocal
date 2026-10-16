@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { load, type CheerioAPI } from 'cheerio';
-import {
-  ImportSource,
-  RawEvent,
-} from '../interfaces/import-source.interface';
+import { ImportSource, RawEvent } from '../interfaces/import-source.interface';
 
 const BASE_URL = 'https://www.rad-net.de';
 const LISTING_URL = `${BASE_URL}/rad-net-portal/rad-net-ausschreibungen.htm?url=%2Fmodules.php%3Fname%3DAusschreibung%26extsearch%3D1&url_hash=12zwZUQXsPe4JWe946PCaJnZ2I4puRrzgGrTr1DG7Vo`;
@@ -14,39 +11,41 @@ const RETRY_BACKOFF_MS = 3000;
 
 const DISCIPLINE_MAP: Record<string, string> = {
   'str.': 'strasse',
-  'straße': 'strasse',
-  'strasse': 'strasse',
-  'bahn': 'bahn',
-  'cx': 'cyclo-cross',
+  straße: 'strasse',
+  strasse: 'strasse',
+  bahn: 'bahn',
+  cx: 'cyclo-cross',
   'cyclo-cross': 'cyclo-cross',
-  'querfeldein': 'cyclo-cross',
-  'mtb': 'mtb',
-  'bmx': 'bmx',
-  'halle': 'halle',
+  querfeldein: 'cyclo-cross',
+  mtb: 'mtb',
+  bmx: 'bmx',
+  halle: 'halle',
   'kunstrsp.': 'halle',
-  'kunstradsport': 'halle',
-  'trial': 'trial',
-  'breitensport': 'breitensport',
-  'gravel': 'gravel',
+  kunstradsport: 'halle',
+  trial: 'trial',
+  breitensport: 'breitensport',
+  gravel: 'gravel',
 };
 
 const STATUS_MAP: Record<string, string> = {
-  'ausgeschrieben': 'published',
-  'abgesagt': 'cancelled',
-  'durchgeführt': 'completed',
-  'durchgefuehrt': 'completed',
+  ausgeschrieben: 'published',
+  abgesagt: 'cancelled',
+  durchgeführt: 'completed',
+  durchgefuehrt: 'completed',
 };
 
 @Injectable()
 export class RadNetSource implements ImportSource {
   readonly name = 'rad-net';
   private readonly logger = new Logger(RadNetSource.name);
+  lastFetchComplete = false;
 
   async fetch(): Promise<RawEvent[]> {
     const events: RawEvent[] = [];
     let url: string | null = LISTING_URL;
     let page = 0;
     let consecutiveFailures = 0;
+    let complete = true;
 
     while (url && page < MAX_PAGES) {
       page++;
@@ -78,11 +77,16 @@ export class RadNetSource implements ImportSource {
         );
         if (consecutiveFailures >= 3) {
           this.logger.error('Too many consecutive failures, stopping');
+          complete = false;
           break;
         }
         await this.delay(RETRY_BACKOFF_MS);
       }
     }
+
+    // Stopped by the page limit while a next page still existed.
+    if (url && page >= MAX_PAGES) complete = false;
+    this.lastFetchComplete = complete && events.length > 0;
 
     this.logger.log(
       `Total events fetched: ${events.length}, enriching with detail pages...`,
@@ -150,15 +154,14 @@ export class RadNetSource implements ImportSource {
       const disciplineSlug = this.mapDiscipline(disciplineText);
       const status = this.mapStatus(statusText);
       const externalId = this.extractEventId(detailHref);
-      const externalUrl = detailHref
-        ? this.resolveUrl(detailHref)
-        : undefined;
+      const externalUrl = detailHref ? this.resolveUrl(detailHref) : undefined;
       const registrationDeadline = deadlineText
         ? this.parseGermanDate(deadlineText)
         : undefined;
 
       events.push({
-        externalId: externalId ?? `rad-net-${name}-${start.toISOString().slice(0, 10)}`,
+        externalId:
+          externalId ?? `rad-net-${name}-${start.toISOString().slice(0, 10)}`,
         sourceName: this.name,
         name,
         startDate: start,
@@ -168,6 +171,7 @@ export class RadNetSource implements ImportSource {
         country: 'DE',
         registrationDeadline: registrationDeadline ?? undefined,
         externalUrl,
+        sourceUrl: externalUrl,
         status,
       });
     });
@@ -264,10 +268,7 @@ export class RadNetSource implements ImportSource {
           `[${i + 1}/${events.length}] ${event.name}: ort=${detail.ort}, address=${detail.address}`,
         );
       } catch (error) {
-        this.logger.warn(
-          `Failed to fetch details for "${event.name}"`,
-          error,
-        );
+        this.logger.warn(`Failed to fetch details for "${event.name}"`, error);
       }
     }
   }
