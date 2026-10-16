@@ -4,6 +4,7 @@
 
 ### Added
 
+- Mobile calendar agenda folds past days of the current month, scrolls to the selected day or today
 - Registration start fields in the event form and a row on the event page
 - Push notification settings in the profile (this device on/off, message types, test message), `PushService` on top of `SwPush`; the subscription is renewed on start and removed on sign-out
 - Delete account dialog in the profile (email confirmation, password, option to remove own content); inbox text for the admin handover

@@ -52,6 +52,7 @@ export class EventCalendarComponent implements OnInit {
   readonly disciplines = signal<Discipline[]>([]);
   readonly isMobile = signal(false);
   readonly selectedDay = signal<string | null>(null);
+  readonly scrollTick = signal(0);
 
   private readonly fetch$ = new Subject<void>();
   private mediaQuery?: MediaQueryList;
@@ -148,6 +149,7 @@ export class EventCalendarComponent implements OnInit {
   goToToday(): void {
     this.currentDate.set(new Date());
     this.selectedDay.set(null);
+    this.scrollTick.update((n) => n + 1);
   }
 
   onViewModeChange(mode: 'month' | 'week'): void {

@@ -457,7 +457,9 @@
     "prevWeek": "Vorherige Woche",
     "nextWeek": "Nächste Woche",
     "viewList": "Zur Listenansicht",
-    "viewCalendar": "Zur Kalenderansicht"
+    "viewCalendar": "Zur Kalenderansicht",
+    "pastShow": "{{days}} vergangene Tage anzeigen ({{events}} Events)",
+    "pastHide": "Vergangene Tage ausblenden"
   },
   "news": {
     "title": "Neuigkeiten",
