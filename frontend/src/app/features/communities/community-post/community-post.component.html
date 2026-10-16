@@ -79,7 +79,9 @@
                 @if (comment.authorId !== myId()) {
                   <button
                     type="button"
-                    class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                    uiButton
+                    variant="quiet"
+                    size="sm"
                     (click)="reportTarget.set({ type: 'comment', id: comment.id })"
                   >
                     {{ 'report.link' | transloco }}
@@ -88,7 +90,9 @@
                 @if (comment.canEdit) {
                   <button
                     type="button"
-                    class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                    uiButton
+                    variant="quiet"
+                    size="sm"
                     (click)="editingComment.set(comment)"
                   >
                     {{ 'communities.posts.edit' | transloco }}
@@ -97,7 +101,9 @@
                 @if (comment.canDelete) {
                   <button
                     type="button"
-                    class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                    uiButton
+                    variant="quiet"
+                    size="sm"
                     (click)="deleteComment(comment)"
                   >
                     {{ 'communities.posts.delete' | transloco }}

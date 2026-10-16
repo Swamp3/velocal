@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Buttons, icon buttons, filter and tab switches, link-style actions and cards now come from shared building blocks, so they look and behave the same across the app (account, admin, calendar, clubs, events, login). Documented in `docs/UI-COMPONENTS.md`.
+- Buttons, icon buttons, filter and tab switches, link-style actions and cards now come from shared building blocks, so they look and behave the same across the app (account, admin, calendar, clubs, events, map, news, login). Documented in `docs/UI-COMPONENTS.md`.
 - In a club's event list, removing a shared event is now a small icon button on the event card instead of a large button next to it.
 - Delete your account yourself from the profile (name, email, password, favorites, memberships, notifications and push subscriptions are removed; you can also remove your posts, comments and polls). A club you alone administered passes to its longest-standing member, who is notified; a club without other members is deleted. Site admins must give up the admin role first.
 - The privacy policy now covers push notifications, profile data, moderation logs, reach measurement and place lookup, and names the correct email provider (Resend).

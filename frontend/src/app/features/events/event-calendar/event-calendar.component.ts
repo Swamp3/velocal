@@ -18,7 +18,7 @@ import { LocaleService } from '@core/services/locale.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { CyclingEvent, Discipline } from '@shared/models';
-import { IconButtonComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
+import { ButtonStyleDirective, IconButtonComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 import { Subject, switchMap, tap } from 'rxjs';
 import { CalendarAgendaComponent } from './calendar-agenda/calendar-agenda.component';
 import { CalendarDayStripComponent } from './calendar-day-strip/calendar-day-strip.component';
@@ -34,7 +34,7 @@ import { CalendarMonthGridComponent } from './calendar-month-grid/calendar-month
     DisciplineFilterComponent,
     CalendarMonthGridComponent,
     CalendarAgendaComponent,
-    CalendarDayStripComponent, SegmentedComponent, IconButtonComponent,
+    CalendarDayStripComponent, SegmentedComponent, IconButtonComponent, ButtonStyleDirective,
   ],
   templateUrl: './event-calendar.component.html',
 })

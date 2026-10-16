@@ -9,14 +9,14 @@ import {
 } from '@angular/core';
 import { AdminService, DailyStats } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
+import { CardComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
 type Period = 7 | 30 | 90;
 
 @Component({
   selector: 'app-analytics',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DecimalPipe, PercentPipe, DatePipe, SkeletonComponent, SegmentedComponent],
+  imports: [TranslocoPipe, DecimalPipe, PercentPipe, DatePipe, SkeletonComponent, SegmentedComponent, CardComponent],
   templateUrl: './analytics.component.html',
 })
 export class AnalyticsComponent implements OnInit {

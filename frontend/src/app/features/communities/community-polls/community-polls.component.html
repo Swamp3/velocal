@@ -15,7 +15,9 @@
               @if (poll.canEdit) {
                 <button
                   type="button"
-                  class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  uiButton
+                  variant="quiet"
+                  size="sm"
                   (click)="editing.set(poll)"
                 >
                   {{ 'communities.posts.edit' | transloco }}
@@ -24,7 +26,9 @@
               @if (poll.canDelete) {
                 <button
                   type="button"
-                  class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  uiButton
+                  variant="quiet"
+                  size="sm"
                   (click)="remove(poll)"
                 >
                   {{ 'communities.polls.delete' | transloco }}

@@ -4,7 +4,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { PostService, PostSearchParams } from '@core/services/post.service';
 import { AuthService } from '@core/services/auth.service';
 import { PostListItem } from '@shared/models';
-import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { ButtonComponent, ChipComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
 import { EmptyStateComponent, NewsCardComponent } from '@shared/components';
 
 @Component({
@@ -17,7 +17,7 @@ import { EmptyStateComponent, NewsCardComponent } from '@shared/components';
     PaginationComponent,
     SkeletonComponent,
     EmptyStateComponent,
-    NewsCardComponent,
+    NewsCardComponent, ChipComponent,
   ],
   templateUrl: './news-list.component.html',
 })

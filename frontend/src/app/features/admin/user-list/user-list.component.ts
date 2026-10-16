@@ -15,7 +15,7 @@ import {
 } from '@core/services/admin.service';
 import { AuthService } from '@core/services/auth.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { BadgeComponent, ButtonComponent, ModalComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent, ToastService } from '@shared/ui';
+import { BadgeComponent, ButtonComponent, CardComponent, ModalComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-user-list',
@@ -28,7 +28,7 @@ import { BadgeComponent, ButtonComponent, ModalComponent, PaginationComponent, S
     PaginationComponent,
     SkeletonComponent,
     DatePipe,
-    FormsModule, SegmentedComponent,
+    FormsModule, SegmentedComponent, CardComponent,
   ],
   templateUrl: './user-list.component.html',
 })

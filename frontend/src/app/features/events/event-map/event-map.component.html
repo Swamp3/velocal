@@ -32,10 +32,10 @@
     </div>
 
     <button
-      class="flex items-center gap-2 rounded-[var(--radius-default)]
-        bg-[var(--color-bg)] px-3 py-2 text-sm font-medium
-        text-[var(--color-text)] shadow-md border border-[var(--color-border)]
-        hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+      type="button"
+      uiButton
+      variant="outline"
+      class="shadow-md"
       (click)="filterPanelOpen.set(!filterPanelOpen())"
       [attr.aria-expanded]="filterPanelOpen()"
       [attr.aria-label]="'map.filter' | transloco"
@@ -146,35 +146,22 @@
           </select>
         </div>
 
-        <div class="mt-2 flex flex-wrap gap-1" role="radiogroup" [attr.aria-label]="'geo.radius' | transloco">
-          <button
-            [class]="radius() === null
-              ? 'rounded-[var(--radius-default)] border border-[var(--color-primary)] bg-[var(--color-primary)] px-2 py-1 text-xs font-medium text-white cursor-pointer'
-              : 'rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer'"
-            [attr.aria-pressed]="radius() === null"
-            (click)="onRadiusChange(null)"
-          >
-            {{ 'geo.all' | transloco }}
-          </button>
-          @for (r of radiusOptions; track r) {
-            <button
-              [class]="radius() === r
-                ? 'rounded-[var(--radius-default)] border border-[var(--color-primary)] bg-[var(--color-primary)] px-2 py-1 text-xs font-medium text-white cursor-pointer'
-                : 'rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] cursor-pointer'"
-              [attr.aria-pressed]="radius() === r"
-              (click)="onRadiusChange(r)"
-            >
-              {{ r }} km
-            </button>
-          }
-        </div>
+        <ui-segmented
+          class="mt-2 block"
+          size="xs"
+          [fullWidth]="true"
+          [options]="radiusChoices"
+          [value]="radius() ?? 0"
+          [ariaLabel]="'geo.radius' | transloco"
+          (valueChange)="onRadiusChange($event === 0 ? null : $event)"
+        />
 
         <div class="mt-2 flex flex-wrap items-center gap-2">
           <button
-            class="inline-flex items-center gap-1 rounded-[var(--radius-default)] border
-              border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1 text-xs
-              text-[var(--color-text)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer
-              disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+            uiButton
+            variant="outline"
+            size="sm"
             [disabled]="geolocationService.loading()"
             (click)="useMyLocation()"
           >
@@ -188,7 +175,9 @@
 
           @if (geoActive()) {
             <button
-              class="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-text)] cursor-pointer"
+              uiButton
+              variant="quiet"
+              size="sm"
               (click)="clearGeoSearch()"
             >
               {{ 'map.reset' | transloco }}
@@ -261,9 +250,9 @@
       <!-- Clear filters -->
       @if (hasActiveFilters()) {
         <button
-          class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)]
-            py-2 text-sm text-[var(--color-text-muted)]
-            hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+          uiButton
+          variant="outline"
+          class="w-full"
           (click)="clearFilters()"
         >
           {{ 'map.clearFilters' | transloco }}

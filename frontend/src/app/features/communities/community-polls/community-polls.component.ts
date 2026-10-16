@@ -12,14 +12,14 @@ import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityPoll } from '@shared/models';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, ToastService } from '@shared/ui';
 import { PollEdit, PollEditDialogComponent } from '../poll-edit-dialog/poll-edit-dialog.component';
 import { communityErrorKey } from '../community-error';
 
 @Component({
   selector: 'app-community-polls',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonComponent, PollEditDialogComponent],
+  imports: [TranslocoPipe, ButtonComponent, PollEditDialogComponent, ButtonStyleDirective],
   templateUrl: './community-polls.component.html',
 })
 export class CommunityPollsComponent implements OnInit {

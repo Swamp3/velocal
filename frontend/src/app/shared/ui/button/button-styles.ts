@@ -1,4 +1,4 @@
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'soft' | 'link' | 'quiet';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'soft' | 'link' | 'quiet' | 'link-danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const BASE =
@@ -19,7 +19,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'active:bg-[var(--color-primary-dark)]',
   secondary: 'bg-[var(--color-secondary)] text-white hover:opacity-90 active:opacity-80',
   outline:
-    'border border-[var(--color-border)] text-[var(--color-text)] ' +
+    'border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text)] ' +
     'hover:bg-[var(--color-bg-alt)] active:bg-[var(--color-border)]',
   ghost:
     'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] ' +
@@ -33,10 +33,14 @@ const VARIANTS: Record<ButtonVariant, string> = {
   link: 'text-[var(--color-primary)] hover:underline',
   /** Like `link`, but grey: for secondary text actions. */
   quiet: 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
+  /** `link` for destructive or error-related text actions. */
+  'link-danger': 'text-[var(--color-danger)] hover:underline',
 };
 
 /** One source of truth for how a button looks, for `ui-button` and `[uiButton]` alike. */
 export function buttonClasses(variant: ButtonVariant, size: ButtonSize): string {
-  const sizeClasses = variant === 'link' || variant === 'quiet' ? 'text-sm gap-1' : SIZES[size];
+  // Text-like variants have no padding: the size only sets the type size.
+  const textLike = variant === 'link' || variant === 'quiet' || variant === 'link-danger';
+  const sizeClasses = textLike ? (size === 'sm' ? 'text-xs gap-1' : 'text-sm gap-1') : SIZES[size];
   return `${BASE} ${sizeClasses} ${VARIANTS[variant]}`;
 }

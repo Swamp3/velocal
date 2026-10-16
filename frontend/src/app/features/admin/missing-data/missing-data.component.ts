@@ -15,7 +15,7 @@ import {
 } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CyclingEvent, Discipline } from '@shared/models';
-import { BadgeComponent, BadgeVariant, ButtonStyleDirective, IconButtonComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
+import { BadgeComponent, BadgeVariant, ButtonStyleDirective, CardComponent, IconButtonComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
 interface MissingEvent extends CyclingEvent {
   missingFields: string[];
@@ -44,7 +44,7 @@ const FIELD_BADGE_VARIANT: Record<string, BadgeVariant> = {
     SkeletonComponent,
     DatePipe,
     RouterLink,
-    DuplicateEventsComponent, SegmentedComponent, ButtonStyleDirective, IconButtonComponent,
+    DuplicateEventsComponent, SegmentedComponent, ButtonStyleDirective, IconButtonComponent, CardComponent,
   ],
   templateUrl: './missing-data.component.html',
 })

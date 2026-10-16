@@ -121,7 +121,10 @@
     <div class="flex items-center gap-1.5">
       <!-- Lang toggle -->
       <button
-        class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] transition-all duration-200 cursor-pointer"
+        type="button"
+        uiButton
+        variant="ghost"
+        size="sm"
         (click)="toggleLang()"
         [attr.aria-label]="activeLang() === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'"
       >
@@ -332,7 +335,10 @@
             {{ 'app.nav.routes' | transloco }}
           </a>
           <button
-            class="rounded-lg px-4 py-2.5 text-sm font-medium text-left text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200 cursor-pointer"
+            type="button"
+            uiButton
+            variant="ghost"
+            class="!justify-start"
             (click)="mobileMenuOpen.set(false); onLogout()"
           >
             {{ 'app.nav.logout' | transloco }}

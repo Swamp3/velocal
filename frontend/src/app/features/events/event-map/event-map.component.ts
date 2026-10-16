@@ -1,4 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
+import { ButtonStyleDirective, SegmentedComponent, SegmentedOption } from '@shared/ui';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -57,7 +58,7 @@ function disciplineColor(slug: string): string {
   selector: 'app-event-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [TranslocoPipe, DisciplineFilterComponent],
+  imports: [TranslocoPipe, DisciplineFilterComponent, SegmentedComponent, ButtonStyleDirective],
   templateUrl: './event-map.component.html',
   styleUrls: [
     '../../../../../node_modules/leaflet/dist/leaflet.css',
@@ -113,6 +114,10 @@ export class EventMapComponent implements OnInit, AfterViewInit {
   readonly userLng = signal<number | null>(null);
 
   readonly radiusOptions = RADIUS_OPTIONS;
+  protected readonly radiusChoices: SegmentedOption<number>[] = [
+    { value: 0, labelKey: 'geo.all' },
+    ...RADIUS_OPTIONS.map((r) => ({ value: r, label: `${r} km` })),
+  ];
   readonly geoActive = computed(() => !!this.zip() || (this.userLat() != null && this.userLng() != null));
 
   readonly filteredEvents = computed(() => {

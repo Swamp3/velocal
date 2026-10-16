@@ -42,7 +42,7 @@ import { BadgeComponent, ButtonComponent, ButtonStyleDirective, SkeletonComponen
     RichTextViewComponent,
     CommunitySectionNavComponent,
     CommunityEventsComponent,
-    ReportDialogComponent, ButtonStyleDirective,
+    ReportDialogComponent, ButtonStyleDirective, ButtonStyleDirective,
   ],
   templateUrl: './community-detail.component.html',
 })

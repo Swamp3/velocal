@@ -24,15 +24,9 @@
   @if (tags().length > 0) {
     <div class="flex flex-wrap gap-2">
       @for (tag of tags(); track tag) {
-        <button
-          class="cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200"
-          [class]="activeTag() === tag
-            ? 'bg-[var(--color-primary)] text-white'
-            : 'bg-[var(--color-bg-alt)] text-[var(--color-text-muted)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]'"
-          (click)="onTagClick(tag)"
-        >
+        <ui-chip [selected]="activeTag() === tag" (selectedChange)="onTagClick(tag)">
           {{ tag }}
-        </button>
+        </ui-chip>
       }
     </div>
   }

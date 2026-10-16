@@ -8,6 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { ButtonStyleDirective } from '@shared/ui/button/button-style.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -141,7 +142,7 @@ const DEFAULT_SEO: RouteSeo = {
     RouterLink,
     RouterLinkActive,
     ToastContainerComponent,
-    TranslocoPipe,
+    TranslocoPipe, ButtonStyleDirective,
   ],
   templateUrl: './app-shell.component.html',
 })

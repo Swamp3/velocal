@@ -155,7 +155,7 @@
   <!-- Users cards (mobile) -->
   <div class="flex flex-col gap-3 md:hidden">
     @for (user of users(); track user.id) {
-      <div class="rounded-xl border border-[var(--color-border)] p-4">
+      <ui-card variant="outline" padding="sm">
         <div class="flex items-center gap-3">
           <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-sm font-semibold text-[var(--color-primary)]">
             {{ (user.displayName || user.email)[0].toUpperCase() }}
@@ -220,7 +220,7 @@
             </ui-button>
           </div>
         }
-      </div>
+      </ui-card>
     }
   </div>
 

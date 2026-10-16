@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ButtonComponent } from '@shared/ui/button/button.component';
+import { IconButtonComponent } from '@shared/ui/icon-button/icon-button.component';
 import { AppUpdateService } from '@core/services/app-update.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-update-banner',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonComponent, IconButtonComponent],
   template: `
     @if (update.updateReady() && !dismissed()) {
       <div
@@ -14,21 +16,17 @@ import { TranslocoPipe } from '@jsverse/transloco';
       >
         <span>{{ 'app.update.available' | transloco }}</span>
         <span class="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            class="rounded-[var(--radius-default)] bg-[var(--color-primary)] px-3 py-1.5 font-medium text-white hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-            (click)="update.apply()"
-          >
+          <ui-button size="sm" (click)="update.apply()">
             {{ 'app.update.reload' | transloco }}
-          </button>
+          </ui-button>
           <button
             type="button"
-            class="rounded-[var(--radius-default)] px-2 py-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
-            [attr.aria-label]="'common.close' | transloco"
+            uiIconButton
+            size="sm"
+            icon="close"
+            [label]="'common.close' | transloco"
             (click)="dismissed.set(true)"
-          >
-            ✕
-          </button>
+          ></button>
         </span>
       </div>
     }

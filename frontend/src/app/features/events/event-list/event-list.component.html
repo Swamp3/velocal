@@ -114,40 +114,20 @@
             </label>
 
             <div class="mt-1 flex flex-wrap items-center gap-2">
-              <button
-                [class]="
-                  futureOnly()
-                    ? 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] cursor-pointer transition-all duration-200'
-                    : 'inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-muted)] hover:border-[var(--color-primary)] cursor-pointer transition-all duration-200'
-                "
-                (click)="onFutureOnlyToggle()"
-                [attr.aria-pressed]="futureOnly()"
+              <ui-chip
+                [selected]="futureOnly()"
+                [icon]="futureOnly() ? 'check' : ''"
+                (selectedChange)="onFutureOnlyToggle()"
               >
-                @if (futureOnly()) {
-                  <span class="material-symbols-outlined text-[14px]">check</span>
-                }
                 {{ 'events.futureOnly' | transloco }}
-              </button>
+              </ui-chip>
 
-              <div
-                class="flex gap-1.5"
-                role="radiogroup"
-                [attr.aria-label]="'events.yearFilter' | transloco"
-              >
-                @for (year of availableYears(); track year) {
-                  <button
-                    [class]="
-                      selectedYear() === year
-                        ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white cursor-pointer transition-all duration-200'
-                        : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer transition-all duration-200'
-                    "
-                    [attr.aria-pressed]="selectedYear() === year"
-                    (click)="onYearSelect(year)"
-                  >
-                    {{ year }}
-                  </button>
-                }
-              </div>
+              <ui-segmented
+                [options]="yearOptions()"
+                [value]="selectedYear()"
+                [ariaLabel]="'events.yearFilter' | transloco"
+                (valueChange)="onYearSelect($event)"
+              />
             </div>
           </div>
 
@@ -200,42 +180,20 @@
                 <span class="text-xs font-medium text-[var(--color-text-muted)]">{{
                   'geo.radius' | transloco
                 }}</span>
-                <div
-                  class="flex gap-1.5"
-                  role="radiogroup"
-                  [attr.aria-label]="'geo.radius' | transloco"
-                >
-                  <button
-                    [class]="
-                      radius() === null
-                        ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
-                        : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
-                    "
-                    [attr.aria-pressed]="radius() === null"
-                    (click)="onRadiusChange(null)"
-                  >
-                    {{ 'geo.all' | transloco }}
-                  </button>
-                  @for (r of radiusOptions; track r) {
-                    <button
-                      [class]="
-                        radius() === r
-                          ? 'rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white cursor-pointer shadow-sm transition-all duration-200'
-                          : 'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] cursor-pointer shadow-sm transition-all duration-200'
-                      "
-                      [attr.aria-pressed]="radius() === r"
-                      (click)="onRadiusChange(r)"
-                    >
-                      {{ r }} km
-                    </button>
-                  }
-                </div>
+                <ui-segmented
+                  [options]="radiusChoices"
+                  [value]="radius() ?? 0"
+                  [ariaLabel]="'geo.radius' | transloco"
+                  (valueChange)="onRadiusChange($event === 0 ? null : $event)"
+                />
               </div>
             </div>
 
             <div class="mt-4 flex flex-wrap items-center gap-3">
               <button
-                class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)]/10 px-4 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                uiButton
+                variant="soft"
                 [disabled]="geolocationService.loading()"
                 (click)="useMyLocation()"
               >
@@ -251,7 +209,9 @@
 
               @if (geoActive()) {
                 <button
-                  class="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+                  uiButton
+                  variant="quiet"
+                  size="sm"
                   (click)="clearGeoSearch()"
                 >
                   {{ 'geo.clearGeo' | transloco }}

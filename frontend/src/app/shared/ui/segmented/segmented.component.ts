@@ -4,7 +4,9 @@ import { TranslocoPipe } from '@jsverse/transloco';
 export interface SegmentedOption<T extends string | number = string> {
   value: T;
   /** Translation key shown as the label. */
-  labelKey: string;
+  labelKey?: string;
+  /** Plain label, used when there is no `labelKey` (numbers, names). */
+  label?: string;
   /** Small number next to the label, e.g. an open count. Hidden when 0 or unset. */
   count?: number;
 }
@@ -22,7 +24,8 @@ export interface SegmentedOption<T extends string | number = string> {
     <div
       role="radiogroup"
       [attr.aria-label]="ariaLabel()"
-      class="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-[var(--color-border)] p-0.5"
+      [class]="fullWidth() ? 'flex' : 'inline-flex'"
+      class="max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-[var(--color-border)] p-0.5"
     >
       @for (option of options(); track option.value) {
         <button
@@ -32,7 +35,7 @@ export interface SegmentedOption<T extends string | number = string> {
           [class]="itemClasses(option.value === value())"
           (click)="valueChange.emit(option.value)"
         >
-          {{ option.labelKey | transloco }}
+          {{ option.labelKey ? (option.labelKey | transloco) : option.label }}
           @if (option.count) {
             <span class="ml-1 rounded-full bg-black/10 px-1.5 text-xs tabular-nums">{{
               option.count
@@ -45,18 +48,22 @@ export interface SegmentedOption<T extends string | number = string> {
 })
 export class SegmentedComponent<T extends string | number = string> {
   readonly options = input.required<SegmentedOption<T>[]>();
-  readonly value = input.required<T>();
-  readonly size = input<'sm' | 'md'>('sm');
+  readonly value = input.required<T | null>();
+  readonly size = input<'xs' | 'sm' | 'md'>('sm');
+  /** Stretch over the full width, items share it equally. */
+  readonly fullWidth = input(false);
   readonly ariaLabel = input<string>();
   readonly valueChange = output<T>();
 
   private readonly sizeClasses = computed(() =>
-    this.size() === 'md' ? 'px-3 py-1.5 text-sm' : 'px-3 py-1.5 text-xs',
+    ({ xs: 'px-1.5 py-1 text-xs', sm: 'px-3 py-1.5 text-xs', md: 'px-3 py-1.5 text-sm' })[
+      this.size()
+    ] + (this.fullWidth() ? ' flex-1' : ''),
   );
 
   protected itemClasses(selected: boolean): string {
     return (
-      `shrink-0 cursor-pointer rounded-md font-medium transition-all ${this.sizeClasses()} ` +
+      `shrink-0 cursor-pointer whitespace-nowrap rounded-md font-medium transition-all ${this.sizeClasses()} ` +
       'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ' +
       (selected
         ? 'bg-[var(--color-primary)] text-white shadow-sm'
