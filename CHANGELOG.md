@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The club description on the admin club review page is shown formatted instead of as raw HTML.
+
 ### Added
 
 - **Add subgroup members by email** — in a subgroup's member page, moderators can add a person by email address, which is unambiguous when several members share a display name. The person must already be a member of the club.

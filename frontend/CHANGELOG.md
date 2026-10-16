@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Admin club review renders the description with `app-rich-text-view`
+
 ### Added
 
 - Email field on the subgroup member page next to the name search
