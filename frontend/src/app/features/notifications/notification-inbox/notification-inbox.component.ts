@@ -51,6 +51,7 @@ export class NotificationInboxComponent implements OnInit {
     if (row.type === 'subgroup.deleted') return 'notifications.subgroupDeleted';
     if (row.type === 'community.suspended') return 'notifications.communitySuspended';
     if (row.type === 'community.unsuspended') return 'notifications.communityUnsuspended';
+    if (row.type === 'community.admin_assigned') return 'notifications.communityAdminAssigned';
     return 'notifications.eventCreated';
   }
 

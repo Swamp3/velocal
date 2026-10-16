@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Delete your account yourself from the profile (name, email, password, favorites, memberships, notifications and push subscriptions are removed; you can also remove your posts, comments and polls). A club you alone administered passes to its longest-standing member, who is notified; a club without other members is deleted. Site admins must give up the admin role first.
 - The privacy policy now covers push notifications, profile data, moderation logs, reach measurement and place lookup, and names the correct email provider (Resend).
 - Reach measurement no longer stores anything on your device and no longer links page views to your account. Visits are counted per page load, so the admin statistics show "visits" instead of unique visitors. Page views are deleted after about 13 months.
 

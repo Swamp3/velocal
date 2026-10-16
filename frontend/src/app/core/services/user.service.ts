@@ -26,6 +26,14 @@ export class UserService {
     return this.api.patch<User>('/users/me', dto);
   }
 
+  deleteAccount(dto: {
+    password?: string;
+    confirmEmail: string;
+    deleteContent: boolean;
+  }): Observable<void> {
+    return this.api.delete<void>('/users/me', dto);
+  }
+
   getDisciplinePrefs(): Observable<string[]> {
     return this.api.get<string[]>('/users/me/discipline-prefs');
   }

@@ -5,6 +5,7 @@
 ### Added
 
 - Push notification settings in the profile (this device on/off, message types, test message), `PushService` on top of `SwPush`; the subscription is renewed on start and removed on sign-out
+- Delete account dialog in the profile (email confirmation, password, option to remove own content); inbox text for the admin handover
 - Privacy policy sections for push notifications and push delivery, profile data, moderation, reach measurement, cookies and place lookup; SendGrid replaced by Resend
 - Page tracking keeps its visit id in memory only and removes the old `velocal_client_id` from local storage
 

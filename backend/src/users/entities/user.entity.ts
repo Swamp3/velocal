@@ -58,6 +58,10 @@ export class User {
   @Column({ type: 'varchar', length: 500, nullable: true })
   banReason: string | null;
 
+  /** Set when the owner deleted the account; the row stays as an empty shell so content keeps its references. */
+  @Column({ type: 'timestamptz', nullable: true })
+  deletedAt: Date | null;
+
   /** Which kinds of notification are sent as push; null means the defaults. */
   @Column({ type: 'jsonb', nullable: true })
   pushPreferences: Record<string, boolean> | null;

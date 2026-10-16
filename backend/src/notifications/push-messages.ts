@@ -128,6 +128,15 @@ export function buildPushMessage(
         url: communityUrl,
         tag: `suspended-${payload.communitySlug}`,
       };
+    case 'community.admin_assigned':
+      return {
+        title: community,
+        body: de
+          ? 'Du bist jetzt Admin dieser Community'
+          : 'You are now an admin of this community',
+        url: communityUrl,
+        tag: `admin-${payload.communitySlug}`,
+      };
     case 'community.unsuspended':
       return {
         title: community,

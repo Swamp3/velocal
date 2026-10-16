@@ -65,6 +65,8 @@ export class UsersService {
       qb.andWhere('u.isAdmin = false');
     }
 
+    qb.andWhere('u.deletedAt IS NULL');
+
     if (dto.status === 'banned') {
       qb.andWhere('u.bannedAt IS NOT NULL');
     }

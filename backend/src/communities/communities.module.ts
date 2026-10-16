@@ -27,6 +27,8 @@ import { Report } from './entities/report.entity';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { AdminReportsController } from './admin-reports.controller';
+import { AccountController } from './account.controller';
+import { AccountDeletionService } from './account-deletion.service';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { AdminCommunitiesController } from './admin-communities.controller';
 import { AdminCommunitiesService } from './admin-communities.service';
@@ -64,6 +66,7 @@ import { SubgroupsService } from './subgroups.service';
     AdminCommunitiesController,
     ReportsController,
     AdminReportsController,
+    AccountController,
   ],
   providers: [
     CommunitiesService,
@@ -71,6 +74,7 @@ import { SubgroupsService } from './subgroups.service';
     CommunityPostsService,
     CommunityPollsService,
     CommunityCleanupService,
+    AccountDeletionService,
     AdminCommunitiesService,
     ReportsService,
   ],

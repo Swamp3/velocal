@@ -40,7 +40,8 @@
     "communityDeleted": "Die Community {{communityName}} wurde gelöscht",
     "subgroupDeleted": "Die Untergruppe {{subgroupName}} von {{communityName}} wurde gelöscht",
     "communitySuspended": "{{communityName}} wurde gesperrt: {{reason}}",
-    "communityUnsuspended": "{{communityName}} ist wieder verfügbar"
+    "communityUnsuspended": "{{communityName}} ist wieder verfügbar",
+    "communityAdminAssigned": "Du bist jetzt Admin von {{communityName}}"
   },
   "events": {
     "title": "Radsport-Events finden",
@@ -354,6 +355,26 @@
         "eventsHint": "Ein neues Event in deinen Clubs und Untergruppen. Kann häufig vorkommen.",
         "community": "Neuigkeiten zu Clubs",
         "communityHint": "Ein Club oder eine Untergruppe wird gelöscht, gesperrt oder ist wieder verfügbar."
+      }
+    },
+    "delete": {
+      "title": "Konto löschen",
+      "hint": "Konto und persönliche Daten endgültig löschen. Das lässt sich nicht rückgängig machen.",
+      "open": "Mein Konto löschen",
+      "intro": "Dein Konto wird endgültig gelöscht. Du wirst auf allen Geräten abgemeldet.",
+      "lossProfile": "Dein Profil, Name, E-Mail, Favoriten, Einstellungen und Benachrichtigungen werden entfernt.",
+      "lossCommunities": "Du verlässt alle Clubs und Untergruppen. Beitrittsanfragen und Zusagen werden entfernt.",
+      "lossAdmin": "Bist du der einzige Admin eines Clubs, wird das am längsten dabei seiende Mitglied Admin. Ein Club ohne weitere Mitglieder wird gelöscht.",
+      "content": "Auch meine Beiträge, Kommentare und Umfragen löschen",
+      "contentHint": "Behältst du sie, bleiben sie sichtbar und stammen von „[deleted]“. Von dir angelegte Events bleiben bestehen.",
+      "password": "Dein Passwort",
+      "confirm": "Konto endgültig löschen",
+      "done": "Dein Konto wurde gelöscht.",
+      "errors": {
+        "generic": "Das Konto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+        "wrongPassword": "Das Passwort ist falsch.",
+        "emailMismatch": "Die E-Mail-Adresse stimmt nicht überein.",
+        "adminCannotDelete": "Website-Admins können ihr Konto nicht löschen. Bitte einen anderen Admin, dir zuerst die Admin-Rolle zu entziehen."
       }
     }
   },
@@ -692,7 +713,8 @@
         "user.promote": "Nutzer zum Admin gemacht",
         "user.demote": "Admin-Rolle entzogen",
         "user.ban": "Nutzer gesperrt",
-        "user.unban": "Nutzer entsperrt"
+        "user.unban": "Nutzer entsperrt",
+        "user.delete": "Eigenes Konto gelöscht"
       }
     }
   },
@@ -754,7 +776,7 @@
       "legalBasisContract": "Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO) — z.B. Bereitstellung des Benutzerkontos",
       "legalBasisLegitimate": "Berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO) — z.B. Server-Logdateien zur Sicherheit",
       "retentionTitle": "5. Speicherdauer",
-      "retentionBody": "Ihre Kontodaten werden gespeichert, solange Ihr Benutzerkonto besteht. Server-Logdateien werden nach 30 Tagen automatisch gelöscht, Seitenaufrufe der Reichweitenmessung nach 13 Monaten, Push-Abonnements beim Abmelden, beim Deaktivieren oder wenn das Gerät sie nicht mehr annimmt. Auf Ihre Anfrage an die im Impressum genannte Adresse löschen wir Ihr Konto und Ihre personenbezogenen Daten, sofern keine gesetzlichen Aufbewahrungspflichten bestehen. Beiträge in Communities werden dabei entfernt oder anonymisiert.",
+      "retentionBody": "Ihre Kontodaten werden gespeichert, solange Ihr Benutzerkonto besteht. Sie können Ihr Konto in Ihrem Profil selbst löschen; es wird dann sofort geleert: Name, E-Mail-Adresse, Passwort, Profildaten, Favoriten, Mitgliedschaften, Benachrichtigungen und Push-Abonnements werden entfernt, und ein anonymer Platzhalter bleibt bestehen, damit Inhalte, die Sie behalten möchten (z. B. von Ihnen angelegte Veranstaltungen), einen gültigen Bezug behalten. Wenn Sie gewählt haben, Ihre Beiträge, Kommentare und Umfragen zu löschen, werden auch diese entfernt. Communities, die Sie verwaltet haben, gehen an das am längsten dabei seiende Mitglied über; Communities ohne weitere Mitglieder werden gelöscht. Server-Logdateien werden nach 30 Tagen automatisch gelöscht, Seitenaufrufe der Reichweitenmessung nach 13 Monaten, Push-Abonnements beim Abmelden oder Deaktivieren. Einträge im Admin-Protokoll (die nach der Löschung Ihren Namen nicht mehr enthalten) und gesetzliche Aufbewahrungspflichten bleiben unberührt. Sie können die Löschung auch an die im Impressum genannte Adresse beantragen.",
       "rightsTitle": "6. Ihre Rechte",
       "rightsBody": "Sie haben nach der DSGVO folgende Rechte, die Sie über die im Impressum genannte Adresse geltend machen können. Eine erteilte Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen (Art. 7 Abs. 3 DSGVO), etwa Push-Benachrichtigungen in Ihrem Profil.",
       "rightAccess": "Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO)",

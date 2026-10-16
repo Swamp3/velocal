@@ -240,4 +240,23 @@
       </p>
     }
   </section>
+
+  <!-- Delete account -->
+  <section
+    class="rounded-[var(--radius-lg)] border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"
+  >
+    <h2 class="mb-2 text-lg font-semibold text-red-800 dark:text-red-400">
+      {{ 'profile.delete.title' | transloco }}
+    </h2>
+    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+      {{ 'profile.delete.hint' | transloco }}
+    </p>
+    <ui-button variant="danger" (click)="deleteDialogOpen.set(true)">
+      {{ 'profile.delete.open' | transloco }}
+    </ui-button>
+  </section>
 </div>
+
+@if (deleteDialogOpen()) {
+  <app-delete-account-dialog [hasPassword]="hasPassword()" (cancelled)="deleteDialogOpen.set(false)" />
+}

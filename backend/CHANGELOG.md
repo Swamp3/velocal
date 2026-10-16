@@ -5,6 +5,7 @@
 ### Added
 
 - Web Push (VAPID, `web-push`): `push_subscriptions` table, `users.pushPreferences`, `GET /push/config`, `POST`/`DELETE /push/subscriptions`, `GET`/`PATCH /push/preferences`, `POST /push/test`; inbox notifications are also sent as push when the user opted in
+- `DELETE /users/me` deletes an account by anonymizing it (`users.deletedAt`, placeholder email and name); removes private data, optionally the user's posts, comments and polls; hands over or deletes communities; audit entry `user.delete`; new notification type `community.admin_assigned`; migration `AddUserDeletedAt`; deleted users cannot authenticate and are hidden from the admin user list
 - Page views no longer store the user; the id is a per-visit random value; page views older than 400 days are deleted daily; migration `AnonymizePageViews` clears existing user links
 - Migration `AddPushNotifications`; new env vars `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
 

@@ -40,7 +40,8 @@
     "communityDeleted": "The community {{communityName}} was deleted",
     "subgroupDeleted": "The subgroup {{subgroupName}} of {{communityName}} was deleted",
     "communitySuspended": "{{communityName}} was suspended: {{reason}}",
-    "communityUnsuspended": "{{communityName}} is available again"
+    "communityUnsuspended": "{{communityName}} is available again",
+    "communityAdminAssigned": "You are now an admin of {{communityName}}"
   },
   "events": {
     "title": "Find Cycling Events",
@@ -354,6 +355,26 @@
         "eventsHint": "A new event in your clubs and subgroups. Can be frequent.",
         "community": "Club updates",
         "communityHint": "A club or subgroup is deleted, suspended or available again."
+      }
+    },
+    "delete": {
+      "title": "Delete account",
+      "hint": "Permanently delete your account and personal data. This cannot be undone.",
+      "open": "Delete my account",
+      "intro": "Your account will be deleted for good. You will be signed out on all devices.",
+      "lossProfile": "Your profile, name, email, favorites, settings and notifications are removed.",
+      "lossCommunities": "You leave all clubs and subgroups. Join requests and RSVPs are removed.",
+      "lossAdmin": "If you are the only admin of a club, the member who has been there longest becomes admin. A club without other members is deleted.",
+      "content": "Also delete my posts, comments and polls",
+      "contentHint": "If you keep them, they stay visible as written by \"[deleted]\". Events you created stay.",
+      "password": "Your password",
+      "confirm": "Delete account permanently",
+      "done": "Your account was deleted.",
+      "errors": {
+        "generic": "Could not delete the account. Please try again.",
+        "wrongPassword": "The password is wrong.",
+        "emailMismatch": "The email address does not match.",
+        "adminCannotDelete": "Site admins cannot delete their account. Ask another admin to remove your admin role first."
       }
     }
   },
@@ -692,7 +713,8 @@
         "user.promote": "Promoted user to admin",
         "user.demote": "Removed admin role",
         "user.ban": "Blocked user",
-        "user.unban": "Unblocked user"
+        "user.unban": "Unblocked user",
+        "user.delete": "Deleted own account"
       }
     }
   },
@@ -754,7 +776,7 @@
       "legalBasisContract": "Contract performance (Art. 6(1)(b) GDPR) — e.g. providing your user account",
       "legalBasisLegitimate": "Legitimate interest (Art. 6(1)(f) GDPR) — e.g. server logs for security",
       "retentionTitle": "5. Data Retention",
-      "retentionBody": "Your account data is stored for as long as your user account exists. Server log files are deleted automatically after 30 days, reach measurement page views after 13 months, and push subscriptions when you sign out, turn them off or the device stops accepting them. On request to the address given in the legal notice we delete your account and personal data, unless legal retention requirements apply. Posts in communities are removed or anonymised in the process.",
+      "retentionBody": "Your account data is stored for as long as your user account exists. You can delete your account yourself in your profile; it is then emptied immediately: name, email, password, profile data, favorites, memberships, notifications and push subscriptions are removed, and an anonymous placeholder remains so that content you chose to keep (such as events you created) keeps a valid reference. If you chose to delete your posts, comments and polls, they are removed as well. Clubs you administered pass to their longest-standing member; clubs without other members are deleted. Server log files are deleted automatically after 30 days, reach measurement page views after 13 months, and push subscriptions when you sign out or turn them off. Entries in the admin log (which do not contain your name after deletion) and legal retention duties are not affected. You can also request deletion at the address given in the legal notice.",
       "rightsTitle": "6. Your Rights",
       "rightsBody": "Under the GDPR you have the following rights, which you can exercise through the address given in the legal notice. You can withdraw any consent at any time with effect for the future (Art. 7(3) GDPR), for example push notifications in your profile.",
       "rightAccess": "Access to your stored data (Art. 15 GDPR)",
