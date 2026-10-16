@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-16
+
 ### Fixed
 
 - Club and event invitations by email ignore deleted accounts

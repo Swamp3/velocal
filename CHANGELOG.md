@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-10-16
+
 ### Fixed
 
 - Inviting someone to a club or event by email only works for registered VeloCal accounts. The message now says so when the address has no account.

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-16
+
 ### Fixed
 
 - Admin club review renders the description with `app-rich-text-view`
