@@ -947,6 +947,7 @@
     "requests": {
       "title": "Join requests",
       "empty": "No pending requests",
+      "pending": "{{count}} open requests",
       "approve": "Approve",
       "reject": "Reject"
     },

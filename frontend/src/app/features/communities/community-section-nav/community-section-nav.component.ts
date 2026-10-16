@@ -8,6 +8,8 @@ export interface CommunitySectionLink {
   commands: string[];
   /** Item count shown next to the label so changes are easy to spot. */
   count?: number;
+  /** Open requests waiting for the viewer; shown as an accent pill. */
+  pending?: number;
 }
 
 @Component({

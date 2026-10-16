@@ -5,6 +5,7 @@ import { ButtonComponent } from '@shared/ui';
 export interface RequestListItem {
   id: string;
   name: string;
+  email?: string | null;
 }
 
 @Component({

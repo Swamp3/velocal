@@ -52,6 +52,8 @@ export interface SerializedSubgroup {
   myRole: SubgroupMemberRole | null;
   myJoinRequest: 'pending' | null;
   viewerIsCommunityAdmin: boolean;
+  /** Open join requests; only set for moderators and club admins. */
+  pendingRequestCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +70,7 @@ export interface SerializedSubgroupJoinRequest {
   id: string;
   userId: string;
   displayName: string | null;
+  email: string | null;
   createdAt: Date;
 }
 
@@ -498,6 +501,7 @@ export class SubgroupsService {
       id: request.id,
       userId: request.userId,
       displayName: request.user?.displayName ?? null,
+      email: request.user?.email ?? null,
       createdAt: request.createdAt,
     }));
   }
@@ -920,6 +924,15 @@ export class SubgroupsService {
       subgroup.communityId,
       userId,
     );
+    const pendingRequestCount =
+      viewerIsCommunityAdmin || membership?.role === SubgroupMemberRole.MODERATOR
+        ? await this.joinRequests.count({
+            where: {
+              subgroupId: subgroup.id,
+              status: CommunityJoinStatus.PENDING,
+            },
+          })
+        : undefined;
     return {
       id: subgroup.id,
       communityId: subgroup.communityId,
@@ -942,6 +955,7 @@ export class SubgroupsService {
       myRole: membership?.role ?? null,
       myJoinRequest: pending ? 'pending' : null,
       viewerIsCommunityAdmin,
+      pendingRequestCount,
       createdAt: subgroup.createdAt,
       updatedAt: subgroup.updatedAt,
     };

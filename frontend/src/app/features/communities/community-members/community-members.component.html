@@ -36,6 +36,12 @@
       @if (c.myRole === 'admin') {
         <a [routerLink]="['/communities', c.slug, 'requests']" uiButton variant="outline">
           {{ 'communities.requests.title' | transloco }}
+          @if (c.pendingRequestCount; as pending) {
+            <span
+              class="ml-2 rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-xs font-semibold text-white"
+              >{{ pending }}</span
+            >
+          }
         </a>
       }
     </div>

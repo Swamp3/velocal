@@ -54,6 +54,8 @@ export interface SerializedCommunity {
   suspendedReason: string | null;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
+  /** Open join requests; only set for club admins. */
+  pendingRequestCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,6 +79,7 @@ export interface SerializedJoinRequest {
   id: string;
   userId: string;
   displayName: string | null;
+  email: string | null;
   createdAt: Date;
 }
 
@@ -91,6 +94,7 @@ interface ViewerState {
   postCount?: number;
   myRole: 'member' | 'admin' | null;
   myJoinRequest: 'pending' | null;
+  pendingRequestCount?: number;
 }
 
 @Injectable()
@@ -574,6 +578,7 @@ export class CommunitiesService {
       id: request.id,
       userId: request.userId,
       displayName: request.user?.displayName ?? null,
+      email: request.user?.email ?? null,
       createdAt: request.createdAt,
     }));
   }
@@ -888,6 +893,16 @@ export class CommunitiesService {
       }),
     ]);
 
+    const pendingRequestCount =
+      myRole === CommunityMemberRole.ADMIN
+        ? await this.joinRequests.count({
+            where: {
+              communityId: community.id,
+              status: CommunityJoinStatus.PENDING,
+            },
+          })
+        : undefined;
+
     return this.serialize(community, {
       memberCount,
       subgroupCount,
@@ -895,6 +910,7 @@ export class CommunitiesService {
       postCount,
       myRole,
       myJoinRequest,
+      pendingRequestCount,
     });
   }
 
@@ -1010,6 +1026,7 @@ export class CommunitiesService {
       suspendedReason: viewer.myRole ? community.suspendedReason : null,
       myRole: viewer.myRole,
       myJoinRequest: viewer.myJoinRequest,
+      pendingRequestCount: viewer.pendingRequestCount,
       createdAt: community.createdAt,
       updatedAt: community.updatedAt,
     };

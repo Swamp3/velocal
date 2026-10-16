@@ -57,6 +57,7 @@ export class CommunityRequestsComponent implements OnInit {
     return this.requests().map((request) => ({
       id: request.id,
       name: request.displayName ?? unnamed,
+      email: request.email,
     }));
   });
 

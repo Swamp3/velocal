@@ -20,6 +20,8 @@ export interface Community {
   postCount?: number;
   myRole: CommunityRole | null;
   myJoinRequest: 'pending' | null;
+  /** Open join requests; only present for club admins. */
+  pendingRequestCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +38,7 @@ export interface CommunityJoinRequest {
   id: string;
   userId: string;
   displayName: string | null;
+  email: string | null;
   createdAt: string;
 }
 
@@ -79,6 +82,8 @@ export interface Subgroup {
   myRole: SubgroupRole | null;
   myJoinRequest: 'pending' | null;
   viewerIsCommunityAdmin: boolean;
+  /** Open join requests; only present for moderators and club admins. */
+  pendingRequestCount?: number;
   createdAt: string;
   updatedAt: string;
 }
