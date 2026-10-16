@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Registration start (Anmeldestart)** — events can have a date and time when sign-up opens. The event page shows it before the deadline and tells visitors when registration has not opened yet. The start must not be after the deadline. Both dates can now be removed again when editing an event.
 - **Push notifications** — turn on push for each device in your profile and choose what you get: event invitations, membership, new events (off by default) and club updates. Works on Android, desktop browsers and iPhones with VeloCal added to the Home Screen. A test button checks that it works.
 
 ### Changed

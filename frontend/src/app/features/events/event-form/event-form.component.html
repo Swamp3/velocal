@@ -382,6 +382,30 @@
         (coordinatesChange)="onCoordinatesChange($event)"
       />
 
+      <!-- Registration start -->
+      <div>
+        <label for="registrationStart" class="block text-sm font-medium text-[var(--color-text)]">
+          {{ 'event.form.registrationStart' | transloco }}
+        </label>
+        <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-2">
+          <input
+            id="registrationStart"
+            type="text"
+            formControlName="registrationStart"
+            [placeholder]="dateInputPlaceholder()"
+            maxlength="10"
+            class="w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+          <input
+            type="text"
+            formControlName="registrationStartTime"
+            placeholder="HH:mm"
+            maxlength="5"
+            class="w-24 rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] tabular-nums placeholder:text-[var(--color-muted)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          />
+        </div>
+      </div>
+
       <!-- Registration Deadline -->
       <div>
         <label

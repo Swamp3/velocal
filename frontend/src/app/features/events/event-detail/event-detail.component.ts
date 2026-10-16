@@ -101,6 +101,13 @@ export class EventDetailComponent implements OnInit {
 
   protected readonly startTime = computed(() => formatTime(this.event()?.startDate));
   protected readonly endTime = computed(() => formatTime(this.event()?.endDate));
+  protected readonly registrationStartTime = computed(() =>
+    formatTime(this.event()?.registrationStart),
+  );
+  protected readonly registrationNotOpenYet = computed(() => {
+    const start = this.event()?.registrationStart;
+    return !!start && new Date(start).getTime() > Date.now();
+  });
   protected readonly deadlineTime = computed(() => formatTime(this.event()?.registrationDeadline));
   private reloadedForViewer = false;
   private loadedAnonymously = false;

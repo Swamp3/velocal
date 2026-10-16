@@ -367,6 +367,7 @@ export class EventsService {
         recurrenceId: series.id,
         startDate: start,
         endDate: moved(first.endDate),
+        registrationStart: moved(first.registrationStart),
         registrationDeadline: moved(first.registrationDeadline),
         meetupAt: first.meetupAt ? moved(first.meetupAt) : null,
       });
@@ -630,6 +631,10 @@ export class EventsService {
       if (geo) coordinates = geo;
     }
 
+    assertRegistrationOrder(
+      dto.registrationStart ? new Date(dto.registrationStart) : null,
+      dto.registrationDeadline ? new Date(dto.registrationDeadline) : null,
+    );
     if (dto.routeId) await this.assertOwnsRoute(dto.routeId, userId);
     const {
       recurrence: _recurrence,
@@ -646,6 +651,9 @@ export class EventsService {
       createdById: userId ?? undefined,
       startDate: new Date(dto.startDate),
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      registrationStart: dto.registrationStart
+        ? new Date(dto.registrationStart)
+        : undefined,
       registrationDeadline: dto.registrationDeadline
         ? new Date(dto.registrationDeadline)
         : undefined,
@@ -706,8 +714,24 @@ export class EventsService {
 
     if (dto.startDate) partial.startDate = new Date(dto.startDate);
     if (dto.endDate) partial.endDate = new Date(dto.endDate);
-    if (dto.registrationDeadline)
-      partial.registrationDeadline = new Date(dto.registrationDeadline);
+    if (dto.registrationStart !== undefined) {
+      partial.registrationStart = dto.registrationStart
+        ? new Date(dto.registrationStart)
+        : null;
+    }
+    if (dto.registrationDeadline !== undefined) {
+      partial.registrationDeadline = dto.registrationDeadline
+        ? new Date(dto.registrationDeadline)
+        : null;
+    }
+    assertRegistrationOrder(
+      partial.registrationStart !== undefined
+        ? partial.registrationStart
+        : event.registrationStart,
+      partial.registrationDeadline !== undefined
+        ? partial.registrationDeadline
+        : event.registrationDeadline,
+    );
 
     let coordinates = dto.coordinates;
     if (
@@ -1843,5 +1867,17 @@ export class EventsService {
     if (!event.imageUrl) return null;
     if (event.listing !== EventListing.MEMBERS) return event.imageUrl;
     return this.imageAccess.sign(event.imageUrl, true);
+  }
+}
+
+/** Sign-up cannot open after it closes. */
+function assertRegistrationOrder(
+  start: Date | null | undefined,
+  deadline: Date | null | undefined,
+): void {
+  if (start && deadline && start.getTime() > deadline.getTime()) {
+    throw new BadRequestException(
+      'Registration start must not be after the registration deadline',
+    );
   }
 }

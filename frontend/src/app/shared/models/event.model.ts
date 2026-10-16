@@ -12,7 +12,8 @@ export interface CyclingEvent {
   address?: string;
   country?: string;
   coordinates?: { lat: number; lng: number };
-  registrationDeadline?: string;
+  registrationStart?: string | null;
+  registrationDeadline?: string | null;
   externalUrl?: string;
   stravaUrl?: string | null;
   listing?: 'public' | 'members';
@@ -69,7 +70,8 @@ export interface CreateEventDto {
   address?: string;
   country?: string;
   coordinates?: { lat: number; lng: number };
-  registrationDeadline?: string;
+  registrationStart?: string | null;
+  registrationDeadline?: string | null;
   externalUrl?: string;
   stravaUrl?: string;
   listing?: 'public' | 'members';

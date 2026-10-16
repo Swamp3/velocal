@@ -129,7 +129,9 @@
       "editMeetup": "Treffpunkt bearbeiten",
       "meetupSaved": "Treffpunkt gespeichert",
       "meetupError": "Treffpunkt konnte nicht gespeichert werden",
-      "membersOnly": "Nur für Mitglieder"
+      "membersOnly": "Nur für Mitglieder",
+      "registrationStart": "Anmeldestart",
+      "registrationNotOpen": "Die Anmeldung ist noch nicht geöffnet."
     },
     "status": {
       "published": "Ausgeschrieben",
@@ -168,7 +170,8 @@
       },
       "error": {
         "create": "Fehler beim Erstellen der Veranstaltung",
-        "update": "Fehler beim Aktualisieren der Veranstaltung"
+        "update": "Fehler beim Aktualisieren der Veranstaltung",
+        "registrationOrder": "Der Anmeldestart darf nicht nach dem Anmeldeschluss liegen."
       },
       "delete": "Löschen",
       "deleteConfirm": "Soll diese Veranstaltung wirklich gelöscht werden?",
@@ -197,7 +200,8 @@
         "groupStrava": "Strava-Links dieser Gruppe (einer pro Zeile)",
         "addGroup": "Pace-Gruppe hinzufügen",
         "removeGroup": "Gruppe entfernen"
-      }
+      },
+      "registrationStart": "Anmeldestart"
     },
     "actions": {
       "create": "Veranstaltung erstellen",

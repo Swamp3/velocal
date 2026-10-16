@@ -117,6 +117,14 @@ export class EventFormComponent implements OnInit {
     country: new FormControl('', { nonNullable: true }),
     lat: new FormControl<number | null>(null),
     lng: new FormControl<number | null>(null),
+    registrationStart: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)],
+    }),
+    registrationStartTime: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+    }),
     registrationDeadline: new FormControl('', {
       nonNullable: true,
       validators: [Validators.pattern(/^(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/)],
@@ -273,8 +281,18 @@ export class EventFormComponent implements OnInit {
       return;
     }
 
-    this.submitting.set(true);
     const raw = this.form.getRawValue();
+    if (
+      raw.registrationStart &&
+      raw.registrationDeadline &&
+      new Date(this.combineDatetime(raw.registrationStart, raw.registrationStartTime)) >
+        new Date(this.combineDatetime(raw.registrationDeadline, raw.registrationDeadlineTime))
+    ) {
+      this.toast.error(this.transloco.translate('event.form.error.registrationOrder'));
+      return;
+    }
+
+    this.submitting.set(true);
 
     const dto = {
       name: raw.name,
@@ -286,9 +304,16 @@ export class EventFormComponent implements OnInit {
       address: raw.address || undefined,
       country: raw.country || undefined,
       coordinates: raw.lat != null && raw.lng != null ? { lat: raw.lat, lng: raw.lng } : undefined,
+      registrationStart: raw.registrationStart
+        ? this.combineDatetime(raw.registrationStart, raw.registrationStartTime)
+        : this.isEdit()
+          ? null
+          : undefined,
       registrationDeadline: raw.registrationDeadline
         ? this.combineDatetime(raw.registrationDeadline, raw.registrationDeadlineTime)
-        : undefined,
+        : this.isEdit()
+          ? null
+          : undefined,
       externalUrl: raw.externalUrl || undefined,
       recurrence: undefined as RecurrenceDto | undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
@@ -415,6 +440,10 @@ export class EventFormComponent implements OnInit {
       country: event.country ?? '',
       lat: event.coordinates?.lat ?? null,
       lng: event.coordinates?.lng ?? null,
+      registrationStart: event.registrationStart ? this.toDateString(event.registrationStart) : '',
+      registrationStartTime: event.registrationStart
+        ? this.toTimeString(event.registrationStart)
+        : '',
       registrationDeadline: event.registrationDeadline
         ? this.toDateString(event.registrationDeadline)
         : '',

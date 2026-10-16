@@ -129,7 +129,9 @@
       "editMeetup": "Edit meetup details",
       "meetupSaved": "Meetup details saved",
       "meetupError": "Could not save the meetup details",
-      "membersOnly": "Members only"
+      "membersOnly": "Members only",
+      "registrationStart": "Registration opens",
+      "registrationNotOpen": "Registration has not opened yet."
     },
     "status": {
       "published": "Published",
@@ -168,7 +170,8 @@
       },
       "error": {
         "create": "Failed to create event",
-        "update": "Failed to update event"
+        "update": "Failed to update event",
+        "registrationOrder": "Registration start must not be after the deadline."
       },
       "delete": "Delete",
       "deleteConfirm": "Are you sure you want to delete this event?",
@@ -197,7 +200,8 @@
         "groupStrava": "Strava links of this group (one per line)",
         "addGroup": "Add pace group",
         "removeGroup": "Remove group"
-      }
+      },
+      "registrationStart": "Registration opens"
     },
     "actions": {
       "create": "Create Event",

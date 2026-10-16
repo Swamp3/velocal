@@ -68,8 +68,12 @@ export class Event {
   })
   coordinates: Point;
 
+  /** When sign-up opens (Anmeldestart). */
   @Column({ type: 'timestamptz', nullable: true })
-  registrationDeadline: Date;
+  registrationStart: Date | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  registrationDeadline: Date | null;
 
   @Column({ nullable: true })
   externalUrl: string;
