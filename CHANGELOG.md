@@ -4,7 +4,7 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.12.0] — 2026-10-16
 
 ### Added
 
@@ -21,6 +21,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Delete your account yourself from the profile (name, email, password, favorites, memberships, notifications and push subscriptions are removed; you can also remove your posts, comments and polls). A club you alone administered passes to its longest-standing member, who is notified; a club without other members is deleted. Site admins must give up the admin role first.
 - The privacy policy now covers push notifications, profile data, moderation logs, reach measurement and place lookup, and names the correct email provider (Resend).
 - Reach measurement no longer stores anything on your device and no longer links page views to your account. Visits are counted per page load, so the admin statistics show "visits" instead of unique visitors. Page views are deleted after about 13 months.
+
+### Fixed
+
+- A few icons (expand less, event available, registration, unlink) showed as empty boxes because the trimmed icon font did not contain them.
+
+### Security and speed
+
+- Push messages only go to the push services of the browser and OS vendors, each person can register at most 10 devices, and account deletion, new push devices and page views are rate limited.
+- Sending push messages, signing in, the importer and the duplicate finder do less work per request, and new database indexes speed up the event lists, your upcoming events and the importer. A ban or account deletion can take up to 10 seconds to apply.
 
 ## [0.11.0] — 2026-10-15
 
@@ -42,7 +51,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- A few icons (expand less, event available, registration, unlink) showed as empty boxes because the trimmed icon font did not contain them.
 - Text in comments no longer breaks in the middle of a word.
 - Buttons in the club section no longer wrap their text on small screens.
 - The Events and account menus in the header open fully on the map page instead of being cut off.

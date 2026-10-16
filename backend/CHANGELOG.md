@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.12.0] - 2026-10-16
 
 ### Added
 
@@ -11,6 +11,14 @@
 - `DELETE /users/me` deletes an account by anonymizing it (`users.deletedAt`, placeholder email and name); removes private data, optionally the user's posts, comments and polls; hands over or deletes communities; audit entry `user.delete`; new notification type `community.admin_assigned`; migration `AddUserDeletedAt`; deleted users cannot authenticate and are hidden from the admin user list
 - Page views no longer store the user; the id is a per-visit random value; page views older than 400 days are deleted daily; migration `AnonymizePageViews` clears existing user links
 - Migration `AddPushNotifications`; new env vars `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
+
+### Security
+
+- Push subscriptions only accept the push services of the browser and OS vendors (SSRF guard, extra hosts via `PUSH_ENDPOINT_HOSTS`); at most 10 devices per user; rate limits for account deletion (5 per 15 min per user), new push subscriptions (20 per hour per user) and page views (1200 per minute overall); account deletion locks the affected clubs so two admins leaving at once cannot orphan a club; ignoring duplicates checks that the events exist
+
+### Performance
+
+- Push messages go out with 20 in flight at most and rewrite `lastSuccessAt` once a day; request authentication reads only the columns it needs and caches the answer for 10 seconds (a ban or deletion can take up to 10 seconds to apply); the importer loads its duplicate candidates once per run; the duplicate finder caches its result for a minute and looks back 12 months at most; migration `AddQueryIndexes` (RSVP by user, event start date, source and external URL)
 
 ## [0.11.0] - 2026-10-15
 
@@ -23,14 +31,6 @@
 - User blocking (`POST /admin/users/:id/ban`, `/unban`, `status=banned` filter); blocked users cannot log in
 - Edit community polls
 - Migrations `AddModeration` and `AddUserBan`
-
-### Security
-
-- Push subscriptions only accept the push services of the browser and OS vendors (SSRF guard, extra hosts via `PUSH_ENDPOINT_HOSTS`); at most 10 devices per user; rate limits for account deletion (5 per 15 min per user), new push subscriptions (20 per hour per user) and page views (1200 per minute overall); account deletion locks the affected clubs so two admins leaving at once cannot orphan a club; ignoring duplicates checks that the events exist
-
-### Performance
-
-- Push messages go out with 20 in flight at most and rewrite `lastSuccessAt` once a day; request authentication reads only the columns it needs and caches the answer for 10 seconds (a ban or deletion can take up to 10 seconds to apply); the importer loads its duplicate candidates once per run; the duplicate finder caches its result for a minute and looks back 12 months at most; migration `AddQueryIndexes` (RSVP by user, event start date, source and external URL)
 
 ### Changed
 
