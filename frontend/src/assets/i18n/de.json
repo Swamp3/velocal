@@ -934,7 +934,8 @@
       "addFromCommunity": "Aus Community-Mitgliedern hinzufügen",
       "searchPlaceholder": "Namen eingeben…",
       "noMatches": "Keine passenden Community-Mitglieder",
-      "stravaProfile": "Strava-Profil von {{name}}"
+      "stravaProfile": "Strava-Profil von {{name}}",
+      "byEmailHint": "Nutze die E-Mail-Adresse, wenn mehrere Mitglieder denselben Anzeigenamen haben. Die Person muss schon Mitglied der Community sein."
     },
     "requests": {
       "title": "Beitrittsanfragen",

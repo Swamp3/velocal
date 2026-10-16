@@ -192,8 +192,13 @@ export class CommunityService {
     return this.api.delete(`/communities/${communitySlug}/subgroups/${slug}`);
   }
 
-  inviteToSubgroup(communitySlug: string, slug: string, userId: string): Observable<Subgroup> {
-    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, { userId });
+  /** Adds a community member to the subgroup, picked by id or found by email. */
+  inviteToSubgroup(
+    communitySlug: string,
+    slug: string,
+    target: { userId: string } | { email: string },
+  ): Observable<Subgroup> {
+    return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/invites`, target);
   }
 
   listPosts(communitySlug: string, subgroupSlug?: string | null): Observable<CommunityPost[]> {

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `POST /communities/:slug/subgroups/:sub/invites` accepts `{ email }` as well as `{ userId }`; an unknown email and a person outside the club give the same answer
+
 ## [0.12.1] - 2026-10-16
 
 ### Changed
