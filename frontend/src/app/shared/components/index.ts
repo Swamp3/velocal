@@ -16,6 +16,7 @@ export { InviteByEmailComponent } from './invite-by-email/invite-by-email.compon
 export { CommunityCardComponent } from './community-card/community-card.component';
 export { CommunityHeroComponent } from './community-hero/community-hero.component';
 export { MemberListComponent, type MemberListItem } from './member-list/member-list.component';
+export { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 export { ConfirmDeleteDialogComponent } from './confirm-delete-dialog/confirm-delete-dialog.component';
 export { RequestListComponent, type RequestListItem } from './request-list/request-list.component';
 export { RichTextComponent } from './rich-text/rich-text.component';

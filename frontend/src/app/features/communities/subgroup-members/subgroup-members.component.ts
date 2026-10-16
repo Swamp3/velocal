@@ -12,7 +12,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { EmptyStateComponent, InviteByEmailComponent, MemberListComponent, MemberListItem } from '@shared/components';
+import {
+  ConfirmDialogComponent,
+  EmptyStateComponent,
+  InviteByEmailComponent,
+  MemberListComponent,
+  MemberListItem,
+} from '@shared/components';
 import { CommunityMember, Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
 import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
@@ -20,7 +26,16 @@ import { communityErrorKey } from '../community-error';
 @Component({
   selector: 'app-subgroup-members',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, SkeletonComponent, EmptyStateComponent, MemberListComponent, ButtonStyleDirective, InviteByEmailComponent],
+  imports: [
+    ConfirmDialogComponent,
+    RouterLink,
+    TranslocoPipe,
+    SkeletonComponent,
+    EmptyStateComponent,
+    MemberListComponent,
+    ButtonStyleDirective,
+    InviteByEmailComponent,
+  ],
   templateUrl: './subgroup-members.component.html',
 })
 export class SubgroupMembersComponent implements OnInit {
@@ -40,6 +55,7 @@ export class SubgroupMembersComponent implements OnInit {
   protected readonly notFound = signal(false);
   protected readonly mutating = signal(false);
   private readonly members = signal<SubgroupMember[]>([]);
+  protected readonly promoteCandidate = signal<SubgroupMember | null>(null);
   private readonly communityMembers = signal<CommunityMember[]>([]);
   protected readonly query = signal('');
 
@@ -121,10 +137,23 @@ export class SubgroupMembersComponent implements OnInit {
   }
 
   protected onRoleToggle(userId: string): void {
-    const subgroup = this.subgroup();
     const member = this.members().find((row) => row.userId === userId);
-    if (!subgroup || !member || this.mutating()) return;
-    const role: SubgroupRole = member.role === 'moderator' ? 'member' : 'moderator';
+    if (!member || this.mutating()) return;
+    // Moderator rights are powerful, so ask before granting them.
+    if (member.role === 'moderator') this.changeRole(userId, 'member');
+    else this.promoteCandidate.set(member);
+  }
+
+  protected confirmPromote(): void {
+    const member = this.promoteCandidate();
+    if (!member) return;
+    this.promoteCandidate.set(null);
+    this.changeRole(member.userId, 'moderator');
+  }
+
+  private changeRole(userId: string, role: SubgroupRole): void {
+    const subgroup = this.subgroup();
+    if (!subgroup || this.mutating()) return;
     this.mutating.set(true);
     this.communityService
       .updateSubgroupRole(subgroup.communitySlug, subgroup.slug, userId, role)

@@ -69,5 +69,18 @@
       }
     </div>
 
+    @if (promoteCandidate(); as candidate) {
+      <app-confirm-dialog
+        [title]="'communities.members.promoteTitle' | transloco"
+        [message]="
+          'communities.members.promoteConfirm'
+            | transloco
+              : { name: candidate.displayName || ('communities.members.unnamed' | transloco) }
+        "
+        [confirmLabel]="'communities.members.promote' | transloco"
+        (confirmed)="confirmPromote()"
+        (cancelled)="promoteCandidate.set(null)"
+      />
+    }
   </div>
 }

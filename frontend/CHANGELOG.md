@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Reusable `app-confirm-dialog`; used before promoting a club admin or subgroup moderator
+
+
 ## [0.13.2] - 2026-10-16
 
 ### Added

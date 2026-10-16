@@ -13,6 +13,7 @@ import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
+  ConfirmDialogComponent,
   EmptyStateComponent,
   InviteByEmailComponent,
   MemberListComponent,
@@ -26,12 +27,14 @@ import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/u
   selector: 'app-community-members',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ConfirmDialogComponent,
     RouterLink,
     TranslocoPipe,
     SkeletonComponent,
     EmptyStateComponent,
     InviteByEmailComponent,
-    MemberListComponent, ButtonStyleDirective,
+    MemberListComponent,
+    ButtonStyleDirective,
   ],
   templateUrl: './community-members.component.html',
 })
@@ -53,6 +56,7 @@ export class CommunityMembersComponent implements OnInit {
   protected readonly mutating = signal(false);
   private readonly members = signal<CommunityMember[]>([]);
 
+  protected readonly promoteCandidate = signal<CommunityMember | null>(null);
   protected readonly canManage = computed(() => this.community()?.myRole === 'admin');
 
   protected readonly memberItems = computed((): MemberListItem[] => {
@@ -105,11 +109,23 @@ export class CommunityMembersComponent implements OnInit {
   }
 
   protected onRoleToggle(userId: string): void {
-    const community = this.community();
     const member = this.members().find((row) => row.userId === userId);
-    if (!community || !member || this.mutating()) return;
+    if (!member || this.mutating()) return;
+    // Giving someone admin rights is hard to undo in practice, so ask first.
+    if (member.role === 'admin') this.changeRole(userId, 'member');
+    else this.promoteCandidate.set(member);
+  }
 
-    const role: CommunityRole = member.role === 'admin' ? 'member' : 'admin';
+  protected confirmPromote(): void {
+    const member = this.promoteCandidate();
+    if (!member) return;
+    this.promoteCandidate.set(null);
+    this.changeRole(member.userId, 'admin');
+  }
+
+  private changeRole(userId: string, role: CommunityRole): void {
+    const community = this.community();
+    if (!community || this.mutating()) return;
     this.mutating.set(true);
     this.communityService
       .updateMemberRole(community.id, userId, role)
