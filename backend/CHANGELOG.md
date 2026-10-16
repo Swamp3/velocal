@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Join request lists include `email`; club and subgroup details include `pendingRequestCount` for admins/moderators
+
+
 ## [0.13.0] - 2026-10-16
 
 ### Fixed

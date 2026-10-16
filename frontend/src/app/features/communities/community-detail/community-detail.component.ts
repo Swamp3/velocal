@@ -113,6 +113,7 @@ export class CommunityDetailComponent implements OnInit {
         labelKey: 'communities.members.title',
         commands: [...base, 'members'],
         count: community.memberCount,
+        pending: community.pendingRequestCount,
       },
     ];
   }

@@ -947,6 +947,7 @@
     "requests": {
       "title": "Beitrittsanfragen",
       "empty": "Keine offenen Anfragen",
+      "pending": "{{count}} offene Anfragen",
       "approve": "Annehmen",
       "reject": "Ablehnen"
     },

@@ -106,6 +106,7 @@ export class SubgroupDetailComponent implements OnInit {
         labelKey: 'communities.members.title',
         commands: [...base, 'members'],
         count: subgroup.memberCount,
+        pending: subgroup.pendingRequestCount,
       },
     ];
   }
