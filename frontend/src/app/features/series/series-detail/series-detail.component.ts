@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { toMetaDescription } from '@shared/utils/meta-text';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { SeoService } from '@core/services/seo.service';
@@ -58,9 +59,9 @@ export class SeriesDetailComponent implements OnInit {
   private applySeo(s: RaceSeriesDetail): void {
     const url = this.seo.pageUrl(`/series/${s.slug}`);
     const image = this.seo.ogImage(s.imageUrl);
-    const description = (
-      s.description ?? `${s.eventCount} events${s.year ? ` · ${s.year}` : ''}`
-    ).slice(0, 260);
+    const description =
+      toMetaDescription(s.description, 260) ||
+      `${s.eventCount} events${s.year ? ` · ${s.year}` : ''}`;
 
     const itemListElement = (s.events ?? [])
       .map((entry, i) => {

@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { toMetaDescription } from '@shared/utils/meta-text';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,15 +21,7 @@ import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
 import { SeriesService } from '@core/services/series.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  AddToCalendarComponent,
-  DisciplineChipComponent,
-  EmptyStateComponent,
-  EventDetailMapComponent,
-  EventStatusBadgeComponent,
-  NewsCardComponent,
-  RichTextViewComponent,
-} from '@shared/components';
+import { AddToCalendarComponent, DisciplineChipComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
 import { CyclingEvent, formatDistance, PostListItem, RaceSeries } from '@shared/models';
 import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit.component';
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
@@ -72,7 +65,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     EventRsvpComponent,
     EventInviteComponent,
     EventCommentsComponent,
-    EventMeetupEditComponent, ButtonStyleDirective,
+    EventMeetupEditComponent, ButtonStyleDirective, ShareButtonComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -133,6 +126,15 @@ export class EventDetailComponent implements OnInit {
   });
 
   /** Query params that keep the community context when leaving to edit and coming back. */
+  /** One line for the share sheet: when and where. */
+  protected shareText(): string {
+    const event = this.event();
+    if (!event) return '';
+    return [this.formatEventDate(event.startDate, event.endDate), event.locationName]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
   protected hostQuery(): Record<string, string> {
     const { community, subgroup } = this.hostContext;
     if (!community) return {};
@@ -266,8 +268,8 @@ export class EventDetailComponent implements OnInit {
     const dateLabel = this.formatEventDate(event.startDate, event.endDate);
     const venue = event.locationName ?? '';
     const shortDesc =
-      [disciplineName, dateLabel, venue].filter(Boolean).join(' · ').slice(0, 260) ||
-      (event.description ?? '').slice(0, 200);
+      toMetaDescription([disciplineName, dateLabel, venue].filter(Boolean).join(' · '), 260) ||
+      toMetaDescription(event.description);
 
     const jsonLd: Record<string, unknown> = {
       '@context': 'https://schema.org',

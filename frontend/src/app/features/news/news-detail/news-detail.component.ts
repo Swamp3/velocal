@@ -1,4 +1,5 @@
 import { DatePipe, isPlatformBrowser } from '@angular/common';
+import { toMetaDescription } from '@shared/utils/meta-text';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -116,7 +117,7 @@ export class NewsDetailComponent implements OnInit {
   private applySeo(post: Post): void {
     const url = this.seo.pageUrl(`/news/${post.slug}`);
     const image = this.seo.ogImage(post.imageUrl);
-    const description = this.stripHtml(post.body).slice(0, 200);
+    const description = toMetaDescription(post.body);
 
     this.seo.setMeta({
       title: post.title,
@@ -143,20 +144,4 @@ export class NewsDetailComponent implements OnInit {
     });
   }
 
-  /**
-   * Browser: parse via DOMParser so HTML entities are decoded correctly.
-   * SSR: DOMParser isn't available, use a text-only regex fallback.
-   */
-  private stripHtml(html: string): string {
-    if (this.isBrowser && typeof DOMParser !== 'undefined') {
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      return (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
-    }
-    return html
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
 }

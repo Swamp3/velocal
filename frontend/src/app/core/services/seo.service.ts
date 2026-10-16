@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
+import { toMetaDescription } from '@shared/utils/meta-text';
 import { SITE_URL } from '@core/tokens/site-url';
 
 export interface SeoMeta {
@@ -36,7 +37,8 @@ export class SeoService {
 
   setMeta(input: SeoMeta): void {
     const title = this.formatTitle(input.title);
-    const description = input.description || DEFAULT_DESCRIPTION;
+    // Rich text in, plain text out: messengers print meta tags as they are.
+    const description = toMetaDescription(input.description, 200) || DEFAULT_DESCRIPTION;
     const image = this.absolute(input.image ?? DEFAULT_IMAGE);
 
     this.title.setTitle(title);
