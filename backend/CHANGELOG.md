@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.12.1] - 2026-10-16
+
+### Changed
+
+- Version bump together with the frontend fixes (link previews, share button); no API changes
+
 ## [0.12.0] - 2026-10-16
 
 ### Added
