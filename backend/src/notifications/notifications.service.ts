@@ -10,6 +10,7 @@ import {
   Repository,
 } from 'typeorm';
 import { MailService } from '../mail/mail.service';
+import { PushService } from './push.service';
 import { User } from '../users/entities/user.entity';
 import { EventInvite } from './entities/event-invite.entity';
 import {
@@ -41,6 +42,7 @@ export class NotificationsService {
     private readonly mail: MailService,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
+    private readonly push: PushService,
   ) {}
 
   async list(userId: string): Promise<Notification[]> {
@@ -245,6 +247,13 @@ export class NotificationsService {
       ? manager.getRepository(Notification)
       : this.notifications;
     await repo.insert(unique.map((userId) => ({ userId, type, payload })));
+    // Inside someone else's transaction the commit may come a moment later, so
+    // wait briefly before pushing; a rolled-back inbox entry then rarely leaks.
+    if (manager) {
+      setTimeout(() => void this.push.notify(unique, type, payload), 1500);
+    } else {
+      void this.push.notify(unique, type, payload);
+    }
   }
 
   private async communityMembers(

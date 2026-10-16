@@ -58,6 +58,10 @@ export class User {
   @Column({ type: 'varchar', length: 500, nullable: true })
   banReason: string | null;
 
+  /** Which kinds of notification are sent as push; null means the defaults. */
+  @Column({ type: 'jsonb', nullable: true })
+  pushPreferences: Record<string, boolean> | null;
+
   @Column({ default: 'de' })
   preferredLanguage: string;
 

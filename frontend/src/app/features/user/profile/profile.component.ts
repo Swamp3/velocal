@@ -19,6 +19,8 @@ import { ButtonComponent, ChipComponent, InputComponent } from '@shared/ui';
 import { EventCardComponent, CountrySelectorComponent } from '@shared/components';
 import { CyclingEvent, Discipline } from '@shared/models';
 
+import { PushSettingsComponent } from './push-settings/push-settings.component';
+
 const FAVORITES_PAGE_SIZE = 10;
 
 @Component({
@@ -32,6 +34,7 @@ const FAVORITES_PAGE_SIZE = 10;
     InputComponent,
     CountrySelectorComponent,
     EventCardComponent,
+    PushSettingsComponent,
   ],
   templateUrl: './profile.component.html',
 })

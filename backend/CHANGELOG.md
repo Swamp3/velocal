@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Web Push (VAPID, `web-push`): `push_subscriptions` table, `users.pushPreferences`, `GET /push/config`, `POST`/`DELETE /push/subscriptions`, `GET`/`PATCH /push/preferences`, `POST /push/test`; inbox notifications are also sent as push when the user opted in
+- Migration `AddPushNotifications`; new env vars `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
+
 ## [0.11.0] - 2026-10-15
 
 ### Added

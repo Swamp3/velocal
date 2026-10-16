@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Push notification settings in the profile (this device on/off, message types, test message), `PushService` on top of `SwPush`; the subscription is renewed on start and removed on sign-out
+- Privacy policy sections for push notifications and push delivery
+
 ## [0.11.0] - 2026-10-15
 
 ### Added

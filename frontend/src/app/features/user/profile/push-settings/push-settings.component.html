@@ -1,0 +1,80 @@
+<section
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
+>
+  <h2 class="mb-2 text-lg font-semibold text-[var(--color-text)]">
+    {{ 'profile.push.title' | transloco }}
+  </h2>
+  <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+    {{ 'profile.push.hint' | transloco }}
+  </p>
+
+  @switch (push.state()) {
+    @case ('loading') {
+      <p class="text-sm text-[var(--color-text-muted)]">…</p>
+    }
+    @case ('unsupported') {
+      <p class="text-sm text-[var(--color-text-muted)]">
+        {{ 'profile.push.unsupported' | transloco }}
+      </p>
+    }
+    @case ('needs-install') {
+      <p class="rounded-lg bg-[var(--color-bg-alt)] p-3 text-sm text-[var(--color-text)]">
+        {{ 'profile.push.needsInstall' | transloco }}
+      </p>
+    }
+    @case ('denied') {
+      <p class="text-sm text-[var(--color-danger)]">
+        {{ 'profile.push.denied' | transloco }}
+      </p>
+    }
+    @default {
+      <div class="flex flex-wrap items-center gap-3">
+        <ui-button
+          [variant]="push.state() === 'on' ? 'outline' : 'primary'"
+          [loading]="busy()"
+          [disabled]="busy()"
+          (click)="toggleDevice()"
+        >
+          {{ (push.state() === 'on' ? 'profile.push.disable' : 'profile.push.enable') | transloco }}
+        </ui-button>
+        @if (push.state() === 'on') {
+          <span class="text-sm text-[var(--color-success)]">
+            {{ 'profile.push.on' | transloco }}
+          </span>
+          <ui-button variant="ghost" size="sm" [loading]="testing()" (click)="sendTest()">
+            {{ 'profile.push.test' | transloco }}
+          </ui-button>
+        }
+      </div>
+    }
+  }
+
+  @if (prefs(); as p) {
+    <fieldset class="mt-5 space-y-3">
+      <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">
+        {{ 'profile.push.categories' | transloco }}
+      </legend>
+      @for (c of categories; track c) {
+        <label class="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            class="mt-1 size-4 shrink-0 cursor-pointer accent-[var(--color-primary)]"
+            [checked]="p[c]"
+            (change)="toggleCategory(c)"
+          />
+          <span>
+            <span class="block text-sm font-medium text-[var(--color-text)]">
+              {{ 'profile.push.category.' + c | transloco }}
+            </span>
+            <span class="block text-xs text-[var(--color-text-muted)]">
+              {{ 'profile.push.category.' + c + 'Hint' | transloco }}
+            </span>
+          </span>
+        </label>
+      }
+      <p class="text-xs text-[var(--color-text-muted)]">
+        {{ 'profile.push.categoriesNote' | transloco }}
+      </p>
+    </fieldset>
+  }
+</section>

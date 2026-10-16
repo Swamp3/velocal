@@ -4,6 +4,16 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **Push notifications** — turn on push for each device in your profile and choose what you get: event invitations, membership, new events (off by default) and club updates. Works on Android, desktop browsers and iPhones with VeloCal added to the Home Screen. A test button checks that it works.
+
+### Changed
+
+- The privacy policy describes push notifications and how they are delivered.
+
 ## [0.11.0] — 2026-10-15
 
 ### Added

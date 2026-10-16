@@ -327,7 +327,35 @@
     "stravaPlaceholder": "strava.com/athletes/… oder Athleten-ID",
     "stravaHint": "Optional. Mitglieder deiner Communities sehen neben deinem Namen einen Link dazu.",
     "stravaInvalid": "Gib einen strava.com-Profillink oder deine Athleten-ID ein",
-    "stravaOpen": "Auf Strava öffnen"
+    "stravaOpen": "Auf Strava öffnen",
+    "push": {
+      "title": "Push-Benachrichtigungen",
+      "hint": "Erhalte eine Nachricht auf diesem Gerät, wenn etwas passiert, auch wenn VeloCal geschlossen ist. Push wird pro Gerät eingerichtet; die Auswahl unten gilt für alle deine Geräte.",
+      "enable": "Für dieses Gerät aktivieren",
+      "disable": "Für dieses Gerät deaktivieren",
+      "on": "Für dieses Gerät aktiv",
+      "test": "Testnachricht senden",
+      "unsupported": "Dieser Browser oder dieses Gerät kann keine Push-Benachrichtigungen empfangen, oder Push ist auf dem Server nicht eingerichtet.",
+      "needsInstall": "Auf iPhone und iPad funktioniert Push für Apps auf dem Home-Bildschirm. Tippe in Safari auf Teilen, wähle „Zum Home-Bildschirm“, öffne VeloCal von dort und rufe diese Seite erneut auf.",
+      "denied": "Benachrichtigungen sind für VeloCal in den Browser- oder Geräteeinstellungen blockiert. Erlaube sie dort und lade die Seite neu.",
+      "enableFailed": "Push-Benachrichtigungen konnten nicht aktiviert werden.",
+      "testSent": "Testnachricht gesendet.",
+      "testNone": "Kein Gerät hat die Nachricht angenommen. Schalte Push aus und wieder ein.",
+      "testWait": "Bitte warte einen Moment, bevor du erneut testest.",
+      "testFailed": "Die Testnachricht konnte nicht gesendet werden.",
+      "categories": "Push senden bei",
+      "categoriesNote": "Alles erscheint weiterhin in deiner Benachrichtigungsliste.",
+      "category": {
+        "invites": "Einladungen zu Events",
+        "invitesHint": "Jemand lädt dich zu einem Event ein.",
+        "membership": "Mitgliedschaft",
+        "membershipHint": "Beitrittsanfragen für Gruppen, die du verwaltest, und Entscheidungen zu deinen Anfragen.",
+        "events": "Neue Events",
+        "eventsHint": "Ein neues Event in deinen Clubs und Untergruppen. Kann häufig vorkommen.",
+        "community": "Neuigkeiten zu Clubs",
+        "communityHint": "Ein Club oder eine Untergruppe wird gelöscht, gesperrt oder ist wieder verfügbar."
+      }
+    }
   },
   "series": {
     "title": "Rennserien",
@@ -703,7 +731,7 @@
     },
     "privacy": {
       "title": "Datenschutzerklärung",
-      "lastUpdated": "Stand: April 2026",
+      "lastUpdated": "Stand: Oktober 2026",
       "controllerTitle": "1. Verantwortlicher",
       "controllerBody": "Verantwortlich für die Datenverarbeitung auf dieser Website ist:",
       "dataCollectedTitle": "2. Welche Daten wir erheben",
@@ -716,7 +744,7 @@
       "serverLogsTitle": "Server-Logdateien",
       "serverLogsBody": "Beim Zugriff auf unsere Website werden automatisch Informationen in Server-Logdateien gespeichert, die Ihr Browser übermittelt: IP-Adresse, Browsertyp und -version, Zeitpunkt des Zugriffs. Diese Daten werden zur Sicherstellung des Betriebs gespeichert (Art. 6 Abs. 1 lit. f DSGVO) und nach 30 Tagen gelöscht.",
       "localStorageTitle": "Lokaler Speicher (localStorage)",
-      "localStorageBody": "Wir verwenden den lokalen Speicher Ihres Browsers (localStorage) um Authentifizierungsdaten, Ihre Designpräferenz (hell/dunkel), Spracheinstellung und Filtereinstellungen zu speichern. Es handelt sich um technisch notwendige Daten, die ausschließlich lokal in Ihrem Browser verbleiben.",
+      "localStorageBody": "Wir verwenden den lokalen Speicher Ihres Browsers (localStorage) um Authentifizierungsdaten, Ihre Designpräferenz (hell/dunkel), Spracheinstellung, Filtereinstellungen und, wenn Sie Push-Benachrichtigungen aktivieren, einen Vermerk, dass Push auf diesem Gerät aktiv ist, zu speichern. Es handelt sich um technisch notwendige Daten, die ausschließlich lokal in Ihrem Browser verbleiben.",
       "thirdPartyTitle": "3. Drittanbieter-Dienste",
       "sendgridTitle": "E-Mail-Versand (Twilio SendGrid)",
       "sendgridBody": "Für den Versand von E-Mails (z.B. Anmeldecodes) nutzen wir den Dienst SendGrid der Twilio Inc. (USA). Dabei werden Ihre E-Mail-Adresse und der Nachrichteninhalt an SendGrid übermittelt. Die Datenübermittlung in die USA erfolgt auf Grundlage von Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO).",
@@ -724,7 +752,7 @@
       "osmBody": "Zur Darstellung von Karten laden wir Kartenkacheln von OpenStreetMap-Servern. Dabei wird Ihre IP-Adresse an die OpenStreetMap Foundation (OSMF) übertragen. Weitere Informationen finden Sie in der Datenschutzerklärung der OSMF: https://wiki.osmfoundation.org/wiki/Privacy_Policy",
       "legalBasisTitle": "4. Rechtsgrundlagen",
       "legalBasisBody": "Die Verarbeitung Ihrer Daten erfolgt auf folgenden Rechtsgrundlagen:",
-      "legalBasisConsent": "Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) — z.B. Standortfreigabe",
+      "legalBasisConsent": "Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) — z.B. Standortfreigabe, Push-Benachrichtigungen",
       "legalBasisContract": "Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO) — z.B. Bereitstellung des Benutzerkontos",
       "legalBasisLegitimate": "Berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO) — z.B. Server-Logdateien zur Sicherheit",
       "retentionTitle": "5. Speicherdauer",
@@ -740,7 +768,11 @@
       "authorityTitle": "7. Beschwerderecht",
       "authorityBody": "Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde über die Verarbeitung Ihrer personenbezogenen Daten zu beschweren.",
       "transferTitle": "8. Datenübermittlung in Drittländer",
-      "transferBody": "Durch die Nutzung von SendGrid (Twilio Inc., USA) werden Daten in die USA übermittelt. Die Übermittlung ist durch Standardvertragsklauseln gemäß Art. 46 Abs. 2 lit. c DSGVO abgesichert."
+      "transferBody": "Durch die Nutzung von SendGrid (Twilio Inc., USA) werden Daten in die USA übermittelt. Die Übermittlung ist durch Standardvertragsklauseln gemäß Art. 46 Abs. 2 lit. c DSGVO abgesichert.",
+      "pushTitle": "Push-Benachrichtigungen (optional)",
+      "pushBody": "Wenn Sie in Ihrem Profil Push-Benachrichtigungen aktivieren, erzeugt Ihr Browser ein Abonnement für dieses Gerät. Wir speichern dessen Adresse (Endpoint) und Verschlüsselungsschlüssel, den Gerätetyp aus dem User-Agent und den Zeitpunkt der letzten erfolgreichen Zustellung zusammen mit Ihrem Konto. Wir nutzen sie ausschließlich, um Ihnen die gewählten Benachrichtigungen zu senden (Einladungen zu Events, Mitgliedschaft, neue Events, Neuigkeiten zu Clubs). Sie können Push jederzeit pro Gerät und pro Art in Ihrem Profil ausschalten; das Abonnement wird dann gelöscht. Es wird außerdem gelöscht, wenn Sie sich auf dem Gerät abmelden, Ihr Konto löschen oder das Gerät keine Nachrichten mehr annimmt. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), erteilt durch die Berechtigungsabfrage des Browsers und das Aktivieren der Einstellung.",
+      "pushServicesTitle": "Push-Zustellung (Hersteller von Browser und Betriebssystem)",
+      "pushServicesBody": "Push-Nachrichten werden über den Push-Dienst des Herstellers Ihres Browsers oder Geräts zugestellt (zum Beispiel Google, Mozilla, Apple oder Microsoft). Unser Server übermittelt die für Ihr Gerät verschlüsselte Nachricht zusammen mit der Abonnement-Adresse an diesen Dienst; der Hersteller sieht, dass eine Nachricht an Ihr Gerät zugestellt wurde, kann den Inhalt aber nicht lesen. Je nach Hersteller kann eine Verarbeitung außerhalb der EU stattfinden; die Hersteller stützen sich dafür auf eigene Garantien nach Kapitel V DSGVO."
     },
     "terms": {
       "title": "Nutzungsbedingungen",

@@ -327,7 +327,35 @@
     "stravaPlaceholder": "strava.com/athletes/… or athlete ID",
     "stravaHint": "Optional. Members of your communities see a link to it next to your name.",
     "stravaInvalid": "Enter a strava.com profile link or your athlete ID",
-    "stravaOpen": "Open on Strava"
+    "stravaOpen": "Open on Strava",
+    "push": {
+      "title": "Push notifications",
+      "hint": "Get a message on this device when something happens, even when VeloCal is closed. Push is set up per device; the choices below apply to all your devices.",
+      "enable": "Turn on for this device",
+      "disable": "Turn off for this device",
+      "on": "On for this device",
+      "test": "Send test message",
+      "unsupported": "This browser or device cannot receive push notifications, or push is not set up on the server.",
+      "needsInstall": "On iPhone and iPad, push works for apps on the Home Screen. Tap Share in Safari, choose \"Add to Home Screen\", open VeloCal from there and come back to this page.",
+      "denied": "Notifications are blocked for VeloCal in your browser or device settings. Allow them there and reload this page.",
+      "enableFailed": "Could not turn on push notifications.",
+      "testSent": "Test message sent.",
+      "testNone": "No device accepted the message. Turn push off and on again.",
+      "testWait": "Please wait a moment before sending another test.",
+      "testFailed": "Could not send the test message.",
+      "categories": "Send me a push for",
+      "categoriesNote": "Everything still appears in your notification list.",
+      "category": {
+        "invites": "Event invitations",
+        "invitesHint": "Someone invites you to an event.",
+        "membership": "Membership",
+        "membershipHint": "Join requests for groups you manage and decisions about your requests.",
+        "events": "New events",
+        "eventsHint": "A new event in your clubs and subgroups. Can be frequent.",
+        "community": "Club updates",
+        "communityHint": "A club or subgroup is deleted, suspended or available again."
+      }
+    }
   },
   "series": {
     "title": "Race Series",
@@ -703,7 +731,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: April 2026",
+      "lastUpdated": "Last updated: October 2026",
       "controllerTitle": "1. Data Controller",
       "controllerBody": "The party responsible for data processing on this website is:",
       "dataCollectedTitle": "2. Data We Collect",
@@ -716,7 +744,7 @@
       "serverLogsTitle": "Server Log Files",
       "serverLogsBody": "When you access our website, your browser automatically transmits information stored in server log files: IP address, browser type and version, time of access. This data is stored to ensure operations (Art. 6(1)(f) GDPR) and deleted after 30 days.",
       "localStorageTitle": "Local Storage",
-      "localStorageBody": "We use your browser's local storage (localStorage) to store authentication data, your design preference (light/dark), language setting, and filter settings. This is technically necessary data that remains exclusively in your browser.",
+      "localStorageBody": "We use your browser's local storage (localStorage) to store authentication data, your design preference (light/dark), language setting, filter settings and, if you turn on push notifications, a note that push is on for this device. This is technically necessary data that remains exclusively in your browser.",
       "thirdPartyTitle": "3. Third-Party Services",
       "sendgridTitle": "Email Delivery (Twilio SendGrid)",
       "sendgridBody": "We use SendGrid by Twilio Inc. (USA) to send emails (e.g. login codes). Your email address and message content are transmitted to SendGrid. Data transfer to the USA is based on Standard Contractual Clauses (Art. 46(2)(c) GDPR).",
@@ -724,7 +752,7 @@
       "osmBody": "To display maps, we load map tiles from OpenStreetMap servers. Your IP address is transmitted to the OpenStreetMap Foundation (OSMF). For more information, see the OSMF privacy policy: https://wiki.osmfoundation.org/wiki/Privacy_Policy",
       "legalBasisTitle": "4. Legal Basis",
       "legalBasisBody": "Your data is processed on the following legal bases:",
-      "legalBasisConsent": "Consent (Art. 6(1)(a) GDPR) — e.g. location sharing",
+      "legalBasisConsent": "Consent (Art. 6(1)(a) GDPR) — e.g. location sharing, push notifications",
       "legalBasisContract": "Contract performance (Art. 6(1)(b) GDPR) — e.g. providing your user account",
       "legalBasisLegitimate": "Legitimate interest (Art. 6(1)(f) GDPR) — e.g. server logs for security",
       "retentionTitle": "5. Data Retention",
@@ -740,7 +768,11 @@
       "authorityTitle": "7. Right to Complain",
       "authorityBody": "You have the right to lodge a complaint with a data protection supervisory authority regarding the processing of your personal data.",
       "transferTitle": "8. Data Transfers to Third Countries",
-      "transferBody": "Through the use of SendGrid (Twilio Inc., USA), data is transferred to the USA. The transfer is secured by Standard Contractual Clauses pursuant to Art. 46(2)(c) GDPR."
+      "transferBody": "Through the use of SendGrid (Twilio Inc., USA), data is transferred to the USA. The transfer is secured by Standard Contractual Clauses pursuant to Art. 46(2)(c) GDPR.",
+      "pushTitle": "Push Notifications (optional)",
+      "pushBody": "If you turn on push notifications in your profile, your browser creates a subscription for this device. We store its address (endpoint) and encryption keys, the device type from the user agent, and the time of the last successful delivery, together with your account. We use them only to send you the notifications you chose (event invitations, membership, new events, club updates). You can turn push off per device and per type in your profile at any time; the subscription is then deleted. It is also deleted when you sign out on that device, when you delete your account, or when the device no longer accepts messages. The legal basis is your consent (Art. 6(1)(a) GDPR), given by the browser permission prompt and by turning the setting on.",
+      "pushServicesTitle": "Push Delivery (browser and operating system vendors)",
+      "pushServicesBody": "Push messages are delivered through the push service of your browser or device vendor (for example Google, Mozilla, Apple or Microsoft). Our server sends the message, encrypted for your device, to that service together with the subscription address; the vendor sees that a message was delivered to your device, but cannot read its content. Depending on the vendor, data may be processed outside the EU; the vendors rely on their own safeguards under Chapter V GDPR."
     },
     "terms": {
       "title": "Terms of Use",
