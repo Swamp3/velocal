@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.13.2] - 2026-10-16
+
 ### Added
 
 - Lazy `app-name-prompt` dialog in the app shell for accounts without a display name
