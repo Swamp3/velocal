@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- The privacy policy describes push notifications and how they are delivered.
+- The privacy policy now covers push notifications, profile data, moderation logs, reach measurement and place lookup, and names the correct email provider (Resend).
+- Reach measurement no longer stores anything on your device and no longer links page views to your account. Visits are counted per page load, so the admin statistics show "visits" instead of unique visitors. Page views are deleted after about 13 months.
 
 ## [0.11.0] — 2026-10-15
 

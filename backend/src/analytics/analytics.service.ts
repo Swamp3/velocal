@@ -1,6 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { PageView } from './entities/page-view.entity';
 
 export interface TopPage {
@@ -21,17 +26,47 @@ export interface AnalyticsOverview {
   daily: DailyStats[];
 }
 
+/** Page views older than this are deleted (see the privacy policy). */
+export const PAGE_VIEW_RETENTION_DAYS = 400;
+
 @Injectable()
-export class AnalyticsService {
+export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(AnalyticsService.name);
+  private cleanupTimer?: NodeJS.Timeout;
+
   constructor(
     @InjectRepository(PageView)
     private readonly pageViewRepo: Repository<PageView>,
   ) {}
 
-  async recordPageView(path: string, userId?: string, clientId?: string): Promise<void> {
+  onModuleInit(): void {
+    void this.deleteExpired();
+    this.cleanupTimer = setInterval(
+      () => void this.deleteExpired(),
+      24 * 60 * 60 * 1000,
+    );
+    this.cleanupTimer.unref();
+  }
+
+  onModuleDestroy(): void {
+    clearInterval(this.cleanupTimer);
+  }
+
+  async deleteExpired(): Promise<void> {
+    try {
+      const cutoff = new Date(
+        Date.now() - PAGE_VIEW_RETENTION_DAYS * 24 * 60 * 60 * 1000,
+      );
+      await this.pageViewRepo.delete({ viewedAt: LessThan(cutoff) });
+    } catch (error) {
+      this.logger.error('Deleting expired page views failed', error);
+    }
+  }
+
+  async recordPageView(path: string, clientId?: string): Promise<void> {
     await this.pageViewRepo.insert({
       path,
-      userId: userId ?? null,
+      userId: null,
       clientId: clientId ?? null,
     });
   }

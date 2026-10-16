@@ -6,7 +6,8 @@ import { NavigationEnd, Router } from '@angular/router';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
 import { catchError, EMPTY, filter, pairwise, startWith, switchMap, throttleTime } from 'rxjs';
 
-const CLIENT_ID_KEY = 'velocal_client_id';
+/** Older versions stored a persistent id here; it is removed on start. */
+const LEGACY_CLIENT_ID_KEY = 'velocal_client_id';
 
 @Injectable({ providedIn: 'root' })
 export class PageTrackingService {
@@ -19,7 +20,10 @@ export class PageTrackingService {
   init(): void {
     if (!this.isBrowser) return;
 
-    const clientId = this.getOrCreateClientId();
+    this.removeLegacyClientId();
+    // Lives only in memory: a new id per visit (page load), never written to
+    // cookies or local storage, so nothing is stored on the device.
+    const clientId = crypto.randomUUID();
 
     this.router.events
       .pipe(
@@ -43,12 +47,11 @@ export class PageTrackingService {
       .subscribe();
   }
 
-  private getOrCreateClientId(): string {
-    let id = localStorage.getItem(CLIENT_ID_KEY);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(CLIENT_ID_KEY, id);
+  private removeLegacyClientId(): void {
+    try {
+      localStorage.removeItem(LEGACY_CLIENT_ID_KEY);
+    } catch {
+      // storage blocked: nothing to remove
     }
-    return id;
   }
 }

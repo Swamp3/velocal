@@ -5,6 +5,7 @@
 ### Added
 
 - Web Push (VAPID, `web-push`): `push_subscriptions` table, `users.pushPreferences`, `GET /push/config`, `POST`/`DELETE /push/subscriptions`, `GET`/`PATCH /push/preferences`, `POST /push/test`; inbox notifications are also sent as push when the user opted in
+- Page views no longer store the user; the id is a per-visit random value; page views older than 400 days are deleted daily; migration `AnonymizePageViews` clears existing user links
 - Migration `AddPushNotifications`; new env vars `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
 
 ## [0.11.0] - 2026-10-15
