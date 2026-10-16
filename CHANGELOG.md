@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- New accounts (created by signing in with an e-mail code) are asked for a display name in a dialog on first sign-in, with a hint that more settings are in the profile. The dialog can save, save and open the profile, or be cancelled (then it is not shown again on that device).
+
+
 ## [0.13.1] — 2026-10-16
 
 ### Fixed

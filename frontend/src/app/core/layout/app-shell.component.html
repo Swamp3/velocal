@@ -195,6 +195,9 @@
   <router-outlet />
   <app-update-banner />
   <app-install-banner />
+  @defer (when needsName()) {
+    <app-name-prompt />
+  }
 </main>
 
 @if (!isFullViewport()) {

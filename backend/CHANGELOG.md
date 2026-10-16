@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Display name is limited to 100 characters when updating the profile
+
+
 ## [0.13.1] - 2026-10-16
 
 ### Changed
