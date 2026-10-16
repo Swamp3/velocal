@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.13.1] - 2026-10-16
+
 ### Fixed
 
 - Join request list shows the email; open-request badge on the members tile and requests button

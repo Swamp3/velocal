@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.13.1] — 2026-10-16
+
 ### Fixed
 
 - Join requests now show the applicant's email address, so requests from people without a display name can be told apart. The number of open requests is shown as a badge on the "Members" tile and on the "Join requests" button for club admins and subgroup moderators.
