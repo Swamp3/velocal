@@ -164,6 +164,11 @@ Then delete the local `velocal_deploy` private key file.
   for the length of the build, and database migrations run on every deploy.
   Back up the database first when a change adds migrations.
 
+## Moving to another server
+
+See [SERVER-MIGRATION.md](SERVER-MIGRATION.md) for the step-by-step move to a
+new VPS (data copy, DNS, Caddy, deploy secrets).
+
 ## Security hardening
 
 Outstanding security work and the production-migration checklist live in [SECURITY-HARDENING.md](SECURITY-HARDENING.md).
