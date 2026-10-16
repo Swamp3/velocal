@@ -380,6 +380,13 @@
         "emailMismatch": "The email address does not match.",
         "adminCannotDelete": "Site admins cannot delete their account. Ask another admin to remove your admin role first."
       }
+    },
+    "upcoming": {
+      "title": "My upcoming events",
+      "empty": "You have not signed up for any upcoming event yet.",
+      "browse": "Browse events",
+      "error": "Could not load your events.",
+      "cancelled": "Cancelled"
     }
   },
   "series": {

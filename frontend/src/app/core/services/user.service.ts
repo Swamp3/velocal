@@ -11,6 +11,19 @@ export interface UpdateProfileDto {
   preferredLocale?: string;
 }
 
+export interface MyUpcomingEvent {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string | null;
+  locationName: string;
+  cancelled: boolean;
+  disciplineSlug: string;
+  myRsvp: 'going' | 'maybe';
+  community: { slug: string; name: string } | null;
+  subgroup: { slug: string; name: string } | null;
+}
+
 export interface FavoriteEntry {
   id: string;
   eventId: string;
@@ -32,6 +45,10 @@ export class UserService {
     deleteContent: boolean;
   }): Observable<void> {
     return this.api.delete<void>('/users/me', dto);
+  }
+
+  getUpcomingEvents(): Observable<MyUpcomingEvent[]> {
+    return this.api.get<MyUpcomingEvent[]>('/users/me/upcoming-events');
   }
 
   getDisciplinePrefs(): Observable<string[]> {

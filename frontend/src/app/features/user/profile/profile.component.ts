@@ -20,6 +20,7 @@ import { EventCardComponent, CountrySelectorComponent } from '@shared/components
 import { CyclingEvent, Discipline } from '@shared/models';
 
 import { DeleteAccountDialogComponent } from './delete-account/delete-account-dialog.component';
+import { UpcomingEventsComponent } from './upcoming-events/upcoming-events.component';
 import { PushSettingsComponent } from './push-settings/push-settings.component';
 
 const FAVORITES_PAGE_SIZE = 10;
@@ -36,6 +37,7 @@ const FAVORITES_PAGE_SIZE = 10;
     CountrySelectorComponent,
     EventCardComponent,
     PushSettingsComponent,
+    UpcomingEventsComponent,
     DeleteAccountDialogComponent,
   ],
   templateUrl: './profile.component.html',

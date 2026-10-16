@@ -380,6 +380,13 @@
         "emailMismatch": "Die E-Mail-Adresse stimmt nicht überein.",
         "adminCannotDelete": "Website-Admins können ihr Konto nicht löschen. Bitte einen anderen Admin, dir zuerst die Admin-Rolle zu entziehen."
       }
+    },
+    "upcoming": {
+      "title": "Meine anstehenden Events",
+      "empty": "Du hast dich noch für kein anstehendes Event angemeldet.",
+      "browse": "Events ansehen",
+      "error": "Deine Events konnten nicht geladen werden.",
+      "cancelled": "Abgesagt"
     }
   },
   "series": {

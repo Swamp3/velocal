@@ -89,6 +89,20 @@ interface EventScope {
   hostCommunity: { name: string; slug: string };
 }
 
+export interface MyUpcomingEvent {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string | null;
+  locationName: string;
+  cancelled: boolean;
+  disciplineSlug: string;
+  myRsvp: 'going' | 'maybe';
+  /** The club the answer belongs to; the event page needs it for club events. */
+  community: { slug: string; name: string } | null;
+  subgroup: { slug: string; name: string } | null;
+}
+
 export interface PaginatedEvents {
   data: SerializedEvent[];
   total: number;
@@ -798,6 +812,59 @@ export class EventsService {
     event.imageUrl = null as unknown as string;
     const saved = await this.repo.save(event);
     return this.present(saved, user.id);
+  }
+
+  /**
+   * Upcoming events the user answered "going" or "maybe" for, soonest first.
+   * Club events only show while the user still belongs to the club.
+   */
+  async listMyUpcoming(userId: string): Promise<MyUpcomingEvent[]> {
+    const rows = await this.rsvps.query<Record<string, unknown>[]>(
+      `SELECT e."id", e."name", e."startDate", e."endDate", e."locationName", e."status" AS "eventStatus",
+              e."discipline_slug" AS "disciplineSlug", r."status" AS "myRsvp",
+              c."slug" AS "communitySlug", c."name" AS "communityName",
+              sg."slug" AS "subgroupSlug", sg."name" AS "subgroupName"
+       FROM "event_rsvps" r
+       JOIN "events" e ON e."id" = r."event_id"
+       LEFT JOIN "event_shares" s ON s."id" = r."share_id"
+       LEFT JOIN "communities" c ON c."id" = COALESCE(e."community_id", s."community_id")
+       LEFT JOIN "subgroups" sg ON sg."id" = COALESCE(e."subgroup_id", s."subgroup_id")
+       WHERE r."user_id" = $1
+         AND r."status" IN ('going', 'maybe')
+         AND COALESCE(e."endDate", e."startDate" + interval '1 day') >= now()
+         AND ${notInSuspendedCommunitySql('e')}
+         AND (
+           e."community_id" IS NULL
+           OR (e."subgroup_id" IS NULL AND EXISTS (
+                SELECT 1 FROM "community_members" cm
+                WHERE cm."community_id" = e."community_id" AND cm."user_id" = $1))
+           OR (e."subgroup_id" IS NOT NULL AND (
+                EXISTS (SELECT 1 FROM "subgroup_members" sm
+                        WHERE sm."subgroup_id" = e."subgroup_id" AND sm."user_id" = $1)
+                OR EXISTS (SELECT 1 FROM "community_members" cm
+                           WHERE cm."community_id" = e."community_id" AND cm."user_id" = $1
+                             AND cm."role" = 'admin')))
+         )
+       ORDER BY e."startDate" ASC
+       LIMIT 50`,
+      [userId],
+    );
+    return rows.map((r) => ({
+      id: r.id as string,
+      name: r.name as string,
+      startDate: (r.startDate as Date).toISOString(),
+      endDate: r.endDate ? (r.endDate as Date).toISOString() : null,
+      locationName: (r.locationName as string) ?? '',
+      cancelled: r.eventStatus === 'cancelled',
+      disciplineSlug: r.disciplineSlug as string,
+      myRsvp: r.myRsvp as 'going' | 'maybe',
+      community: r.communitySlug
+        ? { slug: r.communitySlug as string, name: r.communityName as string }
+        : null,
+      subgroup: r.subgroupSlug
+        ? { slug: r.subgroupSlug as string, name: r.subgroupName as string }
+        : null,
+    }));
   }
 
   async findMissingAtSource(

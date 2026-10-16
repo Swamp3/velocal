@@ -4,6 +4,7 @@
 
 ### Added
 
+- "My upcoming events" card on the profile page
 - Data quality page with sections for missing data, possible duplicates and events gone at their source
 - Mobile calendar agenda folds past days of the current month, scrolls to the selected day or today
 - Registration start fields in the event form and a row on the event page
