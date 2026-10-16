@@ -24,13 +24,18 @@
   </app-empty-state>
 } @else if (community(); as c) {
   <div class="mx-auto max-w-3xl">
-    <a
-      routerLink="/communities"
-      class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
-    >
-      <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
-      {{ 'communities.backToList' | transloco }}
-    </a>
+    <div class="flex items-center justify-between gap-3">
+      <a
+        routerLink="/communities"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+      >
+        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+        {{ 'communities.backToList' | transloco }}
+      </a>
+      @if (!c.suspended && c.visibility !== 'private') {
+        <app-share-button [path]="'/communities/' + c.slug" [title]="c.name" />
+      }
+    </div>
 
     @if (c.suspended) {
       <div

@@ -1,3 +1,4 @@
+export { ShareButtonComponent } from './share-button/share-button.component';
 export { AddToCalendarComponent } from './add-to-calendar/add-to-calendar.component';
 export { DisciplineChipComponent } from './discipline-chip/discipline-chip.component';
 export { DisciplineFilterComponent } from './discipline-filter/discipline-filter.component';

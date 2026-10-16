@@ -448,7 +448,10 @@
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode",
     "toggleMenu": "Toggle menu",
-    "typeToConfirm": "Type “{{text}}” to confirm"
+    "typeToConfirm": "Type “{{text}}” to confirm",
+    "share": "Share",
+    "linkCopied": "Link copied",
+    "shareFailed": "Could not share the link"
   },
   "country": {
     "select": "Select country...",

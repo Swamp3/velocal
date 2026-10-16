@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `app-share-button` (Web Share API with copy-link fallback) on event and club pages; `toMetaDescription()` helper
+
+### Fixed
+
+- `SeoService` strips HTML and entities from every description before writing `description`, `og:` and `twitter:` tags (clubs, events, series, news)
+
 ## [0.12.0] - 2026-10-16
 
 ### Changed

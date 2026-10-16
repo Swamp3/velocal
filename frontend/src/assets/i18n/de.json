@@ -448,7 +448,10 @@
     "switchToLight": "Zum hellen Design wechseln",
     "switchToDark": "Zum dunklen Design wechseln",
     "toggleMenu": "Menü umschalten",
-    "typeToConfirm": "Tippe „{{text}}“ zur Bestätigung"
+    "typeToConfirm": "Tippe „{{text}}“ zur Bestätigung",
+    "share": "Teilen",
+    "linkCopied": "Link kopiert",
+    "shareFailed": "Der Link konnte nicht geteilt werden"
   },
   "country": {
     "select": "Land auswählen...",

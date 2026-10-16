@@ -6,6 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { toMetaDescription } from '@shared/utils/meta-text';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
@@ -13,11 +14,7 @@ import { AuthService } from '@core/services/auth.service';
 import { CommunityService } from '@core/services/community.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  CommunityHeroComponent,
-  EmptyStateComponent,
-  RichTextViewComponent,
-} from '@shared/components';
+import { CommunityHeroComponent, EmptyStateComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
 import { communityErrorKey } from '../community-error';
 import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
 import {
@@ -42,7 +39,7 @@ import { BadgeComponent, ButtonComponent, ButtonStyleDirective, SkeletonComponen
     RichTextViewComponent,
     CommunitySectionNavComponent,
     CommunityEventsComponent,
-    ReportDialogComponent, ButtonStyleDirective, ButtonStyleDirective,
+    ReportDialogComponent, ButtonStyleDirective, ButtonStyleDirective, ShareButtonComponent,
   ],
   templateUrl: './community-detail.component.html',
 })
@@ -193,7 +190,7 @@ export class CommunityDetailComponent implements OnInit {
   }
 
   private applySeo(community: Community): void {
-    const description = (community.description ?? community.name).slice(0, 260);
+    const description = toMetaDescription(community.description) || community.name;
     this.seo.setMeta({
       title: community.name,
       description,

@@ -4,6 +4,16 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **Share button** — events and public clubs have a share icon. On a phone (also the installed app) it opens the share sheet; on a computer it copies the link. Links to club events keep their club, so the recipient lands in the right place.
+
+### Fixed
+
+- Link previews in messengers and search results showed HTML tags (for example `<p>`) for clubs and some events. Descriptions are now turned into plain text and shortened at a word boundary.
+
 ## [0.12.0] — 2026-10-16
 
 ### Added
