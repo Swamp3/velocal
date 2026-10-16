@@ -22,6 +22,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui/toast/toast-container.component';
 import { filter } from 'rxjs';
 import { NavDropdownComponent } from './nav-dropdown/nav-dropdown.component';
+import { NamePromptComponent } from './name-prompt/name-prompt.component';
 import { InstallBannerComponent } from './install-banner/install-banner.component';
 import { UpdateBannerComponent } from './update-banner/update-banner.component';
 import { version as APP_VERSION } from '../../../../package.json';
@@ -140,6 +141,7 @@ const DEFAULT_SEO: RouteSeo = {
     NavDropdownComponent,
     UpdateBannerComponent,
     InstallBannerComponent,
+    NamePromptComponent,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -168,6 +170,10 @@ export class AppShellComponent {
   protected readonly navLinks = NAV_LINKS;
   protected readonly eventLinks = EVENT_LINKS;
   protected readonly currentUrl = signal('/');
+  protected readonly needsName = computed(() => {
+    const user = this.auth.currentUser();
+    return !!user && !user.displayName?.trim();
+  });
   protected readonly eventsGroupActive = computed(() =>
     EVENT_LINKS.some((link) => this.currentUrl().startsWith(link.path)),
   );

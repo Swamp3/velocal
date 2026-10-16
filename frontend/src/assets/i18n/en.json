@@ -303,6 +303,12 @@
     "resetFailed": "Failed to reset password. Please try again.",
     "accountBanned": "This account has been blocked. Contact support if you think this is a mistake."
   },
+  "namePrompt": {
+    "title": "Welcome to VeloCal",
+    "text": "How should other riders see you? Pick a display name.",
+    "hint": "You can change more settings, such as your real name, home ZIP code and notifications, later in your profile.",
+    "saveAndProfile": "Save and go to profile"
+  },
   "profile": {
     "title": "Profile",
     "displayName": "Display Name",

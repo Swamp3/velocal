@@ -303,6 +303,12 @@
     "resetFailed": "Passwort konnte nicht zurückgesetzt werden. Bitte versuche es erneut.",
     "accountBanned": "Dieses Konto wurde gesperrt. Wende dich an den Support, falls das ein Irrtum ist."
   },
+  "namePrompt": {
+    "title": "Willkommen bei VeloCal",
+    "text": "Wie sollen dich andere Fahrer sehen? Wähle einen Anzeigenamen.",
+    "hint": "Weitere Einstellungen, etwa dein richtiger Name, deine Postleitzahl und Benachrichtigungen, kannst du später im Profil vornehmen.",
+    "saveAndProfile": "Speichern und zum Profil"
+  },
   "profile": {
     "title": "Profil",
     "displayName": "Anzeigename",
