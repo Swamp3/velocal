@@ -84,6 +84,10 @@
               <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person</span>
               {{ authNav.key | transloco }}
             </a>
+            <a routerLink="/profile/events" role="menuitem" [class]="menuItemClass">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">event_available</span>
+              {{ 'app.nav.myEvents' | transloco }}
+            </a>
             <a routerLink="/routes" role="menuitem" [class]="menuItemClass">
               <span class="material-symbols-outlined text-[18px]" aria-hidden="true">route</span>
               {{ 'app.nav.routes' | transloco }}
@@ -305,10 +309,19 @@
           <a
             [routerLink]="authNav.path"
             routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            [routerLinkActiveOptions]="{ exact: true }"
             class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
             (click)="mobileMenuOpen.set(false)"
           >
             {{ authNav.key | transloco }}
+          </a>
+          <a
+            routerLink="/profile/events"
+            routerLinkActive="!text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            class="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-all duration-200"
+            (click)="mobileMenuOpen.set(false)"
+          >
+            {{ 'app.nav.myEvents' | transloco }}
           </a>
           <a
             routerLink="/routes"

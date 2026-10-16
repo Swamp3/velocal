@@ -6,14 +6,14 @@ import { MyUpcomingEvent, UserService } from '@core/services/user.service';
 import { formatTime } from '@shared/utils/event-date';
 import { BadgeComponent, SkeletonComponent } from '@shared/ui';
 
-/** Profile overview: the events the user signed up for and that are still ahead. */
+/** Own page: the events the user signed up for and that are still ahead. */
 @Component({
-  selector: 'app-upcoming-events',
+  selector: 'app-my-events',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, RouterLink, TranslocoPipe, BadgeComponent, SkeletonComponent],
-  templateUrl: './upcoming-events.component.html',
+  templateUrl: './my-events.component.html',
 })
-export class UpcomingEventsComponent implements OnInit {
+export class MyEventsComponent implements OnInit {
   private readonly users = inject(UserService);
 
   protected readonly events = signal<MyUpcomingEvent[]>([]);

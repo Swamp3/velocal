@@ -834,6 +834,18 @@ export class EventsService {
          AND COALESCE(e."endDate", e."startDate" + interval '1 day') >= now()
          AND ${notInSuspendedCommunitySql('e')}
          AND (
+           r."share_id" IS NULL
+           OR (s."subgroup_id" IS NULL AND EXISTS (
+                SELECT 1 FROM "community_members" cm
+                WHERE cm."community_id" = s."community_id" AND cm."user_id" = $1))
+           OR (s."subgroup_id" IS NOT NULL AND (
+                EXISTS (SELECT 1 FROM "subgroup_members" sm
+                        WHERE sm."subgroup_id" = s."subgroup_id" AND sm."user_id" = $1)
+                OR EXISTS (SELECT 1 FROM "community_members" cm
+                           WHERE cm."community_id" = s."community_id" AND cm."user_id" = $1
+                             AND cm."role" = 'admin')))
+         )
+         AND (
            e."community_id" IS NULL
            OR (e."subgroup_id" IS NULL AND EXISTS (
                 SELECT 1 FROM "community_members" cm

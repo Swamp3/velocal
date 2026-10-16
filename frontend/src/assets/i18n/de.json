@@ -14,7 +14,8 @@
       "admin": "Admin",
       "routes": "Strecken",
       "eventList": "Liste",
-      "account": "Konto"
+      "account": "Konto",
+      "myEvents": "Meine Events"
     },
     "update": {
       "available": "Eine neue Version von VeloCal ist verfügbar.",
@@ -382,11 +383,12 @@
       }
     },
     "upcoming": {
-      "title": "Meine anstehenden Events",
+      "title": "Meine Events",
       "empty": "Du hast dich noch für kein anstehendes Event angemeldet.",
       "browse": "Events ansehen",
       "error": "Deine Events konnten nicht geladen werden.",
-      "cancelled": "Abgesagt"
+      "cancelled": "Abgesagt",
+      "subtitle": "Events, für die du dich angemeldet hast und die noch anstehen."
     }
   },
   "series": {
