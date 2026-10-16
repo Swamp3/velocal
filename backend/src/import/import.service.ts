@@ -27,6 +27,11 @@ export class ImportService {
   private readonly sources: ImportSource[];
   private readonly cooldownMs: number;
   private importRunning = false;
+  private candidates: {
+    event: Event;
+    lat: number | null;
+    lng: number | null;
+  }[] = [];
 
   constructor(
     @InjectRepository(Event)
@@ -124,6 +129,7 @@ export class ImportService {
           `Source ${source.name} returned ${fetched.length} events (${rawEvents.length} unique)`,
         );
 
+        await this.preloadCandidates(rawEvents);
         const seenIds = new Set<string>();
         for (const raw of rawEvents) {
           try {
@@ -211,7 +217,7 @@ export class ImportService {
         .createQueryBuilder()
         .update(Event)
         .set({ lastSeenAt: new Date(), missingSince: null })
-        .where('id IN (:...ids)', { ids: [...seenIds] })
+        .where('id = ANY(:ids)', { ids: [...seenIds] })
         .execute();
     }
     if (!source.lastFetchComplete) {
@@ -294,20 +300,11 @@ export class ImportService {
       if (byUrl) return byUrl;
     }
 
-    // Same calendar day (a day of slack for time zones), public calendar only.
-    const from = new Date(raw.startDate.getTime() - 24 * 60 * 60 * 1000);
-    const to = new Date(raw.startDate.getTime() + 36 * 60 * 60 * 1000);
-    const candidates = await this.eventRepo
-      .createQueryBuilder('e')
-      .addSelect('ST_Y(e.coordinates::geometry)', 'e_lat')
-      .addSelect('ST_X(e.coordinates::geometry)', 'e_lng')
-      .where('e.startDate BETWEEN :from AND :to', { from, to })
-      .andWhere('e.community_id IS NULL')
-      .getRawAndEntities();
-
+    // Same calendar day, public calendar only; candidates were loaded once for
+    // the whole run (see preloadCandidates).
     let best: { event: Event; score: number } | null = null;
-    candidates.entities.forEach((event, i) => {
-      if (!sameLocalDay(event.startDate, raw.startDate)) return;
+    for (const { event, lat, lng } of this.candidates) {
+      if (!sameLocalDay(event.startDate, raw.startDate)) continue;
       // The same source lists it under another id: a separate record (for
       // example two classes of one race), never merged by name.
       if (
@@ -315,9 +312,8 @@ export class ImportService {
         event.externalId &&
         event.externalId !== raw.externalId
       ) {
-        return;
+        continue;
       }
-      const rawRow = candidates.raw[i] as { e_lat?: number; e_lng?: number };
       const result = compareEvents(
         {
           name: raw.name,
@@ -325,18 +321,43 @@ export class ImportService {
           lat: raw.lat,
           lng: raw.lng,
         },
-        {
-          name: event.name,
-          locationName: event.locationName,
-          lat: rawRow.e_lat ?? null,
-          lng: rawRow.e_lng ?? null,
-        },
+        { name: event.name, locationName: event.locationName, lat, lng },
       );
       if (result.match && (!best || result.score > best.score)) {
         best = { event, score: result.score };
       }
-    });
+    }
     return (best as { event: Event } | null)?.event ?? null;
+  }
+
+  /**
+   * Loads the public-calendar events around the dates of this run in one query
+   * instead of one query per scraped record.
+   */
+  private async preloadCandidates(raws: RawEvent[]): Promise<void> {
+    this.candidates = [];
+    if (raws.length === 0) return;
+    const times = raws.map((r) => r.startDate.getTime());
+    const from = new Date(Math.min(...times) - 24 * 60 * 60 * 1000);
+    const to = new Date(Math.max(...times) + 36 * 60 * 60 * 1000);
+    const rows = await this.eventRepo
+      .createQueryBuilder('e')
+      .addSelect('ST_Y(e.coordinates::geometry)', 'e_lat')
+      .addSelect('ST_X(e.coordinates::geometry)', 'e_lng')
+      .where('e.startDate BETWEEN :from AND :to', { from, to })
+      .andWhere('e.community_id IS NULL')
+      .getRawAndEntities();
+    this.candidates = rows.entities.map((event, i) => {
+      const row = rows.raw[i] as {
+        e_lat?: number | null;
+        e_lng?: number | null;
+      };
+      return {
+        event,
+        lat: row.e_lat == null ? null : Number(row.e_lat),
+        lng: row.e_lng == null ? null : Number(row.e_lng),
+      };
+    });
   }
 
   private async updateIfChanged(
@@ -448,6 +469,12 @@ export class ImportService {
     });
 
     const saved = await this.eventRepo.save(event);
+    // Later records of this run can match the event we just created.
+    this.candidates.push({
+      event: saved,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
+    });
     return { result: 'created', id: saved.id };
   }
 

@@ -13,6 +13,7 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
+import { RateLimit, RateLimitGuard } from '../common/rate-limit';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PushPreferencesDto, SubscribePushDto } from './dto/push.dto';
@@ -29,7 +30,8 @@ export class PushController {
   }
 
   @Post('subscriptions')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
+  @RateLimit({ limit: 20, windowMs: 60 * 60 * 1000, byUser: true })
   @HttpCode(HttpStatus.NO_CONTENT)
   async subscribe(
     @CurrentUser() user: { id: string },

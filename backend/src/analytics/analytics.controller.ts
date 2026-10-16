@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { RateLimit, RateLimitGuard } from '../common/rate-limit';
 import { AnalyticsService } from './analytics.service';
 import { RecordPageViewDto } from './dto/record-page-view.dto';
 
@@ -11,6 +19,8 @@ export class AnalyticsController {
    * the visitor's memory for one visit. The account is deliberately not stored.
    */
   @Post('page-view')
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 1200, windowMs: 60 * 1000, global: true })
   @HttpCode(HttpStatus.NO_CONTENT)
   async recordPageView(@Body() dto: RecordPageViewDto): Promise<void> {
     await this.analyticsService.recordPageView(dto.path, dto.clientId);

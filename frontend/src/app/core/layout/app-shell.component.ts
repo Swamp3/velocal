@@ -195,7 +195,8 @@ export class AppShellComponent {
       this.auth.currentUser();
       this.refreshUnread();
       // Re-register this device's push subscription after every sign-in/start.
-      if (this.auth.isAuthenticated()) untracked(() => void this.push.refresh());
+      const userId = this.auth.currentUser()?.id;
+      if (userId) untracked(() => void this.push.renewIfEnabled(userId));
     });
   }
 

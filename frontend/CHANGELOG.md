@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Push subscriptions are only renewed on start when push is turned on for the device (no extra requests otherwise)
+
 ### Added
 
 - `scripts/subset-icons.py` rebuilds the trimmed icon font from the icons used in the code

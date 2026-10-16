@@ -29,6 +29,20 @@ export class PushService {
   readonly state = signal<PushState>('loading');
   private publicKey = '';
 
+  private renewedFor: string | null = null;
+
+  /**
+   * Called on every start while signed in. Costs nothing unless push was turned
+   * on for this device: then it renews the subscription once per session.
+   */
+  async renewIfEnabled(userId: string): Promise<void> {
+    if (!this.isBrowser || this.renewedFor === userId) return;
+    if (!this.swPush.isEnabled || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted' || !this.wasEnabled()) return;
+    this.renewedFor = userId;
+    await this.refresh();
+  }
+
   /** Works out the state for this device and, if push is on, re-registers the subscription. */
   async refresh(): Promise<void> {
     if (!this.isBrowser) return;
@@ -111,6 +125,7 @@ export class PushService {
 
   /** Called on logout, before the token is removed, so the next user on this device gets nothing. */
   detachOnLogout(): void {
+    this.renewedFor = null;
     const endpoint = this.storedEndpoint();
     if (!endpoint) return;
     this.removeFromServer(endpoint).catch(() => undefined);

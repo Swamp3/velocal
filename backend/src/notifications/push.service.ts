@@ -1,9 +1,15 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as webpush from 'web-push';
 import { User } from '../users/entities/user.entity';
+import { isAllowedPushEndpoint } from './push-endpoints';
 import type {
   NotificationPayload,
   NotificationType,
@@ -24,6 +30,12 @@ const MAX_FAILURES = 5;
 const TTL_SECONDS = 24 * 60 * 60;
 const SEND_TIMEOUT_MS = 10_000;
 const TEST_COOLDOWN_MS = 30_000;
+/** A person rarely has more devices than this; older ones are dropped. */
+const MAX_SUBSCRIPTIONS_PER_USER = 10;
+/** Messages in flight at once, so a big audience cannot exhaust the pool. */
+const SEND_CONCURRENCY = 20;
+/** `lastSuccessAt` is only rewritten this often. */
+const SUCCESS_STAMP_MS = 24 * 60 * 60 * 1000;
 
 export type PushPreferences = Record<PushCategory, boolean>;
 
@@ -31,6 +43,7 @@ export type PushPreferences = Record<PushCategory, boolean>;
 export class PushService implements OnModuleInit {
   private readonly logger = new Logger(PushService.name);
   private publicKey = '';
+  private extraHosts: string[] = [];
   private ready = false;
   private readonly lastTest = new Map<string, number>();
 
@@ -45,6 +58,10 @@ export class PushService implements OnModuleInit {
   onModuleInit(): void {
     const publicKey = this.config.get<string>('VAPID_PUBLIC_KEY') ?? '';
     const privateKey = this.config.get<string>('VAPID_PRIVATE_KEY') ?? '';
+    this.extraHosts = (this.config.get<string>('PUSH_ENDPOINT_HOSTS') ?? '')
+      .split(',')
+      .map((h) => h.trim().toLowerCase())
+      .filter(Boolean);
     const subject =
       this.config.get<string>('VAPID_SUBJECT') ?? 'mailto:noreply@velocal.cc';
     if (!publicKey || !privateKey) {
@@ -64,11 +81,18 @@ export class PushService implements OnModuleInit {
     return { enabled: this.ready, publicKey: this.publicKey };
   }
 
+  isAllowedEndpoint(endpoint: string): boolean {
+    return isAllowedPushEndpoint(endpoint, this.extraHosts);
+  }
+
   async subscribe(
     userId: string,
     input: { endpoint: string; p256dh: string; auth: string },
     userAgent: string | undefined,
   ): Promise<void> {
+    if (!this.isAllowedEndpoint(input.endpoint)) {
+      throw new BadRequestException('Unsupported push service');
+    }
     await this.subscriptions.upsert(
       {
         userId,
@@ -79,6 +103,14 @@ export class PushService implements OnModuleInit {
         failureCount: 0,
       },
       ['endpoint'],
+    );
+    // Keep the newest devices only.
+    await this.subscriptions.query(
+      `DELETE FROM "push_subscriptions"
+       WHERE "user_id" = $1 AND "id" NOT IN (
+         SELECT "id" FROM "push_subscriptions" WHERE "user_id" = $1
+         ORDER BY "created_at" DESC LIMIT $2)`,
+      [userId, MAX_SUBSCRIPTIONS_PER_USER],
     );
   }
 
@@ -166,13 +198,11 @@ export class PushService implements OnModuleInit {
         de: buildPushMessage(type, payload, 'de'),
         en: buildPushMessage(type, payload, 'en'),
       };
-      await Promise.all(
-        subs.map((sub) => {
-          const lang: PushLang =
-            byUser.get(sub.userId)?.preferredLanguage === 'en' ? 'en' : 'de';
-          return this.deliver(sub, messages[lang]);
-        }),
-      );
+      await runLimited(subs, SEND_CONCURRENCY, (sub) => {
+        const lang: PushLang =
+          byUser.get(sub.userId)?.preferredLanguage === 'en' ? 'en' : 'de';
+        return this.deliver(sub, messages[lang]);
+      });
     } catch (error) {
       this.logger.error('Sending push notifications failed', error);
     }
@@ -200,6 +230,11 @@ export class PushService implements OnModuleInit {
         },
       },
     });
+    // Also checked here: rows stored before the allowlist existed.
+    if (!this.isAllowedEndpoint(sub.endpoint)) {
+      await this.subscriptions.delete({ id: sub.id });
+      return false;
+    }
     try {
       await webpush.sendNotification(
         {
@@ -209,10 +244,15 @@ export class PushService implements OnModuleInit {
         body,
         { TTL: TTL_SECONDS, timeout: SEND_TIMEOUT_MS },
       );
-      await this.subscriptions.update(
-        { id: sub.id },
-        { failureCount: 0, lastSuccessAt: new Date() },
-      );
+      const stale =
+        !sub.lastSuccessAt ||
+        Date.now() - sub.lastSuccessAt.getTime() > SUCCESS_STAMP_MS;
+      if (sub.failureCount > 0 || stale) {
+        await this.subscriptions.update(
+          { id: sub.id },
+          { failureCount: 0, lastSuccessAt: new Date() },
+        );
+      }
       return true;
     } catch (error) {
       const status = (error as { statusCode?: number }).statusCode;
@@ -239,4 +279,23 @@ export function mergePreferences(
     if (typeof stored?.[key] === 'boolean') result[key] = stored[key];
   }
   return result;
+}
+
+/** Runs `task` over `items` with at most `limit` in flight. */
+async function runLimited<T>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<unknown>,
+): Promise<void> {
+  let next = 0;
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (next < items.length) {
+        const item = items[next++];
+        await task(item).catch(() => undefined);
+      }
+    },
+  );
+  await Promise.all(workers);
 }

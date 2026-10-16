@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { MatchReason, compareEvents } from './event-matching';
 
@@ -31,6 +31,8 @@ export interface DuplicateGroup {
   events: DuplicateEvent[];
 }
 
+const CACHE_MS = 60_000;
+
 const DAY_FORMAT = new Intl.DateTimeFormat('sv-SE', {
   timeZone: 'Europe/Berlin',
   year: 'numeric',
@@ -51,7 +53,30 @@ export class EventDuplicatesService {
     page: number;
     limit: number;
   }): Promise<{ data: DuplicateGroup[]; total: number }> {
-    const events = await this.load(options.includePast);
+    const all = await this.cachedGroups(options.includePast);
+    const start = (options.page - 1) * options.limit;
+    return {
+      data: all.slice(start, start + options.limit),
+      total: all.length,
+    };
+  }
+
+  private readonly cache = new Map<
+    boolean,
+    { until: number; groups: DuplicateGroup[] }
+  >();
+
+  /** The scan compares every event of a day: reuse it for a minute. */
+  private async cachedGroups(includePast: boolean): Promise<DuplicateGroup[]> {
+    const hit = this.cache.get(includePast);
+    if (hit && hit.until > Date.now()) return hit.groups;
+    const groups = await this.scan(includePast);
+    this.cache.set(includePast, { until: Date.now() + CACHE_MS, groups });
+    return groups;
+  }
+
+  private async scan(includePast: boolean): Promise<DuplicateGroup[]> {
+    const events = await this.load(includePast);
     const ignored = await this.loadIgnored();
 
     const byDay = new Map<string, DuplicateEvent[]>();
@@ -139,16 +164,20 @@ export class EventDuplicatesService {
       })
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    const start = (options.page - 1) * options.limit;
-    return {
-      data: result.slice(start, start + options.limit),
-      total: result.length,
-    };
+    return result;
   }
 
   /** Marks every pair among the given events as "not a duplicate". */
   async ignore(eventIds: string[], adminId: string): Promise<void> {
     const ids = [...new Set(eventIds)].sort();
+    const found = await this.dataSource.query<{ id: string }[]>(
+      `SELECT "id" FROM "events" WHERE "id" = ANY($1::uuid[])`,
+      [ids],
+    );
+    if (found.length !== ids.length) {
+      throw new BadRequestException('Unknown event');
+    }
+    this.cache.clear();
     for (let i = 0; i < ids.length; i++) {
       for (let j = i + 1; j < ids.length; j++) {
         await this.dataSource.query(
@@ -170,7 +199,7 @@ export class EventDuplicatesService {
        FROM "events" e
        WHERE e."community_id" IS NULL
          AND e."status" <> 'cancelled'
-         AND ($1::boolean OR e."startDate" >= now() - interval '1 day')
+         AND e."startDate" >= now() - (CASE WHEN $1::boolean THEN interval '12 months' ELSE interval '1 day' END)
        ORDER BY e."startDate"`,
       [includePast],
     );

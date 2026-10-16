@@ -134,6 +134,14 @@ export class AccountDeletionService {
        WHERE cm."user_id" = $1`,
       [userId],
     );
+    // Two people leaving the same club at once must not both rely on the other
+    // staying admin: lock the clubs, always in the same order.
+    if (memberships.length > 0) {
+      await manager.query(
+        `SELECT 1 FROM "communities" WHERE "id" = ANY($1::uuid[]) ORDER BY "id" FOR UPDATE`,
+        [memberships.map((m) => m.community_id)],
+      );
+    }
     for (const m of memberships) {
       const [others] = await manager.query<
         { admins: number; members: number }[]

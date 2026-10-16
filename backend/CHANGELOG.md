@@ -24,6 +24,14 @@
 - Edit community polls
 - Migrations `AddModeration` and `AddUserBan`
 
+### Security
+
+- Push subscriptions only accept the push services of the browser and OS vendors (SSRF guard, extra hosts via `PUSH_ENDPOINT_HOSTS`); at most 10 devices per user; rate limits for account deletion (5 per 15 min per user), new push subscriptions (20 per hour per user) and page views (1200 per minute overall); account deletion locks the affected clubs so two admins leaving at once cannot orphan a club; ignoring duplicates checks that the events exist
+
+### Performance
+
+- Push messages go out with 20 in flight at most and rewrite `lastSuccessAt` once a day; request authentication reads only the columns it needs and caches the answer for 10 seconds (a ban or deletion can take up to 10 seconds to apply); the importer loads its duplicate candidates once per run; the duplicate finder caches its result for a minute and looks back 12 months at most; migration `AddQueryIndexes` (RSVP by user, event start date, source and external URL)
+
 ### Changed
 
 - `JwtStrategy` loads the user on every request, so blocks and role changes apply immediately

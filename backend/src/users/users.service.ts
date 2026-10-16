@@ -26,6 +26,26 @@ export class UsersService {
     return this.userRepository.findOneBy({ id });
   }
 
+  /** Just what request authentication needs, without the heavy columns. */
+  async findAuthState(id: string): Promise<{
+    id: string;
+    email: string;
+    isAdmin: boolean;
+    bannedAt: Date | null;
+    deletedAt: Date | null;
+  } | null> {
+    return this.userRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        isAdmin: true,
+        bannedAt: true,
+        deletedAt: true,
+      },
+    });
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOneBy({ email });
   }

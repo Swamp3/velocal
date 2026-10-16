@@ -12,7 +12,11 @@ export interface RateLimitOptions {
   limit: number;
   windowMs: number;
   /** Request body field that identifies the account (e.g. `email`). */
-  keyField: string;
+  keyField?: string;
+  /** Count per signed-in user (needs a JWT guard before this one). */
+  byUser?: boolean;
+  /** One shared counter for everybody, for public endpoints without an identity. */
+  global?: boolean;
 }
 
 export const RATE_LIMIT_KEY = 'rateLimit';
@@ -40,8 +44,12 @@ export class RateLimitGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<{
       body?: Record<string, unknown>;
       route?: { path?: string };
+      user?: { id?: string };
     }>();
-    const raw = req.body?.[options.keyField];
+    let raw: unknown;
+    if (options.global) raw = 'all';
+    else if (options.byUser) raw = req.user?.id;
+    else raw = options.keyField ? req.body?.[options.keyField] : undefined;
     if (typeof raw !== 'string' || !raw) return true; // DTO validation rejects it
 
     const now = Date.now();
