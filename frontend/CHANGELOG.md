@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Shared UI building blocks: `uiButton` for links and other elements, `ui-icon-button`, `ui-segmented`, `ui-card`, button variants `soft`, `link` and `quiet`; the duplicated `outlineLinkClass`, hand-written tab bars and icon buttons were replaced
 - Push subscriptions are only renewed on start when push is turned on for the device (no extra requests otherwise)
 
 ### Added

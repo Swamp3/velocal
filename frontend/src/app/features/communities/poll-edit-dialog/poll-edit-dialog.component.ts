@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, OnInit, output } fro
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityPoll, PollResultsVisibility } from '@shared/models';
-import { ButtonComponent, InputComponent, ModalComponent } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, IconButtonComponent, InputComponent, ModalComponent } from '@shared/ui';
 
 export interface PollEdit {
   question: string;
@@ -25,7 +25,7 @@ function toLocalInput(iso: string | null): string {
 @Component({
   selector: 'app-poll-edit-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoPipe, ModalComponent, ButtonComponent, InputComponent],
+  imports: [ReactiveFormsModule, TranslocoPipe, ModalComponent, ButtonComponent, InputComponent, ButtonStyleDirective, IconButtonComponent],
   templateUrl: './poll-edit-dialog.component.html',
 })
 export class PollEditDialogComponent implements OnInit {

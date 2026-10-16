@@ -7,7 +7,7 @@ import { EventComment, EventHostContext, EventService } from '@core/services/eve
 import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { RichTextViewComponent } from '@shared/components/rich-text/rich-text-view.component';
 import { plainText } from '@shared/components/rich-text/rich-text';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-event-comments',
@@ -18,7 +18,7 @@ import { ButtonComponent, ToastService } from '@shared/ui';
     TranslocoPipe,
     RichTextComponent,
     RichTextViewComponent,
-    ButtonComponent,
+    ButtonComponent, ButtonStyleDirective,
   ],
   templateUrl: './event-comments.component.html',
 })

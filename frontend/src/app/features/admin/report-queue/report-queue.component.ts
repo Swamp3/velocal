@@ -4,13 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AdminReport, AdminService, ReportStatus } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  BadgeComponent,
-  ButtonComponent,
-  PaginationComponent,
-  SkeletonComponent,
-  ToastService,
-} from '@shared/ui';
+import { BadgeComponent, ButtonComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent, ToastService } from '@shared/ui';
 
 /** Reports from members, oldest first, with the quickest ways to act on them. */
 @Component({
@@ -23,7 +17,7 @@ import {
     BadgeComponent,
     ButtonComponent,
     PaginationComponent,
-    SkeletonComponent,
+    SkeletonComponent, SegmentedComponent,
   ],
   templateUrl: './report-queue.component.html',
 })
@@ -33,7 +27,9 @@ export class ReportQueueComponent implements OnInit {
   private readonly transloco = inject(TranslocoService);
 
   protected readonly status = signal<ReportStatus>('open');
-  protected readonly statuses: ReportStatus[] = ['open', 'resolved', 'dismissed'];
+  protected readonly statusOptions: SegmentedOption<ReportStatus>[] = (
+    ['open', 'resolved', 'dismissed'] as ReportStatus[]
+  ).map((s) => ({ value: s, labelKey: 'admin.reports.status.' + s }));
   protected readonly reports = signal<AdminReport[]>([]);
   protected readonly total = signal(0);
   protected readonly page = signal(1);

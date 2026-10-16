@@ -37,6 +37,7 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:noreply@velocal.cc}
+      PUSH_ENDPOINT_HOSTS: ${PUSH_ENDPOINT_HOSTS:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@system.velocal.cc}
       RESEND_FROM_NAME: ${RESEND_FROM_NAME:-VeloCal}

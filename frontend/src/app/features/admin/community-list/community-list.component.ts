@@ -9,7 +9,7 @@ import {
 } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { communityVisibilityVariant } from '@shared/models';
-import { BadgeComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { BadgeComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
 type Visibility = 'all' | 'public' | 'request' | 'private';
 type Sort = NonNullable<AdminCommunitySearchParams['sort']>;
@@ -24,7 +24,7 @@ type Sort = NonNullable<AdminCommunitySearchParams['sort']>;
     TranslocoPipe,
     BadgeComponent,
     PaginationComponent,
-    SkeletonComponent,
+    SkeletonComponent, SegmentedComponent,
   ],
   templateUrl: './community-list.component.html',
 })
@@ -39,7 +39,12 @@ export class CommunityListComponent implements OnInit {
   protected readonly query = signal('');
   protected readonly visibility = signal<Visibility>('all');
   protected readonly sort = signal<Sort>('createdAt');
-  protected readonly visibilityOptions: Visibility[] = ['all', 'public', 'request', 'private'];
+  protected readonly visibilityChoices: SegmentedOption<Visibility>[] = (
+    ['all', 'public', 'request', 'private'] as Visibility[]
+  ).map((v) => ({
+    value: v,
+    labelKey: v === 'all' ? 'admin.communities.all' : 'communities.visibility.' + v,
+  }));
   protected readonly sortOptions: Sort[] = ['createdAt', 'name', 'members', 'pending', 'reports'];
   protected readonly badge = communityVisibilityVariant;
 

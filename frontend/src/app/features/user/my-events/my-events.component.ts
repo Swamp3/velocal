@@ -4,13 +4,13 @@ import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MyUpcomingEvent, UserService } from '@core/services/user.service';
 import { formatTime } from '@shared/utils/event-date';
-import { BadgeComponent, SkeletonComponent } from '@shared/ui';
+import { BadgeComponent, CardComponent, SkeletonComponent } from '@shared/ui';
 
 /** Own page: the events the user signed up for and that are still ahead. */
 @Component({
   selector: 'app-my-events',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, TranslocoPipe, BadgeComponent, SkeletonComponent],
+  imports: [DatePipe, RouterLink, TranslocoPipe, BadgeComponent, SkeletonComponent, CardComponent],
   templateUrl: './my-events.component.html',
 })
 export class MyEventsComponent implements OnInit {

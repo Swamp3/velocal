@@ -51,14 +51,11 @@
     <div class="mt-5">
       <app-community-hero [name]="c.name" [heroUrl]="c.heroUrl" [logoUrl]="c.logoUrl">
         @if (!auth.isAuthenticated()) {
-          <a
-            routerLink="/auth/login"
-            class="inline-flex items-center justify-center rounded-[var(--radius-default)] bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-          >
+          <a routerLink="/auth/login" uiButton>
             {{ 'communities.loginToJoin' | transloco }}
           </a>
         } @else if (c.myRole === 'admin') {
-          <a [routerLink]="['/communities', c.slug, 'edit']" [class]="outlineLinkClass">
+          <a [routerLink]="['/communities', c.slug, 'edit']" uiButton variant="outline">
             {{ 'communities.edit' | transloco }}
           </a>
         } @else if (c.myRole === 'member') {

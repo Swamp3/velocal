@@ -6,12 +6,12 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityService } from '@core/services/community.service';
 import { EventService } from '@core/services/event.service';
 import { CyclingEvent } from '@shared/models';
-import { IconButtonComponent, ToastService } from '@shared/ui';
+import { ButtonStyleDirective, IconButtonComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-community-events',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, DatePipe, ReactiveFormsModule, IconButtonComponent],
+  imports: [RouterLink, TranslocoPipe, DatePipe, ReactiveFormsModule, IconButtonComponent, ButtonStyleDirective],
   templateUrl: './community-events.component.html',
 })
 export class CommunityEventsComponent implements OnInit {
@@ -120,8 +120,6 @@ export class CommunityEventsComponent implements OnInit {
     });
   }
 
-  protected readonly outlineLinkClass =
-    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
   protected readonly inputClass =
     'w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
 }

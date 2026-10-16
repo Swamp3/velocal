@@ -14,7 +14,7 @@ import { FavoriteService } from '@core/services/favorite.service';
 import { FilterStateService } from '@core/services/filter-state.service';
 import { LocaleService } from '@core/services/locale.service';
 import { UserService } from '@core/services/user.service';
-import { ToastService } from '@shared/ui';
+import { CardComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import { ButtonComponent, ChipComponent, InputComponent } from '@shared/ui';
 import { EventCardComponent, CountrySelectorComponent } from '@shared/components';
 import { CyclingEvent, Discipline } from '@shared/models';
@@ -36,7 +36,7 @@ const FAVORITES_PAGE_SIZE = 10;
     CountrySelectorComponent,
     EventCardComponent,
     PushSettingsComponent,
-    DeleteAccountDialogComponent,
+    DeleteAccountDialogComponent, IconButtonComponent, CardComponent,
   ],
   templateUrl: './profile.component.html',
 })

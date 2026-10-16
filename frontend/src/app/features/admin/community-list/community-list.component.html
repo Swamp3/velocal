@@ -22,26 +22,11 @@
     />
   </div>
 
-  <div
-    class="flex flex-wrap items-center gap-1 rounded-lg border border-[var(--color-border)] p-0.5"
-  >
-    @for (opt of visibilityOptions; track opt) {
-      <button
-        type="button"
-        [class]="
-          'cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-all ' +
-          (visibility() === opt
-            ? 'bg-[var(--color-primary)] text-white shadow-sm'
-            : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]')
-        "
-        (click)="onVisibility(opt)"
-      >
-        {{
-          (opt === 'all' ? 'admin.communities.all' : 'communities.visibility.' + opt) | transloco
-        }}
-      </button>
-    }
-  </div>
+  <ui-segmented
+    [options]="visibilityChoices"
+    [value]="visibility()"
+    (valueChange)="onVisibility($event)"
+  />
 
   <label class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
     {{ 'admin.communities.sortBy' | transloco }}

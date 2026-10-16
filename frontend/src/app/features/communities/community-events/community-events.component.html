@@ -5,10 +5,10 @@
     </h2>
     @if (canCreate()) {
       <div class="flex flex-wrap gap-2">
-        <button type="button" [class]="outlineLinkClass" (click)="toggleSharing()">
+        <button type="button" uiButton variant="outline" (click)="toggleSharing()">
           {{ 'communities.events.share' | transloco }}
         </button>
-        <a [routerLink]="createLink()" [class]="outlineLinkClass">
+        <a [routerLink]="createLink()" uiButton variant="outline">
           {{ 'communities.events.create' | transloco }}
         </a>
       </div>
@@ -50,10 +50,10 @@
             {{ 'communities.events.shareMeetupHint' | transloco }}
           </p>
           <div class="flex gap-2">
-            <button type="submit" [class]="outlineLinkClass" [disabled]="busy()">
+            <button type="submit" uiButton variant="outline" [disabled]="busy()">
               {{ 'communities.events.shareSubmit' | transloco }}
             </button>
-            <button type="button" [class]="outlineLinkClass" (click)="picked.set(null)">
+            <button type="button" uiButton variant="outline" (click)="picked.set(null)">
               {{ 'common.cancel' | transloco }}
             </button>
           </div>
@@ -67,7 +67,7 @@
             [attr.aria-label]="'communities.events.shareSearch' | transloco"
             [placeholder]="'communities.events.shareSearch' | transloco"
           />
-          <button type="submit" [class]="outlineLinkClass">
+          <button type="submit" uiButton variant="outline">
             {{ 'communities.events.shareSearch' | transloco }}
           </button>
         </form>
@@ -85,7 +85,7 @@
                     {{ result.startDate | date: 'mediumDate' }} · {{ result.locationName }}
                   </span>
                 </span>
-                <button type="button" [class]="outlineLinkClass" (click)="pick(result)">
+                <button type="button" uiButton variant="outline" (click)="pick(result)">
                   {{ 'communities.events.sharePick' | transloco }}
                 </button>
               </li>

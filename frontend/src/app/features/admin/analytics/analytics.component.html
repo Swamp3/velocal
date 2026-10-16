@@ -7,19 +7,7 @@
   </div>
 
   <!-- Period selector -->
-  <div class="flex items-center gap-1 rounded-lg border border-[var(--color-border)] p-1">
-    @for (p of periods; track p) {
-      <button
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-        [class]="period() === p
-          ? 'bg-[var(--color-primary)] text-white'
-          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]'"
-        (click)="setPeriod(p)"
-      >
-        {{ 'admin.analytics.period.' + p + 'd' | transloco }}
-      </button>
-    }
-  </div>
+  <ui-segmented [options]="periodOptions" [value]="period()" size="md" (valueChange)="setPeriod($event)" />
 </div>
 
 <!-- Summary cards -->

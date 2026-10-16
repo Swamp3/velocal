@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -14,12 +15,7 @@ import {
 } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CyclingEvent, Discipline } from '@shared/models';
-import {
-  BadgeComponent,
-  BadgeVariant,
-  PaginationComponent,
-  SkeletonComponent,
-} from '@shared/ui';
+import { BadgeComponent, BadgeVariant, ButtonStyleDirective, IconButtonComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
 interface MissingEvent extends CyclingEvent {
   missingFields: string[];
@@ -48,7 +44,7 @@ const FIELD_BADGE_VARIANT: Record<string, BadgeVariant> = {
     SkeletonComponent,
     DatePipe,
     RouterLink,
-    DuplicateEventsComponent,
+    DuplicateEventsComponent, SegmentedComponent, ButtonStyleDirective, IconButtonComponent,
   ],
   templateUrl: './missing-data.component.html',
 })
@@ -64,7 +60,17 @@ export class MissingDataComponent implements OnInit {
   protected readonly activeTab = signal<FilterTab>('all');
   protected readonly stats = signal<Record<string, number>>({});
   protected readonly tabOptions = TAB_OPTIONS;
-  protected readonly sections: Section[] = ['missing', 'duplicates', 'source'];
+  protected readonly sectionOptions = computed<SegmentedOption<Section>[]>(() =>
+    (['missing', 'duplicates', 'source'] as Section[]).map((s) => ({
+      value: s,
+      labelKey: 'admin.dataQuality.section.' + s,
+      count: this.counts()[s] ?? 0,
+    })),
+  );
+  protected readonly filterOptions: SegmentedOption<FilterTab>[] = TAB_OPTIONS.map((t) => ({
+    value: t,
+    labelKey: 'admin.missingData.tab.' + t,
+  }));
   protected readonly section = signal<Section>('missing');
   private readonly counts = signal<Partial<Record<Section, number>>>({});
 
@@ -78,10 +84,6 @@ export class MissingDataComponent implements OnInit {
     this.admin.getMissingAtSource({ page: 1, limit: 1 }).subscribe({
       next: (r) => this.counts.update((c) => ({ ...c, source: r.total })),
     });
-  }
-
-  protected sectionCount(section: Section): number {
-    return this.counts()[section] ?? 0;
   }
 
   protected onCounted(count: number): void {

@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { IconButtonComponent } from '@shared/ui';
 
 interface StripDay {
     date: Date;
@@ -12,6 +14,7 @@ interface StripDay {
 @Component({
     selector: 'app-calendar-day-strip',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [IconButtonComponent, TranslocoPipe],
     templateUrl: './calendar-day-strip.component.html',
 })
 export class CalendarDayStripComponent {

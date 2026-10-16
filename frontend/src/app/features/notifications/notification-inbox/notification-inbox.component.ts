@@ -4,12 +4,12 @@ import { Router } from '@angular/router';
 import { SeoService } from '@core/services/seo.service';
 import { AppNotification, NotificationService } from '@core/services/notification.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { ButtonComponent, SkeletonComponent } from '@shared/ui';
+import { ButtonComponent, IconButtonComponent, SkeletonComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-notification-inbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, TranslocoPipe, ButtonComponent, SkeletonComponent],
+  imports: [DatePipe, TranslocoPipe, ButtonComponent, SkeletonComponent, IconButtonComponent],
   templateUrl: './notification-inbox.component.html',
 })
 export class NotificationInboxComponent implements OnInit {

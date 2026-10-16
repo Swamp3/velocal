@@ -408,7 +408,9 @@
                   <span class="min-w-0 break-words text-[var(--color-text)]">{{ file.label }}</span>
                   <button
                     type="button"
-                    class="shrink-0 font-medium text-[var(--color-primary)] hover:underline"
+                    uiButton
+                    variant="link"
+                    class="shrink-0"
                     (click)="downloadGpx(route.id, file.id, file.label)"
                   >
                     GPX
@@ -464,7 +466,9 @@
                         </span>
                         <button
                           type="button"
-                          class="shrink-0 font-medium text-[var(--color-primary)] hover:underline"
+                          uiButton
+                          variant="link"
+                          class="shrink-0"
                           (click)="downloadGpx(groupRoute.id, file.id, file.label)"
                         >
                           GPX

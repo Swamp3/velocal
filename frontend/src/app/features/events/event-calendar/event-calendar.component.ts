@@ -18,7 +18,7 @@ import { LocaleService } from '@core/services/locale.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { CyclingEvent, Discipline } from '@shared/models';
-import { SkeletonComponent } from '@shared/ui';
+import { IconButtonComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 import { Subject, switchMap, tap } from 'rxjs';
 import { CalendarAgendaComponent } from './calendar-agenda/calendar-agenda.component';
 import { CalendarDayStripComponent } from './calendar-day-strip/calendar-day-strip.component';
@@ -34,7 +34,7 @@ import { CalendarMonthGridComponent } from './calendar-month-grid/calendar-month
     DisciplineFilterComponent,
     CalendarMonthGridComponent,
     CalendarAgendaComponent,
-    CalendarDayStripComponent,
+    CalendarDayStripComponent, SegmentedComponent, IconButtonComponent,
   ],
   templateUrl: './event-calendar.component.html',
 })
@@ -47,6 +47,10 @@ export class EventCalendarComponent implements OnInit {
 
   readonly currentDate = signal(new Date());
   readonly viewMode = signal<'month' | 'week'>('month');
+  protected readonly viewOptions: SegmentedOption<'month' | 'week'>[] = [
+    { value: 'month', labelKey: 'calendar.month' },
+    { value: 'week', labelKey: 'calendar.week' },
+  ];
   readonly events = signal<CyclingEvent[]>([]);
   readonly loading = signal(false);
   readonly disciplines = signal<Discipline[]>([]);

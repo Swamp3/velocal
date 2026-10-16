@@ -13,9 +13,7 @@
     </p>
   </div>
 
-  <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
-  >
+  <ui-card>
     @if (loading()) {
       <div class="space-y-3">
         @for (_ of [1, 2]; track $index) {
@@ -84,5 +82,5 @@
         }
       </ul>
     }
-  </section>
+  </ui-card>
 </div>

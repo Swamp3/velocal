@@ -9,24 +9,13 @@
 </div>
 
 <!-- Sections -->
-<div class="mb-6 flex items-center gap-1 overflow-x-auto rounded-lg border border-[var(--color-border)] p-0.5">
-  @for (s of sections; track s) {
-    <button
-      [class]="
-        'shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-all cursor-pointer ' +
-        (section() === s
-          ? 'bg-[var(--color-primary)] text-white shadow-sm'
-          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]')
-      "
-      (click)="section.set(s)"
-    >
-      {{ 'admin.dataQuality.section.' + s | transloco }}
-      @if (sectionCount(s); as n) {
-        <span class="ml-1 rounded-full bg-black/10 px-1.5 text-xs tabular-nums">{{ n }}</span>
-      }
-    </button>
-  }
-</div>
+<ui-segmented
+  class="mb-6 block"
+  size="md"
+  [options]="sectionOptions()"
+  [value]="section()"
+  (valueChange)="section.set($event)"
+/>
 
 @if (section() === 'missing') {
   <!-- Stats cards -->
@@ -54,21 +43,12 @@
   }
 
   <!-- Filter tabs -->
-  <div class="mb-5 flex items-center gap-1 overflow-x-auto rounded-lg border border-[var(--color-border)] p-0.5">
-    @for (tab of tabOptions; track tab) {
-      <button
-        [class]="
-          'shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ' +
-          (activeTab() === tab
-            ? 'bg-[var(--color-primary)] text-white shadow-sm'
-            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]')
-        "
-        (click)="onTabChange(tab)"
-      >
-        {{ 'admin.missingData.tab.' + tab | transloco }}
-      </button>
-    }
-  </div>
+  <ui-segmented
+  class="mb-5 block"
+  [options]="filterOptions"
+  [value]="activeTab()"
+  (valueChange)="onTabChange($event)"
+/>
 
   <!-- Loading skeleton -->
   @if (loading()) {
@@ -154,7 +134,9 @@
               <td class="px-4 py-3 text-right">
                 <a
                   [routerLink]="['/events', event.id, 'edit']"
-                  class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+                  uiButton
+                  variant="soft"
+                  size="sm"
                 >
                   <span class="material-symbols-outlined text-[16px]">edit</span>
                   {{ 'admin.missingData.edit' | transloco }}
@@ -184,10 +166,12 @@
             </div>
             <a
               [routerLink]="['/events', event.id, 'edit']"
-              class="shrink-0 rounded-lg p-1.5 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
-            >
-              <span class="material-symbols-outlined text-[18px]">edit</span>
-            </a>
+              uiIconButton
+              variant="soft"
+              shape="square"
+              icon="edit"
+              [label]="'admin.missingData.edit' | transloco"
+            ></a>
           </div>
           <div class="mt-3 flex flex-wrap gap-1">
             @for (field of event.missingFields; track field) {

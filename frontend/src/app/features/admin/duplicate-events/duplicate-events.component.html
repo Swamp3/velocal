@@ -99,7 +99,9 @@
                 <div class="flex shrink-0 items-center gap-2">
                   <a
                     [routerLink]="['/events', event.id, 'edit']"
-                    class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
+                    uiButton
+                    variant="soft"
+                    size="sm"
                   >
                     <span class="material-symbols-outlined text-[16px]">edit</span>
                     {{ 'admin.missingData.edit' | transloco }}
@@ -178,7 +180,9 @@
           <div class="flex shrink-0 items-center gap-2">
             <a
               [routerLink]="['/events', event.id, 'edit']"
-              class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
+              uiButton
+              variant="soft"
+              size="sm"
             >
               <span class="material-symbols-outlined text-[16px]">edit</span>
               {{ 'admin.missingData.edit' | transloco }}

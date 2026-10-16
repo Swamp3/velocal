@@ -51,7 +51,7 @@
             | transloco
         }}
       </h1>
-      <a [routerLink]="createLink()" [class]="outlineLinkClass">
+      <a [routerLink]="createLink()" uiButton variant="outline">
         {{
           (section() === 'posts' ? 'communities.posts.create' : 'communities.polls.new') | transloco
         }}

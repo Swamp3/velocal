@@ -4,12 +4,12 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
 import { EventHostContext, EventService } from '@core/services/event.service';
 import { EventRsvpStatus } from '@shared/models';
-import { ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-event-rsvp',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe],
+  imports: [RouterLink, TranslocoPipe, ButtonComponent, ButtonStyleDirective],
   templateUrl: './event-rsvp.component.html',
 })
 export class EventRsvpComponent {

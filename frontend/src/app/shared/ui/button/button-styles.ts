@@ -1,4 +1,4 @@
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'soft' | 'link';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'soft' | 'link' | 'quiet';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const BASE =
@@ -31,10 +31,12 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'active:bg-[var(--color-primary)]/20',
   /** Text link that triggers an action. Ignores the size padding. */
   link: 'text-[var(--color-primary)] hover:underline',
+  /** Like `link`, but grey: for secondary text actions. */
+  quiet: 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
 };
 
 /** One source of truth for how a button looks, for `ui-button` and `[uiButton]` alike. */
 export function buttonClasses(variant: ButtonVariant, size: ButtonSize): string {
-  const sizeClasses = variant === 'link' ? 'text-sm gap-1' : SIZES[size];
+  const sizeClasses = variant === 'link' || variant === 'quiet' ? 'text-sm gap-1' : SIZES[size];
   return `${BASE} ${sizeClasses} ${VARIANTS[variant]}`;
 }

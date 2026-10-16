@@ -23,7 +23,7 @@ import {
 } from '../community-section-nav/community-section-nav.component';
 import { CommunityEventsComponent } from '../community-events/community-events.component';
 import { Subgroup, SubgroupVisibility, subgroupVisibilityVariant } from '@shared/models';
-import { BadgeComponent, ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { BadgeComponent, ButtonComponent, ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
 @Component({
@@ -39,7 +39,7 @@ import { communityErrorKey } from '../community-error';
     EmptyStateComponent,
     RichTextViewComponent,
     CommunitySectionNavComponent,
-    CommunityEventsComponent,
+    CommunityEventsComponent, ButtonStyleDirective,
   ],
   templateUrl: './subgroup-detail.component.html',
 })
@@ -56,8 +56,6 @@ export class SubgroupDetailComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly acting = signal(false);
-  protected readonly outlineLinkClass =
-    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
 
   ngOnInit(): void {
     const communitySlug = this.route.snapshot.paramMap.get('slug');

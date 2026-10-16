@@ -1,11 +1,14 @@
 <div class="flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-2">
     <!-- Prev week -->
     <button
-        class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        type="button"
+        uiIconButton
+        size="sm"
+        shape="square"
+        icon="chevron_left"
+        [label]="'calendar.prevWeek' | transloco"
         (click)="prevWeek()"
-    >
-        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-    </button>
+    ></button>
 
     <!-- Day circles -->
     <div class="flex flex-1 justify-around">
@@ -35,9 +38,12 @@
 
     <!-- Next week -->
     <button
-        class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+        type="button"
+        uiIconButton
+        size="sm"
+        shape="square"
+        icon="chevron_right"
+        [label]="'calendar.nextWeek' | transloco"
         (click)="nextWeek()"
-    >
-        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-    </button>
+    ></button>
 </div>

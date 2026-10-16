@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PushCategory, PushPreferences, PushService } from '@core/services/push.service';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, CardComponent, ToastService } from '@shared/ui';
 
 const CATEGORIES: PushCategory[] = ['invites', 'membership', 'events', 'community'];
 
@@ -9,7 +9,7 @@ const CATEGORIES: PushCategory[] = ['invites', 'membership', 'events', 'communit
 @Component({
   selector: 'app-push-settings',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonComponent],
+  imports: [TranslocoPipe, ButtonComponent, CardComponent],
   templateUrl: './push-settings.component.html',
 })
 export class PushSettingsComponent implements OnInit {

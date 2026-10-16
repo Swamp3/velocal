@@ -4,7 +4,7 @@ import { CommunityService } from '@core/services/community.service';
 import { EventHostContext } from '@core/services/event.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CyclingEvent } from '@shared/models';
-import { ButtonComponent, ModalComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, ModalComponent, ToastService } from '@shared/ui';
 
 /** `YYYY-MM-DDTHH:mm` in local time, the value format of a datetime-local input. */
 function toLocalInput(iso: string | null | undefined): string {
@@ -20,7 +20,7 @@ function toLocalInput(iso: string | null | undefined): string {
  */
 @Component({
   selector: 'app-event-meetup-edit',
-  imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent, ModalComponent],
+  imports: [ReactiveFormsModule, TranslocoPipe, ButtonComponent, ModalComponent, ButtonStyleDirective],
   templateUrl: './event-meetup-edit.component.html',
 })
 export class EventMeetupEditComponent {

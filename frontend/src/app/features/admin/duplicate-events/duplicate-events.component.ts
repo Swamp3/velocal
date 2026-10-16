@@ -18,13 +18,7 @@ import {
 } from '@core/services/admin.service';
 import { EventService } from '@core/services/event.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  BadgeComponent,
-  ButtonComponent,
-  PaginationComponent,
-  SkeletonComponent,
-  ToastService,
-} from '@shared/ui';
+import { BadgeComponent, ButtonComponent, ButtonStyleDirective, PaginationComponent, SkeletonComponent, ToastService } from '@shared/ui';
 
 export type DuplicateMode = 'duplicates' | 'source';
 
@@ -42,7 +36,7 @@ export type DuplicateMode = 'duplicates' | 'source';
     BadgeComponent,
     ButtonComponent,
     PaginationComponent,
-    SkeletonComponent,
+    SkeletonComponent, ButtonStyleDirective,
   ],
   templateUrl: './duplicate-events.component.html',
 })

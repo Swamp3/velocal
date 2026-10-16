@@ -27,14 +27,14 @@
           </h2>
         }
         <button
-          class="rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+          type="button"
+          uiIconButton
+          size="sm"
+          shape="square"
+          [icon]="sidebarCollapsed() ? 'chevron_right' : 'chevron_left'"
+          [label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
           (click)="sidebarCollapsed.set(!sidebarCollapsed())"
-          [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-        >
-          <span class="material-symbols-outlined text-[18px]">
-            {{ sidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}
-          </span>
-        </button>
+        ></button>
       </div>
 
       @for (item of navItems; track item.path) {

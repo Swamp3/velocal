@@ -18,22 +18,17 @@
             />
             <button
               type="button"
-              class="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] disabled:opacity-40"
+              uiIconButton
+              icon="delete"
+              [label]="'communities.polls.removeOption' | transloco"
               [disabled]="options.length <= 2"
-              [attr.aria-label]="'communities.polls.removeOption' | transloco"
               (click)="removeOption(i)"
-            >
-              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">delete</span>
-            </button>
+            ></button>
           </div>
         }
       </div>
       @if (options.length < 12) {
-        <button
-          type="button"
-          class="text-sm font-medium text-[var(--color-primary)]"
-          (click)="addOption()"
-        >
+        <button type="button" uiButton variant="link" (click)="addOption()">
           {{ 'communities.polls.addOption' | transloco }}
         </button>
       }
