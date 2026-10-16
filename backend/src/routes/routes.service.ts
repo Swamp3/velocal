@@ -7,24 +7,26 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Repository } from 'typeorm';
 import { EventsService } from '../events/events.service';
 import { CreateRouteDto, UpdateRouteDto } from './dto/route.dto';
 import { RouteFile } from './entities/route-file.entity';
 import { Route } from './entities/route.entity';
-import { gpxStats, looksLikeGpx } from './gpx';
+import { gpxStats, gpxTrack, looksLikeGpx, TrackPoint } from './gpx';
 import { SerializedRoute, serializeRoute } from './serialize';
 
 export const MAX_GPX_BYTES = 5 * 1024 * 1024;
 const MAX_FILES_PER_ROUTE = 20;
 const MAX_ROUTES_PER_USER = 100;
+const TRACK_CACHE_SIZE = 50;
 
 type Viewer = { id: string; isAdmin?: boolean } | undefined;
 
 @Injectable()
 export class RoutesService {
+  private readonly trackCache = new Map<string, TrackPoint[]>();
   private readonly rootDir = resolve(process.env.UPLOADS_DIR ?? '/app/uploads');
 
   constructor(
@@ -166,6 +168,37 @@ export class RoutesService {
     const path = join(this.rootDir, 'routes', route.id, `${file.id}.gpx`);
     const safeName = file.label.replace(/[^\w.\- ]+/g, '_') || 'track';
     return { stream: createReadStream(path), filename: `${safeName}.gpx` };
+  }
+
+  /**
+   * A thinned copy of the track for the map page. Files never change, so the
+   * result is kept in memory for a while instead of re-reading the GPX.
+   */
+  async openTrack(
+    id: string,
+    fileId: string,
+    viewer: Viewer,
+  ): Promise<TrackPoint[]> {
+    const route = await this.requireViewable(id, viewer);
+    const file = route.files.find((row) => row.id === fileId);
+    if (!file) throw new NotFoundException('File not found');
+    const cached = this.trackCache.get(file.id);
+    if (cached) {
+      this.trackCache.delete(file.id);
+      this.trackCache.set(file.id, cached);
+      return cached;
+    }
+    const path = join(this.rootDir, 'routes', route.id, `${file.id}.gpx`);
+    const text = await readFile(path, 'utf8').catch(() => {
+      throw new NotFoundException('File not found');
+    });
+    const track = gpxTrack(text);
+    this.trackCache.set(file.id, track);
+    if (this.trackCache.size > TRACK_CACHE_SIZE) {
+      const oldest = this.trackCache.keys().next().value as string;
+      this.trackCache.delete(oldest);
+    }
+    return track;
   }
 
   private canEdit(route: Route, viewer: Viewer): boolean {

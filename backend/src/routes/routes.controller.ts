@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { BadWordInterceptor, CheckBadWords } from '../common/bad-words';
 import { CreateRouteDto, UpdateRouteDto } from './dto/route.dto';
+import type { TrackPoint } from './gpx';
 import { MAX_GPX_BYTES, RoutesService } from './routes.service';
 import { SerializedRoute } from './serialize';
 
@@ -117,5 +118,18 @@ export class RoutesController {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');
     stream.pipe(res);
+  }
+
+  @Get(':id/files/:fileId/track')
+  @UseGuards(OptionalJwtAuthGuard)
+  async track(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Res({ passthrough: true }) res: Response,
+    @CurrentUser() user?: User,
+  ): Promise<{ points: TrackPoint[] }> {
+    const points = await this.routes.openTrack(id, fileId, user);
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    return { points };
   }
 }

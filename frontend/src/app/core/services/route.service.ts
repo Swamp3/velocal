@@ -5,6 +5,8 @@ import { Route } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
+export type TrackPoint = [lat: number, lon: number, ele: number | null, distM: number];
+
 @Injectable({ providedIn: 'root' })
 export class RouteService {
   private readonly api = inject(ApiService);
@@ -39,6 +41,11 @@ export class RouteService {
 
   removeFile(id: string, fileId: string): Observable<Route> {
     return this.api.delete(`/routes/${id}/files/${fileId}`);
+  }
+
+  /** Simplified track for the map page: [lat, lon, ele|null, distanceM][]. */
+  getTrack(id: string, fileId: string): Observable<{ points: TrackPoint[] }> {
+    return this.api.get(`/routes/${id}/files/${fileId}/track`);
   }
 
   /** Fetches the GPX with the user's session (the endpoint is access-checked) and saves it. */

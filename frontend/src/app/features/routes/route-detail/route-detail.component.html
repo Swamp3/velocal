@@ -105,6 +105,14 @@
                 </span>
               </span>
               <span class="flex gap-2">
+                <a
+                  uiButton
+                  size="sm"
+                  variant="outline"
+                  [routerLink]="['/routes', route.id, 'files', file.id]"
+                >
+                  {{ 'routes.map' | transloco }}
+                </a>
                 <ui-button size="sm" variant="outline" (click)="download(file.id, file.label)">
                   {{ 'routes.download' | transloco }}
                 </ui-button>

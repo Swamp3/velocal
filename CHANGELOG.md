@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- An uploaded GPX route can be viewed on its own map page with the track, start and finish and an elevation profile. It is linked as "Map" from the route and the event page; nothing is computed on the other pages.
+
 - **Add subgroup members by email** — in a subgroup's member page, moderators can add a person by email address, which is unambiguous when several members share a display name. The person must already be a member of the club.
 
 ## [0.12.1] — 2026-10-16

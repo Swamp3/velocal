@@ -8,6 +8,8 @@
 
 ### Added
 
+- Route map page `/routes/:id/files/:fileId` (lazy, Leaflet polyline, SVG elevation profile) with "Map" links on route and event detail
+
 - Email field on the subgroup member page next to the name search
 
 ## [0.12.1] - 2026-10-16

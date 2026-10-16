@@ -20,6 +20,8 @@
 
 ### Added
 
+- `GET /routes/:id/files/:fileId/track` returns the GPX track simplified to at most 800 points (lat, lon, elevation, distance), cached in memory
+
 - `GET /users/me/upcoming-events`: upcoming events with a going/maybe RSVP, including club context; club and subgroup events, and public events shared into a club or subgroup, only while the user is still a member
 - Event source tracking (`sourceName`, `sourceUrl`, `lastSeenAt`, `missingSince`) and `event_duplicate_ignores`; importer matches by source id, source page and fuzzy name/place on the same day (`event-matching.ts`), dedupes within a run, updates postponed dates, flags events missing from complete runs; `GET /admin/events/duplicates`, `POST /admin/events/duplicates/ignore`, `GET /admin/events/missing-source`; migration `AddEventSourceTracking` backfills `sourceName` for existing imported events
 - `registrationStart` on events (create, update, repeat series); `null` clears it and `registrationDeadline`; start after deadline is rejected; migration `AddEventRegistrationStart`
