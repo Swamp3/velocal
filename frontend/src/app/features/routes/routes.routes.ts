@@ -10,8 +10,7 @@ const routes: Routes = [
   },
   {
     path: ':id/files/:fileId',
-    loadComponent: () =>
-      import('./route-map/route-map.component').then((m) => m.RouteMapComponent),
+    loadComponent: () => import('./route-map/route-map.component').then((m) => m.RouteMapComponent),
   },
   {
     path: ':id',
