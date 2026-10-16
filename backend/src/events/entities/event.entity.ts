@@ -68,8 +68,12 @@ export class Event {
   })
   coordinates: Point;
 
+  /** When sign-up opens (Anmeldestart). */
   @Column({ type: 'timestamptz', nullable: true })
-  registrationDeadline: Date;
+  registrationStart: Date | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  registrationDeadline: Date | null;
 
   @Column({ nullable: true })
   externalUrl: string;
@@ -82,6 +86,22 @@ export class Event {
 
   @Column({ type: 'enum', enum: EventSource, default: EventSource.MANUAL })
   source: EventSource;
+
+  /** Which scraper created the event, e.g. `rad-net` (imported events only). */
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  sourceName: string | null;
+
+  /** The page of the source that lists the event; stays even if `externalUrl` is edited. */
+  @Column({ type: 'text', nullable: true })
+  sourceUrl: string | null;
+
+  /** Last import run in which the source still listed the event. */
+  @Column({ type: 'timestamptz', nullable: true })
+  lastSeenAt: Date | null;
+
+  /** Set when a complete import run no longer found an upcoming event at its source. */
+  @Column({ type: 'timestamptz', nullable: true })
+  missingSince: Date | null;
 
   @ManyToOne(() => Discipline, { eager: true })
   @JoinColumn({ name: 'discipline_slug', referencedColumnName: 'slug' })

@@ -2,27 +2,26 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DuplicateEventsComponent } from '../duplicate-events/duplicate-events.component';
 import {
   AdminService,
   MissingDataType,
 } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CyclingEvent, Discipline } from '@shared/models';
-import {
-  BadgeComponent,
-  BadgeVariant,
-  PaginationComponent,
-  SkeletonComponent,
-} from '@shared/ui';
+import { BadgeComponent, BadgeVariant, ButtonStyleDirective, CardComponent, IconButtonComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
 interface MissingEvent extends CyclingEvent {
   missingFields: string[];
 }
+
+type Section = 'missing' | 'duplicates' | 'source';
 
 type FilterTab = 'all' | MissingDataType;
 
@@ -45,6 +44,7 @@ const FIELD_BADGE_VARIANT: Record<string, BadgeVariant> = {
     SkeletonComponent,
     DatePipe,
     RouterLink,
+    DuplicateEventsComponent, SegmentedComponent, ButtonStyleDirective, IconButtonComponent, CardComponent,
   ],
   templateUrl: './missing-data.component.html',
 })
@@ -60,10 +60,35 @@ export class MissingDataComponent implements OnInit {
   protected readonly activeTab = signal<FilterTab>('all');
   protected readonly stats = signal<Record<string, number>>({});
   protected readonly tabOptions = TAB_OPTIONS;
+  protected readonly sectionOptions = computed<SegmentedOption<Section>[]>(() =>
+    (['missing', 'duplicates', 'source'] as Section[]).map((s) => ({
+      value: s,
+      labelKey: 'admin.dataQuality.section.' + s,
+      count: this.counts()[s] ?? 0,
+    })),
+  );
+  protected readonly filterOptions: SegmentedOption<FilterTab>[] = TAB_OPTIONS.map((t) => ({
+    value: t,
+    labelKey: 'admin.missingData.tab.' + t,
+  }));
+  protected readonly section = signal<Section>('missing');
+  private readonly counts = signal<Partial<Record<Section, number>>>({});
 
   ngOnInit(): void {
     this.loadStats();
     this.loadEvents();
+    // Counts for the section tabs.
+    this.admin.getDuplicateGroups({ page: 1, limit: 1 }).subscribe({
+      next: (r) => this.counts.update((c) => ({ ...c, duplicates: r.total })),
+    });
+    this.admin.getMissingAtSource({ page: 1, limit: 1 }).subscribe({
+      next: (r) => this.counts.update((c) => ({ ...c, source: r.total })),
+    });
+  }
+
+  protected onCounted(count: number): void {
+    const section = this.section();
+    this.counts.update((c) => ({ ...c, [section]: count }));
   }
 
   protected disciplineName(d: Discipline | undefined): string {

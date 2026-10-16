@@ -20,7 +20,7 @@ import {
 } from '@shared/components';
 import { Community, CommunityMember, CommunityRole } from '@shared/models';
 import { communityErrorKey } from '../community-error';
-import { SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-community-members',
@@ -31,7 +31,7 @@ import { SkeletonComponent, ToastService } from '@shared/ui';
     SkeletonComponent,
     EmptyStateComponent,
     InviteByEmailComponent,
-    MemberListComponent,
+    MemberListComponent, ButtonStyleDirective,
   ],
   templateUrl: './community-members.component.html',
 })
@@ -51,8 +51,6 @@ export class CommunityMembersComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly notFound = signal(false);
   protected readonly mutating = signal(false);
-  protected readonly outlineLinkClass =
-    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
   private readonly members = signal<CommunityMember[]>([]);
 
   protected readonly canManage = computed(() => this.community()?.myRole === 'admin');

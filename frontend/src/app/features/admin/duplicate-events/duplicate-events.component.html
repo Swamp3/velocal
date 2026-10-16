@@ -1,0 +1,223 @@
+<p class="mb-4 text-sm text-[var(--color-text-muted)]">
+  {{
+    (mode() === 'duplicates' ? 'admin.duplicates.hint' : 'admin.duplicates.sourceHint') | transloco
+  }}
+</p>
+
+@if (mode() === 'duplicates') {
+  <label class="mb-4 flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]">
+    <input
+      type="checkbox"
+      class="size-4 cursor-pointer accent-[var(--color-primary)]"
+      [checked]="includePast()"
+      (change)="togglePast()"
+    />
+    {{ 'admin.duplicates.includePast' | transloco }}
+  </label>
+}
+
+@if (loading()) {
+  <div class="space-y-3">
+    @for (_ of [1, 2, 3]; track $index) {
+      <ui-skeleton class="h-24 w-full" />
+    }
+  </div>
+} @else if (mode() === 'duplicates') {
+  @if (groups().length === 0) {
+    <div
+      class="flex flex-col items-center rounded-xl border border-dashed border-[var(--color-border)] py-16"
+    >
+      <span class="material-symbols-outlined mb-3 text-4xl text-[var(--color-text-muted)]/50"
+        >check_circle</span
+      >
+      <p class="text-sm font-medium text-[var(--color-text-muted)]">
+        {{ 'admin.duplicates.empty' | transloco }}
+      </p>
+    </div>
+  } @else {
+    <div class="space-y-4">
+      @for (group of groups(); track group.key) {
+        <section class="rounded-xl border border-[var(--color-border)]">
+          <header
+            class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]/50 px-4 py-2.5"
+          >
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <span class="font-semibold text-[var(--color-text)]">{{
+                group.date | date: 'fullDate'
+              }}</span>
+              @for (reason of group.reasons; track reason) {
+                <ui-badge variant="warning">{{
+                  'admin.duplicates.reason.' + reason | transloco
+                }}</ui-badge>
+              }
+            </div>
+            <ui-button
+              variant="ghost"
+              size="sm"
+              [loading]="busyId() === group.key"
+              (click)="dismiss(group)"
+            >
+              {{ 'admin.duplicates.notDuplicate' | transloco }}
+            </ui-button>
+          </header>
+          <ul class="divide-y divide-[var(--color-border)]">
+            @for (event of group.events; track event.id) {
+              <li
+                class="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div class="min-w-0">
+                  <a
+                    [routerLink]="['/events', event.id]"
+                    class="break-words font-medium text-[var(--color-text)] hover:text-[var(--color-primary)]"
+                    >{{ event.name }}</a
+                  >
+                  <div
+                    class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]"
+                  >
+                    <span>{{ event.startDate | date: 'short' }}</span>
+                    <span>·</span>
+                    <span class="break-words">{{ event.locationName || '—' }}</span>
+                    <ui-badge [variant]="event.source === 'imported' ? 'neutral' : 'success'">
+                      {{ sourceLabel(event) }}
+                    </ui-badge>
+                    @if (event.missingSince) {
+                      <ui-badge variant="danger">{{
+                        'admin.duplicates.gone' | transloco
+                      }}</ui-badge>
+                    }
+                    @if (event.sourceUrl) {
+                      <a
+                        [href]="event.sourceUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-[var(--color-primary)] hover:underline"
+                        >{{ 'admin.duplicates.openSource' | transloco }}</a
+                      >
+                    }
+                  </div>
+                </div>
+                <div class="flex shrink-0 items-center gap-2">
+                  <a
+                    [routerLink]="['/events', event.id, 'edit']"
+                    uiButton
+                    variant="soft"
+                    size="sm"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                    {{ 'admin.missingData.edit' | transloco }}
+                  </a>
+                  @if (confirmingId() === event.id) {
+                    <ui-button
+                      variant="danger"
+                      size="sm"
+                      [loading]="busyId() === event.id"
+                      (click)="delete(event)"
+                    >
+                      {{ 'admin.users.confirm' | transloco }}
+                    </ui-button>
+                    <ui-button variant="ghost" size="sm" (click)="confirmingId.set(null)">
+                      {{ 'common.cancel' | transloco }}
+                    </ui-button>
+                  } @else {
+                    <ui-button variant="outline" size="sm" (click)="askDelete(event)">
+                      {{ 'admin.duplicates.delete' | transloco }}
+                    </ui-button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+  }
+} @else {
+  @if (missing().length === 0) {
+    <div
+      class="flex flex-col items-center rounded-xl border border-dashed border-[var(--color-border)] py-16"
+    >
+      <span class="material-symbols-outlined mb-3 text-4xl text-[var(--color-text-muted)]/50"
+        >check_circle</span
+      >
+      <p class="text-sm font-medium text-[var(--color-text-muted)]">
+        {{ 'admin.duplicates.sourceEmpty' | transloco }}
+      </p>
+    </div>
+  } @else {
+    <ul
+      class="divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)]"
+    >
+      @for (event of missing(); track event.id) {
+        <li class="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <a
+              [routerLink]="['/events', event.id]"
+              class="break-words font-medium text-[var(--color-text)] hover:text-[var(--color-primary)]"
+              >{{ event.name }}</a
+            >
+            <div
+              class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]"
+            >
+              <span>{{ event.startDate | date: 'mediumDate' }}</span>
+              <span>·</span>
+              <span class="break-words">{{ event.locationName || '—' }}</span>
+              <ui-badge variant="neutral">{{ event.sourceName }}</ui-badge>
+              <span
+                >{{ 'admin.duplicates.goneSince' | transloco }}
+                {{ event.missingSince | date: 'mediumDate' }}</span
+              >
+              @if (event.sourceUrl) {
+                <a
+                  [href]="event.sourceUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-[var(--color-primary)] hover:underline"
+                  >{{ 'admin.duplicates.openSource' | transloco }}</a
+                >
+              }
+            </div>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <a
+              [routerLink]="['/events', event.id, 'edit']"
+              uiButton
+              variant="soft"
+              size="sm"
+            >
+              <span class="material-symbols-outlined text-[16px]">edit</span>
+              {{ 'admin.missingData.edit' | transloco }}
+            </a>
+            @if (confirmingId() === event.id) {
+              <ui-button
+                variant="danger"
+                size="sm"
+                [loading]="busyId() === event.id"
+                (click)="delete(event)"
+              >
+                {{ 'admin.users.confirm' | transloco }}
+              </ui-button>
+              <ui-button variant="ghost" size="sm" (click)="confirmingId.set(null)">
+                {{ 'common.cancel' | transloco }}
+              </ui-button>
+            } @else {
+              <ui-button variant="outline" size="sm" (click)="askDelete(event)">
+                {{ 'admin.duplicates.delete' | transloco }}
+              </ui-button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+}
+
+@if (!loading() && total() > limit()) {
+  <div class="mt-6 flex justify-center">
+    <ui-pagination
+      [total]="total()"
+      [page]="page()"
+      [limit]="limit()"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+}

@@ -4,14 +4,17 @@ import {
   computed,
   DestroyRef,
   effect,
+  untracked,
   inject,
   signal,
 } from '@angular/core';
+import { ButtonStyleDirective } from '@shared/ui/button/button-style.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { LocaleService } from '@core/services/locale.service';
 import { NotificationService } from '@core/services/notification.service';
+import { PushService } from '@core/services/push.service';
 import { SeoService } from '@core/services/seo.service';
 import { UserService } from '@core/services/user.service';
 import { ThemeService } from '@core/theme.service';
@@ -139,7 +142,7 @@ const DEFAULT_SEO: RouteSeo = {
     RouterLink,
     RouterLinkActive,
     ToastContainerComponent,
-    TranslocoPipe,
+    TranslocoPipe, ButtonStyleDirective,
   ],
   templateUrl: './app-shell.component.html',
 })
@@ -153,6 +156,7 @@ export class AppShellComponent {
   private readonly seo = inject(SeoService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly notifications = inject(NotificationService);
+  private readonly push = inject(PushService);
 
   protected readonly unreadCount = this.notifications.unread;
 
@@ -191,6 +195,9 @@ export class AppShellComponent {
       if (!this.auth.hydrated()) return;
       this.auth.currentUser();
       this.refreshUnread();
+      // Re-register this device's push subscription after every sign-in/start.
+      const userId = this.auth.currentUser()?.id;
+      if (userId) untracked(() => void this.push.renewIfEnabled(userId));
     });
   }
 

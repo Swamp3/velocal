@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CanActivateFn } from '@angular/router';
 import { AdminService, ImportJob, ImportJobStatus } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { BadgeComponent, BadgeVariant, ButtonComponent, SkeletonComponent } from '@shared/ui';
+import { BadgeComponent, BadgeVariant, ButtonComponent, ButtonStyleDirective, CardComponent, SkeletonComponent } from '@shared/ui';
 import { interval, switchMap } from 'rxjs';
 
 const STATUS_VARIANT: Record<ImportJobStatus, BadgeVariant> = {
@@ -24,7 +24,7 @@ const STATUS_VARIANT: Record<ImportJobStatus, BadgeVariant> = {
 @Component({
   selector: 'app-import-status',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, BadgeComponent, ButtonComponent, SkeletonComponent, DatePipe],
+  imports: [TranslocoPipe, BadgeComponent, ButtonComponent, SkeletonComponent, DatePipe, ButtonStyleDirective, CardComponent],
   templateUrl: './import-status.component.html',
 })
 export class ImportStatusComponent implements OnInit {

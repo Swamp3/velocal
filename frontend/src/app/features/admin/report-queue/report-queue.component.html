@@ -7,24 +7,12 @@
   </p>
 </div>
 
-<div
-  class="mb-5 inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] p-0.5"
->
-  @for (s of statuses; track s) {
-    <button
-      type="button"
-      [class]="
-        'cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-all ' +
-        (status() === s
-          ? 'bg-[var(--color-primary)] text-white shadow-sm'
-          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]')
-      "
-      (click)="setStatus(s)"
-    >
-      {{ 'admin.reports.status.' + s | transloco }}
-    </button>
-  }
-</div>
+<ui-segmented
+  class="mb-5 block"
+  [options]="statusOptions"
+  [value]="status()"
+  (valueChange)="setStatus($event)"
+/>
 
 @if (loading()) {
   <div class="space-y-3">

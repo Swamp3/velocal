@@ -4,6 +4,33 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.12.0] — 2026-10-16
+
+### Added
+
+- **My events page** — a new page "Meine Events" (account menu → My events) lists every upcoming event you answered "going" or "maybe" for, soonest first, with its club and subgroup. Tap one to open it. Declined and past events are left out, and so are events of clubs or subgroups you have since left.
+- **Fewer duplicate events and traceable sources** — the importer now remembers which source and page each event came from, recognises the same race even when its name or place is spelled differently (also against manually created events and the other source), and moves postponed events instead of duplicating them. Admin > Data quality has a new list of possible duplicates (edit, delete or mark as different) and a list of upcoming imported events their source no longer shows.
+- **Calmer mobile calendar** — in the current month, past days are folded into one line ("5 past days (5 events) – show"), so the list starts at today. Open them with a tap, and the Today button or a tapped day scrolls to its entry.
+- **Registration start (Anmeldestart)** — events can have a date and time when sign-up opens. The event page shows it before the deadline and tells visitors when registration has not opened yet. The start must not be after the deadline. Both dates can now be removed again when editing an event.
+- **Push notifications** — turn on push for each device in your profile and choose what you get: event invitations, membership, new events (off by default) and club updates. Works on Android, desktop browsers and iPhones with VeloCal added to the Home Screen. A test button checks that it works.
+
+### Changed
+
+- Buttons, icon buttons, filter and tab switches, link-style actions and cards now come from shared building blocks, so they look and behave the same across the app (account, admin, calendar, clubs, events, map, news, login). Documented in `docs/UI-COMPONENTS.md`.
+- In a club's event list, removing a shared event is now a small icon button on the event card instead of a large button next to it.
+- Delete your account yourself from the profile (name, email, password, favorites, memberships, notifications and push subscriptions are removed; you can also remove your posts, comments and polls). A club you alone administered passes to its longest-standing member, who is notified; a club without other members is deleted. Site admins must give up the admin role first.
+- The privacy policy now covers push notifications, profile data, moderation logs, reach measurement and place lookup, and names the correct email provider (Resend).
+- Reach measurement no longer stores anything on your device and no longer links page views to your account. Visits are counted per page load, so the admin statistics show "visits" instead of unique visitors. Page views are deleted after about 13 months.
+
+### Fixed
+
+- A few icons (expand less, event available, registration, unlink) showed as empty boxes because the trimmed icon font did not contain them.
+
+### Security and speed
+
+- Push messages only go to the push services of the browser and OS vendors, each person can register at most 10 devices, and account deletion, new push devices and page views are rate limited.
+- Sending push messages, signing in, the importer and the duplicate finder do less work per request, and new database indexes speed up the event lists, your upcoming events and the importer. A ban or account deletion can take up to 10 seconds to apply.
+
 ## [0.11.0] — 2026-10-15
 
 ### Added
@@ -26,6 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Text in comments no longer breaks in the middle of a word.
 - Buttons in the club section no longer wrap their text on small screens.
+- The Events and account menus in the header open fully on the map page instead of being cut off.
 - Dialogs keep keyboard focus inside while open.
 - Your RSVP now belongs to the club event it was given for.
 - Uploading a route without a GPX file is refused with a clear message.

@@ -89,6 +89,20 @@ interface EventScope {
   hostCommunity: { name: string; slug: string };
 }
 
+export interface MyUpcomingEvent {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string | null;
+  locationName: string;
+  cancelled: boolean;
+  disciplineSlug: string;
+  myRsvp: 'going' | 'maybe';
+  /** The club the answer belongs to; the event page needs it for club events. */
+  community: { slug: string; name: string } | null;
+  subgroup: { slug: string; name: string } | null;
+}
+
 export interface PaginatedEvents {
   data: SerializedEvent[];
   total: number;
@@ -367,6 +381,7 @@ export class EventsService {
         recurrenceId: series.id,
         startDate: start,
         endDate: moved(first.endDate),
+        registrationStart: moved(first.registrationStart),
         registrationDeadline: moved(first.registrationDeadline),
         meetupAt: first.meetupAt ? moved(first.meetupAt) : null,
       });
@@ -630,6 +645,10 @@ export class EventsService {
       if (geo) coordinates = geo;
     }
 
+    assertRegistrationOrder(
+      dto.registrationStart ? new Date(dto.registrationStart) : null,
+      dto.registrationDeadline ? new Date(dto.registrationDeadline) : null,
+    );
     if (dto.routeId) await this.assertOwnsRoute(dto.routeId, userId);
     const {
       recurrence: _recurrence,
@@ -646,6 +665,9 @@ export class EventsService {
       createdById: userId ?? undefined,
       startDate: new Date(dto.startDate),
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      registrationStart: dto.registrationStart
+        ? new Date(dto.registrationStart)
+        : undefined,
       registrationDeadline: dto.registrationDeadline
         ? new Date(dto.registrationDeadline)
         : undefined,
@@ -706,8 +728,24 @@ export class EventsService {
 
     if (dto.startDate) partial.startDate = new Date(dto.startDate);
     if (dto.endDate) partial.endDate = new Date(dto.endDate);
-    if (dto.registrationDeadline)
-      partial.registrationDeadline = new Date(dto.registrationDeadline);
+    if (dto.registrationStart !== undefined) {
+      partial.registrationStart = dto.registrationStart
+        ? new Date(dto.registrationStart)
+        : null;
+    }
+    if (dto.registrationDeadline !== undefined) {
+      partial.registrationDeadline = dto.registrationDeadline
+        ? new Date(dto.registrationDeadline)
+        : null;
+    }
+    assertRegistrationOrder(
+      partial.registrationStart !== undefined
+        ? partial.registrationStart
+        : event.registrationStart,
+      partial.registrationDeadline !== undefined
+        ? partial.registrationDeadline
+        : event.registrationDeadline,
+    );
 
     let coordinates = dto.coordinates;
     if (
@@ -774,6 +812,99 @@ export class EventsService {
     event.imageUrl = null as unknown as string;
     const saved = await this.repo.save(event);
     return this.present(saved, user.id);
+  }
+
+  /**
+   * Upcoming events the user answered "going" or "maybe" for, soonest first.
+   * Club events only show while the user still belongs to the club.
+   */
+  async listMyUpcoming(userId: string): Promise<MyUpcomingEvent[]> {
+    const rows = await this.rsvps.query<Record<string, unknown>[]>(
+      `SELECT e."id", e."name", e."startDate", e."endDate", e."locationName", e."status" AS "eventStatus",
+              e."discipline_slug" AS "disciplineSlug", r."status" AS "myRsvp",
+              c."slug" AS "communitySlug", c."name" AS "communityName",
+              sg."slug" AS "subgroupSlug", sg."name" AS "subgroupName"
+       FROM "event_rsvps" r
+       JOIN "events" e ON e."id" = r."event_id"
+       LEFT JOIN "event_shares" s ON s."id" = r."share_id"
+       LEFT JOIN "communities" c ON c."id" = COALESCE(e."community_id", s."community_id")
+       LEFT JOIN "subgroups" sg ON sg."id" = COALESCE(e."subgroup_id", s."subgroup_id")
+       WHERE r."user_id" = $1
+         AND r."status" IN ('going', 'maybe')
+         AND COALESCE(e."endDate", e."startDate" + interval '1 day') >= now()
+         AND ${notInSuspendedCommunitySql('e')}
+         AND (
+           r."share_id" IS NULL
+           OR (s."subgroup_id" IS NULL AND EXISTS (
+                SELECT 1 FROM "community_members" cm
+                WHERE cm."community_id" = s."community_id" AND cm."user_id" = $1))
+           OR (s."subgroup_id" IS NOT NULL AND (
+                EXISTS (SELECT 1 FROM "subgroup_members" sm
+                        WHERE sm."subgroup_id" = s."subgroup_id" AND sm."user_id" = $1)
+                OR EXISTS (SELECT 1 FROM "community_members" cm
+                           WHERE cm."community_id" = s."community_id" AND cm."user_id" = $1
+                             AND cm."role" = 'admin')))
+         )
+         AND (
+           e."community_id" IS NULL
+           OR (e."subgroup_id" IS NULL AND EXISTS (
+                SELECT 1 FROM "community_members" cm
+                WHERE cm."community_id" = e."community_id" AND cm."user_id" = $1))
+           OR (e."subgroup_id" IS NOT NULL AND (
+                EXISTS (SELECT 1 FROM "subgroup_members" sm
+                        WHERE sm."subgroup_id" = e."subgroup_id" AND sm."user_id" = $1)
+                OR EXISTS (SELECT 1 FROM "community_members" cm
+                           WHERE cm."community_id" = e."community_id" AND cm."user_id" = $1
+                             AND cm."role" = 'admin')))
+         )
+       ORDER BY e."startDate" ASC
+       LIMIT 50`,
+      [userId],
+    );
+    return rows.map((r) => ({
+      id: r.id as string,
+      name: r.name as string,
+      startDate: (r.startDate as Date).toISOString(),
+      endDate: r.endDate ? (r.endDate as Date).toISOString() : null,
+      locationName: (r.locationName as string) ?? '',
+      cancelled: r.eventStatus === 'cancelled',
+      disciplineSlug: r.disciplineSlug as string,
+      myRsvp: r.myRsvp as 'going' | 'maybe',
+      community: r.communitySlug
+        ? { slug: r.communitySlug as string, name: r.communityName as string }
+        : null,
+      subgroup: r.subgroupSlug
+        ? { slug: r.subgroupSlug as string, name: r.subgroupName as string }
+        : null,
+    }));
+  }
+
+  async findMissingAtSource(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedEvents> {
+    const [data, total] = await this.repo
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.discipline', 'discipline')
+      .where("event.source = 'imported'")
+      .andWhere('event.missingSince IS NOT NULL')
+      .andWhere('event.startDate >= NOW()')
+      .orderBy('event.missingSince', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+    return {
+      data: data.map((e) => ({
+        ...this.serializeEvent(e),
+        sourceName: e.sourceName,
+        sourceUrl: e.sourceUrl,
+        lastSeenAt: e.lastSeenAt,
+        missingSince: e.missingSince,
+      })),
+      total,
+      page,
+      limit,
+    };
   }
 
   async findMissingData(dto: AdminMissingDataDto): Promise<PaginatedEvents> {
@@ -1843,5 +1974,17 @@ export class EventsService {
     if (!event.imageUrl) return null;
     if (event.listing !== EventListing.MEMBERS) return event.imageUrl;
     return this.imageAccess.sign(event.imageUrl, true);
+  }
+}
+
+/** Sign-up cannot open after it closes. */
+function assertRegistrationOrder(
+  start: Date | null | undefined,
+  deadline: Date | null | undefined,
+): void {
+  if (start && deadline && start.getTime() > deadline.getTime()) {
+    throw new BadRequestException(
+      'Registration start must not be after the registration deadline',
+    );
   }
 }

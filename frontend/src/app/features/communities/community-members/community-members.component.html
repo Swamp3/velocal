@@ -34,7 +34,7 @@
         {{ 'communities.members.title' | transloco }}
       </h1>
       @if (c.myRole === 'admin') {
-        <a [routerLink]="['/communities', c.slug, 'requests']" [class]="outlineLinkClass">
+        <a [routerLink]="['/communities', c.slug, 'requests']" uiButton variant="outline">
           {{ 'communities.requests.title' | transloco }}
         </a>
       }

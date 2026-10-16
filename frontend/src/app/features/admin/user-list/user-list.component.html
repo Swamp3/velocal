@@ -21,21 +21,7 @@
     />
   </div>
 
-  <div class="flex items-center gap-1 rounded-lg border border-[var(--color-border)] p-0.5">
-    @for (opt of ['all', 'admin', 'user', 'banned']; track opt) {
-      <button
-        [class]="
-          'rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ' +
-          (roleFilter() === opt
-            ? 'bg-[var(--color-primary)] text-white shadow-sm'
-            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]')
-        "
-        (click)="onRoleFilter($any(opt))"
-      >
-        {{ 'admin.users.role.' + opt | transloco }}
-      </button>
-    }
-  </div>
+  <ui-segmented [options]="roleOptions" [value]="roleFilter()" (valueChange)="onRoleFilter($event)" />
 </div>
 
 <!-- Loading skeleton -->
@@ -65,7 +51,7 @@
   </div>
 } @else {
   <!-- Users table (desktop) -->
-  <div class="hidden overflow-hidden rounded-xl border border-[var(--color-border)] md:block">
+  <div class="hidden overflow-x-auto rounded-xl border border-[var(--color-border)] md:block">
     <table class="w-full text-sm">
       <thead>
         <tr class="border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]/50">
@@ -169,7 +155,7 @@
   <!-- Users cards (mobile) -->
   <div class="flex flex-col gap-3 md:hidden">
     @for (user of users(); track user.id) {
-      <div class="rounded-xl border border-[var(--color-border)] p-4">
+      <ui-card variant="outline" padding="sm">
         <div class="flex items-center gap-3">
           <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-sm font-semibold text-[var(--color-primary)]">
             {{ (user.displayName || user.email)[0].toUpperCase() }}
@@ -234,7 +220,7 @@
             </ui-button>
           </div>
         }
-      </div>
+      </ui-card>
     }
   </div>
 

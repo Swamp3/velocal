@@ -11,7 +11,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { EmptyStateComponent } from '@shared/components';
-import { SkeletonComponent } from '@shared/ui';
+import { ButtonStyleDirective, SkeletonComponent } from '@shared/ui';
 import { CommunityFeedComponent } from '../community-feed/community-feed.component';
 import { CommunityPollsComponent } from '../community-polls/community-polls.component';
 
@@ -26,7 +26,7 @@ type CommunitySection = 'posts' | 'polls';
     SkeletonComponent,
     EmptyStateComponent,
     CommunityFeedComponent,
-    CommunityPollsComponent,
+    CommunityPollsComponent, ButtonStyleDirective,
   ],
   templateUrl: './community-section.component.html',
 })
@@ -43,8 +43,6 @@ export class CommunitySectionComponent implements OnInit {
   protected readonly allowed = signal(false);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
-  protected readonly outlineLinkClass =
-    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
 
   ngOnInit(): void {
     const communitySlug = this.route.snapshot.paramMap.get('slug');

@@ -1,4 +1,5 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { IconButtonComponent } from '../../ui/icon-button/icon-button.component';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -23,7 +24,7 @@ const DIALOG_ZOOM = 14;
   selector: 'app-event-map-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [RouterLink, TranslocoPipe],
+  imports: [RouterLink, TranslocoPipe, IconButtonComponent],
   styleUrls: ['../../../../../node_modules/leaflet/dist/leaflet.css'],
   template: `
     <div
@@ -53,15 +54,12 @@ const DIALOG_ZOOM = 14;
           </div>
           <button
             type="button"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-full
-              text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)]
-              hover:text-[var(--color-text)] transition-colors"
-            [attr.aria-label]="'common.close' | transloco"
+            uiIconButton
+            icon="close"
+            [label]="'common.close' | transloco"
             (click)="close.emit()"
             #closeBtn
-          >
-            <span class="material-symbols-outlined text-[22px]">close</span>
-          </button>
+          ></button>
         </div>
 
         <div

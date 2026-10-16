@@ -1,8 +1,4 @@
-<button
-  type="button"
-  class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-primary)]/50 bg-[var(--color-bg)] px-3 py-1 text-xs font-medium text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary)]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-  (click)="show()"
->
+<button type="button" uiButton variant="soft" size="sm" (click)="show()">
   <span class="material-symbols-outlined text-[16px]" aria-hidden="true">edit_location</span>
   {{ 'events.detail.editMeetup' | transloco }}
 </button>

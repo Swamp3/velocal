@@ -4,9 +4,7 @@
   </h1>
 
   <!-- Profile Form -->
-  <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
-  >
+  <ui-card>
     <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-5">
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <ui-input [label]="'profile.firstName' | transloco" formControlName="firstName" />
@@ -129,12 +127,10 @@
         {{ 'profile.save' | transloco }}
       </ui-button>
     </form>
-  </section>
+  </ui-card>
 
   <!-- Password -->
-  <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
-  >
+  <ui-card>
     <h2 class="mb-2 text-lg font-semibold text-[var(--color-text)]">
       {{ 'profile.passwordTitle' | transloco }}
     </h2>
@@ -164,12 +160,13 @@
         }}
       </ui-button>
     }
-  </section>
+  </ui-card>
+
+  <!-- Push notifications -->
+  <app-push-settings />
 
   <!-- Discipline Preferences -->
-  <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
-  >
+  <ui-card>
     <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
       {{ 'profile.disciplines' | transloco }}
     </h2>
@@ -189,12 +186,10 @@
         {{ 'profile.savingPrefs' | transloco }}
       </p>
     }
-  </section>
+  </ui-card>
 
   <!-- Favorites -->
-  <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
-  >
+  <ui-card>
     <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
       {{ 'profile.favorites' | transloco }}
       @if (favoritesTotal() > 0) {
@@ -211,11 +206,14 @@
             <app-event-card [event]="event" />
             <button
               type="button"
-              class="absolute right-3 top-3 rounded-[var(--radius-default)] px-2.5 py-1 text-xs font-medium text-[var(--color-danger)] border border-[var(--color-danger)]/30 bg-[var(--color-bg)] hover:bg-[var(--color-danger)] hover:text-white transition-colors cursor-pointer"
+              uiIconButton
+              variant="danger"
+              size="sm"
+              icon="close"
+              class="absolute right-3 top-3 bg-[var(--color-bg)]"
+              [label]="'profile.removeFavorite' | transloco"
               (click)="onRemoveFavorite(event.id)"
-            >
-              ★ {{ 'profile.removeFavorite' | transloco }}
-            </button>
+            ></button>
           </div>
         }
       </div>
@@ -236,5 +234,24 @@
         {{ 'profile.noFavorites' | transloco }}
       </p>
     }
+  </ui-card>
+
+  <!-- Delete account -->
+  <section
+    class="rounded-[var(--radius-lg)] border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"
+  >
+    <h2 class="mb-2 text-lg font-semibold text-red-800 dark:text-red-400">
+      {{ 'profile.delete.title' | transloco }}
+    </h2>
+    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+      {{ 'profile.delete.hint' | transloco }}
+    </p>
+    <ui-button variant="danger" (click)="deleteDialogOpen.set(true)">
+      {{ 'profile.delete.open' | transloco }}
+    </ui-button>
   </section>
 </div>
+
+@if (deleteDialogOpen()) {
+  <app-delete-account-dialog [hasPassword]="hasPassword()" (cancelled)="deleteDialogOpen.set(false)" />
+}

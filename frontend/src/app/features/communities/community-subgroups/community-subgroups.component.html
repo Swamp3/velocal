@@ -26,7 +26,7 @@
         {{ 'communities.subgroups.title' | transloco }}
       </h1>
       @if (c.myRole === 'admin') {
-        <a [routerLink]="['/communities', c.slug, 'subgroups', 'new']" [class]="outlineLinkClass">
+        <a [routerLink]="['/communities', c.slug, 'subgroups', 'new']" uiButton variant="outline">
           {{ 'communities.subgroups.create' | transloco }}
         </a>
       }

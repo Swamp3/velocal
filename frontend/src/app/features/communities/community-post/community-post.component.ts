@@ -17,7 +17,7 @@ import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyStateComponent, RichTextComponent, RichTextViewComponent } from '@shared/components';
 import { CommunityComment, CommunityPost } from '@shared/models';
-import { ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
 import { ReportDialogComponent, ReportTarget } from '../report-dialog/report-dialog.component';
 import { CommentEditDialogComponent } from '../comment-edit-dialog/comment-edit-dialog.component';
 import { communityErrorKey } from '../community-error';
@@ -36,7 +36,7 @@ import { communityErrorKey } from '../community-error';
     RichTextComponent,
     RichTextViewComponent,
     CommentEditDialogComponent,
-    ReportDialogComponent,
+    ReportDialogComponent, ButtonStyleDirective,
   ],
   templateUrl: './community-post.component.html',
 })

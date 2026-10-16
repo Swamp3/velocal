@@ -22,7 +22,7 @@ import { EmptyStateComponent } from '@shared/components';
 import { DisciplineFilterComponent } from '@shared/components/discipline-filter/discipline-filter.component';
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
 import { CyclingEvent, Discipline } from '@shared/models';
-import { ButtonComponent, PaginationComponent, SkeletonComponent } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, ChipComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 import { toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
@@ -40,7 +40,7 @@ const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
     ButtonComponent,
     DisciplineFilterComponent,
     EventCardComponent,
-    EmptyStateComponent,
+    EmptyStateComponent, ChipComponent, SegmentedComponent, ButtonStyleDirective,
   ],
   templateUrl: './event-list.component.html',
 })
@@ -85,6 +85,13 @@ export class EventListComponent implements OnInit {
   readonly disciplines = signal<Discipline[]>([]);
 
   readonly radiusOptions = RADIUS_OPTIONS;
+  protected readonly radiusChoices: SegmentedOption<number>[] = [
+    { value: 0, labelKey: 'geo.all' },
+    ...RADIUS_OPTIONS.map((r) => ({ value: r, label: `${r} km` })),
+  ];
+  protected readonly yearOptions = computed<SegmentedOption<number>[]>(() =>
+    this.availableYears().map((y) => ({ value: y, label: String(y) })),
+  );
   readonly filterPanelOpen = signal(false);
   /** False until the user toggles the panel, so desktop can default open via CSS. */
   readonly filterTouched = signal(false);

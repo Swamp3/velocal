@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   Injectable,
+  Injector,
   PLATFORM_ID,
   signal,
 } from '@angular/core';
@@ -11,6 +12,7 @@ import { environment } from '@env';
 import { User } from '@shared/models';
 import { Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
+import { PushService } from './push.service';
 
 const TOKEN_KEY = 'velocal-token';
 const LANG_KEY = 'velocal-lang';
@@ -30,6 +32,7 @@ export interface RegisterDto {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly api = inject(ApiService);
+  private readonly injector = inject(Injector);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly _currentUser = signal<User | null>(null);
   private readonly _initialized = signal(false);
@@ -125,6 +128,8 @@ export class AuthService {
   }
 
   logout(): void {
+    // Needs the token, so it runs before the token is removed.
+    if (this.isBrowser) this.injector.get(PushService).detachOnLogout();
     if (this.isBrowser) localStorage.removeItem(TOKEN_KEY);
     this.pendingUser = null;
     this._currentUser.set(null);

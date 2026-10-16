@@ -4,6 +4,9 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../users/users.service';
 
+const AUTH_CACHE_MS = 10_000;
+const AUTH_CACHE_MAX = 5_000;
+
 export interface JwtPayload {
   sub: string;
   email: string;
@@ -12,6 +15,14 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly cache = new Map<
+    string,
+    {
+      until: number;
+      user: { id: string; email: string; isAdmin: boolean } | null;
+    }
+  >();
+
   constructor(
     configService: ConfigService,
     private readonly usersService: UsersService,
@@ -23,14 +34,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   /**
-   * Re-checks the account on every request, so a ban (or a removed admin
-   * role) takes effect immediately instead of when the token expires.
+   * Re-checks the account, so a ban, a deletion or a removed admin role takes
+   * effect without waiting for the token to expire. The answer is cached for a
+   * few seconds per user: one lookup per burst of requests instead of one per
+   * request, at the price of a short delay.
    */
   async validate(payload: JwtPayload) {
-    const user = await this.usersService.findById(payload.sub);
-    if (!user || user.bannedAt) {
-      throw new UnauthorizedException('Account unavailable');
+    const now = Date.now();
+    let entry = this.cache.get(payload.sub);
+    if (!entry || entry.until <= now) {
+      const user = await this.usersService.findAuthState(payload.sub);
+      entry = {
+        until: now + AUTH_CACHE_MS,
+        user:
+          user && !user.bannedAt && !user.deletedAt
+            ? { id: user.id, email: user.email, isAdmin: user.isAdmin }
+            : null,
+      };
+      if (this.cache.size > AUTH_CACHE_MAX) this.cache.clear();
+      this.cache.set(payload.sub, entry);
     }
-    return { id: user.id, email: user.email, isAdmin: user.isAdmin };
+    if (!entry.user) throw new UnauthorizedException('Account unavailable');
+    return entry.user;
   }
 }

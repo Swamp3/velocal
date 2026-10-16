@@ -223,3 +223,20 @@ To protect against external rate limits, the import has a **cooldown period** (d
 - Race-result events **do** have coordinates directly from the API
 - Re-running the import is safe — duplicates are detected and existing data is updated if changed
 - There is no frontend UI for triggering imports; use `./scripts/import.sh`, curl, or any HTTP client
+
+
+## Avoiding duplicates and tracking the source
+
+Every imported event stores where it came from: `sourceName` (`rad-net`, `race-result`), `sourceUrl` (the page that lists it), `externalId` and `lastSeenAt`.
+
+How a scraped record is matched to an existing event, in this order:
+
+1. Same source and `externalId`.
+2. Same source page (`sourceUrl` or `externalUrl`) among imported events.
+3. Same calendar day (Europe/Berlin) in the public calendar with the same or a very similar name, at the same place or close by (`events/event-matching.ts`: accents, years and edition numbers are ignored). A manual event or an event from another source that matches is left untouched and no second row is created. Records of the same source with a different id are treated as separate events (for example two classes of one race).
+
+A matched event is updated, including its date when it was postponed.
+
+After a run that fetched the whole source (`lastFetchComplete`), upcoming events of that source that were not listed any more get `missingSince`. Partial runs (failed pages, page limit, `HasMore`) never flag anything. The flag is cleared when the event shows up again.
+
+Admin > Datenqualität has two lists for cleaning up: **Mögliche Duplikate** (events on the same day that look alike; edit, delete, or mark as "not duplicates") and **Quelle fehlt** (events their source no longer lists).

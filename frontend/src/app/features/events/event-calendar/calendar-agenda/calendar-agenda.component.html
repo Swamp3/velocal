@@ -1,15 +1,33 @@
 @if (agendaDays().length) {
     <div class="space-y-4">
-        @for (day of agendaDays(); track day.dateKey) {
+        @if (pastDays().length) {
+            <button
+                type="button"
+                class="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg-alt)] px-4 py-2.5 text-left text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+                [attr.aria-expanded]="pastOpen()"
+                (click)="togglePast()"
+            >
+                <span>
+                    {{
+                        (pastOpen() ? 'calendar.pastHide' : 'calendar.pastShow')
+                            | transloco: { days: pastDays().length, events: pastEventCount() }
+                    }}
+                </span>
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">
+                    {{ pastOpen() ? 'expand_less' : 'expand_more' }}
+                </span>
+            </button>
+        }
+        @for (day of visibleDays(); track day.dateKey) {
             <div
                 [id]="'agenda-' + day.dateKey"
-                class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+                class="scroll-mt-20 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
                 [class.ring-2]="day.dateKey === todayKey()"
                 [class.ring-[var(--color-primary)]]="day.dateKey === todayKey()"
             >
                 <div
                     class="rounded-t-xl border-b border-[var(--color-border)] px-4 py-2.5"
-                    [class]="day.dateKey === todayKey() ? 'bg-[var(--color-primary)]/10' : 'bg-[var(--color-bg-alt)]'"
+                    [class]="day.dateKey === todayKey() ? 'bg-[var(--color-primary)]/10' : day.dateKey < todayKey() ? 'bg-[var(--color-bg-alt)] opacity-70' : 'bg-[var(--color-bg-alt)]'"
                 >
                     <span class="text-sm font-semibold" [class]="day.dateKey === todayKey() ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)]'">
                         {{ day.date | date: 'EEEE, d. MMMM' }}

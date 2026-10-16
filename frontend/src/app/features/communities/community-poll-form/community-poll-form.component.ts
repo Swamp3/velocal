@@ -13,7 +13,7 @@ import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PollResultsVisibility } from '@shared/models';
-import { ButtonComponent, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
 @Component({
@@ -25,7 +25,7 @@ import { communityErrorKey } from '../community-error';
     TranslocoPipe,
     ButtonComponent,
     InputComponent,
-    SkeletonComponent,
+    SkeletonComponent, ButtonStyleDirective,
   ],
   templateUrl: './community-poll-form.component.html',
 })

@@ -8,6 +8,8 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
+import { ButtonStyleDirective } from '../../ui/button/button-style.directive';
+import { IconButtonComponent } from '../../ui/icon-button/icon-button.component';
 import { isPlatformBrowser } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CyclingEvent } from '@shared/models';
@@ -16,7 +18,7 @@ import { downloadIcs, googleCalendarUrl, outlookCalendarUrl } from '@shared/util
 @Component({
   selector: 'app-add-to-calendar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, ButtonStyleDirective, IconButtonComponent],
   host: { class: 'relative inline-block' },
   templateUrl: './add-to-calendar.component.html',
 })

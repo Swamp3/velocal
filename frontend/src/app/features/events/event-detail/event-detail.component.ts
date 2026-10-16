@@ -34,7 +34,7 @@ import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
 import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
-import { ButtonComponent, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
 import { formatTime } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
@@ -72,7 +72,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     EventRsvpComponent,
     EventInviteComponent,
     EventCommentsComponent,
-    EventMeetupEditComponent,
+    EventMeetupEditComponent, ButtonStyleDirective,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -101,6 +101,13 @@ export class EventDetailComponent implements OnInit {
 
   protected readonly startTime = computed(() => formatTime(this.event()?.startDate));
   protected readonly endTime = computed(() => formatTime(this.event()?.endDate));
+  protected readonly registrationStartTime = computed(() =>
+    formatTime(this.event()?.registrationStart),
+  );
+  protected readonly registrationNotOpenYet = computed(() => {
+    const start = this.event()?.registrationStart;
+    return !!start && new Date(start).getTime() > Date.now();
+  });
   protected readonly deadlineTime = computed(() => formatTime(this.event()?.registrationDeadline));
   private reloadedForViewer = false;
   private loadedAnonymously = false;

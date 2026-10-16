@@ -12,6 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { IconButtonComponent } from '../icon-button/icon-button.component';
 
 const FOCUSABLE = [
   'a[href]',
@@ -30,7 +31,7 @@ const FOCUSABLE = [
  */
 @Component({
   selector: 'ui-modal',
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, IconButtonComponent],
   host: {
     '(document:keydown.escape)': 'onEscape($event)',
     '(keydown)': 'onKeydown($event)',
@@ -54,12 +55,11 @@ const FOCUSABLE = [
           <h2 class="text-base font-semibold text-[var(--color-text)]">{{ title() }}</h2>
           <button
             type="button"
-            class="inline-flex size-9 items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'common.close' | transloco"
+            uiIconButton
+            icon="close"
+            [label]="'common.close' | transloco"
             (click)="closed.emit()"
-          >
-            <span class="material-symbols-outlined text-[22px]" aria-hidden="true">close</span>
-          </button>
+          ></button>
         </div>
         <div class="overflow-y-auto px-5 py-5">
           <ng-content />

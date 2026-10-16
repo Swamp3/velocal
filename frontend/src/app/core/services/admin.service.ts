@@ -27,6 +27,38 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface DuplicateEvent {
+  id: string;
+  name: string;
+  startDate: string;
+  locationName: string;
+  address: string | null;
+  status: string;
+  disciplineSlug: string;
+  source: 'manual' | 'imported' | string;
+  sourceName: string | null;
+  sourceUrl: string | null;
+  externalUrl: string | null;
+  lastSeenAt: string | null;
+  missingSince: string | null;
+  createdAt: string;
+}
+
+export interface DuplicateGroup {
+  key: string;
+  date: string;
+  score: number;
+  reasons: ('sameName' | 'similarName' | 'sameLocation' | 'nearby')[];
+  events: DuplicateEvent[];
+}
+
+export type MissingAtSourceEvent = CyclingEvent & {
+  sourceName: string | null;
+  sourceUrl: string | null;
+  lastSeenAt: string | null;
+  missingSince: string | null;
+};
+
 export interface AdminUserSearchParams {
   q?: string;
   role?: 'admin' | 'user';
@@ -250,6 +282,22 @@ export class AdminService {
       '/admin/events/missing-data',
       params as Record<string, string | number | boolean>,
     );
+  }
+
+  getDuplicateGroups(
+    params: { page?: number; limit?: number; includePast?: boolean } = {},
+  ): Observable<{ data: DuplicateGroup[]; total: number }> {
+    return this.api.get('/admin/events/duplicates', params as Record<string, string | number | boolean>);
+  }
+
+  ignoreDuplicates(eventIds: string[]): Observable<void> {
+    return this.api.post<void>('/admin/events/duplicates/ignore', { eventIds });
+  }
+
+  getMissingAtSource(
+    params: { page?: number; limit?: number } = {},
+  ): Observable<PaginatedResponse<MissingAtSourceEvent>> {
+    return this.api.get('/admin/events/missing-source', params as Record<string, string | number | boolean>);
   }
 
   getMissingDataStats(): Observable<Record<string, number>> {

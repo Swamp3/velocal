@@ -14,13 +14,13 @@ import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyStateComponent, MemberListComponent, MemberListItem } from '@shared/components';
 import { CommunityMember, Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
-import { SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
 @Component({
   selector: 'app-subgroup-members',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, SkeletonComponent, EmptyStateComponent, MemberListComponent],
+  imports: [RouterLink, TranslocoPipe, SkeletonComponent, EmptyStateComponent, MemberListComponent, ButtonStyleDirective],
   templateUrl: './subgroup-members.component.html',
 })
 export class SubgroupMembersComponent implements OnInit {
@@ -39,8 +39,6 @@ export class SubgroupMembersComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly notFound = signal(false);
   protected readonly mutating = signal(false);
-  protected readonly outlineLinkClass =
-    'inline-flex items-center justify-center rounded-[var(--radius-default)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
   private readonly members = signal<SubgroupMember[]>([]);
   private readonly communityMembers = signal<CommunityMember[]>([]);
   protected readonly query = signal('');

@@ -47,9 +47,9 @@ export class ApiService {
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  delete<T>(path: string): Observable<T> {
+  delete<T>(path: string, body?: unknown): Observable<T> {
     return this.http
-      .delete<T>(`${this.base}${path}`)
+      .delete<T>(`${this.base}${path}`, body === undefined ? {} : { body })
       .pipe(catchError((err) => this.handleError(err)));
   }
 

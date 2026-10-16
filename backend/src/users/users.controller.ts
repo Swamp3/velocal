@@ -15,6 +15,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { EventsService } from '../events/events.service';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -25,7 +26,10 @@ import type { User } from './entities/user.entity';
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly eventsService: EventsService,
+  ) {}
 
   @Get('me')
   async getProfile(@CurrentUser() user: { id: string }) {
@@ -40,6 +44,12 @@ export class UsersController {
   ) {
     const updated = await this.usersService.updateProfile(user.id, dto);
     return this.sanitize(updated);
+  }
+
+  /** Events the user will attend (going or maybe), for the profile overview. */
+  @Get('me/upcoming-events')
+  getUpcomingEvents(@CurrentUser() user: { id: string }) {
+    return this.eventsService.listMyUpcoming(user.id);
   }
 
   @Get('me/favorites')

@@ -34,7 +34,7 @@
               subgroup.slug,
               'edit',
             ]"
-            [class]="outlineLinkClass"
+            uiButton variant="outline"
           >
             {{ 'communities.edit' | transloco }}
           </a>
@@ -44,7 +44,7 @@
             {{ 'communities.leave' | transloco }}
           </ui-button>
         } @else if (!auth.isAuthenticated()) {
-          <a routerLink="/auth/login" [class]="outlineLinkClass">
+          <a routerLink="/auth/login" uiButton variant="outline">
             {{ 'communities.loginToJoin' | transloco }}
           </a>
         } @else if (subgroup.visibility === 'open') {

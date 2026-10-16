@@ -14,7 +14,8 @@
       "admin": "Admin",
       "routes": "Routes",
       "eventList": "List",
-      "account": "Account"
+      "account": "Account",
+      "myEvents": "My events"
     },
     "update": {
       "available": "A new version of VeloCal is available.",
@@ -40,7 +41,8 @@
     "communityDeleted": "The community {{communityName}} was deleted",
     "subgroupDeleted": "The subgroup {{subgroupName}} of {{communityName}} was deleted",
     "communitySuspended": "{{communityName}} was suspended: {{reason}}",
-    "communityUnsuspended": "{{communityName}} is available again"
+    "communityUnsuspended": "{{communityName}} is available again",
+    "communityAdminAssigned": "You are now an admin of {{communityName}}"
   },
   "events": {
     "title": "Find Cycling Events",
@@ -128,7 +130,9 @@
       "editMeetup": "Edit meetup details",
       "meetupSaved": "Meetup details saved",
       "meetupError": "Could not save the meetup details",
-      "membersOnly": "Members only"
+      "membersOnly": "Members only",
+      "registrationStart": "Registration opens",
+      "registrationNotOpen": "Registration has not opened yet."
     },
     "status": {
       "published": "Published",
@@ -167,7 +171,8 @@
       },
       "error": {
         "create": "Failed to create event",
-        "update": "Failed to update event"
+        "update": "Failed to update event",
+        "registrationOrder": "Registration start must not be after the deadline."
       },
       "delete": "Delete",
       "deleteConfirm": "Are you sure you want to delete this event?",
@@ -196,7 +201,8 @@
         "groupStrava": "Strava links of this group (one per line)",
         "addGroup": "Add pace group",
         "removeGroup": "Remove group"
-      }
+      },
+      "registrationStart": "Registration opens"
     },
     "actions": {
       "create": "Create Event",
@@ -327,7 +333,63 @@
     "stravaPlaceholder": "strava.com/athletes/… or athlete ID",
     "stravaHint": "Optional. Members of your communities see a link to it next to your name.",
     "stravaInvalid": "Enter a strava.com profile link or your athlete ID",
-    "stravaOpen": "Open on Strava"
+    "stravaOpen": "Open on Strava",
+    "push": {
+      "title": "Push notifications",
+      "hint": "Get a message on this device when something happens, even when VeloCal is closed. Push is set up per device; the choices below apply to all your devices.",
+      "enable": "Turn on for this device",
+      "disable": "Turn off for this device",
+      "on": "On for this device",
+      "test": "Send test message",
+      "unsupported": "This browser or device cannot receive push notifications, or push is not set up on the server.",
+      "needsInstall": "On iPhone and iPad, push works for apps on the Home Screen. Tap Share in Safari, choose \"Add to Home Screen\", open VeloCal from there and come back to this page.",
+      "denied": "Notifications are blocked for VeloCal in your browser or device settings. Allow them there and reload this page.",
+      "enableFailed": "Could not turn on push notifications.",
+      "testSent": "Test message sent.",
+      "testNone": "No device accepted the message. Turn push off and on again.",
+      "testWait": "Please wait a moment before sending another test.",
+      "testFailed": "Could not send the test message.",
+      "categories": "Send me a push for",
+      "categoriesNote": "Everything still appears in your notification list.",
+      "category": {
+        "invites": "Event invitations",
+        "invitesHint": "Someone invites you to an event.",
+        "membership": "Membership",
+        "membershipHint": "Join requests for groups you manage and decisions about your requests.",
+        "events": "New events",
+        "eventsHint": "A new event in your clubs and subgroups. Can be frequent.",
+        "community": "Club updates",
+        "communityHint": "A club or subgroup is deleted, suspended or available again."
+      }
+    },
+    "delete": {
+      "title": "Delete account",
+      "hint": "Permanently delete your account and personal data. This cannot be undone.",
+      "open": "Delete my account",
+      "intro": "Your account will be deleted for good. You will be signed out on all devices.",
+      "lossProfile": "Your profile, name, email, favorites, settings and notifications are removed.",
+      "lossCommunities": "You leave all clubs and subgroups. Join requests and RSVPs are removed.",
+      "lossAdmin": "If you are the only admin of a club, the member who has been there longest becomes admin. A club without other members is deleted.",
+      "content": "Also delete my posts, comments and polls",
+      "contentHint": "If you keep them, they stay visible as written by \"[deleted]\". Events you created stay.",
+      "password": "Your password",
+      "confirm": "Delete account permanently",
+      "done": "Your account was deleted.",
+      "errors": {
+        "generic": "Could not delete the account. Please try again.",
+        "wrongPassword": "The password is wrong.",
+        "emailMismatch": "The email address does not match.",
+        "adminCannotDelete": "Site admins cannot delete their account. Ask another admin to remove your admin role first."
+      }
+    },
+    "upcoming": {
+      "title": "My events",
+      "empty": "You have not signed up for any upcoming event yet.",
+      "browse": "Browse events",
+      "error": "Could not load your events.",
+      "cancelled": "Cancelled",
+      "subtitle": "Events you signed up for that are still ahead."
+    }
   },
   "series": {
     "title": "Race Series",
@@ -404,7 +466,9 @@
     "prevWeek": "Previous week",
     "nextWeek": "Next week",
     "viewList": "List view",
-    "viewCalendar": "Calendar view"
+    "viewCalendar": "Calendar view",
+    "pastShow": "Show {{days}} past days ({{events}} events)",
+    "pastHide": "Hide past days"
   },
   "news": {
     "title": "News",
@@ -561,12 +625,12 @@
       "title": "Analytics",
       "totalViews": "Total Page Views",
       "uniquePages": "Unique Pages",
-      "uniqueClients": "Unique Visitors",
+      "uniqueClients": "Visits",
       "topPages": "Top Pages",
       "path": "Path",
       "views": "Views",
       "dailyChart": "Page Views Over Time",
-      "visitors": "visitors",
+      "visitors": "visits",
       "empty": "No page views recorded yet",
       "period": {
         "7d": "7 days",
@@ -664,7 +728,36 @@
         "user.promote": "Promoted user to admin",
         "user.demote": "Removed admin role",
         "user.ban": "Blocked user",
-        "user.unban": "Unblocked user"
+        "user.unban": "Unblocked user",
+        "user.delete": "Deleted own account"
+      }
+    },
+    "dataQuality": {
+      "section": {
+        "missing": "Missing data",
+        "duplicates": "Possible duplicates",
+        "source": "Gone at source"
+      }
+    },
+    "duplicates": {
+      "hint": "Events on the same day with similar names and places. Edit one of them, delete the extra copy, or confirm that they are different events.",
+      "sourceHint": "Upcoming imported events that their source (for example Rad-net) no longer lists. They may have been cancelled, moved or listed under a new entry.",
+      "includePast": "Include past events",
+      "empty": "No possible duplicates found",
+      "sourceEmpty": "All imported events are still listed at their source",
+      "notDuplicate": "Not duplicates",
+      "dismissed": "Marked as different events.",
+      "deleted": "Event deleted.",
+      "delete": "Delete",
+      "manual": "manual",
+      "gone": "gone at source",
+      "goneSince": "not listed since",
+      "openSource": "Open source",
+      "reason": {
+        "sameName": "same name",
+        "similarName": "similar name",
+        "sameLocation": "same place",
+        "nearby": "close together"
       }
     }
   },
@@ -703,34 +796,32 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: April 2026",
+      "lastUpdated": "Last updated: October 2026",
       "controllerTitle": "1. Data Controller",
       "controllerBody": "The party responsible for data processing on this website is:",
       "dataCollectedTitle": "2. Data We Collect",
       "registrationTitle": "Registration & Authentication",
       "registrationBody": "When you register, we collect your email address and optionally a display name. Your password is stored exclusively as a cryptographic hash. This data is processed to provide your user account (Art. 6(1)(b) GDPR).",
-      "eventsTitle": "Creating Events & Posts",
-      "eventsBody": "When you create events or posts, this content is associated with your user account and displayed publicly.",
+      "eventsTitle": "Events, Posts and Community Content",
+      "eventsBody": "When you create events, routes (GPX files), posts, comments, polls or event responses, this content is associated with your user account. Public content is visible to everyone; content in communities and subgroups is visible only to their members, depending on the setting. Messages about activity (e.g. invitations, join requests, new events) are stored in your notification list.",
       "geolocationTitle": "Location Data (Geolocation)",
       "geolocationBody": "The proximity search uses your browser's Geolocation API. This feature is only activated with your explicit consent. Your location is not stored on our servers.",
       "serverLogsTitle": "Server Log Files",
       "serverLogsBody": "When you access our website, your browser automatically transmits information stored in server log files: IP address, browser type and version, time of access. This data is stored to ensure operations (Art. 6(1)(f) GDPR) and deleted after 30 days.",
       "localStorageTitle": "Local Storage",
-      "localStorageBody": "We use your browser's local storage (localStorage) to store authentication data, your design preference (light/dark), language setting, and filter settings. This is technically necessary data that remains exclusively in your browser.",
+      "localStorageBody": "We use your browser's local storage (localStorage) to store authentication data, your design preference (light/dark), language setting, filter settings and, if you turn on push notifications, a note that push is on for this device. The installable web app (PWA) also keeps a cache of program files so that it loads faster. This is technically necessary data that remains exclusively in your browser.",
       "thirdPartyTitle": "3. Third-Party Services",
-      "sendgridTitle": "Email Delivery (Twilio SendGrid)",
-      "sendgridBody": "We use SendGrid by Twilio Inc. (USA) to send emails (e.g. login codes). Your email address and message content are transmitted to SendGrid. Data transfer to the USA is based on Standard Contractual Clauses (Art. 46(2)(c) GDPR).",
       "osmTitle": "Map Display (OpenStreetMap)",
       "osmBody": "To display maps, we load map tiles from OpenStreetMap servers. Your IP address is transmitted to the OpenStreetMap Foundation (OSMF). For more information, see the OSMF privacy policy: https://wiki.osmfoundation.org/wiki/Privacy_Policy",
       "legalBasisTitle": "4. Legal Basis",
       "legalBasisBody": "Your data is processed on the following legal bases:",
-      "legalBasisConsent": "Consent (Art. 6(1)(a) GDPR) — e.g. location sharing",
+      "legalBasisConsent": "Consent (Art. 6(1)(a) GDPR) — e.g. location sharing, push notifications",
       "legalBasisContract": "Contract performance (Art. 6(1)(b) GDPR) — e.g. providing your user account",
       "legalBasisLegitimate": "Legitimate interest (Art. 6(1)(f) GDPR) — e.g. server logs for security",
       "retentionTitle": "5. Data Retention",
-      "retentionBody": "Your account data is stored for as long as your user account exists. Server log files are automatically deleted after 30 days. When you delete your account, your personal data is removed immediately, unless legal retention requirements apply.",
+      "retentionBody": "Your account data is stored for as long as your user account exists. You can delete your account yourself in your profile; it is then emptied immediately: name, email, password, profile data, favorites, memberships, notifications and push subscriptions are removed, and an anonymous placeholder remains so that content you chose to keep (such as events you created) keeps a valid reference. If you chose to delete your posts, comments and polls, they are removed as well. Clubs you administered pass to their longest-standing member; clubs without other members are deleted. Server log files are deleted automatically after 30 days, reach measurement page views after 13 months, and push subscriptions when you sign out or turn them off. Entries in the admin log (which do not contain your name after deletion) and legal retention duties are not affected. You can also request deletion at the address given in the legal notice.",
       "rightsTitle": "6. Your Rights",
-      "rightsBody": "Under the GDPR, you have the following rights:",
+      "rightsBody": "Under the GDPR you have the following rights, which you can exercise through the address given in the legal notice. You can withdraw any consent at any time with effect for the future (Art. 7(3) GDPR), for example push notifications in your profile.",
       "rightAccess": "Access to your stored data (Art. 15 GDPR)",
       "rightRectification": "Rectification of inaccurate data (Art. 16 GDPR)",
       "rightDeletion": "Deletion of your data (Art. 17 GDPR)",
@@ -740,7 +831,23 @@
       "authorityTitle": "7. Right to Complain",
       "authorityBody": "You have the right to lodge a complaint with a data protection supervisory authority regarding the processing of your personal data.",
       "transferTitle": "8. Data Transfers to Third Countries",
-      "transferBody": "Through the use of SendGrid (Twilio Inc., USA), data is transferred to the USA. The transfer is secured by Standard Contractual Clauses pursuant to Art. 46(2)(c) GDPR."
+      "transferBody": "By using Resend (Resend, Inc., USA), data is transferred to the USA. The transfer is secured by Standard Contractual Clauses pursuant to Art. 46(2)(c) GDPR. For push messages see the section \"Push Delivery\".",
+      "pushTitle": "Push Notifications (optional)",
+      "pushBody": "If you turn on push notifications in your profile, your browser creates a subscription for this device. We store its address (endpoint) and encryption keys, the device type from the user agent, and the time of the last successful delivery, together with your account. We use them only to send you the notifications you chose (event invitations, membership, new events, club updates). You can turn push off per device and per type in your profile at any time; the subscription is then deleted. It is also deleted when you sign out on that device, when you delete your account, or when the device no longer accepts messages. The legal basis is your consent (Art. 6(1)(a) GDPR), given by the browser permission prompt and by turning the setting on.",
+      "pushServicesTitle": "Push Delivery (browser and operating system vendors)",
+      "pushServicesBody": "Push messages are delivered through the push service of your browser or device vendor (for example Google, Mozilla, Apple or Microsoft). Our server sends the message, encrypted for your device, to that service together with the subscription address; the vendor sees that a message was delivered to your device, but cannot read its content. Depending on the vendor, data may be processed outside the EU; the vendors rely on their own safeguards under Chapter V GDPR.",
+      "profileTitle": "Profile and Memberships",
+      "profileBody": "In your profile you can voluntarily provide your first and last name (visible only to you and administrators), the postal code and country of your home (for the proximity search), a link or ID of your Strava profile (visible to members of your communities), language and format settings, preferred disciplines and favorites. Your memberships and roles in communities and subgroups are stored. We process this data to provide the features you choose (Art. 6(1)(b) GDPR); you can change or remove the optional details at any time.",
+      "moderationTitle": "Reports and Moderation",
+      "moderationBody": "Members can report content. Reports with reason, note and reporter, and actions taken by administrators (e.g. removing content, suspending communities or accounts with a reason) are stored in a log to follow up on abuse and protect the platform (Art. 6(1)(f) GDPR). The logs are visible to administrators only.",
+      "analyticsTitle": "Reach Measurement",
+      "analyticsBody": "We count page views to see which pages are used. We store the visited path, the time and a random visit ID that exists only in your browser's memory and is generated anew each time the app is loaded. No cookies are set and nothing is stored on your device; the measurement is linked neither to your account nor to your IP address and does not recognise you across visits. The data is deleted after 13 months. The legal basis is our legitimate interest in running the platform according to demand (Art. 6(1)(f) GDPR).",
+      "cookiesTitle": "Cookies",
+      "cookiesBody": "VeloCal does not set cookies and does not embed third-party tracking or advertising services. That is why there is no cookie banner.",
+      "resendTitle": "Email Delivery (Resend)",
+      "resendBody": "We use Resend (Resend, Inc., USA) to send emails (login codes, password reset, event invitations). Your email address and message content are transmitted to Resend. Data transfer to the USA is based on Standard Contractual Clauses (Art. 46(2)(c) GDPR).",
+      "geocodingTitle": "Place Lookup (Nominatim / OpenStreetMap)",
+      "geocodingBody": "When you save the postal code and country of your home, our server looks up the coordinates with the Nominatim service of the OpenStreetMap Foundation. Only the postal code and country are sent, no account details; the service sees the IP address of our server, not yours."
     },
     "terms": {
       "title": "Terms of Use",

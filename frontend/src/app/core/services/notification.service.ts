@@ -10,7 +10,8 @@ export type NotificationType =
   | 'community.deleted'
   | 'subgroup.deleted'
   | 'community.suspended'
-  | 'community.unsuspended';
+  | 'community.unsuspended'
+  | 'community.admin_assigned';
 
 export interface AppNotification {
   id: string;

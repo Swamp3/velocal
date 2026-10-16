@@ -12,12 +12,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/services/auth.service';
-import {
-  ButtonComponent,
-  InputComponent,
-  OtpInputComponent,
-  ToastService,
-} from '@shared/ui';
+import { ButtonComponent, ButtonStyleDirective, InputComponent, OtpInputComponent, ToastService } from '@shared/ui';
 
 type AuthView = 'email' | 'otp' | 'password' | 'forgot';
 
@@ -30,7 +25,7 @@ type AuthView = 'email' | 'otp' | 'password' | 'forgot';
     TranslocoPipe,
     ButtonComponent,
     InputComponent,
-    OtpInputComponent,
+    OtpInputComponent, ButtonStyleDirective,
   ],
   templateUrl: './login.component.html',
 })

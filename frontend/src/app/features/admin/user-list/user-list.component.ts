@@ -15,14 +15,7 @@ import {
 } from '@core/services/admin.service';
 import { AuthService } from '@core/services/auth.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  BadgeComponent,
-  ButtonComponent,
-  ModalComponent,
-  PaginationComponent,
-  SkeletonComponent,
-  ToastService,
-} from '@shared/ui';
+import { BadgeComponent, ButtonComponent, CardComponent, ModalComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent, ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-user-list',
@@ -35,7 +28,7 @@ import {
     PaginationComponent,
     SkeletonComponent,
     DatePipe,
-    FormsModule,
+    FormsModule, SegmentedComponent, CardComponent,
   ],
   templateUrl: './user-list.component.html',
 })
@@ -52,6 +45,9 @@ export class UserListComponent implements OnInit {
   protected readonly limit = signal(20);
   protected readonly searchQuery = signal('');
   protected readonly roleFilter = signal<'all' | 'admin' | 'user' | 'banned'>('all');
+  protected readonly roleOptions: SegmentedOption<'all' | 'admin' | 'user' | 'banned'>[] = (
+    ['all', 'admin', 'user', 'banned'] as const
+  ).map((r) => ({ value: r, labelKey: 'admin.users.role.' + r }));
   protected readonly togglingId = signal<string | null>(null);
   protected readonly confirmingId = signal<string | null>(null);
   protected readonly banTarget = signal<AdminUser | null>(null);

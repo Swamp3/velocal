@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.12.0] - 2026-10-16
+
+### Changed
+
+- Shared UI building blocks: `uiButton` for links and other elements, `ui-icon-button`, `ui-segmented`, `ui-card`, button variants `soft`, `link` and `quiet`; the duplicated `outlineLinkClass`, hand-written tab bars and icon buttons were replaced
+- Push subscriptions are only renewed on start when push is turned on for the device (no extra requests otherwise)
+
+### Added
+
+- `scripts/subset-icons.py` rebuilds the trimmed icon font from the icons used in the code
+- "My events" page (`/profile/events`) with an entry in the account menu
+- Data quality page with sections for missing data, possible duplicates and events gone at their source
+- Mobile calendar agenda folds past days of the current month, scrolls to the selected day or today
+- Registration start fields in the event form and a row on the event page
+- Push notification settings in the profile (this device on/off, message types, test message), `PushService` on top of `SwPush`; the subscription is renewed on start and removed on sign-out
+- Delete account dialog in the profile (email confirmation, password, option to remove own content); inbox text for the admin handover
+- Privacy policy sections for push notifications and push delivery, profile data, moderation, reach measurement, cookies and place lookup; SendGrid replaced by Resend
+- Page tracking keeps its visit id in memory only and removes the old `velocal_client_id` from local storage
+
 ## [0.11.0] - 2026-10-15
 
 ### Added
@@ -15,6 +34,7 @@
 
 ### Fixed
 
+- Header dropdowns clipped on the map page (body no longer clips overflow)
 - Mid-word text breaks in rich text; stacked buttons on narrow screens
 
 ## [0.10.0] - 2026-10-15

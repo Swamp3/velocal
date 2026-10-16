@@ -174,6 +174,30 @@
         </div>
       </div>
 
+      @if (event.registrationStart) {
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
+            >how_to_reg</span
+          >
+          <div>
+            <dt class="text-[var(--color-text-muted)]">
+              {{ 'events.detail.registrationStart' | transloco }}
+            </dt>
+            <dd class="font-medium text-[var(--color-text)]">
+              {{ event.registrationStart | date: 'mediumDate' }}
+              @if (registrationStartTime(); as t) {
+                <span class="text-[var(--color-text-muted)]">{{ t }}</span>
+              }
+              @if (registrationNotOpenYet()) {
+                <span class="block text-xs font-normal text-[var(--color-text-muted)]">
+                  {{ 'events.detail.registrationNotOpen' | transloco }}
+                </span>
+              }
+            </dd>
+          </div>
+        </div>
+      }
+
       @if (event.registrationDeadline) {
         <div class="flex items-start gap-3">
           <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
@@ -384,7 +408,9 @@
                   <span class="min-w-0 break-words text-[var(--color-text)]">{{ file.label }}</span>
                   <button
                     type="button"
-                    class="shrink-0 font-medium text-[var(--color-primary)] hover:underline"
+                    uiButton
+                    variant="link"
+                    class="shrink-0"
                     (click)="downloadGpx(route.id, file.id, file.label)"
                   >
                     GPX
@@ -440,7 +466,9 @@
                         </span>
                         <button
                           type="button"
-                          class="shrink-0 font-medium text-[var(--color-primary)] hover:underline"
+                          uiButton
+                          variant="link"
+                          class="shrink-0"
                           (click)="downloadGpx(groupRoute.id, file.id, file.label)"
                         >
                           GPX

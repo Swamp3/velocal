@@ -7,24 +7,12 @@
   </div>
 
   <!-- Period selector -->
-  <div class="flex items-center gap-1 rounded-lg border border-[var(--color-border)] p-1">
-    @for (p of periods; track p) {
-      <button
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-        [class]="period() === p
-          ? 'bg-[var(--color-primary)] text-white'
-          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]'"
-        (click)="setPeriod(p)"
-      >
-        {{ 'admin.analytics.period.' + p + 'd' | transloco }}
-      </button>
-    }
-  </div>
+  <ui-segmented [options]="periodOptions" [value]="period()" size="md" (valueChange)="setPeriod($event)" />
 </div>
 
 <!-- Summary cards -->
 <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <div class="rounded-xl border border-[var(--color-border)] p-5">
+  <ui-card variant="outline" padding="md">
     <div class="text-sm font-medium text-[var(--color-text-muted)]">
       {{ 'admin.analytics.totalViews' | transloco }}
     </div>
@@ -35,8 +23,8 @@
         {{ totalViews() | number }}
       </div>
     }
-  </div>
-  <div class="rounded-xl border border-[var(--color-border)] p-5">
+  </ui-card>
+  <ui-card variant="outline" padding="md">
     <div class="text-sm font-medium text-[var(--color-text-muted)]">
       {{ 'admin.analytics.uniquePages' | transloco }}
     </div>
@@ -47,8 +35,8 @@
         {{ uniquePaths() | number }}
       </div>
     }
-  </div>
-  <div class="rounded-xl border border-[var(--color-border)] p-5">
+  </ui-card>
+  <ui-card variant="outline" padding="md">
     <div class="text-sm font-medium text-[var(--color-text-muted)]">
       {{ 'admin.analytics.uniqueClients' | transloco }}
     </div>
@@ -59,7 +47,7 @@
         {{ uniqueClients() | number }}
       </div>
     }
-  </div>
+  </ui-card>
 </div>
 
 <!-- Daily chart -->
@@ -121,12 +109,12 @@
 @if (loading()) {
   <div class="space-y-3">
     @for (_ of [1, 2, 3, 4, 5]; track $index) {
-      <div class="rounded-xl border border-[var(--color-border)] p-4">
+      <ui-card variant="outline" padding="sm">
         <div class="flex items-center gap-4">
           <ui-skeleton class="h-4 w-48" />
           <ui-skeleton class="h-4 w-16 ml-auto" />
         </div>
-      </div>
+      </ui-card>
     }
   </div>
 } @else if (topPages().length === 0) {

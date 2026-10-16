@@ -9,14 +9,14 @@ import {
 } from '@angular/core';
 import { AdminService, DailyStats } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { SkeletonComponent } from '@shared/ui';
+import { CardComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
 type Period = 7 | 30 | 90;
 
 @Component({
   selector: 'app-analytics',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DecimalPipe, PercentPipe, DatePipe, SkeletonComponent],
+  imports: [TranslocoPipe, DecimalPipe, PercentPipe, DatePipe, SkeletonComponent, SegmentedComponent, CardComponent],
   templateUrl: './analytics.component.html',
 })
 export class AnalyticsComponent implements OnInit {
@@ -47,7 +47,9 @@ export class AnalyticsComponent implements OnInit {
     return Math.max(...days.map((d) => d.uniqueClients), 1);
   });
 
-  protected readonly periods: Period[] = [7, 30, 90];
+  protected readonly periodOptions: SegmentedOption<Period>[] = ([7, 30, 90] as Period[]).map(
+    (p) => ({ value: p, labelKey: 'admin.analytics.period.' + p + 'd' }),
+  );
 
   ngOnInit(): void {
     this.loadData();

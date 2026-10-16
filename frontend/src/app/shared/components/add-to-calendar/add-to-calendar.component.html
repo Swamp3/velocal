@@ -1,23 +1,18 @@
 @if (iconOnly()) {
   <button
     type="button"
-    class="inline-flex items-center justify-center rounded-full p-1.5
-      text-[var(--color-text-muted)] hover:text-[var(--color-primary)]
-      hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+    uiIconButton
+    icon="calendar_add_on"
+    [label]="'events.detail.addToCalendar.button' | transloco"
     [attr.aria-expanded]="open()"
-    [attr.aria-label]="'events.detail.addToCalendar.button' | transloco"
     aria-haspopup="menu"
     (click)="toggle($event)"
-  >
-    <span class="material-symbols-outlined text-[20px]">calendar_add_on</span>
-  </button>
+  ></button>
 } @else {
   <button
     type="button"
-    class="inline-flex items-center gap-2 rounded-[var(--radius-default)]
-      border border-[var(--color-border)] bg-[var(--color-bg)]
-      px-4 py-2 text-sm font-medium text-[var(--color-text)]
-      hover:bg-[var(--color-bg-alt)] transition-colors cursor-pointer"
+    uiButton
+    variant="outline"
     [attr.aria-expanded]="open()"
     aria-haspopup="menu"
     (click)="toggle($event)"

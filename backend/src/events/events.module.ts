@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventsController } from './events.controller';
 import { AdminEventsController } from './admin-events.controller';
 import { EventsService } from './events.service';
+import { EventDuplicatesService } from './event-duplicates.service';
 import { GeocodingService } from './geocoding.service';
 import { CommunityMember } from '../communities/entities/community-member.entity';
 import { Community } from '../communities/entities/community.entity';
@@ -43,7 +44,7 @@ import { User } from '../users/entities/user.entity';
     UploadsModule,
   ],
   controllers: [EventsController, AdminEventsController],
-  providers: [EventsService, GeocodingService],
+  providers: [EventsService, EventDuplicatesService, GeocodingService],
   exports: [EventsService, GeocodingService],
 })
 export class EventsModule {}

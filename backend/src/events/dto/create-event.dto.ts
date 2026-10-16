@@ -89,7 +89,11 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsISO8601()
-  registrationDeadline?: string;
+  registrationStart?: string | null;
+
+  @IsOptional()
+  @IsISO8601()
+  registrationDeadline?: string | null;
 
   @IsOptional()
   @IsUrl()

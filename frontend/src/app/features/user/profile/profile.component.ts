@@ -14,10 +14,13 @@ import { FavoriteService } from '@core/services/favorite.service';
 import { FilterStateService } from '@core/services/filter-state.service';
 import { LocaleService } from '@core/services/locale.service';
 import { UserService } from '@core/services/user.service';
-import { ToastService } from '@shared/ui';
+import { CardComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import { ButtonComponent, ChipComponent, InputComponent } from '@shared/ui';
 import { EventCardComponent, CountrySelectorComponent } from '@shared/components';
 import { CyclingEvent, Discipline } from '@shared/models';
+
+import { DeleteAccountDialogComponent } from './delete-account/delete-account-dialog.component';
+import { PushSettingsComponent } from './push-settings/push-settings.component';
 
 const FAVORITES_PAGE_SIZE = 10;
 
@@ -32,6 +35,8 @@ const FAVORITES_PAGE_SIZE = 10;
     InputComponent,
     CountrySelectorComponent,
     EventCardComponent,
+    PushSettingsComponent,
+    DeleteAccountDialogComponent, IconButtonComponent, CardComponent,
   ],
   templateUrl: './profile.component.html',
 })
@@ -47,6 +52,7 @@ export class ProfileComponent implements OnInit {
   private readonly localeService = inject(LocaleService);
 
   protected readonly saving = signal(false);
+  protected readonly deleteDialogOpen = signal(false);
   protected readonly disciplines = signal<Discipline[]>([]);
   protected readonly selectedSlugs = signal<Set<string>>(new Set());
   protected readonly savingPrefs = signal(false);
