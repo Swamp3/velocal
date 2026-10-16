@@ -18,6 +18,7 @@ import { provideTransloco } from '@jsverse/transloco';
 
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
+import { InstallPromptService } from '@core/services/install-prompt.service';
 import { AppUpdateService } from '@core/services/app-update.service';
 import { AuthService } from '@core/services/auth.service';
 import { localeIdFactory, storedLang } from '@core/services/locale.service';
@@ -48,6 +49,7 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     provideAppInitializer(() => inject(AppUpdateService).start()),
+    provideAppInitializer(() => inject(InstallPromptService).start()),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),

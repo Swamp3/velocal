@@ -8,6 +8,8 @@
 
 ### Added
 
+- `InstallPromptService` and install banner (`beforeinstallprompt` on Chromium, instructions on iOS Safari), snoozed for 30 days after dismissal
+
 - Route map page `/routes/:id/files/:fileId` (lazy, Leaflet polyline, SVG elevation profile) with "Map" links on route and event detail
 
 - Email field on the subgroup member page next to the name search

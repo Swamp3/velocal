@@ -17,6 +17,13 @@
       "account": "Konto",
       "myEvents": "Meine Events"
     },
+    "install": {
+      "title": "VeloCal installieren",
+      "text": "Füge die App deinem Gerät hinzu – für schnellen Zugriff und Benachrichtigungen.",
+      "ios": "Tippe auf „Teilen“ und dann auf „Zum Home-Bildschirm“.",
+      "action": "Installieren",
+      "dismiss": "Nicht jetzt"
+    },
     "update": {
       "available": "Eine neue Version von VeloCal ist verfügbar.",
       "reload": "Neu laden"
