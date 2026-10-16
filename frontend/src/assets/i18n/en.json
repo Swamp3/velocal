@@ -979,7 +979,7 @@
       "generic": "Something went wrong. Please try again.",
       "lastAdminDemotion": "This community needs at least one admin.",
       "lastAdminRemoval": "This community needs at least one admin.",
-      "userNotFound": "No account uses that email.",
+      "userNotFound": "No VeloCal account uses this email address. Only registered accounts can be invited.",
       "notCommunityMember": "That person is not a member of this community.",
       "inviteOnly": "This group is invite only.",
       "membersOnly": "Only members can see this.",

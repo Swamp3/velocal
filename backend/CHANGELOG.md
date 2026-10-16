@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Club and event invitations by email ignore deleted accounts
+
 ### Changed
 
 - `POST /communities/:slug/subgroups/:sub/invites` accepts `{ email }` as well as `{ userId }`; an unknown email and a person outside the club give the same answer

@@ -1433,6 +1433,7 @@ export class EventsService {
     const invitee = await this.users
       .createQueryBuilder('user')
       .where('LOWER(user.email) = :email', { email: normalized })
+      .andWhere('user.deletedAt IS NULL')
       .getOne();
     if (!invitee) throw communityNotFound(CommunityErrorCode.userNotFound);
     if (invitee.id === actorId) {

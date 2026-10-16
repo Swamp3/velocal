@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Inviting someone to a club or event by email only works for registered VeloCal accounts. The message now says so when the address has no account.
+
 - The club description on the admin club review page is shown formatted instead of as raw HTML.
 
 ### Added
