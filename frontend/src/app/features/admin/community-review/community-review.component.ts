@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminCommunityDetail, AdminService } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { FormsModule } from '@angular/forms';
-import { ConfirmDeleteDialogComponent } from '@shared/components';
+import { ConfirmDeleteDialogComponent, RichTextViewComponent } from '@shared/components';
 import { communityVisibilityVariant } from '@shared/models';
 import {
   BadgeComponent,
@@ -32,7 +32,7 @@ type Pending =
     SkeletonComponent,
     ConfirmDeleteDialogComponent,
     FormsModule,
-    ModalComponent,
+    ModalComponent, RichTextViewComponent,
   ],
   templateUrl: './community-review.component.html',
 })

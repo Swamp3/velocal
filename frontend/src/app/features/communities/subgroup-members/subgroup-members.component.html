@@ -41,6 +41,20 @@
 
     @if (canManage()) {
       <div class="mt-6">
+        <app-invite-by-email
+          [label]="'communities.invite.email' | transloco"
+          [action]="'communities.invite.action' | transloco"
+          [submitting]="mutating()"
+          (invited)="onInviteEmail($event)"
+        />
+        <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+          {{ 'communities.members.byEmailHint' | transloco }}
+        </p>
+      </div>
+    }
+
+    @if (canManage()) {
+      <div class="mt-6">
         <label for="member-search" class="block text-sm font-medium text-[var(--color-text)]">
           {{ 'communities.members.addFromCommunity' | transloco }}
         </label>

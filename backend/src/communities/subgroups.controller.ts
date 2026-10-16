@@ -255,6 +255,11 @@ export class SubgroupsController {
     @Body() dto: InviteSubgroupMemberDto,
     @CurrentUser() user: { id: string },
   ): Promise<SerializedSubgroup> {
-    return this.subgroups.invite(communitySlug, slug, dto.userId, user.id);
+    return this.subgroups.invite(
+      communitySlug,
+      slug,
+      { userId: dto.userId, email: dto.email },
+      user.id,
+    );
   }
 }

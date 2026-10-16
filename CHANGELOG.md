@@ -4,6 +4,24 @@ All notable changes to VeloCal will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+## [0.13.0] — 2026-10-16
+
+### Fixed
+
+- Inviting someone to a club or event by email only works for registered VeloCal accounts. The message now says so when the address has no account.
+
+- The club description on the admin club review page is shown formatted instead of as raw HTML.
+
+### Added
+
+- The app offers to install itself on the device (Android/desktop: an Install button; iPhone: a hint for "Add to Home Screen"). It appears after a short while, never in the installed app, and stays hidden for 30 days after "Not now".
+
+- An uploaded GPX route can be viewed on its own map page with the track, start and finish and an elevation profile. It is linked as "Map" from the route and the event page; nothing is computed on the other pages.
+
+- **Add subgroup members by email** — in a subgroup's member page, moderators can add a person by email address, which is unambiguous when several members share a display name. The person must already be a member of the club.
+
 ## [0.12.1] — 2026-10-16
 
 ### Added

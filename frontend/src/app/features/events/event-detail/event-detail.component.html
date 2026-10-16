@@ -412,6 +412,14 @@
               @for (file of route.files; track file.id) {
                 <li class="flex items-center justify-between gap-3 text-sm">
                   <span class="min-w-0 break-words text-[var(--color-text)]">{{ file.label }}</span>
+                  <a
+                    uiButton
+                    variant="link"
+                    class="shrink-0"
+                    [routerLink]="['/routes', route.id, 'files', file.id]"
+                  >
+                    {{ 'routes.map' | transloco }}
+                  </a>
                   <button
                     type="button"
                     uiButton
@@ -470,6 +478,14 @@
                             >
                           }
                         </span>
+                        <a
+                          uiButton
+                          variant="link"
+                          class="shrink-0"
+                          [routerLink]="['/routes', groupRoute.id, 'files', file.id]"
+                        >
+                          {{ 'routes.map' | transloco }}
+                        </a>
                         <button
                           type="button"
                           uiButton

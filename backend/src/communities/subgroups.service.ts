@@ -590,7 +590,7 @@ export class SubgroupsService {
   async invite(
     communitySlug: string,
     slug: string,
-    userId: string,
+    target: { userId?: string; email?: string },
     actorId: string,
   ): Promise<SerializedSubgroup> {
     const { subgroup, community } = await this.requireManageable(
@@ -599,11 +599,24 @@ export class SubgroupsService {
       actorId,
     );
     assertCommunityActive(community);
-    // Only existing community members can be added; unknown ids get the same answer.
-    const user = await this.users.findOne({ where: { id: userId } });
-    const communityMember = await this.communityMembers.findOne({
-      where: { communityId: community.id, userId },
-    });
+    // Only existing community members can be added; unknown ids and emails
+    // get the same answer, so the invite cannot be used to look up accounts.
+    const user = target.email
+      ? await this.users
+          .createQueryBuilder('user')
+          .where('LOWER(user.email) = LOWER(:email)', {
+            email: target.email.trim(),
+          })
+          .andWhere('user.deletedAt IS NULL')
+          .getOne()
+      : target.userId
+        ? await this.users.findOne({ where: { id: target.userId } })
+        : null;
+    const communityMember = user
+      ? await this.communityMembers.findOne({
+          where: { communityId: community.id, userId: user.id },
+        })
+      : null;
     if (!user || !communityMember) {
       throw communityNotFound(CommunityErrorCode.notCommunityMember);
     }

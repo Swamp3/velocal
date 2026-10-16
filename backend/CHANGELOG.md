@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.13.0] - 2026-10-16
+
+### Fixed
+
+- Club and event invitations by email ignore deleted accounts
+
+### Changed
+
+- `POST /communities/:slug/subgroups/:sub/invites` accepts `{ email }` as well as `{ userId }`; an unknown email and a person outside the club give the same answer
+
 ## [0.12.1] - 2026-10-16
 
 ### Changed
@@ -9,6 +21,8 @@
 ## [0.12.0] - 2026-10-16
 
 ### Added
+
+- `GET /routes/:id/files/:fileId/track` returns the GPX track simplified to at most 800 points (lat, lon, elevation, distance), cached in memory
 
 - `GET /users/me/upcoming-events`: upcoming events with a going/maybe RSVP, including club context; club and subgroup events, and public events shared into a club or subgroup, only while the user is still a member
 - Event source tracking (`sourceName`, `sourceUrl`, `lastSeenAt`, `missingSince`) and `event_duplicate_ignores`; importer matches by source id, source page and fuzzy name/place on the same day (`event-matching.ts`), dedupes within a run, updates postponed dates, flags events missing from complete runs; `GET /admin/events/duplicates`, `POST /admin/events/duplicates/ignore`, `GET /admin/events/missing-source`; migration `AddEventSourceTracking` backfills `sourceName` for existing imported events

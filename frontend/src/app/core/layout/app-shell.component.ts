@@ -22,6 +22,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ToastContainerComponent } from '@shared/ui/toast/toast-container.component';
 import { filter } from 'rxjs';
 import { NavDropdownComponent } from './nav-dropdown/nav-dropdown.component';
+import { InstallBannerComponent } from './install-banner/install-banner.component';
 import { UpdateBannerComponent } from './update-banner/update-banner.component';
 import { version as APP_VERSION } from '../../../../package.json';
 
@@ -138,11 +139,13 @@ const DEFAULT_SEO: RouteSeo = {
   imports: [
     NavDropdownComponent,
     UpdateBannerComponent,
+    InstallBannerComponent,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
     ToastContainerComponent,
-    TranslocoPipe, ButtonStyleDirective,
+    TranslocoPipe,
+    ButtonStyleDirective,
   ],
   templateUrl: './app-shell.component.html',
 })

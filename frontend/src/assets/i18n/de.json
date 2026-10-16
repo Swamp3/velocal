@@ -17,6 +17,13 @@
       "account": "Konto",
       "myEvents": "Meine Events"
     },
+    "install": {
+      "title": "VeloCal installieren",
+      "text": "Füge die App deinem Gerät hinzu – für schnellen Zugriff und Benachrichtigungen.",
+      "ios": "Tippe auf „Teilen“ und dann auf „Zum Home-Bildschirm“.",
+      "action": "Installieren",
+      "dismiss": "Nicht jetzt"
+    },
     "update": {
       "available": "Eine neue Version von VeloCal ist verfügbar.",
       "reload": "Neu laden"
@@ -934,7 +941,8 @@
       "addFromCommunity": "Aus Community-Mitgliedern hinzufügen",
       "searchPlaceholder": "Namen eingeben…",
       "noMatches": "Keine passenden Community-Mitglieder",
-      "stravaProfile": "Strava-Profil von {{name}}"
+      "stravaProfile": "Strava-Profil von {{name}}",
+      "byEmailHint": "Nutze die E-Mail-Adresse, wenn mehrere Mitglieder denselben Anzeigenamen haben. Die Person muss schon Mitglied der Community sein."
     },
     "requests": {
       "title": "Beitrittsanfragen",
@@ -978,7 +986,7 @@
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
       "lastAdminDemotion": "Diese Gemeinschaft braucht mindestens einen Admin.",
       "lastAdminRemoval": "Diese Gemeinschaft braucht mindestens einen Admin.",
-      "userNotFound": "Kein Konto nutzt diese E-Mail.",
+      "userNotFound": "Zu dieser E-Mail-Adresse gibt es kein VeloCal-Konto. Eingeladen werden können nur registrierte Konten.",
       "notCommunityMember": "Diese Person ist kein Mitglied dieser Gemeinschaft.",
       "inviteOnly": "Diese Gruppe ist nur auf Einladung.",
       "membersOnly": "Das sehen nur Mitglieder.",
@@ -1099,6 +1107,14 @@
     "total": "gesamt",
     "addFiles": "GPX-Dateien hinzufügen",
     "noFiles": "Noch keine GPX-Dateien",
+    "map": "Karte",
+    "mapTitle": "Routenkarte",
+    "back": "Zurück zur Route",
+    "distance": "Strecke",
+    "ascent": "Anstieg",
+    "elevation": "Höhenprofil",
+    "loadError": "Die Route konnte nicht geladen werden.",
+    "noPoints": "Diese Datei enthält keine Streckenpunkte.",
     "download": "Herunterladen",
     "remove": "Entfernen",
     "delete": "Strecke löschen",

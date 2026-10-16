@@ -1,0 +1,55 @@
+<section class="mx-auto max-w-4xl px-4 py-6">
+  @if (route(); as r) {
+    <a
+      [routerLink]="['/routes', r.id]"
+      class="text-sm text-[var(--color-text-muted)] hover:underline"
+    >
+      ← {{ 'routes.back' | transloco }}
+    </a>
+    <h1 class="mt-2 text-2xl font-bold text-[var(--color-text)]">{{ r.name }}</h1>
+    @if (file(); as f) {
+      <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+        {{ f.label }} · {{ 'routes.distance' | transloco }} {{ distance(f.distanceM) }}
+        @if (f.ascentM !== null) {
+          · {{ 'routes.ascent' | transloco }} ↑ {{ f.ascentM }} m
+        }
+      </p>
+    }
+  } @else if (loading()) {
+    <div class="h-8 w-48 animate-pulse rounded bg-[var(--color-border)]"></div>
+  }
+
+  @if (failed()) {
+    <p class="mt-6 text-[var(--color-text-muted)]">{{ 'routes.loadError' | transloco }}</p>
+  } @else if (!loading() && points().length === 0) {
+    <p class="mt-6 text-[var(--color-text-muted)]">{{ 'routes.noPoints' | transloco }}</p>
+  } @else {
+    <div
+      #mapContainer
+      class="mt-4 h-[60vh] min-h-[320px] w-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+    ></div>
+  }
+
+  @if (profile(); as p) {
+    <h2 class="mt-6 text-sm font-semibold text-[var(--color-text)]">
+      {{ 'routes.elevation' | transloco }}
+      <span class="font-normal text-[var(--color-text-muted)]">({{ p.min }}–{{ p.max }} m)</span>
+    </h2>
+    <svg
+      class="mt-2 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+      [attr.viewBox]="'0 0 ' + profileW + ' ' + profileH"
+      preserveAspectRatio="none"
+      role="img"
+      [attr.aria-label]="'routes.elevation' | transloco"
+    >
+      <path [attr.d]="p.area" fill="#e11d48" fill-opacity="0.18" />
+      <path
+        [attr.d]="p.line"
+        fill="none"
+        stroke="#e11d48"
+        stroke-width="2"
+        vector-effect="non-scaling-stroke"
+      />
+    </svg>
+  }
+</section>

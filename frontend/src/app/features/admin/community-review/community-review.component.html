@@ -81,7 +81,7 @@
       class="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 text-sm"
     >
       @if (c.description) {
-        <p class="whitespace-pre-line break-words text-[var(--color-text)]">{{ c.description }}</p>
+        <app-rich-text-view [value]="c.description" />
       }
       @if (c.location) {
         <p class="mt-2 text-[var(--color-text-muted)]">{{ c.location }}</p>

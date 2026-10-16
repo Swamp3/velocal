@@ -9,6 +9,10 @@ const routes: Routes = [
       import('./route-list/route-list.component').then((m) => m.RouteListComponent),
   },
   {
+    path: ':id/files/:fileId',
+    loadComponent: () => import('./route-map/route-map.component').then((m) => m.RouteMapComponent),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./route-detail/route-detail.component').then((m) => m.RouteDetailComponent),

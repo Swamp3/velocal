@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.13.0] - 2026-10-16
+
+### Fixed
+
+- Admin club review renders the description with `app-rich-text-view`
+
+### Added
+
+- `InstallPromptService` and install banner (`beforeinstallprompt` on Chromium, instructions on iOS Safari), snoozed for 30 days after dismissal
+
+- Route map page `/routes/:id/files/:fileId` (lazy, Leaflet polyline, SVG elevation profile) with "Map" links on route and event detail
+
+- Email field on the subgroup member page next to the name search
+
 ## [0.12.1] - 2026-10-16
 
 ### Added

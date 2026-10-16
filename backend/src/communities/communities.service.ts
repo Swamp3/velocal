@@ -534,6 +534,8 @@ export class CommunitiesService {
     const user = await this.users
       .createQueryBuilder('user')
       .where('LOWER(user.email) = LOWER(:email)', { email: trimmed })
+      // Only registered VeloCal accounts can be invited, never deleted shells.
+      .andWhere('user.deletedAt IS NULL')
       .getOne();
     if (!user) throw communityNotFound(CommunityErrorCode.userNotFound);
 

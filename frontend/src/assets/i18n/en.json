@@ -17,6 +17,13 @@
       "account": "Account",
       "myEvents": "My events"
     },
+    "install": {
+      "title": "Install VeloCal",
+      "text": "Add the app to your device for quick access and notifications.",
+      "ios": "Tap the Share button, then “Add to Home Screen”.",
+      "action": "Install",
+      "dismiss": "Not now"
+    },
     "update": {
       "available": "A new version of VeloCal is available.",
       "reload": "Reload"
@@ -934,7 +941,8 @@
       "addFromCommunity": "Add from community members",
       "searchPlaceholder": "Type a name…",
       "noMatches": "No matching community members",
-      "stravaProfile": "Strava profile of {{name}}"
+      "stravaProfile": "Strava profile of {{name}}",
+      "byEmailHint": "Use the email address when several members share a display name. The person must already be a member of the club."
     },
     "requests": {
       "title": "Join requests",
@@ -978,7 +986,7 @@
       "generic": "Something went wrong. Please try again.",
       "lastAdminDemotion": "This community needs at least one admin.",
       "lastAdminRemoval": "This community needs at least one admin.",
-      "userNotFound": "No account uses that email.",
+      "userNotFound": "No VeloCal account uses this email address. Only registered accounts can be invited.",
       "notCommunityMember": "That person is not a member of this community.",
       "inviteOnly": "This group is invite only.",
       "membersOnly": "Only members can see this.",
@@ -1099,6 +1107,14 @@
     "total": "total",
     "addFiles": "Add GPX files",
     "noFiles": "No GPX files yet",
+    "map": "Map",
+    "mapTitle": "Route map",
+    "back": "Back to route",
+    "distance": "Distance",
+    "ascent": "Ascent",
+    "elevation": "Elevation profile",
+    "loadError": "The route could not be loaded.",
+    "noPoints": "This file contains no track points.",
     "download": "Download",
     "remove": "Remove",
     "delete": "Delete route",
