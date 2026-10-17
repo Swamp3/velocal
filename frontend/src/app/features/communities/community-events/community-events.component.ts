@@ -6,12 +6,26 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityService } from '@core/services/community.service';
 import { EventService } from '@core/services/event.service';
 import { CyclingEvent } from '@shared/models';
-import { ButtonStyleDirective, IconButtonComponent, ToastService } from '@shared/ui';
+import {
+  ActionMenuComponent,
+  type ActionMenuItem,
+  ButtonStyleDirective,
+  IconButtonComponent,
+  ToastService,
+} from '@shared/ui';
 
 @Component({
   selector: 'app-community-events',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, DatePipe, ReactiveFormsModule, IconButtonComponent, ButtonStyleDirective],
+  imports: [
+    RouterLink,
+    TranslocoPipe,
+    DatePipe,
+    ReactiveFormsModule,
+    IconButtonComponent,
+    ButtonStyleDirective,
+    ActionMenuComponent,
+  ],
   templateUrl: './community-events.component.html',
 })
 export class CommunityEventsComponent implements OnInit {
@@ -54,6 +68,20 @@ export class CommunityEventsComponent implements OnInit {
     return subgroup
       ? ['/communities', this.communitySlug(), 'subgroups', subgroup, 'events', 'new']
       : ['/communities', this.communitySlug(), 'events', 'new'];
+  }
+
+  protected addMenu(): ActionMenuItem[] {
+    return [
+      {
+        id: 'share',
+        icon: 'event_available',
+        label: this.transloco.translate('communities.events.share'),
+      },
+    ];
+  }
+
+  protected onAddMenu(id: string): void {
+    if (id === 'share') this.toggleSharing();
   }
 
   protected toggleSharing(): void {

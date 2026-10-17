@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- `timeLeft()` helper with tests; poll countdown; `scripts/subset-icons.py` also finds `icon = input('name')` defaults
+
+
 ## [0.14.3] - 2026-10-17
 
 ### Changed

@@ -4,13 +4,16 @@
       {{ 'communities.events.title' | transloco }}
     </h2>
     @if (canCreate()) {
-      <div class="flex flex-wrap gap-2">
-        <button type="button" uiButton variant="outline" (click)="toggleSharing()">
-          {{ 'communities.events.share' | transloco }}
-        </button>
-        <a [routerLink]="createLink()" uiButton variant="outline">
+      <div class="flex items-center gap-1.5">
+        <a [routerLink]="createLink()" uiButton size="sm">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
           {{ 'communities.events.create' | transloco }}
         </a>
+        <ui-action-menu
+          [items]="addMenu()"
+          [label]="'communities.events.moreOptions' | transloco"
+          (selected)="onAddMenu($event)"
+        />
       </div>
     }
   </div>

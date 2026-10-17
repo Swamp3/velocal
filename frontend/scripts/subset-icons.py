@@ -11,7 +11,7 @@ box or its name):
 
 Icons are found in templates and components: the text of
 `<span class="material-symbols-outlined">name</span>` (also inside `{{ }}`
-expressions) and `icon="name"` / `icon: 'name'` values.
+expressions) and `icon="name"` / `icon: 'name'` values and `icon = input('name')` defaults.
 """
 import re
 import sys
@@ -31,6 +31,8 @@ TARGET = ROOT / 'src/assets/fonts/material-symbols-subset.woff2'
 WORD = re.compile(r"[a-z][a-z0-9_]*")
 SPAN = re.compile(r'class="[^"]*material-symbols-outlined[^"]*"[^>]*>(.*?)</span', re.S)
 ICON_ATTR = re.compile(r"""\bicon\w*\s*[=:]\s*(?:"'?([a-z0-9_]+)'?"|'([a-z0-9_]+)')""")
+# Default of an icon input in a component: `readonly icon = input('more_vert')`.
+ICON_INPUT = re.compile(r"""\bicon\w*\s*=\s*input(?:<[^>]*>)?\(\s*'([a-z0-9_]+)'""")
 ICON_FIELD = re.compile(r"""\bicon\w*\s*:\s*'([a-z0-9_]+)'""")
 
 
@@ -89,6 +91,7 @@ def used_icons(known: set[str]) -> set[str]:
         for m in ICON_ATTR.finditer(text):
             found.update(g for g in m.groups() if g and g in known)
         found.update(w for w in ICON_FIELD.findall(text) if w in known)
+        found.update(w for w in ICON_INPUT.findall(text) if w in known)
     return found
 
 

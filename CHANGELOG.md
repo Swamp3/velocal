@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Club member list: role change and removal are in a "more" menu per member, so each member takes one line.
+
+- Club events: "New event" is one button with a "more" menu for adding an existing public event, so the bar fits on one line.
+
+- The "Future only" filter in the event list has a clear icon (upcoming event) instead of a checkmark.
+
+### Added
+
+- Club polls with an end date show how long they still run ("Ends in 3 days", with the exact time on hover) and when they ended.
+
+
 ## [0.14.3] — 2026-10-17
 
 ### Changed

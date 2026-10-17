@@ -948,6 +948,7 @@
       "stravaInvalid": "Please enter a link to strava.com (https://…)"
     },
     "members": {
+      "actionsFor": "Actions for {{name}}",
       "title": "Members",
       "empty": "No members yet",
       "unnamed": "Unnamed member",
@@ -1034,6 +1035,15 @@
       "create": "Create poll",
       "vote": "Vote",
       "voted": "Your vote is in",
+      "closedOn": "Ended {{date}}",
+      "endsIn": {
+        "minutesOne": "Ends in 1 minute",
+        "minutesMany": "Ends in {{count}} minutes",
+        "hoursOne": "Ends in 1 hour",
+        "hoursMany": "Ends in {{count}} hours",
+        "daysOne": "Ends in 1 day",
+        "daysMany": "Ends in {{count}} days"
+      },
       "closed": "Closed",
       "votes": "{{count}} votes",
       "hidden": "Results are hidden",
@@ -1049,6 +1059,7 @@
       "updated": "Poll updated"
     },
     "events": {
+      "moreOptions": "More options",
       "title": "Events",
       "create": "New event",
       "empty": "No events yet",

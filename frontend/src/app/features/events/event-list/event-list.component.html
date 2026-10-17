@@ -116,7 +116,7 @@
             <div class="mt-1 flex flex-wrap items-center gap-2">
               <ui-chip
                 [selected]="futureOnly()"
-                [icon]="futureOnly() ? 'check' : ''"
+                icon="event_upcoming"
                 (selectedChange)="onFutureOnlyToggle()"
               >
                 {{ 'events.futureOnly' | transloco }}

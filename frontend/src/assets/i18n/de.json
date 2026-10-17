@@ -948,6 +948,7 @@
       "stravaInvalid": "Bitte einen Link zu strava.com angeben (https://…)"
     },
     "members": {
+      "actionsFor": "Aktionen für {{name}}",
       "title": "Mitglieder",
       "empty": "Noch keine Mitglieder",
       "unnamed": "Unbenanntes Mitglied",
@@ -1034,6 +1035,15 @@
       "create": "Umfrage erstellen",
       "vote": "Abstimmen",
       "voted": "Deine Stimme ist gespeichert",
+      "closedOn": "Beendet am {{date}}",
+      "endsIn": {
+        "minutesOne": "Endet in 1 Minute",
+        "minutesMany": "Endet in {{count}} Minuten",
+        "hoursOne": "Endet in 1 Stunde",
+        "hoursMany": "Endet in {{count}} Stunden",
+        "daysOne": "Endet in 1 Tag",
+        "daysMany": "Endet in {{count}} Tagen"
+      },
       "closed": "Geschlossen",
       "votes": "{{count}} Stimmen",
       "hidden": "Ergebnisse sind verborgen",
@@ -1049,6 +1059,7 @@
       "updated": "Umfrage aktualisiert"
     },
     "events": {
+      "moreOptions": "Weitere Optionen",
       "title": "Events",
       "create": "Neues Event",
       "empty": "Noch keine Events",
