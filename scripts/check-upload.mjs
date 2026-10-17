@@ -8,7 +8,9 @@
 //
 // Use a throw-away account. The script creates a route "upload-check", uploads a tiny GPX
 // file to it and deletes the route again. Override the places to test with
-// TARGETS="http://localhost:3000/api,https://velocal.cc/api".
+// TARGETS="http://localhost:3000/api,https://velocal.cc/api". It uploads files of several sizes
+// (SIZES, in bytes, default 2 KB, 300 KB, 3 MB), because limits in a proxy often show up only
+// for bigger files.
 const email = process.env.EMAIL;
 const password = process.env.PASSWORD;
 const targets = (
@@ -21,11 +23,20 @@ if (!email || !password) {
   process.exit(2);
 }
 
-const gpx = `<?xml version="1.0"?><gpx version="1.1"><trk><trkseg>
-<trkpt lat="52.5" lon="13.4"><ele>40</ele></trkpt>
-<trkpt lat="52.51" lon="13.41"><ele>45</ele></trkpt>
-<trkpt lat="52.52" lon="13.42"><ele>50</ele></trkpt>
-</trkseg></trk></gpx>`;
+const sizes = (process.env.SIZES ?? '2000,300000,3000000').split(',').map(Number);
+
+/** A valid GPX file of roughly `bytes` bytes. */
+function makeGpx(bytes) {
+  const head = '<?xml version="1.0"?><gpx version="1.1"><trk><trkseg>\n';
+  const tail = '</trkseg></trk></gpx>';
+  let body = '';
+  let i = 0;
+  while (head.length + body.length + tail.length < bytes || i < 3) {
+    body += `<trkpt lat="${(52.5 + i * 0.0001).toFixed(6)}" lon="${(13.4 + i * 0.0001).toFixed(6)}"><ele>${40 + (i % 20)}</ele></trkpt>\n`;
+    i += 1;
+  }
+  return head + body + tail;
+}
 
 async function call(base, path, init = {}) {
   try {
@@ -70,15 +81,19 @@ for (const base of targets) {
   }
   const id = route.json?.id;
 
-  const form = new FormData();
-  form.append('file', new Blob([gpx], { type: 'application/gpx+xml' }), 'check.gpx');
-  const upload = await call(base, `/routes/${id}/files`, {
-    method: 'POST',
-    headers: auth,
-    body: form,
-  });
-  console.log(`upload gpx     ${upload.status}  ${upload.status === 201 ? 'OK' : upload.text}`);
+  for (const size of sizes) {
+    const gpx = makeGpx(size);
+    const form = new FormData();
+    form.append('file', new Blob([gpx], { type: 'application/gpx+xml' }), 'check.gpx');
+    const upload = await call(base, `/routes/${id}/files`, {
+      method: 'POST',
+      headers: auth,
+      body: form,
+    });
+    const label = `${Math.round(gpx.length / 1000)} KB`.padEnd(8);
+    console.log(`upload ${label}  ${upload.status}  ${upload.status === 201 ? 'OK' : upload.text}`);
+  }
 
   await call(base, `/routes/${id}`, { method: 'DELETE', headers: auth });
 }
-console.log('\nDone. Compare the "upload gpx" line of each target.');
+console.log('\nDone. Compare the "upload" lines of each target.');
