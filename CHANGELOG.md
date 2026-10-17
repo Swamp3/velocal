@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Failed image uploads (events, clubs, news) show the HTTP status and server message in the error text.
+
 - A failed GPX upload with an unexpected cause now shows the HTTP status and the server message in the error text, so it can be reported and traced.
 
 

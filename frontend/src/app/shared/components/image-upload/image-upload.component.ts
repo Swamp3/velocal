@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -22,6 +23,13 @@ const MAX_BYTES = 10 * 1024 * 1024;
  * form decides what endpoint to hit. That keeps it reusable for events,
  * series, and posts without dragging each feature's service in here.
  */
+/** Status and server text of a failed request, so a report says what actually happened. */
+function errorDetail(err: unknown): string {
+  if (!(err instanceof HttpErrorResponse)) return '';
+  const text = typeof err.error?.message === 'string' ? `: ${err.error.message.slice(0, 120)}` : '';
+  return ` (HTTP ${err.status}${text})`;
+}
+
 @Component({
   selector: 'app-image-upload',
   standalone: true,
@@ -103,7 +111,7 @@ export class ImageUploadComponent {
         });
       });
     } catch (err) {
-      this.toast.error(this.transloco.translate('uploads.failed'));
+      this.toast.error(this.transloco.translate('uploads.failed') + errorDetail(err));
     } finally {
       this.loading.set(false);
     }
@@ -125,9 +133,9 @@ export class ImageUploadComponent {
       this.preview.set(null);
       this.imageChange.emit(next);
       this.toast.success(this.transloco.translate('uploads.updated'));
-    } catch {
+    } catch (err) {
       this.preview.set(null);
-      this.toast.error(this.transloco.translate('uploads.failed'));
+      this.toast.error(this.transloco.translate('uploads.failed') + errorDetail(err));
     } finally {
       this.loading.set(false);
     }

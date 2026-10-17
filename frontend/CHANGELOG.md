@@ -4,6 +4,8 @@
 
 ### Changed
 
+- `app-image-upload`: failed uploads append `(HTTP <status>: <message>)`
+
 - Route page: unknown upload errors append `(HTTP <status>: <message>)`
 
 
