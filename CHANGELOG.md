@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Save buttons are at the top of every form page (profile, event, series, news, club, subgroup, post, poll, route), next to an "×" to cancel, and stay visible while scrolling. Dialogs keep their buttons at the bottom.
+
 - Club member list: role change and removal are in a "more" menu per member, so each member takes one line.
 
 - Club events: "New event" is one button with a "more" menu for adding an existing public event, so the bar fits on one line.

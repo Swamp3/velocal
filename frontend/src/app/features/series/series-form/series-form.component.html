@@ -1,17 +1,17 @@
 <div class="mx-auto max-w-xl">
-  <a
-    routerLink="/series"
-    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-  >
-    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-    {{ 'series.backToList' | transloco }}
-  </a>
+  <app-form-actions
+    formId="seriesForm"
+    [backLink]="['/series']"
+    [backLabel]="'series.backToList' | transloco"
+    [saving]="loading()"
+  />
 
   <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
     {{ (isEdit() ? 'series.editTitle' : 'series.create') | transloco }}
   </h1>
 
   <form
+    id="seriesForm"
     [formGroup]="form"
     (ngSubmit)="onSubmit()"
     class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
@@ -78,15 +78,5 @@
       formControlName="externalUrl"
     />
 
-    <div class="flex gap-3 pt-2">
-      <ui-button type="submit" [loading]="loading()" [disabled]="loading()">
-        {{ 'common.save' | transloco }}
-      </ui-button>
-      <a routerLink="/series">
-        <ui-button variant="outline" type="button">
-          {{ 'common.cancel' | transloco }}
-        </ui-button>
-      </a>
-    </div>
   </form>
 </div>

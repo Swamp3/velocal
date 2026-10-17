@@ -29,7 +29,7 @@ import {
   RecurrenceDto,
   Route,
 } from '@shared/models';
-import { ButtonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import {
   toDisplayDate as toDisplayDateUtil,
   parseDisplayDate,
@@ -41,6 +41,7 @@ import { LocaleService } from '@core/services/locale.service';
   selector: 'app-event-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    IconButtonComponent,
     ReactiveFormsModule,
     RouterLink,
     TranslocoPipe,

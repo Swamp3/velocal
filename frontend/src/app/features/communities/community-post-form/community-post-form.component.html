@@ -1,11 +1,11 @@
 <div class="mx-auto max-w-xl">
-  <a
-    [routerLink]="backLink()"
-    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
-  >
-    <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
-    {{ (postId() ? 'communities.posts.backToPost' : 'communities.posts.back') | transloco }}
-  </a>
+  <app-form-actions
+    formId="postForm"
+    [backLink]="backLink()"
+    [backLabel]="(postId() ? 'communities.posts.backToPost' : 'communities.posts.back') | transloco"
+    [saveLabel]="(postId() ? 'communities.posts.saveChanges' : 'communities.posts.publish') | transloco"
+    [saving]="saving()"
+  />
 
   <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
     {{ (postId() ? 'communities.posts.editTitle' : 'communities.posts.createTitle') | transloco }}
@@ -17,6 +17,7 @@
     </div>
   } @else {
     <form
+      id="postForm"
       [formGroup]="form"
       (ngSubmit)="publish()"
       class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
@@ -31,16 +32,6 @@
         [compact]="true"
         [placeholder]="'communities.posts.placeholder' | transloco"
       />
-      <div class="flex gap-3 pt-2">
-        <ui-button type="submit" [loading]="saving()" [disabled]="saving()">
-          {{
-            (postId() ? 'communities.posts.saveChanges' : 'communities.posts.publish') | transloco
-          }}
-        </ui-button>
-        <a [routerLink]="backLink()">
-          <ui-button variant="outline" type="button">{{ 'common.cancel' | transloco }}</ui-button>
-        </a>
-      </div>
     </form>
   }
 </div>

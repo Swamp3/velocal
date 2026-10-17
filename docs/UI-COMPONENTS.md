@@ -13,6 +13,7 @@ Alle wiederkehrenden Bedienelemente kommen aus `frontend/src/app/shared/ui` (Imp
 | Kleine Statusmarke | `ui-badge` | `<ui-badge variant="success">Dabei</ui-badge>` |
 | Fläche für einen Inhaltsblock | `ui-card` | `<ui-card><h2>…</h2>…</ui-card>` |
 | Dialog | `ui-modal` | Titel, Inhalt, Fußzeile über `<ng-container footer>` |
+| Kopfzeile einer Formularseite (Zurück, ×, Speichern) | `app-form-actions` | `<app-form-actions formId="myForm" [backLink]="['/x']" [backLabel]="'…' \| transloco" [saving]="saving()" />` |
 | Lösch-Bestätigung | `app-confirm-delete-dialog` | Name eintippen |
 | Seitenwechsel | `ui-pagination` | |
 | Ladezustand | `ui-skeleton` | |
@@ -42,6 +43,8 @@ python3 -m venv /tmp/icons && /tmp/icons/bin/pip install fonttools brotli
 ```
 
 ## Regeln
+
+- **Speichern steht oben.** Formularseiten haben `app-form-actions`: Zurück-Link links, „×“ (abbrechen) und „Speichern“ rechts, beim Scrollen sichtbar. Der Knopf löst das Formular per `formId` aus; unten steht kein zweiter Speichern-Knopf. Dialoge behalten Abbrechen und Speichern in der Fußzeile.
 
 - Kein `<button class="rounded-… px-… py-…">` und kein `<a class="…px-… py-…">` im Button-Look: `ui-button` oder `uiButton`.
 - Icon-Buttons immer mit `label`.

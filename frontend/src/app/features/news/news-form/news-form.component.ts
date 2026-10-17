@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { QuillEditorComponent } from 'ngx-quill';
 import { PostService } from '@core/services/post.service';
@@ -17,13 +17,15 @@ import { CreatePostDto, Post, PostStatus } from '@shared/models';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
 
+import { FormActionsComponent } from '@shared/components/form-actions/form-actions.component';
+
 @Component({
   selector: 'app-news-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    FormActionsComponent,
     ReactiveFormsModule,
-    RouterLink,
     TranslocoPipe,
     QuillEditorComponent,
     ButtonComponent,

@@ -8,17 +8,17 @@
 } @else if (data(); as route) {
   <div class="mx-auto max-w-3xl">
     @if (route.canEdit) {
-      <a
-        routerLink="/routes"
-        class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-      >
-        <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
-        {{ 'routes.title' | transloco }}
-      </a>
+      <app-form-actions
+        formId="routeForm"
+        [backLink]="['/routes']"
+        [backLabel]="'routes.title' | transloco"
+        [saving]="busy()"
+        [disabled]="form.invalid"
+      />
     }
 
     @if (route.canEdit) {
-      <form [formGroup]="form" (ngSubmit)="save()" class="mt-5 space-y-4">
+      <form id="routeForm" [formGroup]="form" (ngSubmit)="save()" class="mt-5 space-y-4">
         <div>
           <label for="rname" class="block text-sm font-medium text-[var(--color-text)]">
             {{ 'routes.name' | transloco }}
@@ -43,9 +43,6 @@
             class="mt-1.5 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           ></textarea>
         </div>
-        <ui-button type="submit" [loading]="busy()" [disabled]="busy() || form.invalid">
-          {{ 'common.save' | transloco }}
-        </ui-button>
       </form>
     } @else {
       <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">{{ route.name }}</h1>

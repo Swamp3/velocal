@@ -4,6 +4,8 @@
 
 ### Added
 
+- `app-form-actions` (back link, cancel ×, save, sticky) used by all form pages
+
 - `timeLeft()` helper with tests; poll countdown; `scripts/subset-icons.py` also finds `icon = input('name')` defaults
 
 
