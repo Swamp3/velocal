@@ -8,7 +8,11 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { IconButtonComponent, type IconButtonVariant } from '../icon-button/icon-button.component';
+import {
+  IconButtonComponent,
+  type IconButtonSize,
+  type IconButtonVariant,
+} from '../icon-button/icon-button.component';
 
 export interface ActionMenuItem {
   id: string;
@@ -17,6 +21,8 @@ export interface ActionMenuItem {
   /** Red text for destructive actions. */
   danger?: boolean;
   disabled?: boolean;
+  /** Opens this address in a new tab instead of emitting `selected` (e.g. a maps link). */
+  href?: string;
 }
 
 /**
@@ -33,8 +39,9 @@ export interface ActionMenuItem {
     <button
       type="button"
       uiIconButton
-      icon="more_vert"
+      [icon]="icon()"
       [variant]="variant()"
+      [size]="size()"
       [label]="label()"
       aria-haspopup="menu"
       [attr.aria-expanded]="open()"
@@ -44,25 +51,44 @@ export interface ActionMenuItem {
     @if (open()) {
       <div
         role="menu"
-        class="absolute right-0 z-40 mt-1 min-w-[16rem] overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] py-1 shadow-[var(--shadow-elevated)]"
+        [class]="align() === 'start' ? 'left-0' : 'right-0'"
+        class="absolute z-40 mt-1 w-max min-w-[12rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] py-1 shadow-[var(--shadow-elevated)]"
         (keydown.escape)="open.set(false)"
       >
         @for (item of items(); track item.id) {
-          <button
-            type="button"
-            role="menuitem"
-            class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-bg-alt)] disabled:pointer-events-none disabled:opacity-50"
-            [class]="item.danger ? 'text-[var(--color-danger)]' : 'text-[var(--color-text)]'"
-            [disabled]="item.disabled"
-            (click)="pick(item.id)"
-          >
-            @if (item.icon) {
-              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{
-                item.icon
-              }}</span>
-            }
-            {{ item.label }}
-          </button>
+          @if (item.href) {
+            <a
+              role="menuitem"
+              class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-alt)]"
+              [href]="item.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              (click)="open.set(false)"
+            >
+              @if (item.icon) {
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{
+                  item.icon
+                }}</span>
+              }
+              {{ item.label }}
+            </a>
+          } @else {
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-bg-alt)] disabled:pointer-events-none disabled:opacity-50"
+              [class]="item.danger ? 'text-[var(--color-danger)]' : 'text-[var(--color-text)]'"
+              [disabled]="item.disabled"
+              (click)="pick(item.id)"
+            >
+              @if (item.icon) {
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{
+                  item.icon
+                }}</span>
+              }
+              {{ item.label }}
+            </button>
+          }
         }
       </div>
     }
@@ -72,6 +98,10 @@ export class ActionMenuComponent {
   readonly items = input.required<ActionMenuItem[]>();
   readonly label = input.required<string>();
   readonly variant = input<IconButtonVariant>('outline');
+  readonly size = input<IconButtonSize>('md');
+  readonly icon = input('more_vert');
+  /** Which edge of the button the menu lines up with; use `start` when the button sits near the left of the screen. */
+  readonly align = input<'start' | 'end'>('end');
   readonly selected = output<string>();
 
   protected readonly open = signal(false);

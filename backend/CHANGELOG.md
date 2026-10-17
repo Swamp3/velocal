@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-10-17
+
+### Changed
+
+- GPX upload limit 5 MB to 20 MB; `looksLikeGpx` checks the first 64 KB and allows prefixed tags (`<gpx:trkpt>`)
+
+
 ## [0.14.1] - 2026-10-17
 
 ### Changed

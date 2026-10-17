@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-10-17
+
+### Changed
+
+- `ui-action-menu` can hold links (`href`, opens a new tab), and has `icon`, `size` and `align` options; meeting point navigation uses it
+
+### Fixed
+
+- Route page maps upload errors (413, not GPX, no track, too many files, rate limit, offline) to specific messages
+
+
 ## [0.14.1] - 2026-10-17
 
 ### Added

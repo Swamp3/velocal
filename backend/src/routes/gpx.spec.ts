@@ -50,3 +50,32 @@ describe('gpxTrack', () => {
       expect(pts[i][3]).toBeGreaterThanOrEqual(pts[i - 1][3]);
   });
 });
+
+describe('GPX variations from real exporters', () => {
+  const points = `<trkpt lat="52.5" lon="13.4"><ele>40</ele></trkpt><trkpt lat="52.501" lon="13.401"><ele>55</ele></trkpt>`;
+
+  it('accepts a long comment before the gpx tag', () => {
+    const text = `<?xml version="1.0"?>\n<!-- ${'x'.repeat(8000)} -->\n<gpx><trk><trkseg>${points}</trkseg></trk></gpx>`;
+    expect(looksLikeGpx(text)).toBe(true);
+    expect(gpxStats(text).points).toBe(2);
+  });
+
+  it('accepts prefixed tags', () => {
+    const text = `<?xml version="1.0"?><g:gpx xmlns:g="http://www.topografix.com/GPX/1/1"><g:trk><g:trkseg>${points
+      .replaceAll('<trkpt', '<g:trkpt')
+      .replaceAll('</trkpt', '</g:trkpt')
+      .replaceAll('<ele', '<g:ele')
+      .replaceAll('</ele', '</g:ele')}</g:trkseg></g:trk></g:gpx>`;
+    expect(looksLikeGpx(text)).toBe(true);
+    const stats = gpxStats(text);
+    expect(stats.points).toBe(2);
+    expect(stats.ascentM).not.toBeNull();
+    expect(gpxTrack(text)[1][2]).toBe(55);
+  });
+
+  it('rejects other XML', () => {
+    expect(looksLikeGpx('<?xml version="1.0"?><kml><Document/></kml>')).toBe(
+      false,
+    );
+  });
+});
