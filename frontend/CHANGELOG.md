@@ -4,6 +4,8 @@
 
 ### Added
 
+- Inbox entries and push settings for the new post notifications
+
 - `leaflet-polylinedecorator` (loaded only on the route map page) for direction arrows; elevation profile with km axis and a linked hover marker
 
 - `app-form-actions` (back link, cancel ×, save, sticky) used by all form pages

@@ -35,6 +35,8 @@
     "loadError": "Benachrichtigungen konnten nicht geladen werden",
     "markAll": "Alle als gelesen",
     "eventCreated": "Neues Event in {{communityName}}: {{eventName}}",
+    "postCreated": "Neuer Beitrag in {{communityName}}: {{postTitle}}",
+    "postComment": "{{actorName}} hat „{{postTitle}}“ kommentiert",
     "eventInvite": "Du bist zu {{eventName}} eingeladen",
     "joinCommunity": "Neue Beitrittsanfrage für {{communityName}}",
     "joinSubgroup": "Neue Beitrittsanfrage für {{subgroupName}}",
@@ -379,6 +381,10 @@
         "membershipHint": "Beitrittsanfragen für Gruppen, die du verwaltest, und Entscheidungen zu deinen Anfragen.",
         "events": "Neue Events",
         "eventsHint": "Ein neues Event in deinen Clubs und Untergruppen. Kann häufig vorkommen.",
+        "posts": "Neue Beiträge",
+        "postsHint": "Ein neuer Beitrag in deinen Clubs und Untergruppen. Kann häufig vorkommen.",
+        "comments": "Antworten",
+        "commentsHint": "Jemand kommentiert einen Beitrag, den du geschrieben oder kommentiert hast.",
         "community": "Neuigkeiten zu Clubs",
         "communityHint": "Ein Club oder eine Untergruppe wird gelöscht, gesperrt oder ist wieder verfügbar."
       }

@@ -12,7 +12,7 @@ Status: umgesetzt (Web Push mit VAPID, ohne externen Dienst). Dieses Dokument be
 
 ## Abweichungen vom ursprünglichen Plan
 
-- Einstellungen liegen als `users.pushPreferences` (jsonb, `null` = Standardwerte) statt in einer eigenen Tabelle. Vier Gruppen: `invites`, `membership`, `events` (standardmäßig aus), `community`.
+- Einstellungen liegen als `users.pushPreferences` (jsonb, `null` = Standardwerte) statt in einer eigenen Tabelle. Sechs Gruppen: `invites`, `membership`, `events` (standardmäßig aus), `posts` (neue Beiträge in deinen Clubs, standardmäßig aus), `comments` (Kommentare auf Beiträge, die du geschrieben oder kommentiert hast, standardmäßig an) und `community`. Neue Beiträge gehen an alle Mitglieder des Clubs bzw. der Untergruppe außer dem Autor, Kommentare an den Autor und frühere Kommentierende außer dem Kommentierenden.
 - Das Abo wird pro Gerät ein- und ausgeschaltet, die Gruppen gelten pro Konto.
 - Zusätzlich gibt es `POST /push/test` (Testnachricht an die eigenen Geräte, 30 s Pause) und `GET /push/config` (öffentlich: Schlüssel und Verfügbarkeit).
 - Beim Abmelden wird das Abo des Geräts serverseitig entfernt, damit der nächste Nutzer auf demselben Gerät nichts erhält.

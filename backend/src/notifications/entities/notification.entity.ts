@@ -18,7 +18,9 @@ export type NotificationType =
   | 'subgroup.deleted'
   | 'community.suspended'
   | 'community.unsuspended'
-  | 'community.admin_assigned';
+  | 'community.admin_assigned'
+  | 'post.created'
+  | 'post.comment';
 
 export interface NotificationPayload {
   communityName: string;
@@ -27,6 +29,8 @@ export interface NotificationPayload {
   subgroupSlug?: string;
   eventId?: string;
   eventName?: string;
+  postId?: string;
+  postTitle?: string;
   actorName?: string;
   decision?: 'approved' | 'rejected';
   /** Why a community was suspended, shown to its members. */

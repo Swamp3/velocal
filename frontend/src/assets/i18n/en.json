@@ -35,6 +35,8 @@
     "loadError": "Could not load notifications",
     "markAll": "Mark all read",
     "eventCreated": "New event in {{communityName}}: {{eventName}}",
+    "postCreated": "New post in {{communityName}}: {{postTitle}}",
+    "postComment": "{{actorName}} commented on “{{postTitle}}”",
     "eventInvite": "You're invited to {{eventName}}",
     "joinCommunity": "New join request for {{communityName}}",
     "joinSubgroup": "New join request for {{subgroupName}}",
@@ -379,6 +381,10 @@
         "membershipHint": "Join requests for groups you manage and decisions about your requests.",
         "events": "New events",
         "eventsHint": "A new event in your clubs and subgroups. Can be frequent.",
+        "posts": "New posts",
+        "postsHint": "A new post in your clubs and subgroups. Can be frequent.",
+        "comments": "Replies",
+        "commentsHint": "Someone comments on a post you wrote or commented on.",
         "community": "Club updates",
         "communityHint": "A club or subgroup is deleted, suspended or available again."
       }

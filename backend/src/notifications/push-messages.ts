@@ -3,12 +3,15 @@ import type {
   NotificationType,
 } from './entities/notification.entity';
 
-export type PushCategory = 'invites' | 'membership' | 'events' | 'community';
+export type PushCategory =
+  'invites' | 'membership' | 'events' | 'posts' | 'comments' | 'community';
 
 export const PUSH_CATEGORIES: PushCategory[] = [
   'invites',
   'membership',
   'events',
+  'posts',
+  'comments',
   'community',
 ];
 
@@ -17,6 +20,10 @@ export const PUSH_DEFAULTS: Record<PushCategory, boolean> = {
   invites: true,
   membership: true,
   events: false,
+  // New posts can be frequent, like new events, so they start off; replies to a post you took
+  // part in are rarer and more personal.
+  posts: false,
+  comments: true,
   community: true,
 };
 
@@ -29,6 +36,10 @@ export function categoryOf(type: NotificationType): PushCategory {
       return 'membership';
     case 'event.created':
       return 'events';
+    case 'post.created':
+      return 'posts';
+    case 'post.comment':
+      return 'comments';
     default:
       return 'community';
   }
@@ -61,7 +72,33 @@ export function buildPushMessage(
     ? `/events/${encodeURIComponent(payload.eventId)}`
     : '/notifications';
 
+  const postUrl = payload.postId
+    ? payload.subgroupSlug
+      ? `${communityUrl}/subgroups/${encodeURIComponent(payload.subgroupSlug)}/posts/${encodeURIComponent(payload.postId)}`
+      : `${communityUrl}/posts/${encodeURIComponent(payload.postId)}`
+    : communityUrl;
+  const actor = payload.actorName;
+
   switch (type) {
+    case 'post.created':
+      return {
+        title: group,
+        body: de
+          ? `${actor ? `${actor}: ` : ''}Neuer Beitrag – ${payload.postTitle ?? ''}`
+          : `${actor ? `${actor}: ` : ''}New post – ${payload.postTitle ?? ''}`,
+        url: postUrl,
+        tag: `post-${payload.postId ?? 'new'}`,
+      };
+    case 'post.comment':
+      return {
+        title: payload.postTitle ?? group,
+        body: de
+          ? `${actor ?? 'Jemand'} hat kommentiert`
+          : `${actor ?? 'Someone'} commented`,
+        url: postUrl,
+        // One notification per post on the device, so a lively thread does not pile up.
+        tag: `comment-${payload.postId ?? 'new'}`,
+      };
     case 'event.created':
       return {
         title: community,

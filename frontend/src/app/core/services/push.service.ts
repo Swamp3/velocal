@@ -4,7 +4,7 @@ import { SwPush } from '@angular/service-worker';
 import { firstValueFrom, Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
-export type PushCategory = 'invites' | 'membership' | 'events' | 'community';
+export type PushCategory = 'invites' | 'membership' | 'events' | 'posts' | 'comments' | 'community';
 export type PushPreferences = Record<PushCategory, boolean>;
 
 /**

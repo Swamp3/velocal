@@ -10,6 +10,7 @@ import {
   Repository,
 } from 'typeorm';
 import { MailService } from '../mail/mail.service';
+import { commentRecipients } from './comment-recipients';
 import { PushService } from './push.service';
 import { User } from '../users/entities/user.entity';
 import { EventInvite } from './entities/event-invite.entity';
@@ -101,6 +102,53 @@ export class NotificationsService {
         )
       : await this.communityMembers(input.communityId, input.actorId);
     await this.insertMany(recipients, 'event.created', input.payload, manager);
+  }
+
+  /** New community or subgroup post: everyone who can see it, except the author. */
+  async postCreated(input: {
+    actorId: string;
+    communityId: string;
+    subgroupId: string | null;
+    payload: NotificationPayload;
+  }): Promise<void> {
+    const recipients = await this.postAudience(input);
+    await this.insertMany(recipients, 'post.created', input.payload);
+  }
+
+  /** A comment: the post's author and everyone who commented before, except the commenter. */
+  async postComment(input: {
+    actorId: string;
+    communityId: string;
+    subgroupId: string | null;
+    postId: string;
+    postAuthorId: string;
+    payload: NotificationPayload;
+  }): Promise<void> {
+    const rows: { author_id: string }[] = await this.dataSource.query(
+      `SELECT DISTINCT "author_id" FROM "community_post_comments" WHERE "post_id" = $1`,
+      [input.postId],
+    );
+    const audience = await this.postAudience(input);
+    const recipients = commentRecipients(
+      [input.postAuthorId, ...rows.map((row) => row.author_id)],
+      audience,
+      input.actorId,
+    );
+    await this.insertMany(recipients, 'post.comment', input.payload);
+  }
+
+  private postAudience(input: {
+    actorId: string;
+    communityId: string;
+    subgroupId: string | null;
+  }): Promise<string[]> {
+    return input.subgroupId
+      ? this.subgroupAudience(
+          input.communityId,
+          input.subgroupId,
+          input.actorId,
+        )
+      : this.communityMembers(input.communityId, input.actorId);
   }
 
   async joinRequest(
