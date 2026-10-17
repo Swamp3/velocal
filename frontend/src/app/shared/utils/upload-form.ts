@@ -14,3 +14,10 @@ export function imageFallbackName(file: File): string {
   const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
   return `image.${ext}`;
 }
+
+/**
+ * Request options for a file upload. `ngsw-bypass` keeps the Angular service worker out of the
+ * request: in an installed iOS web app the worker cannot reliably forward a multipart body, and the
+ * upload then fails although the same upload works in a browser tab.
+ */
+export const UPLOAD_OPTIONS = { headers: { 'ngsw-bypass': 'true' } } as const;

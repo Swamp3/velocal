@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Uploading images and GPX files from the installed app on iPhone: uploads now bypass the app's service worker (`ngsw-bypass`), which cannot reliably forward file uploads in an installed iOS web app.
+
 - File uploads from the installed app no longer depend on the picker providing a file name (an empty name made the server ignore the file), and the error text of failed image uploads now really shows the HTTP status.
 
 

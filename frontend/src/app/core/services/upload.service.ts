@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
 import { Community, CyclingEvent, Post, RaceSeries, Subgroup } from '@shared/models';
-import { imageFallbackName, uploadForm } from '@shared/utils/upload-form';
+import { imageFallbackName, UPLOAD_OPTIONS, uploadForm } from '@shared/utils/upload-form';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -82,7 +82,7 @@ export class UploadService {
     // Do not set `Content-Type` manually — HttpClient needs to generate the
     // multipart boundary itself.
     return this.http
-      .post<T>(`${this.base}${subject}/${id}/image`, form)
+      .post<T>(`${this.base}${subject}/${id}/image`, form, UPLOAD_OPTIONS)
       .pipe(catchError((err: HttpErrorResponse) => this.toError(err)));
   }
 
@@ -95,7 +95,7 @@ export class UploadService {
   private postFile<T>(path: string, file: File): Observable<T> {
     const form = uploadForm(file, imageFallbackName(file));
     return this.http
-      .post<T>(`${this.base}${path}`, form)
+      .post<T>(`${this.base}${path}`, form, UPLOAD_OPTIONS)
       .pipe(catchError((err: HttpErrorResponse) => this.toError(err)));
   }
 

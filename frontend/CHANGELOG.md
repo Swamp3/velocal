@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- `UPLOAD_OPTIONS` (`ngsw-bypass: true`) on all multipart uploads (images, GPX)
+
 - `uploadForm` helper gives every upload a non-empty file name; `app-image-upload` reads `{ status, message }` errors from `UploadService` for its detail text
 
 

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from '@core/tokens/api-base-url';
 import { Route } from '@shared/models';
-import { uploadForm } from '@shared/utils/upload-form';
+import { UPLOAD_OPTIONS, uploadForm } from '@shared/utils/upload-form';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
@@ -36,7 +36,7 @@ export class RouteService {
 
   addFile(id: string, file: File): Observable<Route> {
     const form = uploadForm(file, 'track.gpx');
-    return this.http.post<Route>(`${this.base}/routes/${id}/files`, form);
+    return this.http.post<Route>(`${this.base}/routes/${id}/files`, form, UPLOAD_OPTIONS);
   }
 
   removeFile(id: string, fileId: string): Observable<Route> {
