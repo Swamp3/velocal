@@ -5,13 +5,14 @@ import { RouteService } from '@core/services/route.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyStateComponent } from '@shared/components';
 import { formatDistance, Route } from '@shared/models';
-import { ButtonComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonComponent, SkeletonComponent, ToastService, IconButtonComponent } from '@shared/ui';
 import { concat, last, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-route-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    IconButtonComponent,
     RouterLink,
     ReactiveFormsModule,
     TranslocoPipe,

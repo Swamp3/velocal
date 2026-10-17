@@ -29,7 +29,12 @@
         [error]="fieldError('name')"
       />
 
-      <ui-input [label]="'communities.form.location' | transloco" formControlName="location" />
+      <div>
+        <ui-input [label]="'communities.form.location' | transloco" formControlName="location" />
+        <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+          {{ 'communities.form.locationHint' | transloco }}
+        </p>
+      </div>
 
       <ui-input
         [label]="'communities.form.strava' | transloco"

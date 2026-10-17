@@ -1,16 +1,19 @@
-<div class="space-y-8">
+<div class="mx-auto max-w-3xl space-y-6">
   <h1 class="text-2xl font-bold text-[var(--color-text)]">
     {{ 'profile.title' | transloco }}
   </h1>
 
-  <!-- Profile Form -->
-  <ui-card>
-    <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-5">
+  <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-6">
+    <!-- Personal details -->
+    <app-profile-section
+      [title]="'profile.sections.personal' | transloco"
+      [description]="'profile.sections.personalHint' | transloco"
+    >
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <ui-input [label]="'profile.firstName' | transloco" formControlName="firstName" />
         <ui-input [label]="'profile.lastName' | transloco" formControlName="lastName" />
       </div>
-      <p class="-mt-3 text-xs text-[var(--color-text-muted)]">
+      <p class="-mt-2 text-xs text-[var(--color-text-muted)]">
         {{ 'profile.namesHint' | transloco }}
       </p>
 
@@ -42,7 +45,13 @@
           }
         </p>
       </div>
+    </app-profile-section>
 
+    <!-- Region, language and formats -->
+    <app-profile-section
+      [title]="'profile.sections.region' | transloco"
+      [description]="'profile.sections.regionHint' | transloco"
+    >
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <ui-input
           [label]="'profile.zip' | transloco"
@@ -58,118 +67,84 @@
         </div>
       </div>
 
-      <!-- Language -->
-      <fieldset class="space-y-2">
-        <legend class="text-sm font-medium text-[var(--color-text)]">
-          {{ 'profile.language' | transloco }}
-        </legend>
-        <div class="flex items-center gap-6">
-          <label
-            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
-          >
-            <input
-              type="radio"
-              formControlName="preferredLanguage"
-              value="de"
-              class="accent-[var(--color-primary)]"
-            />
-            Deutsch
-          </label>
-          <label
-            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
-          >
-            <input
-              type="radio"
-              formControlName="preferredLanguage"
-              value="en"
-              class="accent-[var(--color-primary)]"
-            />
-            English
-          </label>
-        </div>
-      </fieldset>
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <fieldset class="space-y-2">
+          <legend class="text-sm font-medium text-[var(--color-text)]">
+            {{ 'profile.language' | transloco }}
+          </legend>
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+            >
+              <input
+                type="radio"
+                formControlName="preferredLanguage"
+                value="de"
+                class="accent-[var(--color-primary)]"
+              />
+              Deutsch
+            </label>
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+            >
+              <input
+                type="radio"
+                formControlName="preferredLanguage"
+                value="en"
+                class="accent-[var(--color-primary)]"
+              />
+              English
+            </label>
+          </div>
+        </fieldset>
 
-      <!-- Format / Number locale -->
-      <fieldset class="space-y-2">
-        <legend class="text-sm font-medium text-[var(--color-text)]">
-          {{ 'profile.formatLocale' | transloco }}
-        </legend>
-        <p class="text-xs text-[var(--color-text-muted)]">
-          {{ 'profile.formatLocaleHint' | transloco }}
-        </p>
-        <div class="flex items-center gap-6">
-          <label
-            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
-          >
-            <input
-              type="radio"
-              formControlName="preferredLocale"
-              value="de"
-              class="accent-[var(--color-primary)]"
-            />
-            {{ 'profile.formatDe' | transloco }}
-          </label>
-          <label
-            class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
-          >
-            <input
-              type="radio"
-              formControlName="preferredLocale"
-              value="en"
-              class="accent-[var(--color-primary)]"
-            />
-            {{ 'profile.formatEn' | transloco }}
-          </label>
-        </div>
-      </fieldset>
+        <fieldset class="space-y-2">
+          <legend class="text-sm font-medium text-[var(--color-text)]">
+            {{ 'profile.formatLocale' | transloco }}
+          </legend>
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+            >
+              <input
+                type="radio"
+                formControlName="preferredLocale"
+                value="de"
+                class="accent-[var(--color-primary)]"
+              />
+              {{ 'profile.formatDe' | transloco }}
+            </label>
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text)]"
+            >
+              <input
+                type="radio"
+                formControlName="preferredLocale"
+                value="en"
+                class="accent-[var(--color-primary)]"
+              />
+              {{ 'profile.formatEn' | transloco }}
+            </label>
+          </div>
+          <p class="text-xs text-[var(--color-text-muted)]">
+            {{ 'profile.formatLocaleHint' | transloco }}
+          </p>
+        </fieldset>
+      </div>
+    </app-profile-section>
 
+    <div>
       <ui-button type="submit" [loading]="saving()" [disabled]="profileForm.invalid" size="lg">
         {{ 'profile.save' | transloco }}
       </ui-button>
-    </form>
-  </ui-card>
+    </div>
+  </form>
 
-  <!-- Password -->
-  <ui-card>
-    <h2 class="mb-2 text-lg font-semibold text-[var(--color-text)]">
-      {{ 'profile.passwordTitle' | transloco }}
-    </h2>
-    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
-      {{
-        hasPassword()
-          ? ('profile.passwordChangeHint' | transloco)
-          : ('profile.passwordSetHint' | transloco)
-      }}
-    </p>
-
-    @if (passwordActionSent()) {
-      <p class="text-sm text-[var(--color-success)]">
-        {{ 'profile.passwordResetSent' | transloco }}
-      </p>
-    } @else {
-      <ui-button
-        variant="outline"
-        [loading]="passwordActionLoading()"
-        [disabled]="passwordActionLoading()"
-        (click)="onChangePassword()"
-      >
-        {{
-          hasPassword()
-            ? ('profile.changePassword' | transloco)
-            : ('profile.setPassword' | transloco)
-        }}
-      </ui-button>
-    }
-  </ui-card>
-
-  <!-- Push notifications -->
-  <app-push-settings />
-
-  <!-- Discipline Preferences -->
-  <ui-card>
-    <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
-      {{ 'profile.disciplines' | transloco }}
-    </h2>
+  <!-- Disciplines -->
+  <app-profile-section
+    [title]="'profile.disciplines' | transloco"
+    [description]="'profile.disciplinesHint' | transloco"
+  >
     <div class="flex flex-wrap gap-2">
       @for (d of disciplines(); track d.slug) {
         <ui-chip
@@ -182,23 +157,20 @@
       }
     </div>
     @if (savingPrefs()) {
-      <p class="mt-2 text-xs text-[var(--color-muted)]">
+      <p class="text-xs text-[var(--color-text-muted)]">
         {{ 'profile.savingPrefs' | transloco }}
       </p>
     }
-  </ui-card>
+  </app-profile-section>
+
+  <!-- Push notifications -->
+  <app-push-settings />
 
   <!-- Favorites -->
-  <ui-card>
-    <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">
-      {{ 'profile.favorites' | transloco }}
-      @if (favoritesTotal() > 0) {
-        <span class="ml-1 text-sm font-normal text-[var(--color-muted)]">
-          ({{ favoritesTotal() }})
-        </span>
-      }
-    </h2>
-
+  <app-profile-section
+    [title]="'profile.favorites' | transloco"
+    [count]="favoritesTotal() > 0 ? favoritesTotal() : null"
+  >
     @if (favoriteEvents().length) {
       <div class="space-y-3">
         @for (event of favoriteEvents(); track event.id) {
@@ -219,39 +191,71 @@
       </div>
 
       @if (hasMoreFavorites()) {
-        <div class="mt-4 text-center">
+        <div class="text-center">
           <ui-button variant="outline" [loading]="loadingFavorites()" (click)="onLoadMore()">
             {{ 'profile.loadMore' | transloco }}
           </ui-button>
         </div>
       }
     } @else if (loadingFavorites()) {
-      <p class="text-sm text-[var(--color-muted)]">
+      <p class="text-sm text-[var(--color-text-muted)]">
         {{ 'profile.loadingFavorites' | transloco }}
       </p>
     } @else {
-      <p class="text-sm text-[var(--color-muted)]">
+      <p class="text-sm text-[var(--color-text-muted)]">
         {{ 'profile.noFavorites' | transloco }}
       </p>
     }
-  </ui-card>
+  </app-profile-section>
+
+  <!-- Security -->
+  <app-profile-section
+    [title]="'profile.passwordTitle' | transloco"
+    [description]="
+      hasPassword()
+        ? ('profile.passwordChangeHint' | transloco)
+        : ('profile.passwordSetHint' | transloco)
+    "
+  >
+    @if (passwordActionSent()) {
+      <p class="text-sm text-[var(--color-success)]">
+        {{ 'profile.passwordResetSent' | transloco }}
+      </p>
+    } @else {
+      <div>
+        <ui-button
+          variant="outline"
+          [loading]="passwordActionLoading()"
+          [disabled]="passwordActionLoading()"
+          (click)="onChangePassword()"
+        >
+          {{
+            hasPassword()
+              ? ('profile.changePassword' | transloco)
+              : ('profile.setPassword' | transloco)
+          }}
+        </ui-button>
+      </div>
+    }
+  </app-profile-section>
 
   <!-- Delete account -->
-  <section
-    class="rounded-[var(--radius-lg)] border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/10"
+  <app-profile-section
+    tone="danger"
+    [title]="'profile.delete.title' | transloco"
+    [description]="'profile.delete.hint' | transloco"
   >
-    <h2 class="mb-2 text-lg font-semibold text-red-800 dark:text-red-400">
-      {{ 'profile.delete.title' | transloco }}
-    </h2>
-    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
-      {{ 'profile.delete.hint' | transloco }}
-    </p>
-    <ui-button variant="danger" (click)="deleteDialogOpen.set(true)">
-      {{ 'profile.delete.open' | transloco }}
-    </ui-button>
-  </section>
+    <div>
+      <ui-button variant="danger" (click)="deleteDialogOpen.set(true)">
+        {{ 'profile.delete.open' | transloco }}
+      </ui-button>
+    </div>
+  </app-profile-section>
 </div>
 
 @if (deleteDialogOpen()) {
-  <app-delete-account-dialog [hasPassword]="hasPassword()" (cancelled)="deleteDialogOpen.set(false)" />
+  <app-delete-account-dialog
+    [hasPassword]="hasPassword()"
+    (cancelled)="deleteDialogOpen.set(false)"
+  />
 }

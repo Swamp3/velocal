@@ -71,6 +71,7 @@ export class UsersService {
         'u.bannedAt',
         'u.banReason',
         'u.createdAt',
+        'u.lastLoginAt',
       ]);
 
     if (dto.q) {
@@ -93,7 +94,11 @@ export class UsersService {
 
     const sort = dto.sort ?? 'createdAt';
     const order = dto.order ?? 'DESC';
-    qb.orderBy(`u.${sort}`, order);
+    qb.orderBy(
+      `u.${sort}`,
+      order,
+      order === 'DESC' ? 'NULLS LAST' : 'NULLS FIRST',
+    );
 
     const page = dto.page ?? 1;
     const limit = dto.limit ?? 20;
@@ -102,6 +107,13 @@ export class UsersService {
     const [data, total] = await qb.getManyAndCount();
 
     return { data, total, page, limit };
+  }
+
+  async recordLogin(userId: string): Promise<void> {
+    await this.userRepository.update(
+      { id: userId },
+      { lastLoginAt: new Date() },
+    );
   }
 
   async setBan(userId: string, reason: string | null): Promise<User> {

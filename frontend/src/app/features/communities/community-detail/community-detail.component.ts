@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { toMetaDescription } from '@shared/utils/meta-text';
+import { appleMapsDirectionsUrl, googleMapsDirectionsUrl } from '@shared/utils/map-links';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
@@ -82,6 +83,9 @@ export class CommunityDetailComponent implements OnInit {
   protected visibilityVariant(visibility: CommunityVisibility) {
     return communityVisibilityVariant(visibility);
   }
+
+  protected readonly googleDirections = googleMapsDirectionsUrl;
+  protected readonly appleDirections = appleMapsDirectionsUrl;
 
   protected sections(community: Community): CommunitySectionLink[] {
     const base = ['/communities', community.slug];

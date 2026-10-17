@@ -119,9 +119,17 @@ to_cron_expression() {
 # Credentials + config (shared)
 # ──────────────────────────────────────────────
 read_config_value() {
-  local key="$1"
-  [[ -f "$CRON_CONFIG" ]] || return 0
-  grep -E "^${key}=" "$CRON_CONFIG" 2>/dev/null | tail -1 | sed -E "s/^${key}=//; s/^'//; s/'$//"
+  local key="$1" line
+  # A missing key is normal. grep exits 1, and under set -e that aborted the
+  # installer before it prompted or wrote the timer.
+  [[ -r "$CRON_CONFIG" ]] || return 0
+  line="$(
+    grep -E "^(export[[:space:]]+)?${key}=" "$CRON_CONFIG" 2>/dev/null \
+      | tail -1 \
+      | sed -E "s/^(export[[:space:]]+)?${key}=//; s/^'//; s/'$//; s/\r$//" \
+      || true
+  )"
+  printf '%s' "$line"
 }
 
 prompt_credentials() {
@@ -395,7 +403,9 @@ show_all() {
   echo -e "  Log:    ${DIM}${CRON_LOG}${NC}"
   echo -e "  Script: ${DIM}${IMPORT_CRON_SCRIPT}${NC}"
   echo ""
-  if [[ -f "$CRON_CONFIG" ]]; then
+  if [[ -f "$CRON_CONFIG" && ! -r "$CRON_CONFIG" ]]; then
+    warn "Config file exists but is not readable by ${USER}"
+  elif [[ -f "$CRON_CONFIG" ]]; then
     ok "Config file exists"
     local cfg_email cfg_api cfg_src cfg_day cfg_time
     cfg_email="$(read_config_value VELOCAL_EMAIL)"
@@ -473,6 +483,9 @@ install_flow() {
   echo ""
 
   [[ -x "$IMPORT_CRON_SCRIPT" ]] || fail "${IMPORT_CRON_SCRIPT} is missing or not executable"
+  if [[ -f "$CRON_CONFIG" && ! -r "$CRON_CONFIG" ]]; then
+    fail "Config file is not readable by ${USER}: ${CRON_CONFIG}. Run: sudo chown ${USER}:${USER} ${CRON_CONFIG} && chmod 600 ${CRON_CONFIG}"
+  fi
 
   prompt_credentials
   echo ""

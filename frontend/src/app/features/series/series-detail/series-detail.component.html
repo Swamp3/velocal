@@ -106,15 +106,22 @@
     </dl>
 
     @if (auth.isAuthenticated()) {
-      <div class="mt-6 flex gap-2">
-        <a [routerLink]="['/series', s.slug, 'edit']">
-          <ui-button variant="outline">
-            {{ 'series.edit' | transloco }}
-          </ui-button>
-        </a>
-        <ui-button variant="outline" (click)="deleteSeries()">
-          {{ 'series.delete' | transloco }}
-        </ui-button>
+      <div class="mt-6 flex gap-1.5">
+        <a
+          [routerLink]="['/series', s.slug, 'edit']"
+          uiIconButton
+          icon="edit"
+          variant="outline"
+          [label]="'series.edit' | transloco"
+        ></a>
+        <button
+          type="button"
+          uiIconButton
+          icon="delete"
+          variant="danger"
+          [label]="'series.delete' | transloco"
+          (click)="deleteSeries()"
+        ></button>
       </div>
     }
 

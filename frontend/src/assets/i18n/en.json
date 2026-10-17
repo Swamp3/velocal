@@ -111,6 +111,7 @@
       "meetupTime": "Time",
       "meetupNote": "Note",
       "description": "Description",
+      "moreActions": "More actions",
       "addFavorite": "Add to favorites",
       "removeFavorite": "Remove from favorites",
       "loginToFavorite": "Login to use favorites",
@@ -310,6 +311,13 @@
     "saveAndProfile": "Save and go to profile"
   },
   "profile": {
+    "sections": {
+      "personal": "Personal details",
+      "personalHint": "Your name and how others see you.",
+      "region": "Region and language",
+      "regionHint": "Home area for event suggestions, language and number formats."
+    },
+    "disciplinesHint": "Choose the types of events you are interested in. They are used as a default filter.",
     "title": "Profile",
     "displayName": "Display Name",
     "displayNamePlaceholder": "Your name",
@@ -590,12 +598,15 @@
         "user": "Users",
         "banned": "Blocked"
       },
+      "never": "Never",
+      "neverHint": "Not recorded: no sign-in since this feature was added",
       "col": {
         "user": "User",
         "email": "Email",
         "role": "Role",
         "verified": "Verified",
         "registered": "Registered",
+        "lastLogin": "Last login",
         "actions": "Actions"
       },
       "ban": "Block",
@@ -893,6 +904,7 @@
     }
   },
   "communities": {
+    "navigate": "Navigate with",
     "title": "Communities",
     "search": "Search communities…",
     "create": "New community",
@@ -930,7 +942,8 @@
       "visibility": "Visibility",
       "hero": "Cover image",
       "logo": "Logo",
-      "location": "Location",
+      "location": "Meeting point",
+      "locationHint": "Address or place where the club meets, for example “Marktplatz 1, Berlin”. Visitors get a navigation link to it.",
       "strava": "Strava link",
       "stravaInvalid": "Please enter a link to strava.com (https://…)"
     },
@@ -938,6 +951,8 @@
       "title": "Members",
       "empty": "No members yet",
       "unnamed": "Unnamed member",
+      "promoteTitle": "Make admin?",
+      "promoteConfirm": "{{name}} will be able to manage members, requests and settings of this club, and can promote or remove other admins. Only do this for people you trust.",
       "promote": "Promote to admin",
       "demote": "Demote to member",
       "remove": "Remove member",
@@ -970,6 +985,8 @@
       "leaveConfirm": "Leave this subgroup?",
       "notFoundTitle": "Subgroup not found",
       "notFoundMessage": "This subgroup does not exist or is invite only.",
+      "promoteTitle": "Make moderator?",
+      "promoteConfirm": "{{name}} will be able to manage members and join requests of this subgroup. Only do this for people you trust.",
       "promote": "Make moderator",
       "demote": "Remove moderator",
       "roleModerator": "Moderator",

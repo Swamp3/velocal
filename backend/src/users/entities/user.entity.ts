@@ -62,6 +62,10 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   deletedAt: Date | null;
 
+  /** Last password, e-mail-code or password-reset sign-in. Visible to admins only. */
+  @Column({ type: 'timestamptz', nullable: true })
+  lastLoginAt: Date | null;
+
   /** Which kinds of notification are sent as push; null means the defaults. */
   @Column({ type: 'jsonb', nullable: true })
   pushPreferences: Record<string, boolean> | null;

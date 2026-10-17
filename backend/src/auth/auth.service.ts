@@ -69,7 +69,7 @@ export class AuthService {
       displayName: dto.displayName,
     });
 
-    return this.buildAuthResponse(user);
+    return this.finishLogin(user);
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
@@ -86,7 +86,7 @@ export class AuthService {
     }
 
     this.assertNotBanned(user);
-    return this.buildAuthResponse(user);
+    return this.finishLogin(user);
   }
 
   async requestOtp(email: string): Promise<{ message: string }> {
@@ -181,7 +181,7 @@ export class AuthService {
       user = await this.usersService.update(user);
     }
 
-    return this.buildAuthResponse(user);
+    return this.finishLogin(user);
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
@@ -237,7 +237,7 @@ export class AuthService {
       })
       .execute();
 
-    return this.buildAuthResponse(updated);
+    return this.finishLogin(updated);
   }
 
   async changePassword(userId: string): Promise<{ message: string }> {
@@ -301,6 +301,13 @@ export class AuthService {
     if (count >= RESET_MAX_PER_HOUR) {
       throw new UnauthorizedException('Too many requests. Try again later.');
     }
+  }
+
+  /** Remembers when the account last signed in, then issues the session. */
+  private async finishLogin(user: User): Promise<AuthResponse> {
+    const response = this.buildAuthResponse(user);
+    await this.usersService.recordLogin(user.id);
+    return response;
   }
 
   buildAuthResponse(user: User): AuthResponse {

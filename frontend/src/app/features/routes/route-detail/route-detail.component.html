@@ -104,27 +104,32 @@
                   }
                 </span>
               </span>
-              <span class="flex gap-2">
+              <span class="flex items-center gap-1">
                 <a
-                  uiButton
-                  size="sm"
-                  variant="outline"
+                  uiIconButton
+                  icon="map"
+                  variant="soft"
                   [routerLink]="['/routes', route.id, 'files', file.id]"
-                >
-                  {{ 'routes.map' | transloco }}
-                </a>
-                <ui-button size="sm" variant="outline" (click)="download(file.id, file.label)">
-                  {{ 'routes.download' | transloco }}
-                </ui-button>
+                  [label]="'routes.map' | transloco"
+                ></a>
+                <button
+                  type="button"
+                  uiIconButton
+                  icon="download"
+                  variant="ghost"
+                  [label]="'routes.download' | transloco"
+                  (click)="download(file.id, file.label)"
+                ></button>
                 @if (route.canEdit) {
-                  <ui-button
-                    size="sm"
+                  <button
+                    type="button"
+                    uiIconButton
+                    icon="delete"
                     variant="danger"
                     [disabled]="busy()"
+                    [label]="'routes.remove' | transloco"
                     (click)="removeFile(file.id)"
-                  >
-                    {{ 'routes.remove' | transloco }}
-                  </ui-button>
+                  ></button>
                 }
               </span>
             </li>

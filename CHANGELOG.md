@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-10-17
+
+### Changed
+
+- The event page is less crowded: favorite (heart), share and edit are icon buttons, and delete (or "delete this event only" / "stop series") moved into a "more" menu. Edit and delete buttons on news posts, race series, route files and the admin duplicate list are icon buttons too.
+
+- The profile page is tidier: every block now has the same heading, description and spacing, and the page is split into "Personal details", "Region and language", disciplines, push notifications, favorites, password and account deletion. The Save button belongs to the two form blocks above it.
+
+- Making someone a club admin or a subgroup moderator now asks for confirmation first, so the role is not granted by an accidental click.
+
+### Added
+
+- Club pages with a meeting point show "Navigate with Google Maps / Apple Maps" links that open a route to it. The club form calls the field "Meeting point" and explains what to enter.
+
+- Admins see when each user last signed in (Admin > Users, table and mobile cards). It is recorded on password sign-in, e-mail-code sign-in, registration and password reset, is visible to admins only, and is cleared when an account is deleted. Accounts that have not signed in since this release show "Never". Database migration included, back up first.
+
+
 ## [0.13.2] — 2026-10-16
 
 ### Added

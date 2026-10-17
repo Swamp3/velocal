@@ -32,7 +32,8 @@
             subgroup.slug,
             'requests',
           ]"
-          uiButton variant="outline"
+          uiButton
+          variant="outline"
         >
           {{ 'communities.requests.title' | transloco }}
           @if (subgroup.pendingRequestCount; as pending) {
@@ -112,5 +113,19 @@
         />
       }
     </div>
+
+    @if (promoteCandidate(); as candidate) {
+      <app-confirm-dialog
+        [title]="'communities.subgroups.promoteTitle' | transloco"
+        [message]="
+          'communities.subgroups.promoteConfirm'
+            | transloco
+              : { name: candidate.displayName || ('communities.members.unnamed' | transloco) }
+        "
+        [confirmLabel]="'communities.subgroups.promote' | transloco"
+        (confirmed)="confirmPromote()"
+        (cancelled)="promoteCandidate.set(null)"
+      />
+    }
   </div>
 }

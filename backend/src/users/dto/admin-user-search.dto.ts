@@ -12,6 +12,7 @@ import { Transform } from 'class-transformer';
 
 export enum UserSortField {
   CREATED_AT = 'createdAt',
+  LAST_LOGIN_AT = 'lastLoginAt',
   EMAIL = 'email',
   DISPLAY_NAME = 'displayName',
 }

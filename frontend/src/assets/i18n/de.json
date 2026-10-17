@@ -111,6 +111,7 @@
       "meetupTime": "Zeit",
       "meetupNote": "Hinweis",
       "description": "Beschreibung",
+      "moreActions": "Weitere Aktionen",
       "addFavorite": "Zu Favoriten hinzufügen",
       "removeFavorite": "Aus Favoriten entfernen",
       "loginToFavorite": "Anmelden um Favoriten zu nutzen",
@@ -310,6 +311,13 @@
     "saveAndProfile": "Speichern und zum Profil"
   },
   "profile": {
+    "sections": {
+      "personal": "Persönliche Daten",
+      "personalHint": "Dein Name und wie andere dich sehen.",
+      "region": "Region und Sprache",
+      "regionHint": "Heimatort für Event-Vorschläge, Sprache und Zahlenformate."
+    },
+    "disciplinesHint": "Wähle die Arten von Events, die dich interessieren. Sie dienen als Standardfilter.",
     "title": "Profil",
     "displayName": "Anzeigename",
     "displayNamePlaceholder": "Dein Name",
@@ -590,12 +598,15 @@
         "user": "Benutzer",
         "banned": "Gesperrt"
       },
+      "never": "Nie",
+      "neverHint": "Nicht erfasst: keine Anmeldung seit Einführung dieser Funktion",
       "col": {
         "user": "Benutzer",
         "email": "E-Mail",
         "role": "Rolle",
         "verified": "Verifiziert",
         "registered": "Registriert",
+        "lastLogin": "Letzte Anmeldung",
         "actions": "Aktionen"
       },
       "ban": "Sperren",
@@ -893,6 +904,7 @@
     }
   },
   "communities": {
+    "navigate": "Navigieren mit",
     "title": "Gemeinschaften",
     "search": "Gemeinschaften suchen…",
     "create": "Neue Gemeinschaft",
@@ -930,7 +942,8 @@
       "visibility": "Sichtbarkeit",
       "hero": "Titelbild",
       "logo": "Logo",
-      "location": "Standort",
+      "location": "Treffpunkt",
+      "locationHint": "Adresse oder Ort, an dem sich der Club trifft, zum Beispiel „Marktplatz 1, Berlin“. Besucher erhalten einen Navigationslink dorthin.",
       "strava": "Strava-Link",
       "stravaInvalid": "Bitte einen Link zu strava.com angeben (https://…)"
     },
@@ -938,6 +951,8 @@
       "title": "Mitglieder",
       "empty": "Noch keine Mitglieder",
       "unnamed": "Unbenanntes Mitglied",
+      "promoteTitle": "Zum Admin machen?",
+      "promoteConfirm": "{{name}} kann Mitglieder, Anfragen und Einstellungen dieses Clubs verwalten und weitere Admins ernennen oder entfernen. Mach das nur bei Personen, denen du vertraust.",
       "promote": "Zum Admin befördern",
       "demote": "Zum Mitglied herabstufen",
       "remove": "Mitglied entfernen",
@@ -970,6 +985,8 @@
       "leaveConfirm": "Diese Untergruppe verlassen?",
       "notFoundTitle": "Untergruppe nicht gefunden",
       "notFoundMessage": "Diese Untergruppe existiert nicht oder ist nur auf Einladung.",
+      "promoteTitle": "Zum Moderator machen?",
+      "promoteConfirm": "{{name}} kann Mitglieder und Beitrittsanfragen dieser Untergruppe verwalten. Mach das nur bei Personen, denen du vertraust.",
       "promote": "Zum Moderator machen",
       "demote": "Moderator entfernen",
       "roleModerator": "Moderator",

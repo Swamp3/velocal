@@ -22,12 +22,14 @@ import {
   ChipComponent,
   SkeletonComponent,
   ToastService,
+  IconButtonComponent,
 } from '@shared/ui';
 
 @Component({
   selector: 'app-news-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    IconButtonComponent,
     RouterLink,
     DatePipe,
     TranslocoPipe,

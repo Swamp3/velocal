@@ -12,15 +12,15 @@ import {
   RichTextViewComponent,
 } from '@shared/components';
 import { RaceSeriesDetail } from '@shared/models';
-import { ButtonComponent, SkeletonComponent } from '@shared/ui';
+import { SkeletonComponent, IconButtonComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-series-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    IconButtonComponent,
     RouterLink,
     TranslocoPipe,
-    ButtonComponent,
     SkeletonComponent,
     DisciplineChipComponent,
     EmptyStateComponent,

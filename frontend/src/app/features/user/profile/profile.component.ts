@@ -14,12 +14,13 @@ import { FavoriteService } from '@core/services/favorite.service';
 import { FilterStateService } from '@core/services/filter-state.service';
 import { LocaleService } from '@core/services/locale.service';
 import { UserService } from '@core/services/user.service';
-import { CardComponent, IconButtonComponent, ToastService } from '@shared/ui';
+import { IconButtonComponent, ToastService } from '@shared/ui';
 import { ButtonComponent, ChipComponent, InputComponent } from '@shared/ui';
 import { EventCardComponent, CountrySelectorComponent } from '@shared/components';
 import { CyclingEvent, Discipline } from '@shared/models';
 
 import { DeleteAccountDialogComponent } from './delete-account/delete-account-dialog.component';
+import { ProfileSectionComponent } from './profile-section.component';
 import { PushSettingsComponent } from './push-settings/push-settings.component';
 
 const FAVORITES_PAGE_SIZE = 10;
@@ -36,7 +37,9 @@ const FAVORITES_PAGE_SIZE = 10;
     CountrySelectorComponent,
     EventCardComponent,
     PushSettingsComponent,
-    DeleteAccountDialogComponent, IconButtonComponent, CardComponent,
+    DeleteAccountDialogComponent,
+    IconButtonComponent,
+    ProfileSectionComponent,
   ],
   templateUrl: './profile.component.html',
 })

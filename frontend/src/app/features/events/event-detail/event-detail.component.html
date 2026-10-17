@@ -36,62 +36,53 @@
         {{ back().labelKey | transloco }}
       </a>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex items-center gap-1.5">
+        @if (auth.isAuthenticated()) {
+          <button
+            type="button"
+            uiIconButton
+            icon="favorite"
+            [filled]="isFavorite()"
+            [variant]="isFavorite() ? 'soft' : 'outline'"
+            [label]="
+              (isFavorite() ? 'events.detail.removeFavorite' : 'events.detail.addFavorite')
+                | transloco
+            "
+            [disabled]="favoriteLoading()"
+            [attr.aria-pressed]="isFavorite()"
+            (click)="toggleFavorite()"
+          ></button>
+        } @else {
+          <a
+            routerLink="/auth/login"
+            uiIconButton
+            icon="favorite"
+            variant="outline"
+            [label]="'events.detail.loginToFavorite' | transloco"
+          ></a>
+        }
+
         <app-share-button
           [path]="'/events/' + event.id"
           [query]="hostQuery()"
           [title]="event.name"
           [text]="shareText()"
         />
-        @if (auth.isAuthenticated()) {
-          <ui-button
-            size="sm"
-            [variant]="isFavorite() ? 'primary' : 'outline'"
-            [loading]="favoriteLoading()"
-            (click)="toggleFavorite()"
-          >
-            {{
-              isFavorite()
-                ? ('events.detail.removeFavorite' | transloco)
-                : ('events.detail.addFavorite' | transloco)
-            }}
-          </ui-button>
-        } @else {
-          <a routerLink="/auth/login" class="inline-flex">
-            <ui-button variant="outline" size="sm">
-              {{ 'events.detail.loginToFavorite' | transloco }}
-            </ui-button>
-          </a>
-        }
 
         @if (canEdit()) {
           <a
             [routerLink]="['/events', event.id, 'edit']"
             [queryParams]="hostQuery()"
-            class="inline-flex"
-          >
-            <ui-button variant="outline" size="sm">
-              <span class="material-symbols-outlined text-[16px]">edit</span>
-              {{ 'event.actions.edit' | transloco }}
-            </ui-button>
-          </a>
-          <ui-button variant="danger" size="sm" [loading]="deleteLoading()" (click)="deleteEvent()">
-            <span class="material-symbols-outlined text-[16px]">delete</span>
-            {{
-              (event.recurrenceId ? 'event.series.deleteOne' : 'event.actions.delete') | transloco
-            }}
-          </ui-button>
-          @if (event.recurrenceId) {
-            <ui-button
-              variant="danger"
-              size="sm"
-              [loading]="deleteLoading()"
-              (click)="stopSeries()"
-            >
-              <span class="material-symbols-outlined text-[16px]">event_busy</span>
-              {{ 'event.series.stop' | transloco }}
-            </ui-button>
-          }
+            uiIconButton
+            icon="edit"
+            variant="outline"
+            [label]="'event.actions.edit' | transloco"
+          ></a>
+          <ui-action-menu
+            [items]="adminActions(event)"
+            [label]="'events.detail.moreActions' | transloco"
+            (selected)="onAdminAction($event)"
+          />
         }
       </div>
     </div>
@@ -412,23 +403,25 @@
               @for (file of route.files; track file.id) {
                 <li class="flex items-center justify-between gap-3 text-sm">
                   <span class="min-w-0 break-words text-[var(--color-text)]">{{ file.label }}</span>
-                  <a
-                    uiButton
-                    variant="link"
-                    class="shrink-0"
-                    [routerLink]="['/routes', route.id, 'files', file.id]"
-                  >
-                    {{ 'routes.map' | transloco }}
-                  </a>
-                  <button
-                    type="button"
-                    uiButton
-                    variant="link"
-                    class="shrink-0"
-                    (click)="downloadGpx(route.id, file.id, file.label)"
-                  >
-                    GPX
-                  </button>
+                  <span class="flex shrink-0 items-center gap-1">
+                    <a
+                      uiIconButton
+                      size="sm"
+                      icon="map"
+                      variant="soft"
+                      [routerLink]="['/routes', route.id, 'files', file.id]"
+                      [label]="'routes.map' | transloco"
+                    ></a>
+                    <button
+                      type="button"
+                      uiIconButton
+                      size="sm"
+                      icon="download"
+                      variant="ghost"
+                      [label]="'routes.download' | transloco"
+                      (click)="downloadGpx(route.id, file.id, file.label)"
+                    ></button>
+                  </span>
                 </li>
               }
             </ul>
@@ -478,23 +471,25 @@
                             >
                           }
                         </span>
-                        <a
-                          uiButton
-                          variant="link"
-                          class="shrink-0"
-                          [routerLink]="['/routes', groupRoute.id, 'files', file.id]"
-                        >
-                          {{ 'routes.map' | transloco }}
-                        </a>
-                        <button
-                          type="button"
-                          uiButton
-                          variant="link"
-                          class="shrink-0"
-                          (click)="downloadGpx(groupRoute.id, file.id, file.label)"
-                        >
-                          GPX
-                        </button>
+                        <span class="flex shrink-0 items-center gap-1">
+                          <a
+                            uiIconButton
+                            size="sm"
+                            icon="map"
+                            variant="soft"
+                            [routerLink]="['/routes', groupRoute.id, 'files', file.id]"
+                            [label]="'routes.map' | transloco"
+                          ></a>
+                          <button
+                            type="button"
+                            uiIconButton
+                            size="sm"
+                            icon="download"
+                            variant="ghost"
+                            [label]="'routes.download' | transloco"
+                            (click)="downloadGpx(groupRoute.id, file.id, file.label)"
+                          ></button>
+                        </span>
                       </li>
                     }
                   </ul>
