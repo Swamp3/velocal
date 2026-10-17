@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-10-17
+
 ### Changed
 
 - The event page is less crowded: favorite (heart), share and edit are icon buttons, and delete (or "delete this event only" / "stop series") moved into a "more" menu. Edit and delete buttons on news posts, race series, route files and the admin duplicate list are icon buttons too.

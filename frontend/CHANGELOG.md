@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-17
+
 ### Added
 
 - `ui-action-menu` (overflow menu) and `filled` option for `uiIconButton`; event, news, series, route and duplicate-events pages use icon buttons
