@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- The route map shows the direction of travel with small arrows along the track. The elevation profile has a distance axis in kilometres, and touching or hovering it shows distance and height and marks that point on the map.
+
 - Club polls with an end date show how long they still run ("Ends in 3 days", with the exact time on hover) and when they ended.
 
 

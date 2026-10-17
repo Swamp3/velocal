@@ -35,21 +35,68 @@
       {{ 'routes.elevation' | transloco }}
       <span class="font-normal text-[var(--color-text-muted)]">({{ p.min }}–{{ p.max }} m)</span>
     </h2>
-    <svg
-      class="mt-2 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)]"
-      [attr.viewBox]="'0 0 ' + profileW + ' ' + profileH"
-      preserveAspectRatio="none"
-      role="img"
-      [attr.aria-label]="'routes.elevation' | transloco"
-    >
-      <path [attr.d]="p.area" fill="#e11d48" fill-opacity="0.18" />
-      <path
-        [attr.d]="p.line"
-        fill="none"
-        stroke="#e11d48"
-        stroke-width="2"
-        vector-effect="non-scaling-stroke"
-      />
-    </svg>
+    <div class="mt-2">
+      <div
+        class="relative h-36 w-full cursor-crosshair touch-pan-y overflow-hidden rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)]"
+        (pointermove)="onProfileMove($event)"
+        (pointerdown)="onProfileMove($event)"
+        (pointerleave)="onProfileLeave()"
+        (pointercancel)="onProfileLeave()"
+      >
+        <svg
+          class="absolute inset-0 size-full"
+          [attr.viewBox]="'0 0 ' + profileW + ' ' + profileH"
+          preserveAspectRatio="none"
+          role="img"
+          [attr.aria-label]="'routes.elevation' | transloco"
+        >
+          <path [attr.d]="p.area" fill="#e11d48" fill-opacity="0.18" />
+          <path
+            [attr.d]="p.line"
+            fill="none"
+            stroke="#e11d48"
+            stroke-width="2"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+        <span
+          class="pointer-events-none absolute left-1.5 top-1 rounded bg-[var(--color-bg-card)]/80 px-1 text-[10px] text-[var(--color-text-muted)]"
+          >{{ p.max }} m</span
+        >
+        <span
+          class="pointer-events-none absolute bottom-1 left-1.5 rounded bg-[var(--color-bg-card)]/80 px-1 text-[10px] text-[var(--color-text-muted)]"
+          >{{ p.min }} m</span
+        >
+        @if (hover(); as h) {
+          <div
+            class="pointer-events-none absolute inset-y-0 w-px bg-[var(--color-text-muted)]"
+            [style.left.%]="h.left"
+          ></div>
+          <div
+            class="pointer-events-none absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-blue-600"
+            [style.left.%]="h.left"
+            [style.top.%]="h.top"
+          ></div>
+          <div
+            class="pointer-events-none absolute top-1 whitespace-nowrap rounded bg-[var(--color-text)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--color-bg)]"
+            [class]="h.left > 60 ? '-translate-x-full' : ''"
+            [style.left.%]="h.left"
+          >
+            {{ h.km | number: '1.0-1' }} km · {{ h.ele }} m
+          </div>
+        }
+      </div>
+      <div class="relative mt-1 h-4 text-[11px] text-[var(--color-text-muted)]" aria-hidden="true">
+        @for (t of ticks(); track t.km) {
+          <span
+            class="absolute -translate-x-1/2 tabular-nums"
+            [class]="t.left < 4 ? 'translate-x-0' : ''"
+            [style.left.%]="t.left"
+            >{{ t.km | number: '1.0-1' }}</span
+          >
+        }
+        <span class="absolute right-0 top-0">km</span>
+      </div>
+    </div>
   }
 </section>
