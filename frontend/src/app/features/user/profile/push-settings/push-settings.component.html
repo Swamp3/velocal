@@ -1,11 +1,7 @@
-<ui-card>
-  <h2 class="mb-2 text-lg font-semibold text-[var(--color-text)]">
-    {{ 'profile.push.title' | transloco }}
-  </h2>
-  <p class="mb-4 text-sm text-[var(--color-text-muted)]">
-    {{ 'profile.push.hint' | transloco }}
-  </p>
-
+<app-profile-section
+  [title]="'profile.push.title' | transloco"
+  [description]="'profile.push.hint' | transloco"
+>
   @switch (push.state()) {
     @case ('loading') {
       <p class="text-sm text-[var(--color-text-muted)]">…</p>
@@ -48,7 +44,7 @@
   }
 
   @if (prefs(); as p) {
-    <fieldset class="mt-5 space-y-3">
+    <fieldset class="space-y-3">
       <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">
         {{ 'profile.push.categories' | transloco }}
       </legend>
@@ -75,4 +71,4 @@
       </p>
     </fieldset>
   }
-</ui-card>
+</app-profile-section>

@@ -310,6 +310,13 @@
     "saveAndProfile": "Save and go to profile"
   },
   "profile": {
+    "sections": {
+      "personal": "Personal details",
+      "personalHint": "Your name and how others see you.",
+      "region": "Region and language",
+      "regionHint": "Home area for event suggestions, language and number formats."
+    },
+    "disciplinesHint": "Choose the types of events you are interested in. They are used as a default filter.",
     "title": "Profile",
     "displayName": "Display Name",
     "displayNamePlaceholder": "Your name",

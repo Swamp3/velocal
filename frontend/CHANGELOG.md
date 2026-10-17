@@ -8,6 +8,10 @@
 
 - Reusable `app-confirm-dialog`; used before promoting a club admin or subgroup moderator
 
+### Changed
+
+- Profile page restructured with a shared `app-profile-section` (heading, description, count, danger tone); push settings use it too; the form is split into two cards
+
 
 ## [0.13.2] - 2026-10-16
 

@@ -310,6 +310,13 @@
     "saveAndProfile": "Speichern und zum Profil"
   },
   "profile": {
+    "sections": {
+      "personal": "Persönliche Daten",
+      "personalHint": "Dein Name und wie andere dich sehen.",
+      "region": "Region und Sprache",
+      "regionHint": "Heimatort für Event-Vorschläge, Sprache und Zahlenformate."
+    },
+    "disciplinesHint": "Wähle die Arten von Events, die dich interessieren. Sie dienen als Standardfilter.",
     "title": "Profil",
     "displayName": "Anzeigename",
     "displayNamePlaceholder": "Dein Name",

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The profile page is tidier: every block now has the same heading, description and spacing, and the page is split into "Personal details", "Region and language", disciplines, push notifications, favorites, password and account deletion. The Save button belongs to the two form blocks above it.
+
 - Making someone a club admin or a subgroup moderator now asks for confirmation first, so the role is not granted by an accidental click.
 
 ### Added
