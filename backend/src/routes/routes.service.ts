@@ -17,7 +17,7 @@ import { Route } from './entities/route.entity';
 import { gpxStats, gpxTrack, looksLikeGpx, TrackPoint } from './gpx';
 import { SerializedRoute, serializeRoute } from './serialize';
 
-export const MAX_GPX_BYTES = 5 * 1024 * 1024;
+export const MAX_GPX_BYTES = 20 * 1024 * 1024;
 const MAX_FILES_PER_ROUTE = 20;
 const MAX_ROUTES_PER_USER = 100;
 const TRACK_CACHE_SIZE = 50;

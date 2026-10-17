@@ -11,7 +11,8 @@ const EARTH_RADIUS_M = 6_371_000;
 const ASCENT_THRESHOLD_M = 3;
 
 export function looksLikeGpx(text: string): boolean {
-  return /<gpx[\s>]/i.test(text.slice(0, 4096));
+  // Some exporters put a long comment or metadata header first, or prefix the tags (`<gpx:gpx>`).
+  return /<(?:[\w.-]+:)?gpx[\s>]/i.test(text.slice(0, 65536));
 }
 
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -30,7 +31,7 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
  * nothing to hook into.
  */
 export function gpxStats(text: string): GpxStats {
-  const pointTag = /<(trkpt|rtept)\b([^>]*?)(\/?)>/gi;
+  const pointTag = /<(?:([\w.-]+):)?(trkpt|rtept)\b([^>]*?)(\/?)>/gi;
   let distance = 0;
   let ascent = 0;
   let count = 0;
@@ -42,7 +43,7 @@ export function gpxStats(text: string): GpxStats {
   let maxLon = -180;
 
   for (const match of text.matchAll(pointTag)) {
-    const attrs = match[2];
+    const attrs = match[3];
     const lat = Number(/\blat\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]);
     const lon = Number(/\blon\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
@@ -56,11 +57,18 @@ export function gpxStats(text: string): GpxStats {
     if (prev) distance += haversine(prev.lat, prev.lon, lat, lon);
     prev = { lat, lon };
 
-    if (match[3] !== '/') {
+    if (match[4] !== '/') {
       const start = (match.index ?? 0) + match[0].length;
-      const end = text.indexOf(`</${match[1]}`, start);
+      const end = text.indexOf(
+        `</${match[1] ? `${match[1]}:` : ''}${match[2]}`,
+        start,
+      );
       const inner = text.slice(start, end === -1 ? start : end);
-      const ele = Number(/<ele>\s*([^<\s]+)\s*<\/ele>/i.exec(inner)?.[1]);
+      const ele = Number(
+        /<(?:[\w.-]+:)?ele>\s*([^<\s]+)\s*<\/(?:[\w.-]+:)?ele>/i.exec(
+          inner,
+        )?.[1],
+      );
       if (Number.isFinite(ele)) {
         if (anchorEle === null) anchorEle = ele;
         else if (ele - anchorEle >= ASCENT_THRESHOLD_M) {
@@ -85,7 +93,12 @@ export function gpxStats(text: string): GpxStats {
 }
 
 /** One point of a drawable track: latitude, longitude, elevation (or null), metres from the start. */
-export type TrackPoint = [lat: number, lon: number, ele: number | null, distM: number];
+export type TrackPoint = [
+  lat: number,
+  lon: number,
+  ele: number | null,
+  distM: number,
+];
 
 const DEFAULT_TRACK_POINTS = 800;
 
@@ -99,32 +112,37 @@ export function gpxTrack(
   text: string,
   maxPoints = DEFAULT_TRACK_POINTS,
 ): TrackPoint[] {
-  const pointTag = /<(trkpt|rtept)\b([^>]*?)(\/?)>/gi;
+  const pointTag = /<(?:([\w.-]+):)?(trkpt|rtept)\b([^>]*?)(\/?)>/gi;
   const lats: number[] = [];
   const lons: number[] = [];
   const eles: (number | null)[] = [];
   const dist: number[] = [];
 
   for (const match of text.matchAll(pointTag)) {
-    const attrs = match[2];
+    const attrs = match[3];
     const lat = Number(/\blat\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]);
     const lon = Number(/\blon\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1]);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
     if (Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
 
     let ele: number | null = null;
-    if (match[3] !== '/') {
+    if (match[4] !== '/') {
       const start = (match.index ?? 0) + match[0].length;
-      const end = text.indexOf(`</${match[1]}`, start);
+      const end = text.indexOf(
+        `</${match[1] ? `${match[1]}:` : ''}${match[2]}`,
+        start,
+      );
       const inner = text.slice(start, end === -1 ? start : end);
-      const value = Number(/<ele>\s*([^<\s]+)\s*<\/ele>/i.exec(inner)?.[1]);
+      const value = Number(
+        /<(?:[\w.-]+:)?ele>\s*([^<\s]+)\s*<\/(?:[\w.-]+:)?ele>/i.exec(
+          inner,
+        )?.[1],
+      );
       if (Number.isFinite(value)) ele = value;
     }
     const n = lats.length;
     dist.push(
-      n === 0
-        ? 0
-        : dist[n - 1] + haversine(lats[n - 1], lons[n - 1], lat, lon),
+      n === 0 ? 0 : dist[n - 1] + haversine(lats[n - 1], lons[n - 1], lat, lon),
     );
     lats.push(lat);
     lons.push(lon);
@@ -191,8 +209,12 @@ function rdp(xs: number[], ys: number[], epsilon: number): number[] {
       const d =
         len === 0
           ? Math.hypot(xs[i] - xs[first], ys[i] - ys[first])
-          : Math.abs(dy * xs[i] - dx * ys[i] + xs[last] * ys[first] - ys[last] * xs[first]) /
-            len;
+          : Math.abs(
+              dy * xs[i] -
+                dx * ys[i] +
+                xs[last] * ys[first] -
+                ys[last] * xs[first],
+            ) / len;
       if (d > maxDist) {
         maxDist = d;
         index = i;

@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,6 +8,18 @@ import { EmptyStateComponent } from '@shared/components';
 import { formatDistance, Route } from '@shared/models';
 import { ButtonComponent, SkeletonComponent, ToastService, IconButtonComponent } from '@shared/ui';
 import { concat, last, Observable } from 'rxjs';
+
+/** Tells the user why a GPX upload was refused instead of a bare "something went wrong". */
+function uploadErrorKey(err: HttpErrorResponse): string {
+  const message = typeof err.error?.message === 'string' ? err.error.message : '';
+  if (err.status === 413 || message === 'GPX file is too large') return 'routes.errorTooLarge';
+  if (message === 'This is not a GPX file') return 'routes.errorNotGpx';
+  if (message === 'The GPX file contains no track') return 'routes.errorNoTrack';
+  if (message === 'Too many files for one route') return 'routes.errorTooMany';
+  if (err.status === 429) return 'routes.errorRateLimit';
+  if (err.status === 0) return 'routes.errorNetwork';
+  return 'routes.error';
+}
 
 @Component({
   selector: 'app-route-detail',
@@ -93,8 +106,8 @@ export class RouteDetailComponent implements OnInit {
           this.busy.set(false);
           this.apply(updated);
         },
-        error: () => {
-          this.fail();
+        error: (err: HttpErrorResponse) => {
+          this.fail(uploadErrorKey(err));
           this.routeService.get(data.id).subscribe((fresh) => this.apply(fresh));
         },
       });
@@ -134,8 +147,8 @@ export class RouteDetailComponent implements OnInit {
     this.form.patchValue({ name: data.name, description: data.description ?? '' });
   }
 
-  private fail(): void {
+  private fail(key = 'routes.error'): void {
     this.busy.set(false);
-    this.toast.error(this.transloco.translate('routes.error'));
+    this.toast.error(this.transloco.translate(key));
   }
 }
