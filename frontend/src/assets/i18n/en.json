@@ -903,6 +903,7 @@
     }
   },
   "communities": {
+    "navigate": "Navigate with",
     "title": "Communities",
     "search": "Search communities…",
     "create": "New community",
@@ -940,7 +941,8 @@
       "visibility": "Visibility",
       "hero": "Cover image",
       "logo": "Logo",
-      "location": "Location",
+      "location": "Meeting point",
+      "locationHint": "Address or place where the club meets, for example “Marktplatz 1, Berlin”. Visitors get a navigation link to it.",
       "strava": "Strava link",
       "stravaInvalid": "Please enter a link to strava.com (https://…)"
     },

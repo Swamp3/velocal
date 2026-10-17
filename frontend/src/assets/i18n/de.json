@@ -903,6 +903,7 @@
     }
   },
   "communities": {
+    "navigate": "Navigieren mit",
     "title": "Gemeinschaften",
     "search": "Gemeinschaften suchen…",
     "create": "Neue Gemeinschaft",
@@ -940,7 +941,8 @@
       "visibility": "Sichtbarkeit",
       "hero": "Titelbild",
       "logo": "Logo",
-      "location": "Standort",
+      "location": "Treffpunkt",
+      "locationHint": "Adresse oder Ort, an dem sich der Club trifft, zum Beispiel „Marktplatz 1, Berlin“. Besucher erhalten einen Navigationslink dorthin.",
       "strava": "Strava-Link",
       "stravaInvalid": "Bitte einen Link zu strava.com angeben (https://…)"
     },

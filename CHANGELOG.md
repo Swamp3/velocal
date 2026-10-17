@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Club pages with a meeting point show "Navigate with Google Maps / Apple Maps" links that open a route to it. The club form calls the field "Meeting point" and explains what to enter.
+
 - Admins see when each user last signed in (Admin > Users, table and mobile cards). It is recorded on password sign-in, e-mail-code sign-in, registration and password reset, is visible to admins only, and is cleared when an account is deleted. Accounts that have not signed in since this release show "Never". Database migration included, back up first.
 
 
