@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.14.3] - 2026-10-17
+
 ### Changed
 
 - `app-image-upload`: failed uploads append `(HTTP <status>: <message>)`
