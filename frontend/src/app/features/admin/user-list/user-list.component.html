@@ -71,7 +71,7 @@
             {{ 'admin.users.col.registered' | transloco }}
           </th>
           <th class="px-4 py-3 text-left font-medium text-[var(--color-text-muted)]">
-            {{ 'admin.users.col.lastLogin' | transloco }}
+            {{ 'admin.users.col.lastSeen' | transloco }}
           </th>
           <th class="px-4 py-3 text-right font-medium text-[var(--color-text-muted)]">
             {{ 'admin.users.col.actions' | transloco }}
@@ -113,8 +113,8 @@
               {{ user.createdAt | date:'mediumDate' }}
             </td>
             <td class="px-4 py-3 text-[var(--color-text-muted)]">
-              @if (user.lastLoginAt) {
-                {{ user.lastLoginAt | date:'medium' }}
+              @if (user.lastSeenAt) {
+                {{ user.lastSeenAt | date:'medium' }}
               } @else {
                 <span title="{{ 'admin.users.neverHint' | transloco }}">{{ 'admin.users.never' | transloco }}</span>
               }
@@ -186,9 +186,9 @@
         <div class="mt-3 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
           <div class="flex items-center gap-3">
             <span>{{ user.createdAt | date:'mediumDate' }}</span>
-            <span [title]="'admin.users.col.lastLogin' | transloco">
+            <span [title]="'admin.users.col.lastSeen' | transloco">
               <span class="material-symbols-outlined align-middle text-[14px]" aria-hidden="true">login</span>
-              {{ user.lastLoginAt ? (user.lastLoginAt | date:'short') : ('admin.users.never' | transloco) }}
+              {{ user.lastSeenAt ? (user.lastSeenAt | date:'short') : ('admin.users.never' | transloco) }}
             </span>
             @if (user.emailVerified) {
               <span class="material-symbols-outlined text-[14px] text-emerald-500" style="font-variation-settings: 'FILL' 1">verified</span>

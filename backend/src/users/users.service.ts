@@ -33,6 +33,7 @@ export class UsersService {
     isAdmin: boolean;
     bannedAt: Date | null;
     deletedAt: Date | null;
+    lastSeenAt: Date | null;
   } | null> {
     return this.userRepository.findOne({
       where: { id },
@@ -42,6 +43,7 @@ export class UsersService {
         isAdmin: true,
         bannedAt: true,
         deletedAt: true,
+        lastSeenAt: true,
       },
     });
   }
@@ -71,7 +73,7 @@ export class UsersService {
         'u.bannedAt',
         'u.banReason',
         'u.createdAt',
-        'u.lastLoginAt',
+        'u.lastSeenAt',
       ]);
 
     if (dto.q) {
@@ -109,10 +111,10 @@ export class UsersService {
     return { data, total, page, limit };
   }
 
-  async recordLogin(userId: string): Promise<void> {
+  async recordSeen(userId: string): Promise<void> {
     await this.userRepository.update(
       { id: userId },
-      { lastLoginAt: new Date() },
+      { lastSeenAt: new Date() },
     );
   }
 

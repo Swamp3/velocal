@@ -188,3 +188,16 @@ select {
     cursor: auto;
   }
 }
+
+// iOS Safari zooms the whole page when a field with text smaller than 16px gets focus, and
+// leaves it zoomed (dialog buttons then slide off screen). Keep text in fields at 16px on touch
+// devices instead of blocking zoom for everyone.
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+  select,
+  textarea,
+  .ql-container.ql-snow,
+  .ql-editor {
+    font-size: 16px !important;
+  }
+}

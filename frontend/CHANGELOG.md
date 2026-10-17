@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-10-17
+
+### Added
+
+- Navigation links under the meetup place in the club area of the event page
+
+### Changed
+
+- Web manifest: `handle_links: preferred` and `launch_handler.client_mode: navigate-existing`
+
+- Admin user list column "Last active" (`lastSeenAt`)
+
+### Fixed
+
+- Fields, selects, textareas and the rich-text editor use 16px text on touch devices (`pointer: coarse`) to stop the iOS focus zoom
+
+
 ## [0.14.0] - 2026-10-17
 
 ### Added

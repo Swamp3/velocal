@@ -22,6 +22,7 @@ import { SeoService } from '@core/services/seo.service';
 import { SeriesService } from '@core/services/series.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AddToCalendarComponent, DisciplineChipComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
+import { appleMapsDirectionsUrl, googleMapsDirectionsUrl } from '@shared/utils/map-links';
 import { CyclingEvent, formatDistance, PostListItem, RaceSeries } from '@shared/models';
 import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit.component';
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
@@ -202,6 +203,9 @@ export class EventDetailComponent implements OnInit {
       error: () => this.favoriteLoading.set(false),
     });
   }
+
+  protected readonly googleDirections = googleMapsDirectionsUrl;
+  protected readonly appleDirections = appleMapsDirectionsUrl;
 
   /** Less common admin actions, kept in the "more" menu next to the edit button. */
   protected adminActions(event: CyclingEvent): ActionMenuItem[] {
