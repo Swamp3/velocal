@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `users.lastLoginAt` is now `users.lastSeenAt` (migration `RenameLastLoginToLastSeen`), also written by `JwtStrategy` at most every 5 minutes per user; `GET /admin/users` sorts by `lastSeenAt`
+
+
 ## [0.14.0] - 2026-10-17
 
 ### Added

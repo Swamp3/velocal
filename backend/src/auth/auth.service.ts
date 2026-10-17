@@ -306,7 +306,7 @@ export class AuthService {
   /** Remembers when the account last signed in, then issues the session. */
   private async finishLogin(user: User): Promise<AuthResponse> {
     const response = this.buildAuthResponse(user);
-    await this.usersService.recordLogin(user.id);
+    await this.usersService.recordSeen(user.id);
     return response;
   }
 

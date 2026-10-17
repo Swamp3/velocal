@@ -62,9 +62,9 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   deletedAt: Date | null;
 
-  /** Last password, e-mail-code or password-reset sign-in. Visible to admins only. */
+  /** Last time a request with this account's token was verified (sign-ins included), written at most every few minutes. Visible to admins only. */
   @Column({ type: 'timestamptz', nullable: true })
-  lastLoginAt: Date | null;
+  lastSeenAt: Date | null;
 
   /** Which kinds of notification are sent as push; null means the defaults. */
   @Column({ type: 'jsonb', nullable: true })

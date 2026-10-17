@@ -599,14 +599,14 @@
         "banned": "Blocked"
       },
       "never": "Never",
-      "neverHint": "Not recorded: no sign-in since this feature was added",
+      "neverHint": "Not recorded yet: no visit since this feature was added",
       "col": {
         "user": "User",
         "email": "Email",
         "role": "Role",
         "verified": "Verified",
         "registered": "Registered",
-        "lastLogin": "Last login",
+        "lastSeen": "Last active",
         "actions": "Actions"
       },
       "ban": "Block",

@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The meeting point of a club event (Treffpunkt on the event page) now has "Navigate with Google Maps / Apple Maps" links that open a route to it.
 
+### Changed
+
+- The admin user list shows when a user was last active instead of the last sign-in: the time is updated whenever the backend verifies the user's token (at most every 5 minutes per user), so it also covers people who stay signed in. Migration included (renames a column).
+
 
 ## [0.14.0] — 2026-10-17
 

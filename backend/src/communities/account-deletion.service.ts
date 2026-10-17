@@ -251,7 +251,7 @@ export class AccountDeletionService {
          "displayName" = $3, "firstName" = NULL, "lastName" = NULL,
          "stravaUrl" = NULL, "homeZip" = NULL, "homeCountry" = NULL,
          "homeCoordinates" = NULL, "pushPreferences" = NULL,
-         "isAdmin" = false, "lastLoginAt" = NULL, "deletedAt" = now()
+         "isAdmin" = false, "lastSeenAt" = NULL, "deletedAt" = now()
        WHERE "id" = $1`,
       [user.id, `deleted-${user.id}@deleted.invalid`, DELETED_USER_NAME],
     );

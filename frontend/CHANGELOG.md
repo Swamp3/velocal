@@ -6,6 +6,10 @@
 
 - Navigation links under the meetup place in the club area of the event page
 
+### Changed
+
+- Admin user list column "Last active" (`lastSeenAt`)
+
 
 ## [0.14.0] - 2026-10-17
 

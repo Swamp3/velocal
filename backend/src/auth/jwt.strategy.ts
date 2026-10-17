@@ -6,6 +6,8 @@ import { UsersService } from '../users/users.service';
 
 const AUTH_CACHE_MS = 10_000;
 const AUTH_CACHE_MAX = 5_000;
+/** The "last seen" time is written at most this often per user. */
+const SEEN_WRITE_EVERY_MS = 5 * 60_000;
 
 export interface JwtPayload {
   sub: string;
@@ -37,7 +39,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Re-checks the account, so a ban, a deletion or a removed admin role takes
    * effect without waiting for the token to expire. The answer is cached for a
    * few seconds per user: one lookup per burst of requests instead of one per
-   * request, at the price of a short delay.
+   * request, at the price of a short delay. The same lookup keeps the user's
+   * "last seen" time up to date, written at most every few minutes.
    */
   async validate(payload: JwtPayload) {
     const now = Date.now();
@@ -51,6 +54,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             ? { id: user.id, email: user.email, isAdmin: user.isAdmin }
             : null,
       };
+      if (
+        entry.user &&
+        (!user?.lastSeenAt ||
+          now - user.lastSeenAt.getTime() > SEEN_WRITE_EVERY_MS)
+      ) {
+        // Piggybacks on the lookup above; a failed write must never fail the request.
+        void this.usersService.recordSeen(payload.sub).catch(() => undefined);
+      }
       if (this.cache.size > AUTH_CACHE_MAX) this.cache.clear();
       this.cache.set(payload.sub, entry);
     }

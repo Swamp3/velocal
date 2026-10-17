@@ -599,14 +599,14 @@
         "banned": "Gesperrt"
       },
       "never": "Nie",
-      "neverHint": "Nicht erfasst: keine Anmeldung seit Einführung dieser Funktion",
+      "neverHint": "Noch nicht erfasst: kein Besuch seit Einführung dieser Funktion",
       "col": {
         "user": "Benutzer",
         "email": "E-Mail",
         "role": "Rolle",
         "verified": "Verifiziert",
         "registered": "Registriert",
-        "lastLogin": "Letzte Anmeldung",
+        "lastSeen": "Zuletzt aktiv",
         "actions": "Aktionen"
       },
       "ban": "Sperren",
