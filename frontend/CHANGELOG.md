@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-10-17
+
 ### Changed
 
 - `ui-action-menu` can hold links (`href`, opens a new tab), and has `icon`, `size` and `align` options; meeting point navigation uses it
