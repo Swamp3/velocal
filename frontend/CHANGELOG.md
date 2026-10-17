@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Web manifest: `handle_links: preferred` and `launch_handler.client_mode: navigate-existing`
+
 - Admin user list column "Last active" (`lastSeenAt`)
 
 ### Fixed

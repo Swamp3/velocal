@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- VeloCal links (for example shared event links) now ask the browser to open in the installed app instead of a browser tab, and to reuse the already open app window. This works in Chrome and Edge on Android and desktop; iPhone does not offer this for web apps.
+
 - The admin user list shows when a user was last active instead of the last sign-in: the time is updated whenever the backend verifies the user's token (at most every 5 minutes per user), so it also covers people who stay signed in. Migration included (renames a column).
 
 ### Fixed
