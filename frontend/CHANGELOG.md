@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Route map `?event=` back link (with club/subgroup context); event ride section: one-line rows, file name only for routes with several files
+
+
 ## [0.15.0] - 2026-10-17
 
 ### Added

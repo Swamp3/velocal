@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Opening the route map from an event now leads back to the event ("Back to the event") instead of to the route page. The route list of an event and its pace groups no longer show the GPX file name when a route has a single file; with several files the name is shortened to one line.
+
+
 ## [0.15.0] — 2026-10-17
 
 ### Changed

@@ -45,6 +45,9 @@ export class RouteMapComponent implements OnInit {
   private leaflet?: typeof LeafletNS;
   private hoverMarker?: LeafletNS.CircleMarker;
 
+  /** Event the page was opened from (`?event=`), so "back" returns there instead of to the route. */
+  protected readonly fromEvent = signal<{ id: string; query: Record<string, string> } | null>(null);
+
   protected readonly route = signal<Route | null>(null);
   protected readonly file = signal<RouteFile | null>(null);
   protected readonly points = signal<TrackPoint[]>([]);
@@ -178,6 +181,16 @@ export class RouteMapComponent implements OnInit {
   ngOnInit(): void {
     const id = this.activated.snapshot.paramMap.get('id')!;
     const fileId = this.activated.snapshot.paramMap.get('fileId')!;
+    const queryMap = this.activated.snapshot.queryParamMap;
+    const eventId = queryMap.get('event');
+    if (eventId && /^[0-9a-f-]{36}$/i.test(eventId)) {
+      const query: Record<string, string> = {};
+      for (const key of ['community', 'subgroup']) {
+        const value = queryMap.get(key);
+        if (value) query[key] = value;
+      }
+      this.fromEvent.set({ id: eventId, query });
+    }
     this.seo.setMeta({ title: 'VeloCal — Route', description: '', noindex: true });
     forkJoin([this.routeService.get(id), this.routeService.getTrack(id, fileId)]).subscribe({
       next: ([route, track]) => {
