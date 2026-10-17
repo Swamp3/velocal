@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.14.3] - 2026-10-17
+
+### Changed
+
+- `app-image-upload`: failed uploads append `(HTTP <status>: <message>)`
+
+- Route page: unknown upload errors append `(HTTP <status>: <message>)`
+
+### Fixed
+
+- `UPLOAD_OPTIONS` (`ngsw-bypass: true`) on all multipart uploads (images, GPX)
+
+- `uploadForm` helper gives every upload a non-empty file name; `app-image-upload` reads `{ status, message }` errors from `UploadService` for its detail text
+
+
 ## [0.14.2] - 2026-10-17
 
 ### Changed

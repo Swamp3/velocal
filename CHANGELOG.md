@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.14.3] — 2026-10-17
+
+### Changed
+
+- Failed image uploads (events, clubs, news) show the HTTP status and server message in the error text.
+
+- A failed GPX upload with an unexpected cause now shows the HTTP status and the server message in the error text, so it can be reported and traced.
+
+### Fixed
+
+- Uploading images and GPX files from the installed app on iPhone: uploads now bypass the app's service worker (`ngsw-bypass`), which cannot reliably forward file uploads in an installed iOS web app.
+
+- File uploads from the installed app no longer depend on the picker providing a file name (an empty name made the server ignore the file), and the error text of failed image uploads now really shows the HTTP status.
+
+
 ## [0.14.2] — 2026-10-17
 
 ### Changed

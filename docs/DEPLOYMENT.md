@@ -164,6 +164,24 @@ Then delete the local `velocal_deploy` private key file.
   for the length of the build, and database migrations run on every deploy.
   Back up the database first when a change adds migrations.
 
+## Uploads fail
+
+If images or GPX files cannot be uploaded and the backend log shows no `ERROR`
+(client errors are not logged as errors), find the layer that breaks the request.
+Use a throw-away account; the script creates a route, uploads a tiny GPX file and
+deletes the route again, once straight at the backend, once through the frontend
+server and once through the public address:
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T \
+  -e EMAIL=test@example.com -e PASSWORD='...' backend \
+  node --input-type=module - < scripts/check-upload.mjs
+```
+
+- Fails only at `https://…/api`: the reverse proxy (Caddy) or a CDN in front.
+- Fails at `http://frontend:80/api` and the public address: the frontend server proxy.
+- Fails at `http://localhost:3000/api` too: the backend itself (permissions on `/app/uploads`, disk, database).
+
 ## Moving to another server
 
 See [SERVER-MIGRATION.md](SERVER-MIGRATION.md) for the step-by-step move to a
