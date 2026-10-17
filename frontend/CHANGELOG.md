@@ -4,6 +4,8 @@
 
 ### Added
 
+- "Last login" column and mobile line in the admin user list; `login` icon added to the icon subset
+
 - Reusable `app-confirm-dialog`; used before promoting a club admin or subgroup moderator
 
 

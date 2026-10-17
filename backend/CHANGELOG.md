@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- `users.lastLoginAt` (migration `AddUserLastLogin`), set on login, e-mail-code login, register and password reset; returned by `GET /admin/users` and sortable with `sort=lastLoginAt`
+
+
 ## [0.13.2] - 2026-10-16
 
 ### Changed

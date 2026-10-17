@@ -25,6 +25,8 @@ export interface AdminUser {
   bannedAt?: string | null;
   banReason?: string | null;
   createdAt: string;
+  /** Last sign-in; null for accounts that have not signed in since this was tracked. */
+  lastLoginAt?: string | null;
 }
 
 export interface DuplicateEvent {
@@ -65,7 +67,7 @@ export interface AdminUserSearchParams {
   status?: 'banned';
   page?: number;
   limit?: number;
-  sort?: 'createdAt' | 'email' | 'displayName';
+  sort?: 'createdAt' | 'lastLoginAt' | 'email' | 'displayName';
   order?: 'ASC' | 'DESC';
 }
 
