@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-10-17
+
 ### Changed
 
 - Save buttons are at the top of every form page (profile, event, series, news, club, subgroup, post, poll, route), next to an "×" to cancel, and stay visible while scrolling. Dialogs keep their buttons at the bottom.

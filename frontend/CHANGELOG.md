@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-17
+
 ### Added
 
 - Inbox entries and push settings for the new post notifications
