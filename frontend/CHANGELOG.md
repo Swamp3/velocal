@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Route page: unknown upload errors append `(HTTP <status>: <message>)`
+
+
 ## [0.14.2] - 2026-10-17
 
 ### Changed

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- A failed GPX upload with an unexpected cause now shows the HTTP status and the server message in the error text, so it can be reported and traced.
+
+
 ## [0.14.2] — 2026-10-17
 
 ### Changed

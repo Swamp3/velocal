@@ -21,6 +21,13 @@ function uploadErrorKey(err: HttpErrorResponse): string {
   return 'routes.error';
 }
 
+/** Status and server text for errors we have no specific message for, so a report says what happened. */
+function uploadErrorDetail(err: HttpErrorResponse): string {
+  if (uploadErrorKey(err) !== 'routes.error') return '';
+  const text = typeof err.error?.message === 'string' ? `: ${err.error.message.slice(0, 120)}` : '';
+  return ` (HTTP ${err.status}${text})`;
+}
+
 @Component({
   selector: 'app-route-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,7 +114,7 @@ export class RouteDetailComponent implements OnInit {
           this.apply(updated);
         },
         error: (err: HttpErrorResponse) => {
-          this.fail(uploadErrorKey(err));
+          this.fail(uploadErrorKey(err), uploadErrorDetail(err));
           this.routeService.get(data.id).subscribe((fresh) => this.apply(fresh));
         },
       });
@@ -147,8 +154,8 @@ export class RouteDetailComponent implements OnInit {
     this.form.patchValue({ name: data.name, description: data.description ?? '' });
   }
 
-  private fail(key = 'routes.error'): void {
+  private fail(key = 'routes.error', detail = ''): void {
     this.busy.set(false);
-    this.toast.error(this.transloco.translate(key));
+    this.toast.error(this.transloco.translate(key) + detail);
   }
 }
