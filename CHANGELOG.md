@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.14.1] — 2026-10-17
+
 ### Added
 
 - The meeting point of a club event (Treffpunkt on the event page) now has "Navigate with Google Maps / Apple Maps" links that open a route to it.
