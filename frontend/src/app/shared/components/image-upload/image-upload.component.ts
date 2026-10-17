@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,9 +24,12 @@ const MAX_BYTES = 10 * 1024 * 1024;
  */
 /** Status and server text of a failed request, so a report says what actually happened. */
 function errorDetail(err: unknown): string {
-  if (!(err instanceof HttpErrorResponse)) return '';
-  const text = typeof err.error?.message === 'string' ? `: ${err.error.message.slice(0, 120)}` : '';
-  return ` (HTTP ${err.status}${text})`;
+  // UploadService turns HTTP errors into a plain `{ status, message }`.
+  const e = err as { status?: unknown; message?: unknown; error?: { message?: unknown } };
+  if (typeof e?.status !== 'number') return '';
+  const raw = e.error?.message ?? e.message;
+  const text = typeof raw === 'string' && raw ? `: ${raw.slice(0, 120)}` : '';
+  return ` (HTTP ${e.status}${text})`;
 }
 
 @Component({

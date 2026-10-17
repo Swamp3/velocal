@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - A failed GPX upload with an unexpected cause now shows the HTTP status and the server message in the error text, so it can be reported and traced.
 
+### Fixed
+
+- File uploads from the installed app no longer depend on the picker providing a file name (an empty name made the server ignore the file), and the error text of failed image uploads now really shows the HTTP status.
+
 
 ## [0.14.2] — 2026-10-17
 

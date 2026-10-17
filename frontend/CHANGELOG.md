@@ -8,6 +8,10 @@
 
 - Route page: unknown upload errors append `(HTTP <status>: <message>)`
 
+### Fixed
+
+- `uploadForm` helper gives every upload a non-empty file name; `app-image-upload` reads `{ status, message }` errors from `UploadService` for its detail text
+
 
 ## [0.14.2] - 2026-10-17
 
