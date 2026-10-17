@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Navigation links under the meetup place in the club area of the event page
+
+
 ## [0.14.0] - 2026-10-17
 
 ### Added
