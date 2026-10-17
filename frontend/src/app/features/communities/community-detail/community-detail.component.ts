@@ -15,7 +15,12 @@ import { AuthService } from '@core/services/auth.service';
 import { CommunityService } from '@core/services/community.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { CommunityHeroComponent, EmptyStateComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
+import {
+  CommunityHeroComponent,
+  EmptyStateComponent,
+  RichTextViewComponent,
+  ShareButtonComponent,
+} from '@shared/components';
 import { communityErrorKey } from '../community-error';
 import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
 import {
@@ -24,12 +29,21 @@ import {
 } from '../community-section-nav/community-section-nav.component';
 import { CommunityEventsComponent } from '../community-events/community-events.component';
 import { Community, CommunityVisibility, communityVisibilityVariant } from '@shared/models';
-import { BadgeComponent, ButtonComponent, ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
+import {
+  ActionMenuComponent,
+  type ActionMenuItem,
+  BadgeComponent,
+  ButtonComponent,
+  ButtonStyleDirective,
+  SkeletonComponent,
+  ToastService,
+} from '@shared/ui';
 
 @Component({
   selector: 'app-community-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ActionMenuComponent,
     RouterLink,
     TranslocoPipe,
     BadgeComponent,
@@ -40,7 +54,10 @@ import { BadgeComponent, ButtonComponent, ButtonStyleDirective, SkeletonComponen
     RichTextViewComponent,
     CommunitySectionNavComponent,
     CommunityEventsComponent,
-    ReportDialogComponent, ButtonStyleDirective, ButtonStyleDirective, ShareButtonComponent,
+    ReportDialogComponent,
+    ButtonStyleDirective,
+    ButtonStyleDirective,
+    ShareButtonComponent,
   ],
   templateUrl: './community-detail.component.html',
 })
@@ -84,8 +101,22 @@ export class CommunityDetailComponent implements OnInit {
     return communityVisibilityVariant(visibility);
   }
 
-  protected readonly googleDirections = googleMapsDirectionsUrl;
-  protected readonly appleDirections = appleMapsDirectionsUrl;
+  protected navigationItems(place: string): ActionMenuItem[] {
+    return [
+      {
+        id: 'google',
+        label: 'Google Maps',
+        icon: 'open_in_new',
+        href: googleMapsDirectionsUrl(place),
+      },
+      {
+        id: 'apple',
+        label: 'Apple Maps',
+        icon: 'open_in_new',
+        href: appleMapsDirectionsUrl(place),
+      },
+    ];
+  }
 
   protected sections(community: Community): CommunitySectionLink[] {
     const base = ['/communities', community.slug];

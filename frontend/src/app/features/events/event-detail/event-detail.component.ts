@@ -204,8 +204,12 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
-  protected readonly googleDirections = googleMapsDirectionsUrl;
-  protected readonly appleDirections = appleMapsDirectionsUrl;
+  protected navigationItems(place: string): ActionMenuItem[] {
+    return [
+      { id: 'google', label: 'Google Maps', icon: 'open_in_new', href: googleMapsDirectionsUrl(place) },
+      { id: 'apple', label: 'Apple Maps', icon: 'open_in_new', href: appleMapsDirectionsUrl(place) },
+    ];
+  }
 
   /** Less common admin actions, kept in the "more" menu next to the edit button. */
   protected adminActions(event: CyclingEvent): ActionMenuItem[] {

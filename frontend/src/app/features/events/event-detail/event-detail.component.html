@@ -311,33 +311,16 @@
                     <dt class="text-[var(--color-text-muted)]">
                       {{ 'events.detail.meetupPlace' | transloco }}
                     </dt>
-                    <dd class="font-medium text-[var(--color-text)]">{{ event.meetupPlace }}</dd>
-                    <dd class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
-                      <span class="text-[var(--color-text-muted)]">{{
-                        'communities.navigate' | transloco
+                    <dd class="flex items-center justify-between gap-2">
+                      <span class="font-medium text-[var(--color-text)]">{{
+                        event.meetupPlace
                       }}</span>
-                      <a
-                        [href]="googleDirections(event.meetupPlace)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-1 font-medium text-[var(--color-primary)] hover:underline"
-                      >
-                        Google Maps
-                        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                          >open_in_new</span
-                        >
-                      </a>
-                      <a
-                        [href]="appleDirections(event.meetupPlace)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-1 font-medium text-[var(--color-primary)] hover:underline"
-                      >
-                        Apple Maps
-                        <span class="material-symbols-outlined text-[16px]" aria-hidden="true"
-                          >open_in_new</span
-                        >
-                      </a>
+                      <ui-action-menu
+                        [items]="navigationItems(event.meetupPlace)"
+                        [label]="'communities.navigate' | transloco"
+                        variant="ghost"
+                        size="sm"
+                      />
                     </dd>
                   </div>
                 }

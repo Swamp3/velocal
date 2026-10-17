@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- The navigation links to a meeting point (club events and club pages) sit behind a small "⋮" menu next to the address instead of showing both links as text.
+
+
 ## [0.14.1] — 2026-10-17
 
 ### Added
