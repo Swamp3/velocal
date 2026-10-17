@@ -27,7 +27,14 @@ import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
 import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
-import { ButtonComponent, ButtonStyleDirective, ChipComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import {
+  ActionMenuComponent,
+  type ActionMenuItem,
+  ChipComponent,
+  IconButtonComponent,
+  SkeletonComponent,
+  ToastService,
+} from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
 import { formatTime } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
@@ -51,7 +58,6 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     RouterLink,
     DatePipe,
     TranslocoPipe,
-    ButtonComponent,
     SkeletonComponent,
     AddToCalendarComponent,
     DisciplineChipComponent,
@@ -65,7 +71,10 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     EventRsvpComponent,
     EventInviteComponent,
     EventCommentsComponent,
-    EventMeetupEditComponent, ButtonStyleDirective, ShareButtonComponent,
+    EventMeetupEditComponent,
+    ShareButtonComponent,
+    IconButtonComponent,
+    ActionMenuComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -192,6 +201,37 @@ export class EventDetailComponent implements OnInit {
       next: () => this.favoriteLoading.set(false),
       error: () => this.favoriteLoading.set(false),
     });
+  }
+
+  /** Less common admin actions, kept in the "more" menu next to the edit button. */
+  protected adminActions(event: CyclingEvent): ActionMenuItem[] {
+    const busy = this.deleteLoading();
+    const items: ActionMenuItem[] = [
+      {
+        id: 'delete',
+        icon: 'delete',
+        danger: true,
+        disabled: busy,
+        label: this.transloco.translate(
+          event.recurrenceId ? 'event.series.deleteOne' : 'event.actions.delete',
+        ),
+      },
+    ];
+    if (event.recurrenceId) {
+      items.push({
+        id: 'stopSeries',
+        icon: 'event_busy',
+        danger: true,
+        disabled: busy,
+        label: this.transloco.translate('event.series.stop'),
+      });
+    }
+    return items;
+  }
+
+  protected onAdminAction(id: string): void {
+    if (id === 'delete') this.deleteEvent();
+    else if (id === 'stopSeries') this.stopSeries();
   }
 
   protected deleteEvent(): void {

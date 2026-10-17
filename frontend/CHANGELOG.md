@@ -4,6 +4,8 @@
 
 ### Added
 
+- `ui-action-menu` (overflow menu) and `filled` option for `uiIconButton`; event, news, series, route and duplicate-events pages use icon buttons
+
 - `map-links` helper (Google/Apple Maps directions from free text); navigation links on the club detail page; hint under the location field in the club form
 
 - "Last login" column and mobile line in the admin user list; `login` icon added to the icon subset

@@ -111,6 +111,7 @@
       "meetupTime": "Time",
       "meetupNote": "Note",
       "description": "Description",
+      "moreActions": "More actions",
       "addFavorite": "Add to favorites",
       "removeFavorite": "Remove from favorites",
       "loginToFavorite": "Login to use favorites",

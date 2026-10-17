@@ -125,21 +125,23 @@
             {{ 'news.publish' | transloco }}
           </ui-button>
         }
-        <a [routerLink]="['/news', post.slug, 'edit']" class="inline-flex">
-          <ui-button variant="outline" size="sm">
-            <span class="material-symbols-outlined text-[16px]">edit</span>
-            {{ 'news.edit' | transloco }}
-          </ui-button>
-        </a>
-        <ui-button
+        <span class="flex-1"></span>
+        <a
+          [routerLink]="['/news', post.slug, 'edit']"
+          uiIconButton
+          icon="edit"
+          variant="outline"
+          [label]="'news.edit' | transloco"
+        ></a>
+        <button
+          type="button"
+          uiIconButton
+          icon="delete"
           variant="danger"
-          size="sm"
-          [loading]="deleteLoading()"
+          [disabled]="deleteLoading()"
+          [label]="'news.delete' | transloco"
           (click)="deletePost()"
-        >
-          <span class="material-symbols-outlined text-[16px]">delete</span>
-          {{ 'news.delete' | transloco }}
-        </ui-button>
+        ></button>
       </div>
     }
   </div>

@@ -99,13 +99,12 @@
                 <div class="flex shrink-0 items-center gap-2">
                   <a
                     [routerLink]="['/events', event.id, 'edit']"
-                    uiButton
-                    variant="soft"
+                    uiIconButton
                     size="sm"
-                  >
-                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                    {{ 'admin.missingData.edit' | transloco }}
-                  </a>
+                    icon="edit"
+                    variant="soft"
+                    [label]="'admin.missingData.edit' | transloco"
+                  ></a>
                   @if (confirmingId() === event.id) {
                     <ui-button
                       variant="danger"
@@ -119,9 +118,15 @@
                       {{ 'common.cancel' | transloco }}
                     </ui-button>
                   } @else {
-                    <ui-button variant="outline" size="sm" (click)="askDelete(event)">
-                      {{ 'admin.duplicates.delete' | transloco }}
-                    </ui-button>
+                    <button
+                      type="button"
+                      uiIconButton
+                      size="sm"
+                      icon="delete"
+                      variant="danger"
+                      [label]="'admin.duplicates.delete' | transloco"
+                      (click)="askDelete(event)"
+                    ></button>
                   }
                 </div>
               </li>
@@ -180,13 +185,12 @@
           <div class="flex shrink-0 items-center gap-2">
             <a
               [routerLink]="['/events', event.id, 'edit']"
-              uiButton
-              variant="soft"
+              uiIconButton
               size="sm"
-            >
-              <span class="material-symbols-outlined text-[16px]">edit</span>
-              {{ 'admin.missingData.edit' | transloco }}
-            </a>
+              icon="edit"
+              variant="soft"
+              [label]="'admin.missingData.edit' | transloco"
+            ></a>
             @if (confirmingId() === event.id) {
               <ui-button
                 variant="danger"
@@ -200,9 +204,15 @@
                 {{ 'common.cancel' | transloco }}
               </ui-button>
             } @else {
-              <ui-button variant="outline" size="sm" (click)="askDelete(event)">
-                {{ 'admin.duplicates.delete' | transloco }}
-              </ui-button>
+              <button
+                type="button"
+                uiIconButton
+                size="sm"
+                icon="delete"
+                variant="danger"
+                [label]="'admin.duplicates.delete' | transloco"
+                (click)="askDelete(event)"
+              ></button>
             }
           </div>
         </li>

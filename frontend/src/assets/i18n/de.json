@@ -111,6 +111,7 @@
       "meetupTime": "Zeit",
       "meetupNote": "Hinweis",
       "description": "Beschreibung",
+      "moreActions": "Weitere Aktionen",
       "addFavorite": "Zu Favoriten hinzufügen",
       "removeFavorite": "Aus Favoriten entfernen",
       "loginToFavorite": "Anmelden um Favoriten zu nutzen",

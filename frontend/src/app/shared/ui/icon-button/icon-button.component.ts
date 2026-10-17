@@ -32,9 +32,13 @@ const VARIANTS: Record<IconButtonVariant, string> = {
     '[attr.aria-label]': 'label()',
     '[attr.title]': 'label()',
   },
-  template: `<span class="material-symbols-outlined" [class]="iconSize()" aria-hidden="true">{{
-    icon()
-  }}</span>`,
+  template: `<span
+    class="material-symbols-outlined"
+    [class]="iconSize()"
+    [style.font-variation-settings]="fill()"
+    aria-hidden="true"
+    >{{ icon() }}</span
+  >`,
 })
 export class IconButtonComponent {
   readonly icon = input.required<string>();
@@ -42,7 +46,10 @@ export class IconButtonComponent {
   readonly variant = input<IconButtonVariant>('ghost');
   readonly size = input<IconButtonSize>('md');
   readonly shape = input<'round' | 'square'>('round');
+  /** Solid icon, for the "on" state of a toggle such as a favorite. */
+  readonly filled = input(false);
 
+  protected readonly fill = computed(() => (this.filled() ? "'FILL' 1" : null));
   protected readonly iconSize = computed(() => SIZES[this.size()].icon);
   protected readonly classes = computed(
     () =>
