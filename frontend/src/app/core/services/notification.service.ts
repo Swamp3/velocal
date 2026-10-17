@@ -11,7 +11,9 @@ export type NotificationType =
   | 'subgroup.deleted'
   | 'community.suspended'
   | 'community.unsuspended'
-  | 'community.admin_assigned';
+  | 'community.admin_assigned'
+  | 'post.created'
+  | 'post.comment';
 
 export interface AppNotification {
   id: string;
@@ -23,6 +25,8 @@ export interface AppNotification {
     subgroupSlug?: string;
     eventId?: string;
     eventName?: string;
+    postId?: string;
+    postTitle?: string;
     actorName?: string;
     decision?: 'approved' | 'rejected';
     reason?: string;

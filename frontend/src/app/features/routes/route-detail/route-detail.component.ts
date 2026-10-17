@@ -28,10 +28,13 @@ function uploadErrorDetail(err: HttpErrorResponse): string {
   return ` (HTTP ${err.status}${text})`;
 }
 
+import { FormActionsComponent } from '@shared/components/form-actions/form-actions.component';
+
 @Component({
   selector: 'app-route-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FormActionsComponent,
     IconButtonComponent,
     RouterLink,
     ReactiveFormsModule,

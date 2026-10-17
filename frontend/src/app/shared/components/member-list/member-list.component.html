@@ -1,9 +1,9 @@
 @if (items().length > 0) {
   <ul
-    class="divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)]"
+    class="divide-y divide-[var(--color-border)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)]"
   >
     @for (item of items(); track item.id) {
-      <li class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <li class="flex items-center justify-between gap-3 px-4 py-3">
         <div class="min-w-0">
           <p class="flex items-center gap-2 font-medium text-[var(--color-text)]">
             <span class="truncate">{{ item.name }}</span>
@@ -30,18 +30,13 @@
         </div>
 
         @if (item.toggleLabel || item.canRemove) {
-          <div class="flex shrink-0 flex-wrap gap-2">
-            @if (item.toggleLabel) {
-              <ui-button variant="outline" size="sm" (click)="roleToggle.emit(item.id)">
-                {{ item.toggleLabel }}
-              </ui-button>
-            }
-            @if (item.canRemove) {
-              <ui-button variant="danger" size="sm" (click)="remove.emit(item.id)">
-                {{ 'communities.members.remove' | transloco }}
-              </ui-button>
-            }
-          </div>
+          <ui-action-menu
+            class="shrink-0"
+            [items]="menuItems(item)"
+            [label]="'communities.members.actionsFor' | transloco: { name: item.name }"
+            variant="ghost"
+            (selected)="onAction($event, item)"
+          />
         }
       </li>
     }

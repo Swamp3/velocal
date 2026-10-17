@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
@@ -10,6 +11,8 @@ import {
   CommunityErrorCode,
   communityForbidden,
 } from './community-error';
+import { NotificationPayload } from '../notifications/entities/notification.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateCommunityCommentDto } from './dto/create-community-comment.dto';
 import { CreateCommunityPostDto } from './dto/create-community-post.dto';
 import { CommunityPostComment } from './entities/community-post-comment.entity';
@@ -57,6 +60,8 @@ interface HostAccess {
 
 @Injectable()
 export class CommunityPostsService {
+  private readonly logger = new Logger(CommunityPostsService.name);
+
   constructor(
     @InjectRepository(CommunityPost)
     private readonly posts: Repository<CommunityPost>,
@@ -70,6 +75,7 @@ export class CommunityPostsService {
     private readonly subgroups: Repository<Subgroup>,
     @InjectRepository(SubgroupMember)
     private readonly subgroupMembers: Repository<SubgroupMember>,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async list(
@@ -107,6 +113,18 @@ export class CommunityPostsService {
       }),
     );
     const loaded = await this.requirePost(saved.id);
+    this.notifyPost(
+      this.notifications.postCreated({
+        actorId: userId,
+        communityId: host.community.id,
+        subgroupId: host.subgroup?.id ?? null,
+        payload: this.notificationPayload(
+          host,
+          loaded,
+          loaded.author?.displayName,
+        ),
+      }),
+    );
     return this.serializePost(loaded, userId, host, new Map());
   }
 
@@ -186,7 +204,7 @@ export class CommunityPostsService {
     subgroupSlug?: string,
   ): Promise<SerializedCommunityComment> {
     const host = await this.requireHost(communitySlug, userId, subgroupSlug);
-    await this.requireHostPost(host, postId);
+    const post = await this.requireHostPost(host, postId);
     const saved = await this.comments.save(
       this.comments.create({
         postId,
@@ -199,7 +217,44 @@ export class CommunityPostsService {
       relations: { author: true },
     });
     if (!loaded) throw new NotFoundException('Comment not found');
+    this.notifyPost(
+      this.notifications.postComment({
+        actorId: userId,
+        communityId: host.community.id,
+        subgroupId: host.subgroup?.id ?? null,
+        postId,
+        postAuthorId: post.authorId,
+        payload: this.notificationPayload(
+          host,
+          post,
+          loaded.author?.displayName,
+        ),
+      }),
+    );
     return this.serializeComment(loaded, userId, host);
+  }
+
+  private notificationPayload(
+    host: HostAccess,
+    post: CommunityPost,
+    actorName?: string | null,
+  ): NotificationPayload {
+    return {
+      communityName: host.community.name,
+      communitySlug: host.community.slug,
+      subgroupName: host.subgroup?.name,
+      subgroupSlug: host.subgroup?.slug,
+      postId: post.id,
+      postTitle: post.title,
+      actorName: actorName ?? undefined,
+    };
+  }
+
+  /** Notifications never make the request fail. */
+  private notifyPost(sending: Promise<void>): void {
+    void sending.catch((err: Error) =>
+      this.logger.warn(`Could not send post notification: ${err.message}`),
+    );
   }
 
   /** Only the author edits a comment; moderators can still delete it. */

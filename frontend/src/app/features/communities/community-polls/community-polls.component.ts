@@ -7,19 +7,27 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { CommunityPoll } from '@shared/models';
 import { ButtonComponent, ButtonStyleDirective, ToastService } from '@shared/ui';
+import { timeLeft } from '@shared/utils/time-left';
 import { PollEdit, PollEditDialogComponent } from '../poll-edit-dialog/poll-edit-dialog.component';
 import { communityErrorKey } from '../community-error';
 
 @Component({
   selector: 'app-community-polls',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonComponent, PollEditDialogComponent, ButtonStyleDirective],
+  imports: [
+    TranslocoPipe,
+    DatePipe,
+    ButtonComponent,
+    PollEditDialogComponent,
+    ButtonStyleDirective,
+  ],
   templateUrl: './community-polls.component.html',
 })
 export class CommunityPollsComponent implements OnInit {
@@ -37,6 +45,14 @@ export class CommunityPollsComponent implements OnInit {
   protected readonly editing = signal<CommunityPoll | null>(null);
   protected readonly savingEdit = signal(false);
   protected readonly selection = signal<Record<string, string[]>>({});
+
+  /** "Ends in 2 days" for a poll that is still open. */
+  protected remaining(poll: CommunityPoll): string {
+    const left = poll.closesAt ? timeLeft(poll.closesAt) : null;
+    if (!left) return this.transloco.translate('communities.polls.closed');
+    const key = `communities.polls.endsIn.${left.unit}${left.value === 1 ? 'One' : 'Many'}`;
+    return this.transloco.translate(key, { count: left.value });
+  }
 
   ngOnInit(): void {
     this.communityService

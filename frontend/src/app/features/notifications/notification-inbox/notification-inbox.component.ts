@@ -47,6 +47,8 @@ export class NotificationInboxComponent implements OnInit {
         : 'notifications.joinCommunity';
     }
     if (row.type === 'event.invite') return 'notifications.eventInvite';
+    if (row.type === 'post.created') return 'notifications.postCreated';
+    if (row.type === 'post.comment') return 'notifications.postComment';
     if (row.type === 'community.deleted') return 'notifications.communityDeleted';
     if (row.type === 'subgroup.deleted') return 'notifications.subgroupDeleted';
     if (row.type === 'community.suspended') return 'notifications.communitySuspended';
@@ -108,6 +110,12 @@ export class NotificationInboxComponent implements OnInit {
       return row.payload.eventId ? `/events/${row.payload.eventId}` : '/notifications';
     }
     const community = `/communities/${row.payload.communitySlug}`;
+    if (row.type === 'post.created' || row.type === 'post.comment') {
+      const base = row.payload.subgroupSlug
+        ? `${community}/subgroups/${row.payload.subgroupSlug}`
+        : community;
+      return row.payload.postId ? `${base}/posts/${row.payload.postId}` : base;
+    }
     if (row.type === 'join.request') {
       return row.payload.subgroupSlug
         ? `${community}/subgroups/${row.payload.subgroupSlug}/requests`

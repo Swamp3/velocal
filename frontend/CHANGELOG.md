@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-17
+
+### Added
+
+- Inbox entries and push settings for the new post notifications
+
+- `leaflet-polylinedecorator` (loaded only on the route map page) for direction arrows; elevation profile with km axis and a linked hover marker
+
+- `app-form-actions` (back link, cancel ×, save, sticky) used by all form pages
+
+- `timeLeft()` helper with tests; poll countdown; `scripts/subset-icons.py` also finds `icon = input('name')` defaults
+
+
 ## [0.14.3] - 2026-10-17
 
 ### Changed

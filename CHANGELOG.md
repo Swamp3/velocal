@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-10-17
+
+### Changed
+
+- Save buttons are at the top of every form page (profile, event, series, news, club, subgroup, post, poll, route), next to an "×" to cancel, and stay visible while scrolling. Dialogs keep their buttons at the bottom.
+
+- Club member list: role change and removal are in a "more" menu per member, so each member takes one line.
+
+- Club events: "New event" is one button with a "more" menu for adding an existing public event, so the bar fits on one line.
+
+- The "Future only" filter in the event list has a clear icon (upcoming event) instead of a checkmark.
+
+### Added
+
+- Notifications for club posts: new posts in your clubs and subgroups (push off by default, switch "New posts" in the profile) and replies to posts you wrote or commented on (push on by default, switch "Replies"). Both also appear in the notification list.
+
+- The route map shows the direction of travel with small arrows along the track. The elevation profile has a distance axis in kilometres, and touching or hovering it shows distance and height and marks that point on the map.
+
+- Club polls with an end date show how long they still run ("Ends in 3 days", with the exact time on hover) and when they ended.
+
+
 ## [0.14.3] — 2026-10-17
 
 ### Changed

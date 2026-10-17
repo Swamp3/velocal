@@ -1,11 +1,11 @@
 <div class="mx-auto max-w-xl">
-  <a
-    [routerLink]="listLink()"
-    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
-  >
-    <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
-    {{ 'communities.polls.back' | transloco }}
-  </a>
+  <app-form-actions
+    formId="pollForm"
+    [backLink]="listLink()"
+    [backLabel]="'communities.polls.back' | transloco"
+    [saveLabel]="'communities.polls.create' | transloco"
+    [saving]="saving()"
+  />
 
   <h1 class="mt-5 text-2xl font-bold text-[var(--color-text)]">
     {{ 'communities.polls.create' | transloco }}
@@ -19,6 +19,7 @@
     </div>
   } @else {
     <form
+      id="pollForm"
       [formGroup]="form"
       (ngSubmit)="create()"
       class="mt-6 space-y-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 shadow-[var(--shadow-card)]"
@@ -82,14 +83,6 @@
         />
       </div>
 
-      <div class="flex gap-3 pt-2">
-        <ui-button type="submit" [loading]="saving()" [disabled]="saving()">
-          {{ 'communities.polls.create' | transloco }}
-        </ui-button>
-        <a [routerLink]="listLink()">
-          <ui-button variant="outline" type="button">{{ 'common.cancel' | transloco }}</ui-button>
-        </a>
-      </div>
     </form>
   }
 </div>

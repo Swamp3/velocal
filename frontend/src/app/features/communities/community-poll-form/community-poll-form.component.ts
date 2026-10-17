@@ -8,24 +8,26 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PollResultsVisibility } from '@shared/models';
-import { ButtonComponent, ButtonStyleDirective, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
+import { ButtonStyleDirective, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
+
+import { FormActionsComponent } from '@shared/components/form-actions/form-actions.component';
 
 @Component({
   selector: 'app-community-poll-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FormActionsComponent,
     ReactiveFormsModule,
-    RouterLink,
     TranslocoPipe,
-    ButtonComponent,
     InputComponent,
-    SkeletonComponent, ButtonStyleDirective,
+    SkeletonComponent,
+    ButtonStyleDirective,
   ],
   templateUrl: './community-poll-form.component.html',
 })

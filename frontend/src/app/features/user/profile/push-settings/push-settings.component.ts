@@ -4,7 +4,14 @@ import { PushCategory, PushPreferences, PushService } from '@core/services/push.
 import { ButtonComponent, ToastService } from '@shared/ui';
 import { ProfileSectionComponent } from '../profile-section.component';
 
-const CATEGORIES: PushCategory[] = ['invites', 'membership', 'events', 'community'];
+const CATEGORIES: PushCategory[] = [
+  'invites',
+  'membership',
+  'events',
+  'posts',
+  'comments',
+  'community',
+];
 
 /** Profile section: turn push on for this device and choose which messages arrive. */
 @Component({

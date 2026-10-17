@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-17
+
+### Added
+
+- Notification types `post.created` and `post.comment`; push categories `posts` and `comments`; `CommunityPostsService` notifies after creating a post or comment (failures are only logged)
+
+
 ## [0.14.3] - 2026-10-17
 
 ## [0.14.2] - 2026-10-17

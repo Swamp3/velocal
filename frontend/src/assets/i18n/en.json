@@ -35,6 +35,8 @@
     "loadError": "Could not load notifications",
     "markAll": "Mark all read",
     "eventCreated": "New event in {{communityName}}: {{eventName}}",
+    "postCreated": "New post in {{communityName}}: {{postTitle}}",
+    "postComment": "{{actorName}} commented on “{{postTitle}}”",
     "eventInvite": "You're invited to {{eventName}}",
     "joinCommunity": "New join request for {{communityName}}",
     "joinSubgroup": "New join request for {{subgroupName}}",
@@ -379,6 +381,10 @@
         "membershipHint": "Join requests for groups you manage and decisions about your requests.",
         "events": "New events",
         "eventsHint": "A new event in your clubs and subgroups. Can be frequent.",
+        "posts": "New posts",
+        "postsHint": "A new post in your clubs and subgroups. Can be frequent.",
+        "comments": "Replies",
+        "commentsHint": "Someone comments on a post you wrote or commented on.",
         "community": "Club updates",
         "communityHint": "A club or subgroup is deleted, suspended or available again."
       }
@@ -948,6 +954,7 @@
       "stravaInvalid": "Please enter a link to strava.com (https://…)"
     },
     "members": {
+      "actionsFor": "Actions for {{name}}",
       "title": "Members",
       "empty": "No members yet",
       "unnamed": "Unnamed member",
@@ -1034,6 +1041,15 @@
       "create": "Create poll",
       "vote": "Vote",
       "voted": "Your vote is in",
+      "closedOn": "Ended {{date}}",
+      "endsIn": {
+        "minutesOne": "Ends in 1 minute",
+        "minutesMany": "Ends in {{count}} minutes",
+        "hoursOne": "Ends in 1 hour",
+        "hoursMany": "Ends in {{count}} hours",
+        "daysOne": "Ends in 1 day",
+        "daysMany": "Ends in {{count}} days"
+      },
       "closed": "Closed",
       "votes": "{{count}} votes",
       "hidden": "Results are hidden",
@@ -1049,6 +1065,7 @@
       "updated": "Poll updated"
     },
     "events": {
+      "moreOptions": "More options",
       "title": "Events",
       "create": "New event",
       "empty": "No events yet",

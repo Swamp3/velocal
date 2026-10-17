@@ -8,6 +8,29 @@ describe('push messages', () => {
     expect(categoryOf('join.decision')).toBe('membership');
     expect(categoryOf('event.created')).toBe('events');
     expect(categoryOf('community.suspended')).toBe('community');
+    expect(categoryOf('post.created')).toBe('posts');
+    expect(categoryOf('post.comment')).toBe('comments');
+  });
+
+  it('links a post notification to the post, also inside a subgroup', () => {
+    const club = {
+      communityName: 'Club',
+      communitySlug: 'club',
+      postId: 'p1',
+      postTitle: 'Training',
+      actorName: 'Anna',
+    };
+    const inClub = buildPushMessage('post.created', club, 'de');
+    expect(inClub.url).toBe('/communities/club/posts/p1');
+    expect(inClub.body).toBe('Anna: Neuer Beitrag – Training');
+    const inGroup = buildPushMessage(
+      'post.comment',
+      { ...club, subgroupName: 'Gravel', subgroupSlug: 'gravel' },
+      'en',
+    );
+    expect(inGroup.url).toBe('/communities/club/subgroups/gravel/posts/p1');
+    expect(inGroup.body).toBe('Anna commented');
+    expect(inGroup.tag).toBe('comment-p1');
   });
 
   it('builds a German invite with an event link', () => {
@@ -39,6 +62,8 @@ describe('push messages', () => {
       invites: true,
       membership: true,
       events: false,
+      posts: false,
+      comments: true,
       community: true,
     });
     expect(mergePreferences({ events: true, invites: false })).toMatchObject({

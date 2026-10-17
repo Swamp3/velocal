@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SeriesService } from '@core/services/series.service';
@@ -16,16 +16,16 @@ import { UploadService } from '@core/services/upload.service';
 import { Discipline, RaceSeriesDetail } from '@shared/models';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
 import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
-import { ButtonComponent, InputComponent, ToastService } from '@shared/ui';
+import { InputComponent, ToastService } from '@shared/ui';
 
+import { FormActionsComponent } from '@shared/components/form-actions/form-actions.component';
 @Component({
   selector: 'app-series-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FormActionsComponent,
     ReactiveFormsModule,
-    RouterLink,
     TranslocoPipe,
-    ButtonComponent,
     InputComponent,
     ImageUploadComponent,
     RichTextComponent,

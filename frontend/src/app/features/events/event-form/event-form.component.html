@@ -12,12 +12,15 @@
       </a>
     </div>
     @if (!loading()) {
-      <div class="flex items-center gap-3">
-        <a [routerLink]="backCommands()" [queryParams]="backQuery()">
-          <ui-button variant="ghost" type="button">
-            {{ 'event.form.cancel' | transloco }}
-          </ui-button>
-        </a>
+      <div class="flex items-center gap-1.5">
+        <a
+          [routerLink]="backCommands()"
+          [queryParams]="backQuery()"
+          uiIconButton
+          icon="close"
+          variant="ghost"
+          [label]="'event.form.cancel' | transloco"
+        ></a>
         <ui-button
           type="submit"
           form="eventForm"

@@ -35,6 +35,8 @@
     "loadError": "Benachrichtigungen konnten nicht geladen werden",
     "markAll": "Alle als gelesen",
     "eventCreated": "Neues Event in {{communityName}}: {{eventName}}",
+    "postCreated": "Neuer Beitrag in {{communityName}}: {{postTitle}}",
+    "postComment": "{{actorName}} hat „{{postTitle}}“ kommentiert",
     "eventInvite": "Du bist zu {{eventName}} eingeladen",
     "joinCommunity": "Neue Beitrittsanfrage für {{communityName}}",
     "joinSubgroup": "Neue Beitrittsanfrage für {{subgroupName}}",
@@ -379,6 +381,10 @@
         "membershipHint": "Beitrittsanfragen für Gruppen, die du verwaltest, und Entscheidungen zu deinen Anfragen.",
         "events": "Neue Events",
         "eventsHint": "Ein neues Event in deinen Clubs und Untergruppen. Kann häufig vorkommen.",
+        "posts": "Neue Beiträge",
+        "postsHint": "Ein neuer Beitrag in deinen Clubs und Untergruppen. Kann häufig vorkommen.",
+        "comments": "Antworten",
+        "commentsHint": "Jemand kommentiert einen Beitrag, den du geschrieben oder kommentiert hast.",
         "community": "Neuigkeiten zu Clubs",
         "communityHint": "Ein Club oder eine Untergruppe wird gelöscht, gesperrt oder ist wieder verfügbar."
       }
@@ -948,6 +954,7 @@
       "stravaInvalid": "Bitte einen Link zu strava.com angeben (https://…)"
     },
     "members": {
+      "actionsFor": "Aktionen für {{name}}",
       "title": "Mitglieder",
       "empty": "Noch keine Mitglieder",
       "unnamed": "Unbenanntes Mitglied",
@@ -1034,6 +1041,15 @@
       "create": "Umfrage erstellen",
       "vote": "Abstimmen",
       "voted": "Deine Stimme ist gespeichert",
+      "closedOn": "Beendet am {{date}}",
+      "endsIn": {
+        "minutesOne": "Endet in 1 Minute",
+        "minutesMany": "Endet in {{count}} Minuten",
+        "hoursOne": "Endet in 1 Stunde",
+        "hoursMany": "Endet in {{count}} Stunden",
+        "daysOne": "Endet in 1 Tag",
+        "daysMany": "Endet in {{count}} Tagen"
+      },
       "closed": "Geschlossen",
       "votes": "{{count}} Stimmen",
       "hidden": "Ergebnisse sind verborgen",
@@ -1049,6 +1065,7 @@
       "updated": "Umfrage aktualisiert"
     },
     "events": {
+      "moreOptions": "Weitere Optionen",
       "title": "Events",
       "create": "Neues Event",
       "empty": "Noch keine Events",

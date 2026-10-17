@@ -25,10 +25,13 @@ import { PushSettingsComponent } from './push-settings/push-settings.component';
 
 const FAVORITES_PAGE_SIZE = 10;
 
+import { FormActionsComponent } from '@shared/components/form-actions/form-actions.component';
+
 @Component({
   selector: 'app-profile',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FormActionsComponent,
     ReactiveFormsModule,
     TranslocoPipe,
     ButtonComponent,

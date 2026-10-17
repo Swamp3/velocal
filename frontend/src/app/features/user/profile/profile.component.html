@@ -1,9 +1,13 @@
 <div class="mx-auto max-w-3xl space-y-6">
-  <h1 class="text-2xl font-bold text-[var(--color-text)]">
-    {{ 'profile.title' | transloco }}
-  </h1>
+  <app-form-actions
+    formId="profileForm"
+    [title]="'profile.title' | transloco"
+    [saving]="saving()"
+    [disabled]="profileForm.invalid"
+    [saveLabel]="'profile.save' | transloco"
+  />
 
-  <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-6">
+  <form id="profileForm" [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-6">
     <!-- Personal details -->
     <app-profile-section
       [title]="'profile.sections.personal' | transloco"
@@ -133,11 +137,6 @@
       </div>
     </app-profile-section>
 
-    <div>
-      <ui-button type="submit" [loading]="saving()" [disabled]="profileForm.invalid" size="lg">
-        {{ 'profile.save' | transloco }}
-      </ui-button>
-    </div>
   </form>
 
   <!-- Disciplines -->
