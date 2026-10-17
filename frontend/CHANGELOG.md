@@ -10,6 +10,10 @@
 
 - Admin user list column "Last active" (`lastSeenAt`)
 
+### Fixed
+
+- Fields, selects, textareas and the rich-text editor use 16px text on touch devices (`pointer: coarse`) to stop the iOS focus zoom
+
 
 ## [0.14.0] - 2026-10-17
 
