@@ -47,5 +47,13 @@ export class PushPreferencesDto {
 
   @IsOptional()
   @IsBoolean()
+  posts?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  comments?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   community?: boolean;
 }
