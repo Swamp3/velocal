@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, output } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { CommunityPoll, PollResultsVisibility } from '@shared/models';
+import { CommunityPoll, PollResultsVisibility, PollVisibility } from '@shared/models';
 import { ButtonComponent, ButtonStyleDirective, IconButtonComponent, InputComponent, ModalComponent } from '@shared/ui';
 
 export interface PollEdit {
   question: string;
   resultsVisibility: PollResultsVisibility;
+  visibility: PollVisibility;
   /** ISO date, or null to remove the closing time. */
   closesAt: string | null;
   /** Existing options carry their id so votes are kept. */
@@ -40,6 +41,7 @@ export class PollEditDialogComponent implements OnInit {
   protected readonly form = this.fb.nonNullable.group({
     question: ['', Validators.required],
     resultsVisibility: this.fb.nonNullable.control<PollResultsVisibility>('members'),
+    visibility: this.fb.nonNullable.control<PollVisibility>('members'),
     closesAt: [''],
     options: this.fb.array<{ id: string | null; label: string }>([]),
   });
@@ -53,6 +55,7 @@ export class PollEditDialogComponent implements OnInit {
     this.form.patchValue({
       question: poll.question,
       resultsVisibility: poll.resultsVisibility,
+      visibility: poll.visibility,
       closesAt: toLocalInput(poll.closesAt),
     });
     for (const option of poll.options) this.options.push(this.optionGroup(option.id, option.label));
@@ -87,6 +90,7 @@ export class PollEditDialogComponent implements OnInit {
     this.saved.emit({
       question: raw.question.trim(),
       resultsVisibility: raw.resultsVisibility,
+      visibility: raw.visibility,
       closesAt: raw.closesAt ? new Date(raw.closesAt).toISOString() : null,
       options: this.options.controls
         .map((c) => ({

@@ -1,0 +1,181 @@
+<div class="mx-auto max-w-2xl">
+  <a
+    [routerLink]="loggedIn() ? listLink() : hostLink()"
+    class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+  >
+    <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+    {{ (loggedIn() ? 'communities.polls.back' : 'communities.polls.backToHost') | transloco }}
+  </a>
+
+  @if (loading()) {
+    <div class="mt-5 h-64 animate-pulse rounded-2xl bg-[var(--color-bg-card)]"></div>
+  } @else if (error(); as err) {
+    <div
+      class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-8 text-center"
+    >
+      <span class="material-symbols-outlined text-[40px] text-[var(--color-text-muted)]" aria-hidden="true">
+        {{ err === 'forbidden' ? 'lock' : 'search_off' }}
+      </span>
+      <p class="mt-2 font-medium text-[var(--color-text)]">
+        {{ (err === 'forbidden' ? 'communities.polls.forbiddenTitle' : 'communities.polls.missingTitle') | transloco }}
+      </p>
+      <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+        {{ (err === 'forbidden' ? 'communities.polls.forbiddenBody' : 'communities.polls.missingBody') | transloco }}
+      </p>
+      @if (err === 'forbidden' && !loggedIn()) {
+        <a routerLink="/login" uiButton class="mt-4 inline-flex">{{ 'auth.login' | transloco }}</a>
+      }
+    </div>
+  } @else if (poll(); as poll) {
+    <article
+      class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-card)] sm:p-6"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <ui-badge [variant]="poll.visibility === 'public' ? 'success' : 'neutral'">
+          {{ (poll.visibility === 'public' ? 'communities.polls.visibilityPublic' : 'communities.polls.visibilityMembers') | transloco }}
+        </ui-badge>
+        <ui-badge [variant]="poll.closed ? 'neutral' : 'warning'">
+          {{ (poll.closed ? 'communities.polls.closed' : 'communities.polls.open') | transloco }}
+        </ui-badge>
+      </div>
+
+      <div class="mt-3 flex items-start justify-between gap-3">
+        <h1 class="min-w-0 break-words text-2xl font-bold text-[var(--color-text)]">
+          {{ poll.question }}
+        </h1>
+        <div class="flex shrink-0 items-center gap-2">
+          @if (poll.visibility === 'public') {
+            <app-share-button [path]="sharePath()" [title]="poll.question" />
+          }
+          @if (menuItems().length > 0) {
+            <ui-action-menu
+              [items]="menuItems()"
+              [label]="'communities.events.moreOptions' | transloco"
+              align="end"
+              (selected)="onMenu($event)"
+            />
+          }
+        </div>
+      </div>
+
+      <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-text-muted)]">
+        <a [routerLink]="hostLink()" class="inline-flex items-center gap-1 hover:text-[var(--color-text)] hover:underline">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">groups</span>
+          {{ poll.host.subgroupName ?? poll.host.communityName }}
+        </a>
+        @if (poll.authorName) {
+          <span>{{ 'communities.polls.by' | transloco: { name: poll.authorName } }}</span>
+        }
+        @if (poll.closesAt) {
+          <span class="inline-flex items-center gap-1" [title]="poll.closesAt | date: 'medium'">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">timer</span>
+            @if (poll.closed) {
+              {{ 'communities.polls.closedOn' | transloco: { date: (poll.closesAt | date: 'medium') } }}
+            } @else {
+              {{ remaining() }}
+            }
+          </span>
+        }
+      </p>
+
+      <ul class="mt-5 space-y-2.5" role="list">
+        @for (option of poll.options; track option.id) {
+          @let picked = selection().includes(option.id);
+          @let leading = poll.canSeeResults && topVotes() > 0 && option.votes === topVotes();
+          <li>
+            <label
+              class="relative block overflow-hidden rounded-xl border px-3.5 py-3 transition-colors"
+              [class.cursor-pointer]="poll.canVote"
+              [class.border-[var(--color-primary)]]="picked"
+              [class.border-[var(--color-border)]]="!picked"
+              [class.hover:bg-[var(--color-bg)]]="poll.canVote"
+            >
+              @if (poll.canSeeResults) {
+                <span
+                  class="absolute inset-y-0 left-0 transition-[width] duration-500"
+                  [class.bg-[var(--color-primary)]]="leading"
+                  [class.bg-[var(--color-border)]]="!leading"
+                  [class.opacity-25]="leading"
+                  [class.opacity-60]="!leading"
+                  [style.width.%]="option.percent ?? 0"
+                  aria-hidden="true"
+                ></span>
+              }
+              <span class="relative flex items-center gap-3">
+                @if (poll.canVote) {
+                  <input
+                    class="shrink-0"
+                    [type]="poll.multiple ? 'checkbox' : 'radio'"
+                    [name]="'poll-' + poll.id"
+                    [checked]="picked"
+                    (change)="toggle(option.id)"
+                  />
+                } @else if (picked) {
+                  <span
+                    class="material-symbols-outlined shrink-0 text-[20px] text-[var(--color-primary)]"
+                    [attr.aria-label]="'communities.polls.yourVote' | transloco"
+                    >check_circle</span
+                  >
+                }
+                <span class="min-w-0 flex-1 break-words text-sm font-medium text-[var(--color-text)]">
+                  {{ option.label }}
+                </span>
+                @if (poll.canSeeResults) {
+                  <span class="shrink-0 text-right text-sm tabular-nums">
+                    <span class="font-semibold text-[var(--color-text)]">{{ option.percent }}%</span>
+                    <span class="ml-1.5 text-[var(--color-text-muted)]">
+                      {{ (option.votes === 1 ? 'communities.polls.votesOne' : 'communities.polls.votes') | transloco: { count: option.votes } }}
+                    </span>
+                  </span>
+                }
+              </span>
+            </label>
+          </li>
+        }
+      </ul>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        @if (poll.canSeeResults) {
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ (poll.totalVoters === 1 ? 'communities.polls.votersOne' : 'communities.polls.voters') | transloco: { count: poll.totalVoters } }}
+          </p>
+        } @else if (poll.options.length > 0) {
+          <p class="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">visibility_off</span>
+            {{ (poll.resultsVisibility === 'managers' ? 'communities.polls.hiddenManagers' : 'communities.polls.hiddenVisitors') | transloco }}
+          </p>
+        }
+        @if (poll.canVote) {
+          <ui-button
+            type="button"
+            [loading]="voting()"
+            [disabled]="voting() || selection().length === 0"
+            (click)="vote()"
+          >
+            {{ (hasVoted() ? 'communities.polls.changeVote' : 'communities.polls.vote') | transloco }}
+          </ui-button>
+        }
+      </div>
+
+      @if (!poll.canVote && !poll.closed) {
+        <p
+          class="mt-4 rounded-xl bg-[var(--color-bg)] px-3.5 py-3 text-sm text-[var(--color-text-muted)]"
+        >
+          {{ 'communities.polls.joinToVote' | transloco }}
+          <a [routerLink]="hostLink()" class="font-medium text-[var(--color-primary)] hover:underline">
+            {{ poll.host.subgroupName ?? poll.host.communityName }}
+          </a>
+        </p>
+      }
+    </article>
+  }
+</div>
+
+@if (editing() && poll(); as poll) {
+  <app-poll-edit-dialog
+    [poll]="poll"
+    [saving]="savingEdit()"
+    (saved)="saveEdit($event)"
+    (closed)="editing.set(false)"
+  />
+}

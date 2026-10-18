@@ -12,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError } from '@core/services/api.service';
 import { CommunityService } from '@core/services/community.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { PollResultsVisibility } from '@shared/models';
+import { PollResultsVisibility, PollVisibility } from '@shared/models';
 import { ButtonStyleDirective, InputComponent, SkeletonComponent, ToastService } from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
@@ -42,12 +42,14 @@ export class CommunityPollFormComponent implements OnInit {
 
   protected readonly saving = signal(false);
   protected readonly loaded = signal(false);
+  protected readonly publicAllowed = signal(true);
   protected readonly communitySlug = signal('');
   protected readonly subgroupSlug = signal<string | null>(null);
   protected readonly form = this.fb.nonNullable.group({
     question: ['', Validators.required],
     multiple: [false],
     resultsVisibility: this.fb.nonNullable.control<PollResultsVisibility>('members'),
+    visibility: this.fb.nonNullable.control<PollVisibility>('members'),
     closesAt: [''],
     options: this.fb.nonNullable.array([
       this.fb.nonNullable.control('', Validators.required),
@@ -75,6 +77,7 @@ export class CommunityPollFormComponent implements OnInit {
               void this.router.navigate(this.listLink());
               return;
             }
+            this.publicAllowed.set(subgroup.visibility !== 'invite');
             this.loaded.set(true);
           },
           error: () => void this.router.navigate(['/communities', communitySlug]),
@@ -91,6 +94,7 @@ export class CommunityPollFormComponent implements OnInit {
             void this.router.navigate(this.listLink());
             return;
           }
+          this.publicAllowed.set(community.visibility !== 'private');
           this.loaded.set(true);
         },
         error: () => void this.router.navigateByUrl('/communities'),
@@ -137,6 +141,7 @@ export class CommunityPollFormComponent implements OnInit {
           question: raw.question.trim(),
           multiple: raw.multiple,
           resultsVisibility: raw.resultsVisibility,
+          visibility: raw.visibility,
           closesAt: raw.closesAt ? new Date(raw.closesAt).toISOString() : undefined,
           options: options.map((label) => ({ label })),
         },

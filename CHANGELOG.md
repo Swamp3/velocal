@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Club and subgroup polls have their own page with a link you can share. Results are shown as bars with percentages and the number of voters; you can vote and change your vote there. The poll list is now an overview with status, deadline and whether you already voted.
+- A poll can be set to "Public": anyone with the link can read the question and options (without logging in), but only members vote and see results. Not available in private clubs or invite-only subgroups. Polls stay members-only by default.
+
 ### Fixed
 
 - Opening the route map from an event now leads back to the event ("Back to the event") instead of to the route page. The route list of an event and its pace groups no longer show the GPX file name when a route has a single file; with several files the name is shortened to one line.

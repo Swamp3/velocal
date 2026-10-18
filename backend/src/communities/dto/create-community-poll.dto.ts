@@ -11,7 +11,10 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { PollResultsVisibility } from '../entities/community-poll.entity';
+import {
+  PollResultsVisibility,
+  PollVisibility,
+} from '../entities/community-poll.entity';
 
 export class CreatePollOptionDto {
   @IsString()
@@ -33,6 +36,10 @@ export class CreateCommunityPollDto {
   @IsOptional()
   @IsEnum(PollResultsVisibility)
   resultsVisibility?: PollResultsVisibility;
+
+  @IsOptional()
+  @IsEnum(PollVisibility)
+  visibility?: PollVisibility;
 
   @IsOptional()
   @IsDateString()

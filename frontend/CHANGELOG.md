@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Poll detail page (`/communities/:slug/polls/:id`, also for subgroups) with result bars, voting and edit/delete; poll list links to it; visibility selector in the poll form and edit dialog
+
 ### Fixed
 
 - Route map `?event=` back link (with club/subgroup context); event ride section: one-line rows, file name only for routes with several files

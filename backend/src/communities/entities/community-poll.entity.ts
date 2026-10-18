@@ -18,6 +18,12 @@ export enum PollResultsVisibility {
   MANAGERS = 'managers',
 }
 
+/** Who may open the poll: only members of its host, or anyone with the link (read only). */
+export enum PollVisibility {
+  MEMBERS = 'members',
+  PUBLIC = 'public',
+}
+
 /** One host: the community (`subgroupId` null) or exactly one subgroup. */
 @Entity('community_polls')
 export class CommunityPoll {
@@ -60,6 +66,14 @@ export class CommunityPoll {
     default: PollResultsVisibility.MEMBERS,
   })
   resultsVisibility: PollResultsVisibility;
+
+  @Column({
+    type: 'enum',
+    enum: PollVisibility,
+    enumName: 'poll_visibility',
+    default: PollVisibility.MEMBERS,
+  })
+  visibility: PollVisibility;
 
   @Column({ type: 'timestamptz', nullable: true })
   closesAt: Date | null;

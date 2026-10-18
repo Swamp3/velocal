@@ -130,11 +130,14 @@ export interface CommunityPost {
 }
 
 export type PollResultsVisibility = 'members' | 'managers';
+export type PollVisibility = 'members' | 'public';
 
 export interface CommunityPollOption {
   id: string;
   label: string;
   votes: number | null;
+  /** Share of the voters who picked this option, 0-100. Null while results are hidden. */
+  percent: number | null;
   selected: boolean;
 }
 
@@ -143,8 +146,21 @@ export interface CommunityPoll {
   question: string;
   multiple: boolean;
   resultsVisibility: PollResultsVisibility;
+  visibility: PollVisibility;
+  host: {
+    communityName: string;
+    communitySlug: string;
+    subgroupName: string | null;
+    subgroupSlug: string | null;
+  };
+  authorName: string | null;
+  /** The host allows public polls (not a private club or an invite-only subgroup). */
+  publicAllowed: boolean;
   closesAt: string | null;
   closed: boolean;
+  canVote: boolean;
+  /** People who voted (not votes: a multiple-choice voter counts once). Null while hidden. */
+  totalVoters: number | null;
   canSeeResults: boolean;
   canEdit: boolean;
   canDelete: boolean;
