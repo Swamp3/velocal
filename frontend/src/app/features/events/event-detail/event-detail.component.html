@@ -412,7 +412,19 @@
             <ul class="mt-1 flex flex-col gap-1">
               @for (file of route.files; track file.id) {
                 <li class="flex items-center justify-between gap-3 text-sm">
-                  <span class="min-w-0 break-words text-[var(--color-text)]">{{ file.label }}</span>
+                  <span class="min-w-0 truncate text-[var(--color-text)]">
+                    @if (route.files.length > 1) {
+                      {{ file.label }}
+                      @if (file.distanceM) {
+                        <span class="text-[var(--color-text-muted)]"> · {{ distance(file.distanceM) }}</span>
+                      }
+                    } @else if (file.distanceM) {
+                      {{ distance(file.distanceM) }}
+                      @if (file.ascentM !== null) {
+                        <span class="text-[var(--color-text-muted)]"> · ↑ {{ file.ascentM }} m</span>
+                      }
+                    }
+                  </span>
                   <span class="flex shrink-0 items-center gap-1">
                     <a
                       uiIconButton
@@ -420,6 +432,7 @@
                       icon="map"
                       variant="soft"
                       [routerLink]="['/routes', route.id, 'files', file.id]"
+                      [queryParams]="mapQuery()"
                       [label]="'routes.map' | transloco"
                     ></a>
                     <button
@@ -473,8 +486,11 @@
                   <ul class="mt-2 flex flex-col gap-1 text-sm">
                     @for (file of groupRoute.files; track file.id) {
                       <li class="flex items-center justify-between gap-3">
-                        <span class="min-w-0 break-words">
-                          {{ groupRoute.name }} · {{ file.label }}
+                        <span class="min-w-0 truncate">
+                          {{ groupRoute.name }}
+                          @if (groupRoute.files.length > 1) {
+                            <span class="text-[var(--color-text-muted)]"> · {{ file.label }}</span>
+                          }
                           @if (file.distanceM) {
                             <span class="text-[var(--color-text-muted)]">
                               · {{ distance(file.distanceM) }}</span
@@ -488,6 +504,7 @@
                             icon="map"
                             variant="soft"
                             [routerLink]="['/routes', groupRoute.id, 'files', file.id]"
+                            [queryParams]="mapQuery()"
                             [label]="'routes.map' | transloco"
                           ></a>
                           <button

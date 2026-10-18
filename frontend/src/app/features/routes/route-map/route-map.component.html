@@ -1,11 +1,21 @@
 <section class="mx-auto max-w-4xl px-4 py-6">
   @if (route(); as r) {
-    <a
-      [routerLink]="['/routes', r.id]"
-      class="text-sm text-[var(--color-text-muted)] hover:underline"
-    >
-      ← {{ 'routes.back' | transloco }}
-    </a>
+    @if (fromEvent(); as from) {
+      <a
+        [routerLink]="['/events', from.id]"
+        [queryParams]="from.query"
+        class="text-sm text-[var(--color-text-muted)] hover:underline"
+      >
+        ← {{ 'routes.backToEvent' | transloco }}
+      </a>
+    } @else {
+      <a
+        [routerLink]="['/routes', r.id]"
+        class="text-sm text-[var(--color-text-muted)] hover:underline"
+      >
+        ← {{ 'routes.back' | transloco }}
+      </a>
+    }
     <h1 class="mt-2 text-2xl font-bold text-[var(--color-text)]">{{ r.name }}</h1>
     @if (file(); as f) {
       <p class="mt-1 text-sm text-[var(--color-text-muted)]">

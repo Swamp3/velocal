@@ -59,6 +59,13 @@ const routes: Routes = [
       ),
   },
   {
+    path: ':slug/polls/:pollId',
+    loadComponent: () =>
+      import('./community-poll-detail/community-poll-detail.component').then(
+        (m) => m.CommunityPollDetailComponent,
+      ),
+  },
+  {
     path: ':slug/polls',
     canActivate: [authGuard],
     data: { section: 'polls' },
@@ -118,6 +125,13 @@ const routes: Routes = [
     loadComponent: () =>
       import('./community-section/community-section.component').then(
         (m) => m.CommunitySectionComponent,
+      ),
+  },
+  {
+    path: ':slug/subgroups/:subgroupSlug/polls/:pollId',
+    loadComponent: () =>
+      import('./community-poll-detail/community-poll-detail.component').then(
+        (m) => m.CommunityPollDetailComponent,
       ),
   },
   {

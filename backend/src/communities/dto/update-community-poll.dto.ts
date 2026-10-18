@@ -11,7 +11,10 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { PollResultsVisibility } from '../entities/community-poll.entity';
+import {
+  PollResultsVisibility,
+  PollVisibility,
+} from '../entities/community-poll.entity';
 
 export class UpdatePollOptionDto {
   /** Present for an existing option, so its votes are kept. Missing means a new option. */
@@ -38,6 +41,10 @@ export class UpdateCommunityPollDto {
   @IsOptional()
   @IsEnum(PollResultsVisibility)
   resultsVisibility?: PollResultsVisibility;
+
+  @IsOptional()
+  @IsEnum(PollVisibility)
+  visibility?: PollVisibility;
 
   /** An ISO date, or null to remove the closing time. */
   @IsOptional()

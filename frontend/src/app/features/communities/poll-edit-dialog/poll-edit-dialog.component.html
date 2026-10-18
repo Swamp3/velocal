@@ -58,6 +58,23 @@
     </div>
 
     <div>
+      <label for="poll-edit-visibility" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+        {{ 'communities.polls.visibility' | transloco }}
+      </label>
+      <select
+        id="poll-edit-visibility"
+        formControlName="visibility"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+      >
+        <option value="members">{{ 'communities.polls.visibilityMembers' | transloco }}</option>
+        <option value="public" [disabled]="!poll().publicAllowed && form.controls.visibility.value !== 'public'">{{ 'communities.polls.visibilityPublic' | transloco }}</option>
+      </select>
+      <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+        {{ (form.controls.visibility.value === 'public' ? 'communities.polls.visibilityPublicHint' : 'communities.polls.visibilityMembersHint') | transloco }}
+      </p>
+    </div>
+
+    <div>
       <label
         for="poll-edit-deadline"
         class="mb-1.5 block text-sm font-medium text-[var(--color-text)]"

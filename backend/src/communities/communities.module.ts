@@ -18,6 +18,7 @@ import { CommunityPost } from './entities/community-post.entity';
 import { CommunityPollOption } from './entities/community-poll-option.entity';
 import { CommunityPollVote } from './entities/community-poll-vote.entity';
 import { CommunityPoll } from './entities/community-poll.entity';
+import { CommunityPollDetailController } from './community-poll-detail.controller';
 import { CommunityPollsController } from './community-polls.controller';
 import { CommunityPollsService } from './community-polls.service';
 import { CommunityPostsController } from './community-posts.controller';
@@ -62,6 +63,7 @@ import { SubgroupsService } from './subgroups.service';
     SubgroupsController,
     CommunityPostsController,
     CommunityPollsController,
+    CommunityPollDetailController,
     CommunityEventsController,
     AdminCommunitiesController,
     ReportsController,

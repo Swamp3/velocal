@@ -6,6 +6,7 @@ import {
   CommunityPoll,
   CommunityPost,
   PollResultsVisibility,
+  PollVisibility,
   CommunityMember,
   CommunityRole,
   CreateCommunityDto,
@@ -285,12 +286,21 @@ export class CommunityService {
     return this.api.get(this.pollsPath(communitySlug, subgroupSlug));
   }
 
+  getPoll(
+    communitySlug: string,
+    pollId: string,
+    subgroupSlug?: string | null,
+  ): Observable<CommunityPoll> {
+    return this.api.get(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}`);
+  }
+
   createPoll(
     communitySlug: string,
     dto: {
       question: string;
       multiple: boolean;
       resultsVisibility: PollResultsVisibility;
+      visibility: PollVisibility;
       closesAt?: string;
       options: { label: string }[];
     },
@@ -352,6 +362,7 @@ export class CommunityService {
     dto: {
       question: string;
       resultsVisibility: PollResultsVisibility;
+      visibility: PollVisibility;
       closesAt: string | null;
       options: { id?: string; label: string }[];
     },

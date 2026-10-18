@@ -145,6 +145,12 @@ export class EventDetailComponent implements OnInit {
       .join(' · ');
   }
 
+  /** Tells the route map which event it was opened from, so its back link returns there. */
+  protected mapQuery(): Record<string, string> {
+    const id = this.event()?.id;
+    return id ? { ...this.hostQuery(), event: id } : this.hostQuery();
+  }
+
   protected hostQuery(): Record<string, string> {
     const { community, subgroup } = this.hostContext;
     if (!community) return {};

@@ -14,6 +14,7 @@ import {
   assertCommunityActive,
   communityForbidden,
 } from './community-error';
+import { canBePublic, pollPercent } from './poll-access';
 import { CreateCommunityPollDto } from './dto/create-community-poll.dto';
 import { UpdateCommunityPollDto } from './dto/update-community-poll.dto';
 import { CommunityPollOption } from './entities/community-poll-option.entity';
@@ -21,6 +22,7 @@ import { CommunityPollVote } from './entities/community-poll-vote.entity';
 import {
   CommunityPoll,
   PollResultsVisibility,
+  PollVisibility,
 } from './entities/community-poll.entity';
 import {
   CommunityMember,
@@ -37,6 +39,8 @@ export interface SerializedPollOption {
   id: string;
   label: string;
   votes: number | null;
+  /** Share of the people who voted, whole percent. */
+  percent: number | null;
   selected: boolean;
 }
 
@@ -45,6 +49,21 @@ export interface SerializedPoll {
   question: string;
   multiple: boolean;
   resultsVisibility: PollResultsVisibility;
+  visibility: PollVisibility;
+  /** Where the poll lives, for the page header and links. */
+  host: {
+    communityName: string;
+    communitySlug: string;
+    subgroupName: string | null;
+    subgroupSlug: string | null;
+  };
+  authorName: string | null;
+  /** The host allows public polls (not a private club or an invite-only subgroup). */
+  publicAllowed: boolean;
+  /** Viewer is a member of the host and the poll is still open. */
+  canVote: boolean;
+  /** People who voted (counts are hidden together with the results). */
+  totalVoters: number | null;
   closesAt: Date | null;
   closed: boolean;
   canSeeResults: boolean;
@@ -58,6 +77,8 @@ interface HostAccess {
   community: Community;
   subgroup: Subgroup | null;
   canModerate: boolean;
+  /** Member of the host (or club admin); others only read public polls. */
+  isMember: boolean;
 }
 
 @Injectable()
@@ -98,6 +119,31 @@ export class CommunityPollsService {
     return Promise.all(rows.map((poll) => this.serialize(poll, userId, host)));
   }
 
+  /**
+   * One poll, for its own page. Members always see it; anyone else only when the poll is public
+   * and the club (or subgroup) is publicly visible. Visitors can read the question and options
+   * but never see the counts or vote.
+   */
+  async findOne(
+    communitySlug: string,
+    pollId: string,
+    userId: string | undefined,
+    subgroupSlug?: string,
+  ): Promise<SerializedPoll> {
+    const host = await this.resolveHost(communitySlug, userId, subgroupSlug);
+    const poll = await this.requireHostPoll(host, pollId);
+    if (!host.isMember) {
+      const readable =
+        poll.visibility === PollVisibility.PUBLIC &&
+        canBePublic(
+          host.community.visibility,
+          host.subgroup?.visibility ?? null,
+        );
+      if (!readable) throw communityForbidden(CommunityErrorCode.membersOnly);
+    }
+    return this.serialize(poll, userId, host);
+  }
+
   async create(
     communitySlug: string,
     userId: string,
@@ -114,6 +160,7 @@ export class CommunityPollsService {
         violations: [{ field: 'options' }],
       });
     }
+    this.assertVisibilityAllowed(host, dto.visibility);
     const saved = await this.dataSource.transaction(async (manager) => {
       const poll = await manager.save(
         manager.create(CommunityPoll, {
@@ -124,6 +171,7 @@ export class CommunityPollsService {
           multiple: dto.multiple ?? false,
           resultsVisibility:
             dto.resultsVisibility ?? PollResultsVisibility.MEMBERS,
+          visibility: dto.visibility ?? PollVisibility.MEMBERS,
           closesAt: dto.closesAt ? new Date(dto.closesAt) : null,
         }),
       );
@@ -178,10 +226,12 @@ export class CommunityPollsService {
       throw new BadRequestException('Unknown poll option');
     }
 
+    this.assertVisibilityAllowed(host, dto.visibility);
     await this.dataSource.transaction(async (manager) => {
       await manager.update(CommunityPoll, poll.id, {
         question: dto.question.trim(),
         resultsVisibility: dto.resultsVisibility ?? poll.resultsVisibility,
+        visibility: dto.visibility ?? poll.visibility,
         ...(dto.closesAt !== undefined
           ? { closesAt: dto.closesAt ? new Date(dto.closesAt) : null }
           : {}),
@@ -278,7 +328,7 @@ export class CommunityPollsService {
 
   private async serialize(
     poll: CommunityPoll,
-    userId: string,
+    userId: string | undefined,
     host: HostAccess,
   ): Promise<SerializedPoll> {
     const options = [...(poll.options ?? [])].sort(
@@ -286,30 +336,80 @@ export class CommunityPollsService {
     );
     const optionIds = options.map((option) => option.id);
     const canSeeResults =
-      poll.resultsVisibility === PollResultsVisibility.MEMBERS ||
-      host.canModerate;
-    const counts = canSeeResults
-      ? await this.voteCounts(optionIds)
-      : new Map<string, number>();
-    const selected = new Set(await this.myVotes(userId, optionIds));
+      host.isMember &&
+      (poll.resultsVisibility === PollResultsVisibility.MEMBERS ||
+        host.canModerate);
+    const [counts, totalVoters] = canSeeResults
+      ? await Promise.all([
+          this.voteCounts(optionIds),
+          this.voterCount(optionIds),
+        ])
+      : [new Map<string, number>(), null];
+    const selected = new Set(
+      userId ? await this.myVotes(userId, optionIds) : [],
+    );
+    const closed = this.isClosed(poll.closesAt);
     return {
       id: poll.id,
       question: poll.question,
       multiple: poll.multiple,
       resultsVisibility: poll.resultsVisibility,
+      visibility: poll.visibility,
+      host: {
+        communityName: host.community.name,
+        communitySlug: host.community.slug,
+        subgroupName: host.subgroup?.name ?? null,
+        subgroupSlug: host.subgroup?.slug ?? null,
+      },
+      authorName: poll.author?.displayName ?? null,
+      publicAllowed: canBePublic(
+        host.community.visibility,
+        host.subgroup?.visibility ?? null,
+      ),
+      canVote: host.isMember && !closed,
+      totalVoters,
       closesAt: poll.closesAt,
-      closed: this.isClosed(poll.closesAt),
+      closed,
       canSeeResults,
-      canEdit: poll.authorId === userId,
-      canDelete: poll.authorId === userId || host.canModerate,
+      canEdit: !!userId && poll.authorId === userId,
+      canDelete: !!userId && (poll.authorId === userId || host.canModerate),
       options: options.map((option) => ({
         id: option.id,
         label: option.label,
         votes: canSeeResults ? (counts.get(option.id) ?? 0) : null,
+        percent: canSeeResults
+          ? pollPercent(counts.get(option.id) ?? 0, totalVoters ?? 0)
+          : null,
         selected: selected.has(option.id),
       })),
       createdAt: poll.createdAt,
     };
+  }
+
+  private async voterCount(optionIds: string[]): Promise<number> {
+    if (optionIds.length === 0) return 0;
+    const rows: Array<{ count: number }> = await this.votes.query(
+      `SELECT COUNT(DISTINCT "user_id")::int AS "count"
+       FROM "community_poll_votes"
+       WHERE "option_id" = ANY($1::uuid[])`,
+      [optionIds],
+    );
+    return rows[0]?.count ?? 0;
+  }
+
+  /** Public polls only where the club (or subgroup) is itself publicly visible. */
+  private assertVisibilityAllowed(
+    host: HostAccess,
+    visibility: PollVisibility | undefined,
+  ): void {
+    if (
+      visibility === PollVisibility.PUBLIC &&
+      !canBePublic(host.community.visibility, host.subgroup?.visibility ?? null)
+    ) {
+      throw new BadRequestException(
+        'Public polls are not available in a private club or an invite-only subgroup',
+      );
+    }
   }
 
   private isClosed(closesAt: Date | string | null): boolean {
@@ -349,7 +449,7 @@ export class CommunityPollsService {
   private async requirePoll(id: string): Promise<CommunityPoll> {
     const poll = await this.polls.findOne({
       where: { id },
-      relations: { options: true },
+      relations: { options: true, author: true },
     });
     if (!poll) throw new NotFoundException('Poll not found');
     return poll;
@@ -385,13 +485,27 @@ export class CommunityPollsService {
     userId: string,
     subgroupSlug?: string,
   ): Promise<HostAccess> {
+    const host = await this.resolveHost(communitySlug, userId, subgroupSlug);
+    if (!host.isMember)
+      throw communityForbidden(CommunityErrorCode.membersOnly);
+    return host;
+  }
+
+  /** The host and what the viewer is to it; `userId` is missing for visitors who are not signed in. */
+  private async resolveHost(
+    communitySlug: string,
+    userId: string | undefined,
+    subgroupSlug?: string,
+  ): Promise<HostAccess> {
     const community = await this.communities.findOne({
       where: { slug: communitySlug },
     });
     if (!community) throw new NotFoundException('Community not found');
-    const communityMember = await this.communityMembers.findOne({
-      where: { communityId: community.id, userId },
-    });
+    const communityMember = userId
+      ? await this.communityMembers.findOne({
+          where: { communityId: community.id, userId },
+        })
+      : null;
     if (
       community.visibility === CommunityVisibility.PRIVATE &&
       !communityMember
@@ -401,17 +515,22 @@ export class CommunityPollsService {
     assertCommunityActive(community);
     const isAdmin = communityMember?.role === CommunityMemberRole.ADMIN;
     if (!subgroupSlug) {
-      if (!communityMember)
-        throw communityForbidden(CommunityErrorCode.membersOnly);
-      return { community, subgroup: null, canModerate: isAdmin };
+      return {
+        community,
+        subgroup: null,
+        canModerate: isAdmin,
+        isMember: !!communityMember,
+      };
     }
     const subgroup = await this.subgroups.findOne({
       where: { communityId: community.id, slug: subgroupSlug },
     });
     if (!subgroup) throw new NotFoundException('Subgroup not found');
-    const subgroupMember = await this.subgroupMembers.findOne({
-      where: { subgroupId: subgroup.id, userId },
-    });
+    const subgroupMember = userId
+      ? await this.subgroupMembers.findOne({
+          where: { subgroupId: subgroup.id, userId },
+        })
+      : null;
     if (
       subgroup.visibility === SubgroupVisibility.INVITE &&
       !isAdmin &&
@@ -419,14 +538,12 @@ export class CommunityPollsService {
     ) {
       throw new NotFoundException('Subgroup not found');
     }
-    if (!subgroupMember && !isAdmin) {
-      throw communityForbidden(CommunityErrorCode.membersOnly);
-    }
     return {
       community,
       subgroup,
       canModerate:
         isAdmin || subgroupMember?.role === SubgroupMemberRole.MODERATOR,
+      isMember: isAdmin || !!subgroupMember,
     };
   }
 }

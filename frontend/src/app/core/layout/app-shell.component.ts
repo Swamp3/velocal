@@ -10,7 +10,16 @@ import {
 } from '@angular/core';
 import { ButtonStyleDirective } from '@shared/ui/button/button-style.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { LocaleService } from '@core/services/locale.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -166,6 +175,8 @@ export class AppShellComponent {
   protected readonly unreadCount = this.notifications.unread;
 
   protected readonly mobileMenuOpen = signal(false);
+  /** A navigation is taking long (lazy page loading); shows a bar so the old page doesn't look stuck. */
+  protected readonly navigating = signal(false);
   protected readonly isFullViewport = signal(false);
   protected readonly navLinks = NAV_LINKS;
   protected readonly eventLinks = EVENT_LINKS;
@@ -188,6 +199,22 @@ export class AppShellComponent {
   protected readonly currentYear = new Date().getFullYear();
 
   constructor() {
+    let pending: ReturnType<typeof setTimeout> | undefined;
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
+      if (e instanceof NavigationStart) {
+        // Only for navigations that take noticeable time, so quick ones don't flicker.
+        clearTimeout(pending);
+        pending = setTimeout(() => this.navigating.set(true), 150);
+      } else if (
+        e instanceof NavigationEnd ||
+        e instanceof NavigationCancel ||
+        e instanceof NavigationError
+      ) {
+        clearTimeout(pending);
+        this.navigating.set(false);
+      }
+    });
+
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),

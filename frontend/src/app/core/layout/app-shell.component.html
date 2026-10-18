@@ -7,7 +7,7 @@
       <img
         src="/logo2.svg"
         alt="VeloCal"
-        class="size-8 shadow-md group-hover:shadow-lg transition-shadow"
+        class="size-8"
       />
       <span class="text-lg font-bold tracking-tight text-[var(--color-text)]">
         Velo<span class="text-[var(--color-primary)]">Cal</span>
@@ -189,6 +189,13 @@
       </button>
     </div>
   </div>
+  @if (navigating()) {
+    <div
+      class="absolute inset-x-0 bottom-0 h-0.5 animate-pulse bg-[var(--color-primary)]"
+      role="progressbar"
+      aria-busy="true"
+    ></div>
+  }
 </header>
 
 <main [class]="isFullViewport() ? 'isolate' : 'isolate mx-auto max-w-7xl px-4 py-8 sm:px-6'">

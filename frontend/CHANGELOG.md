@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-18
+
+### Fixed
+
+- Header logo: removed the drop shadow
+- App shell: navigation progress bar (shown after 150 ms) while lazy routes load
+
+### Added
+
+- Poll detail page (`/communities/:slug/polls/:id`, also for subgroups) with result bars, voting and edit/delete; poll list links to it; visibility selector in the poll form and edit dialog
+
+### Fixed
+
+- Route map `?event=` back link (with club/subgroup context); event ride section: one-line rows, file name only for routes with several files
+
+
 ## [0.15.0] - 2026-10-17
 
 ### Added
