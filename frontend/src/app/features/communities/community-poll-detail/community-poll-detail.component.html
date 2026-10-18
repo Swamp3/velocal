@@ -44,9 +44,7 @@
           {{ poll.question }}
         </h1>
         <div class="flex shrink-0 items-center gap-2">
-          @if (poll.visibility === 'public') {
-            <app-share-button [path]="sharePath()" [title]="poll.question" />
-          }
+          <app-share-button [path]="sharePath()" [title]="poll.question" />
           @if (menuItems().length > 0) {
             <ui-action-menu
               [items]="menuItems()"

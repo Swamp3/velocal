@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-10-18
+
+### Fixed
+
+- Dialogs on phones: the floating version label and coffee button no longer cover the dialog buttons, the buttons keep clear of the screen edge, and date fields no longer stick out of the dialog.
+- Polls: the share button is also shown for members-only polls (the link then opens for members), not just public ones.
+
 ## [0.16.0] - 2026-10-18
 
 ### Fixed

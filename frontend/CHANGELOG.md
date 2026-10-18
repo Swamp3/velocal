@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-10-18
+
+### Fixed
+
+- Modal: floating corner links hidden while a dialog is open, footer safe-area padding; datetime-local inputs `min-w-0 max-w-full`
+- Poll detail: share button always visible
+
 ## [0.16.0] - 2026-10-18
 
 ### Fixed

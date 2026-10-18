@@ -149,5 +149,5 @@ export class CommunityEventsComponent implements OnInit {
   }
 
   protected readonly inputClass =
-    'w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
+    'min-w-0 max-w-full w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2 text-sm text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
 }

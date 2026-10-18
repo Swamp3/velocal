@@ -240,7 +240,7 @@
 
 <a
   routerLink="/changelog"
-  class="fixed bottom-4 left-4 z-40 select-none font-mono text-[11px] text-[var(--color-text-muted)]/70 hover:text-[var(--color-text-muted)] hover:underline"
+  class="fixed bottom-4 left-4 z-40 [body:has([aria-modal=true])_&]:hidden select-none font-mono text-[11px] text-[var(--color-text-muted)]/70 hover:text-[var(--color-text-muted)] hover:underline"
   [attr.aria-label]="'changelog.footerLink' | transloco"
 >
   v{{ appVersion }}
@@ -251,7 +251,7 @@
   target="_blank"
   rel="noopener noreferrer"
   aria-label="Buy me a coffee"
-  class="fixed bottom-4 right-4 z-40 flex size-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-muted)] shadow-lg hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] transition-all duration-200"
+  class="fixed bottom-4 right-4 z-40 [body:has([aria-modal=true])_&]:hidden flex size-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-muted)] shadow-lg hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)] transition-all duration-200"
 >
   <svg
     class="size-5"
