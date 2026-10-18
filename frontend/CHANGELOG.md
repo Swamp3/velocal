@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Poll detail: share button always visible
+
 ## [0.16.0] - 2026-10-18
 
 ### Fixed
