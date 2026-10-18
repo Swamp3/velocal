@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- The logo in the header no longer has a shadow in the light theme.
 - Switching pages: while a page takes a moment to load, a thin progress bar appears under the header, so the old page no longer looks like it ignored your tap.
 
 ### Added

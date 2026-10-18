@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Header logo: removed the drop shadow
 - App shell: navigation progress bar (shown after 150 ms) while lazy routes load
 
 ### Added
