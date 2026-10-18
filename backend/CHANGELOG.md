@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-18
+
 ### Added
 
 - `community_polls.visibility` (`members` | `public`, migration `AddPollVisibility`); `GET communities/:slug/polls/:id` and the subgroup variant (optional auth, public polls readable by visitors without counts); poll responses carry `visibility`, `host`, `authorName`, `publicAllowed`, `canVote`, `totalVoters` and per-option `percent`
