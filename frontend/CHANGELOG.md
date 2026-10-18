@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Modal: floating corner links hidden while a dialog is open, footer safe-area padding; datetime-local inputs `min-w-0 max-w-full`
+
 ## [0.16.1] - 2026-10-18
 
 ### Fixed

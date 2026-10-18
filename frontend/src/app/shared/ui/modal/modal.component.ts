@@ -61,10 +61,12 @@ const FOCUSABLE = [
             (click)="closed.emit()"
           ></button>
         </div>
-        <div class="overflow-y-auto px-5 py-5">
+        <div class="min-h-0 overflow-y-auto overscroll-contain px-5 py-5">
           <ng-content />
         </div>
-        <div class="flex justify-end gap-2 border-t border-[var(--color-border)] px-5 py-3">
+        <div
+          class="flex justify-end gap-2 border-t border-[var(--color-border)] px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3"
+        >
           <ng-content select="[footer]" />
         </div>
       </div>

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Dialogs on phones: the floating version label and coffee button no longer cover the dialog buttons, the buttons keep clear of the screen edge, and date fields no longer stick out of the dialog.
+
 ## [0.16.1] - 2026-10-18
 
 ### Fixed
