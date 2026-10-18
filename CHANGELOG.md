@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Switching pages: while a page takes a moment to load, a thin progress bar appears under the header, so the old page no longer looks like it ignored your tap.
+
 ### Added
 
 - Club and subgroup polls have their own page with a link you can share. Results are shown as bars with percentages and the number of voters; you can vote and change your vote there. The poll list is now an overview with status, deadline and whether you already voted.

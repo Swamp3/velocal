@@ -189,6 +189,13 @@
       </button>
     </div>
   </div>
+  @if (navigating()) {
+    <div
+      class="absolute inset-x-0 bottom-0 h-0.5 animate-pulse bg-[var(--color-primary)]"
+      role="progressbar"
+      aria-busy="true"
+    ></div>
+  }
 </header>
 
 <main [class]="isFullViewport() ? 'isolate' : 'isolate mx-auto max-w-7xl px-4 py-8 sm:px-6'">
