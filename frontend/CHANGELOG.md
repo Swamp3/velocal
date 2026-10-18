@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-18
+
 ### Changed
 
 - Version label moved from a fixed corner link into the footer
