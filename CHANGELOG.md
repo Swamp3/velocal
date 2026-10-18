@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-10-18
+
 ### Fixed
 
 - Polls: the share button is also shown for members-only polls (the link then opens for members), not just public ones.
