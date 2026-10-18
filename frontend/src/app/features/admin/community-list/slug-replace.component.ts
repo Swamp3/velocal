@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, output, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { AdminService, SlugChange } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { ConfirmDialogComponent } from '@shared/components';
 import { ButtonComponent, ToastService } from '@shared/ui';
 
 type Target = 'communities' | 'subgroups' | 'both';
@@ -10,7 +11,7 @@ type Target = 'communities' | 'subgroups' | 'both';
 @Component({
   selector: 'app-admin-slug-replace',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslocoPipe, ButtonComponent],
+  imports: [FormsModule, TranslocoPipe, ButtonComponent, ConfirmDialogComponent],
   template: `
     <details
       class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4"
@@ -98,7 +99,7 @@ type Target = 'communities' | 'subgroups' | 'both';
               type="button"
               [loading]="busy()"
               [disabled]="busy() || selected().size === 0"
-              (click)="apply()"
+              (click)="confirming.set(true)"
             >
               {{ 'admin.communities.slug.apply' | transloco: { count: selected().size } }}
             </ui-button>
@@ -106,6 +107,20 @@ type Target = 'communities' | 'subgroups' | 'both';
         }
       }
     </details>
+
+    @if (confirming()) {
+      <app-confirm-dialog
+        [title]="'admin.communities.slug.confirmTitle' | transloco"
+        [message]="
+          'admin.communities.slug.confirmMany'
+            | transloco: { count: selected().size, find: find(), replace: replace() }
+        "
+        [confirmLabel]="'admin.communities.slug.confirm' | transloco"
+        [busy]="busy()"
+        (confirmed)="apply()"
+        (cancelled)="confirming.set(false)"
+      />
+    }
   `,
 })
 export class SlugReplaceComponent {
@@ -122,6 +137,7 @@ export class SlugReplaceComponent {
   protected readonly changes = signal<SlugChange[] | null>(null);
   protected readonly selected = signal<ReadonlySet<string>>(new Set());
   protected readonly busy = signal(false);
+  protected readonly confirming = signal(false);
 
   protected preview(): void {
     if (this.busy()) return;
@@ -162,6 +178,7 @@ export class SlugReplaceComponent {
       .subscribe({
         next: (res) => {
           this.busy.set(false);
+          this.confirming.set(false);
           this.changes.set(null);
           this.toast.success(
             this.transloco.translate('admin.communities.slug.done', { count: res.changes.length }),
@@ -174,6 +191,7 @@ export class SlugReplaceComponent {
 
   private fail(): void {
     this.busy.set(false);
+    this.confirming.set(false);
     this.toast.error(this.transloco.translate('admin.communities.slug.error'));
   }
 }

@@ -740,7 +740,11 @@
           "invalid": "Ungültige Adresse (nur Kleinbuchstaben, Ziffern und Bindestriche)",
           "reserved": "Diese Adresse ist reserviert",
           "taken": "Diese Adresse ist schon vergeben"
-        }
+        },
+        "confirmTitle": "Adresse ändern?",
+        "confirmOne": "Die Adresse von „{{name}}“ ändert sich von /{{from}} auf /{{to}}. Links auf die alte Adresse funktionieren danach nicht mehr.",
+        "confirmMany": "{{count}} Adressen werden geändert („{{find}}“ → „{{replace}}“). Links auf die alten Adressen funktionieren danach nicht mehr.",
+        "confirm": "Adresse ändern"
       }
     },
     "reports": {

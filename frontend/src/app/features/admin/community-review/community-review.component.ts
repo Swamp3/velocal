@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminCommunityDetail, AdminService } from '@core/services/admin.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { FormsModule } from '@angular/forms';
-import { ConfirmDeleteDialogComponent, RichTextViewComponent } from '@shared/components';
+import { ConfirmDeleteDialogComponent, ConfirmDialogComponent, RichTextViewComponent } from '@shared/components';
 import { communityVisibilityVariant } from '@shared/models';
 import {
   BadgeComponent,
@@ -33,6 +33,7 @@ type Pending =
     ConfirmDeleteDialogComponent,
     FormsModule,
     ModalComponent, RichTextViewComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './community-review.component.html',
 })
@@ -54,6 +55,7 @@ export class CommunityReviewComponent implements OnInit {
 
   protected readonly slugDraft = signal('');
   protected readonly savingSlug = signal(false);
+  protected readonly confirmingSlug = signal(false);
 
   private id = '';
 
@@ -141,6 +143,7 @@ export class CommunityReviewComponent implements OnInit {
   protected saveSlug(community: AdminCommunityDetail): void {
     const slug = this.slugDraft().trim().toLowerCase();
     if (!slug || slug === community.slug || this.savingSlug()) return;
+    this.confirmingSlug.set(false);
     this.savingSlug.set(true);
     this.admin.renameCommunitySlug(this.id, slug).subscribe({
       next: () => {

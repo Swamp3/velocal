@@ -740,7 +740,11 @@
           "invalid": "Invalid address (lower-case letters, digits and hyphens only)",
           "reserved": "This address is reserved",
           "taken": "This address is already taken"
-        }
+        },
+        "confirmTitle": "Change address?",
+        "confirmOne": "The address of \"{{name}}\" changes from /{{from}} to /{{to}}. Links to the old address stop working.",
+        "confirmMany": "{{count}} addresses will be changed (\"{{find}}\" → \"{{replace}}\"). Links to the old addresses stop working.",
+        "confirm": "Change address"
       }
     },
     "reports": {

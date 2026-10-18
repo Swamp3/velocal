@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Changing a community address (single or find-and-replace) asks for confirmation first and explains that old links stop working.
 - Site admins can change the address of a community (Admin → Communities → open a community → Address) and replace text in the addresses of many communities and subgroups at once, with a preview. Old links stop working; earlier inbox notifications are updated.
 
 ### Fixed
