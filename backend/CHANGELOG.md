@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `PushPreferencesDto` now accepts `posts` and `comments` (they were stripped by validation); spec checks every push category is accepted
+
 ## [0.17.0] - 2026-10-18
 
 ### Added

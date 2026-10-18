@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Push settings: the "new posts" and "replies" options can be switched on again; the server ignored them and reset the checkbox.
+
 ## [0.17.0] - 2026-10-18
 
 ### Changed
