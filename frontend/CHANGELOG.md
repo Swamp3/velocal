@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-18
+
+### Changed
+
+- Version label moved from a fixed corner link into the footer
+
+### Added
+
+- Admin address changes: confirmation dialog before saving/applying
+- Admin: address field on the community review page; "Replace text in addresses" tool with preview on the community list
+
 ## [0.16.1] - 2026-10-18
 
 ### Fixed

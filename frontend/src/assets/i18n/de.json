@@ -718,7 +718,34 @@
       "suspend": "Sperren",
       "unsuspend": "Sperre aufheben",
       "suspendReason": "Grund (für Mitglieder sichtbar)",
-      "reportsBadge": "{{count}} offene Meldungen"
+      "reportsBadge": "{{count}} offene Meldungen",
+      "slug": {
+        "title": "Text in Adressen ersetzen",
+        "hint": "Ersetzt Text in den Adressen (der Teil des Links nach /communities/) von Communities und Untergruppen. Prüfe erst die Vorschau. Alte Links funktionieren danach nicht mehr.",
+        "find": "Suchen",
+        "replace": "Ersetzen durch",
+        "target": "Gilt für",
+        "both": "Communities und Untergruppen",
+        "communities": "Communities",
+        "subgroups": "Untergruppen",
+        "preview": "Vorschau",
+        "none": "Keine Adresse enthält diesen Text.",
+        "apply": "{{count}} Adressen ändern",
+        "done": "{{count}} Adressen geändert",
+        "error": "Die Adressen konnten nicht geändert werden",
+        "address": "Adresse",
+        "addressHint": "Der Teil des Links nach /communities/. Alte Links funktionieren nach einer Änderung nicht mehr.",
+        "saved": "Adresse geändert",
+        "problem": {
+          "invalid": "Ungültige Adresse (nur Kleinbuchstaben, Ziffern und Bindestriche)",
+          "reserved": "Diese Adresse ist reserviert",
+          "taken": "Diese Adresse ist schon vergeben"
+        },
+        "confirmTitle": "Adresse ändern?",
+        "confirmOne": "Die Adresse von „{{name}}“ ändert sich von /{{from}} auf /{{to}}. Links auf die alte Adresse funktionieren danach nicht mehr.",
+        "confirmMany": "{{count}} Adressen werden geändert („{{find}}“ → „{{replace}}“). Links auf die alten Adressen funktionieren danach nicht mehr.",
+        "confirm": "Adresse ändern"
+      }
     },
     "reports": {
       "title": "Meldungen",

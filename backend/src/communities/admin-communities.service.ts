@@ -1,13 +1,31 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { AdminCommunitySearchDto } from './dto/admin-community-search.dto';
+import { SlugReplaceDto } from './dto/admin-slug.dto';
+import {
+  isValidSlug,
+  planSlugReplace,
+  RESERVED_COMMUNITY_SLUGS,
+  RESERVED_SUBGROUP_SLUGS,
+  SlugChange,
+} from './community-slug';
+
+export interface SlugChangePreview {
+  type: 'community' | 'subgroup';
+  id: string;
+  name: string;
+  oldSlug: string;
+  newSlug: string;
+  problem: SlugChange['problem'];
+}
 
 export interface AdminCommunityRow {
   id: string;
@@ -317,6 +335,195 @@ export class AdminCommunitiesService {
       targetLabel: row.name,
       communityId: id,
     });
+  }
+
+  /** Sets the address of one community. Old links stop working, so only admins may do this. */
+  async renameSlug(id: string, slug: string, actorId: string): Promise<void> {
+    if (!isValidSlug(slug)) {
+      throw new BadRequestException(
+        'Use lower-case letters, digits and single hyphens',
+      );
+    }
+    if (RESERVED_COMMUNITY_SLUGS.has(slug)) {
+      throw new BadRequestException('This address is reserved');
+    }
+    const [row] = await this.dataSource.query<{ name: string; slug: string }[]>(
+      `SELECT "name", "slug" FROM "communities" WHERE "id" = $1`,
+      [id],
+    );
+    if (!row) throw new NotFoundException('Community not found');
+    if (row.slug === slug) return;
+    const [clash] = await this.dataSource.query<{ id: string }[]>(
+      `SELECT "id" FROM "communities" WHERE "slug" = $1`,
+      [slug],
+    );
+    if (clash) throw new ConflictException('This address is already taken');
+    await this.dataSource.transaction(async (manager) => {
+      await this.applyCommunitySlug(manager, id, row.slug, slug);
+    });
+    await this.audit.record({
+      actorId,
+      action: 'community.slug',
+      targetType: 'community',
+      targetId: id,
+      targetLabel: row.name,
+      communityId: id,
+      details: { from: row.slug, to: slug },
+    });
+  }
+
+  /**
+   * Replaces `find` with `replace` in the addresses of communities and/or subgroups. Without
+   * `apply` it only returns what would change; with `apply` nothing is changed unless every
+   * result is valid and free.
+   */
+  async replaceSlugs(
+    dto: SlugReplaceDto,
+    actorId: string,
+  ): Promise<{ applied: boolean; changes: SlugChangePreview[] }> {
+    const withCommunities = dto.target !== 'subgroups';
+    const withSubgroups = dto.target !== 'communities';
+
+    const communities = await this.dataSource.query<
+      { id: string; name: string; slug: string }[]
+    >(`SELECT "id", "name", "slug" FROM "communities"`);
+    const subgroups = await this.dataSource.query<
+      { id: string; name: string; slug: string; community_id: string }[]
+    >(`SELECT "id", "name", "slug", "community_id" FROM "subgroups"`);
+
+    const taken = new Map<string, Set<string>>();
+    taken.set('communities', new Set(communities.map((c) => c.slug)));
+    for (const sub of subgroups) {
+      const set = taken.get(sub.community_id) ?? new Set<string>();
+      set.add(sub.slug);
+      taken.set(sub.community_id, set);
+    }
+
+    const names = new Map<string, string>();
+    for (const c of communities) names.set(c.id, c.name);
+    for (const sub of subgroups) names.set(sub.id, sub.name);
+    const types = new Map<string, 'community' | 'subgroup'>();
+
+    const plans: SlugChange[] = [];
+    if (withCommunities) {
+      for (const c of communities) types.set(c.id, 'community');
+      plans.push(
+        ...planSlugReplace(
+          communities.map((c) => ({
+            id: c.id,
+            scope: 'communities',
+            slug: c.slug,
+          })),
+          dto.find,
+          dto.replace,
+          RESERVED_COMMUNITY_SLUGS,
+          taken,
+        ),
+      );
+    }
+    if (withSubgroups) {
+      for (const sub of subgroups) types.set(sub.id, 'subgroup');
+      plans.push(
+        ...planSlugReplace(
+          subgroups.map((sub) => ({
+            id: sub.id,
+            scope: sub.community_id,
+            slug: sub.slug,
+          })),
+          dto.find,
+          dto.replace,
+          RESERVED_SUBGROUP_SLUGS,
+          taken,
+        ),
+      );
+    }
+
+    const changes: SlugChangePreview[] = plans.map((plan) => ({
+      type: types.get(plan.id) ?? 'community',
+      id: plan.id,
+      name: names.get(plan.id) ?? '',
+      oldSlug: plan.slug,
+      newSlug: plan.newSlug,
+      problem: plan.problem,
+    }));
+
+    if (!dto.apply) return { applied: false, changes };
+    const selected = dto.ids
+      ? changes.filter((change) => dto.ids?.includes(change.id))
+      : changes;
+    if (selected.some((change) => change.problem)) {
+      throw new BadRequestException({
+        message: 'Some addresses cannot be changed; nothing was changed',
+        changes,
+      });
+    }
+    if (selected.length === 0) return { applied: true, changes: [] };
+
+    const parentSlug = new Map(communities.map((c) => [c.id, c.slug]));
+    const subParent = new Map(
+      subgroups.map((sub) => [sub.id, sub.community_id]),
+    );
+    await this.dataSource.transaction(async (manager) => {
+      // Communities first, so subgroup notifications use the new community address.
+      for (const change of selected.filter((c) => c.type === 'community')) {
+        await this.applyCommunitySlug(
+          manager,
+          change.id,
+          change.oldSlug,
+          change.newSlug,
+        );
+        parentSlug.set(change.id, change.newSlug);
+      }
+      for (const change of selected.filter((c) => c.type === 'subgroup')) {
+        const communityId = subParent.get(change.id) as string;
+        await manager.query(
+          `UPDATE "subgroups" SET "slug" = $2 WHERE "id" = $1`,
+          [change.id, change.newSlug],
+        );
+        await manager.query(
+          `UPDATE "notifications"
+              SET "payload" = jsonb_set("payload", '{subgroupSlug}', to_jsonb($3::text))
+            WHERE "payload"->>'communitySlug' = $1 AND "payload"->>'subgroupSlug' = $2`,
+          [parentSlug.get(communityId), change.oldSlug, change.newSlug],
+        );
+      }
+    });
+    for (const change of selected) {
+      await this.audit.record({
+        actorId,
+        action:
+          change.type === 'community' ? 'community.slug' : 'subgroup.slug',
+        targetType: change.type,
+        targetId: change.id,
+        targetLabel: change.name,
+        details: {
+          from: change.oldSlug,
+          to: change.newSlug,
+          find: dto.find,
+          replace: dto.replace,
+        },
+      });
+    }
+    return { applied: true, changes: selected };
+  }
+
+  private async applyCommunitySlug(
+    manager: EntityManager,
+    id: string,
+    oldSlug: string,
+    newSlug: string,
+  ): Promise<void> {
+    await manager.query(
+      `UPDATE "communities" SET "slug" = $2 WHERE "id" = $1`,
+      [id, newSlug],
+    );
+    // Inbox links of earlier notifications carry the address.
+    await manager.query(
+      `UPDATE "notifications"
+          SET "payload" = jsonb_set("payload", '{communitySlug}', to_jsonb($2::text))
+        WHERE "payload"->>'communitySlug' = $1`,
+      [oldSlug, newSlug],
+    );
   }
 
   private async notifyAdmins(

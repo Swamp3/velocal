@@ -71,6 +71,15 @@ export interface AdminUserSearchParams {
   order?: 'ASC' | 'DESC';
 }
 
+export interface SlugChange {
+  type: 'community' | 'subgroup';
+  id: string;
+  name: string;
+  oldSlug: string;
+  newSlug: string;
+  problem: 'invalid' | 'reserved' | 'taken' | null;
+}
+
 export interface AdminCommunityRow {
   id: string;
   slug: string;
@@ -216,6 +225,21 @@ export class AdminService {
 
   deleteCommunityComment(id: string, commentId: string): Observable<void> {
     return this.api.delete<void>(`/admin/communities/${id}/comments/${commentId}`);
+  }
+
+  renameCommunitySlug(id: string, slug: string): Observable<void> {
+    return this.api.patch<void>(`/admin/communities/${id}/slug`, { slug });
+  }
+
+  /** Preview (or with `apply`, perform) a find-and-replace in community/subgroup addresses. */
+  replaceSlugs(body: {
+    find: string;
+    replace: string;
+    target: 'communities' | 'subgroups' | 'both';
+    apply?: boolean;
+    ids?: string[];
+  }): Observable<{ applied: boolean; changes: SlugChange[] }> {
+    return this.api.post(`/admin/communities/slug-replace`, body);
   }
 
   suspendCommunity(id: string, reason: string): Observable<void> {

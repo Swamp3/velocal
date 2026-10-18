@@ -8,6 +8,7 @@ import {
   AdminService,
 } from '@core/services/admin.service';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { SlugReplaceComponent } from './slug-replace.component';
 import { communityVisibilityVariant } from '@shared/models';
 import { BadgeComponent, PaginationComponent, SegmentedComponent, SegmentedOption, SkeletonComponent } from '@shared/ui';
 
@@ -25,6 +26,7 @@ type Sort = NonNullable<AdminCommunitySearchParams['sort']>;
     BadgeComponent,
     PaginationComponent,
     SkeletonComponent, SegmentedComponent,
+    SlugReplaceComponent,
   ],
   templateUrl: './community-list.component.html',
 })
@@ -72,6 +74,10 @@ export class CommunityListComponent implements OnInit {
 
   protected onPage(page: number): void {
     this.page.set(page);
+    this.load();
+  }
+
+  protected reload(): void {
     this.load();
   }
 
