@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Club and subgroup links keep accented letters as plain letters: a club named "Rokkā" now gets the address `rokka` instead of `rokk`. Existing addresses stay unchanged.
+
 ## [0.16.1] - 2026-10-18
 
 ### Fixed

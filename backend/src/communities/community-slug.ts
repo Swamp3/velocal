@@ -4,7 +4,10 @@ export const RESERVED_COMMUNITY_SLUGS = new Set(['mine', 'new']);
 /** Slugs that collide with the create-subgroup route. */
 export const RESERVED_SUBGROUP_SLUGS = new Set(['new']);
 
-/** German transliteration, then a non-empty fallback when the name has no slug characters. */
+/**
+ * German transliteration, then accents dropped ("Rokkā" → "rokka"), then a non-empty fallback
+ * when the name has no slug characters.
+ */
 export function slugBase(name: string, fallback: string): string {
   const base = name
     .toLowerCase()
@@ -12,6 +15,8 @@ export function slugBase(name: string, fallback: string): string {
     .replace(/[öÖ]/g, 'oe')
     .replace(/[üÜ]/g, 'ue')
     .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
   return base || fallback;

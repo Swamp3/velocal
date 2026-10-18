@@ -10,6 +10,11 @@ describe('slugBase', () => {
     expect(slugBase('Größe & Übung', 'community')).toBe('groesse-uebung');
   });
 
+  it('drops other accents instead of cutting the word', () => {
+    expect(slugBase('Rokkā', 'community')).toBe('rokka');
+    expect(slugBase('Café Évian Çà', 'community')).toBe('cafe-evian-ca');
+  });
+
   it('uses the fallback when the name has no slug characters', () => {
     expect(slugBase('!!!', 'community')).toBe('community');
     expect(slugBase('   ', 'group')).toBe('group');

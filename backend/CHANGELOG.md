@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `slugBase` strips diacritics after the German transliteration (NFD) instead of dropping the whole letter
+
 ## [0.16.1] - 2026-10-18
 
 ## [0.16.0] - 2026-10-18
