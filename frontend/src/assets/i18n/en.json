@@ -718,7 +718,30 @@
       "suspend": "Suspend",
       "unsuspend": "Lift suspension",
       "suspendReason": "Reason (shown to members)",
-      "reportsBadge": "{{count}} open reports"
+      "reportsBadge": "{{count}} open reports",
+      "slug": {
+        "title": "Replace text in addresses",
+        "hint": "Replaces text in the addresses (the part of the link after /communities/) of communities and subgroups. Check the preview first. Old links stop working.",
+        "find": "Find",
+        "replace": "Replace with",
+        "target": "Applies to",
+        "both": "Communities and subgroups",
+        "communities": "Communities",
+        "subgroups": "Subgroups",
+        "preview": "Preview",
+        "none": "No address contains this text.",
+        "apply": "Change {{count}} addresses",
+        "done": "{{count}} addresses changed",
+        "error": "Could not change the addresses",
+        "address": "Address",
+        "addressHint": "The part of the link after /communities/. Old links stop working when you change it.",
+        "saved": "Address changed",
+        "problem": {
+          "invalid": "Invalid address (lower-case letters, digits and hyphens only)",
+          "reserved": "This address is reserved",
+          "taken": "This address is already taken"
+        }
+      }
     },
     "reports": {
       "title": "Reports",

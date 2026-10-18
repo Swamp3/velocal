@@ -52,6 +52,9 @@ export class CommunityReviewComponent implements OnInit {
   protected readonly suspendReason = signal('');
   protected readonly badge = communityVisibilityVariant;
 
+  protected readonly slugDraft = signal('');
+  protected readonly savingSlug = signal(false);
+
   private id = '';
 
   ngOnInit(): void {
@@ -135,10 +138,32 @@ export class CommunityReviewComponent implements OnInit {
     });
   }
 
+  protected saveSlug(community: AdminCommunityDetail): void {
+    const slug = this.slugDraft().trim().toLowerCase();
+    if (!slug || slug === community.slug || this.savingSlug()) return;
+    this.savingSlug.set(true);
+    this.admin.renameCommunitySlug(this.id, slug).subscribe({
+      next: () => {
+        this.savingSlug.set(false);
+        this.toast.success(this.transloco.translate('admin.communities.slug.saved'));
+        this.load();
+      },
+      error: (err: { status?: number }) => {
+        this.savingSlug.set(false);
+        this.toast.error(
+          this.transloco.translate(
+            err.status === 409 ? 'admin.communities.slug.problem.taken' : 'admin.communities.slug.problem.invalid',
+          ),
+        );
+      },
+    });
+  }
+
   private load(): void {
     this.admin.getCommunity(this.id).subscribe({
       next: (community) => {
         this.community.set(community);
+        this.slugDraft.set(community.slug);
         this.loading.set(false);
       },
       error: () => {

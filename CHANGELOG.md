@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Site admins can change the address of a community (Admin → Communities → open a community → Address) and replace text in the addresses of many communities and subgroups at once, with a preview. Old links stop working; earlier inbox notifications are updated.
+
 ### Fixed
 
 - Club and subgroup links keep accented letters as plain letters: a club named "Rokkā" now gets the address `rokka` instead of `rokk`. Existing addresses stay unchanged.

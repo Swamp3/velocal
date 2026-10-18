@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `PATCH admin/communities/:id/slug` and `POST admin/communities/slug-replace` (preview, or apply with optional `ids`); changes are written to the audit log and update stored notification links
+
 ### Fixed
 
 - `slugBase` strips diacritics after the German transliteration (NFD) instead of dropping the whole letter

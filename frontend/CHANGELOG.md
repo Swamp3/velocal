@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Admin: address field on the community review page; "Replace text in addresses" tool with preview on the community list
+
 ## [0.16.1] - 2026-10-18
 
 ### Fixed

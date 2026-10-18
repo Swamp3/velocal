@@ -100,6 +100,35 @@
 
   <section class="mt-8">
     <h2 class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'admin.communities.slug.address' | transloco }}
+    </h2>
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      {{ 'admin.communities.slug.addressHint' | transloco }}
+    </p>
+    <form class="mt-2 flex flex-wrap items-center gap-2" (submit)="$event.preventDefault(); saveSlug(c)">
+      <span class="font-mono text-sm text-[var(--color-text-muted)]">/communities/</span>
+      <input
+        name="slug"
+        [ngModel]="slugDraft()"
+        (ngModelChange)="slugDraft.set($event)"
+        maxlength="100"
+        autocapitalize="none"
+        autocomplete="off"
+        spellcheck="false"
+        class="min-w-0 flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 font-mono text-sm text-[var(--color-text)]"
+      />
+      <ui-button
+        type="submit"
+        [loading]="savingSlug()"
+        [disabled]="savingSlug() || !slugDraft().trim() || slugDraft().trim() === c.slug"
+      >
+        {{ 'common.save' | transloco }}
+      </ui-button>
+    </form>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold text-[var(--color-text)]">
       {{ 'admin.communities.admins' | transloco }}
     </h2>
     <ul class="mt-2 text-sm text-[var(--color-text)]">

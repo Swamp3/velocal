@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -16,6 +17,7 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminCommunitiesService } from './admin-communities.service';
 import { SuspendCommunityDto } from './dto/report.dto';
+import { RenameSlugDto, SlugReplaceDto } from './dto/admin-slug.dto';
 import { AdminCommunitySearchDto } from './dto/admin-community-search.dto';
 
 /** Review and moderation of all communities for site admins. */
@@ -27,6 +29,26 @@ export class AdminCommunitiesController {
   @Get()
   list(@Query() dto: AdminCommunitySearchDto) {
     return this.admin.list(dto);
+  }
+
+  /** Find-and-replace in the addresses of communities and subgroups (preview unless `apply`). */
+  @Post('slug-replace')
+  @HttpCode(HttpStatus.OK)
+  replaceSlugs(
+    @Body() dto: SlugReplaceDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.admin.replaceSlugs(dto, user.id);
+  }
+
+  @Patch(':id/slug')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  renameSlug(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RenameSlugDto,
+    @CurrentUser() user: { id: string },
+  ): Promise<void> {
+    return this.admin.renameSlug(id, dto.slug, user.id);
   }
 
   @Get(':id')
