@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Version label moved from a fixed corner link into the footer
+
 ### Added
 
 - Admin: address field on the community review page; "Replace text in addresses" tool with preview on the community list

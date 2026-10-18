@@ -214,7 +214,15 @@
     <div
       class="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between sm:px-6"
     >
-      <span>&copy; {{ currentYear }} VeloCal</span>
+      <span>
+        &copy; {{ currentYear }} VeloCal ·
+        <a
+          routerLink="/changelog"
+          class="font-mono text-xs hover:text-[var(--color-text)] hover:underline"
+          [attr.aria-label]="'changelog.footerLink' | transloco"
+          >v{{ appVersion }}</a
+        >
+      </span>
       <nav class="flex flex-wrap justify-center gap-x-4 gap-y-2" aria-label="Legal links">
         <a routerLink="/changelog" class="hover:text-[var(--color-text)] transition-colors">
           {{ 'changelog.footerLink' | transloco }}
@@ -237,14 +245,6 @@
 }
 
 <ui-toast-container />
-
-<a
-  routerLink="/changelog"
-  class="fixed bottom-4 left-4 z-40 [body:has([aria-modal=true])_&]:hidden select-none font-mono text-[11px] text-[var(--color-text-muted)]/70 hover:text-[var(--color-text-muted)] hover:underline"
-  [attr.aria-label]="'changelog.footerLink' | transloco"
->
-  v{{ appVersion }}
-</a>
 
 <a
   href="https://buymeacoffee.com/timoa"
