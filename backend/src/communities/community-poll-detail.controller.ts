@@ -6,9 +6,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import {
   CommunityPollsService,
+  PollVoters,
   SerializedPoll,
 } from './community-polls.service';
 
@@ -25,9 +27,15 @@ export class CommunityPollDetailController {
   findCommunity(
     @Param('communitySlug') communitySlug: string,
     @Param('pollId', ParseUUIDPipe) pollId: string,
-    @CurrentUser() user?: { id: string },
+    @CurrentUser() user?: { id: string; isAdmin?: boolean },
   ): Promise<SerializedPoll> {
-    return this.polls.findOne(communitySlug, pollId, user?.id);
+    return this.polls.findOne(
+      communitySlug,
+      pollId,
+      user?.id,
+      undefined,
+      !!user?.isAdmin,
+    );
   }
 
   @Get('communities/:communitySlug/subgroups/:subgroupSlug/polls/:pollId')
@@ -35,8 +43,44 @@ export class CommunityPollDetailController {
     @Param('communitySlug') communitySlug: string,
     @Param('subgroupSlug') subgroupSlug: string,
     @Param('pollId', ParseUUIDPipe) pollId: string,
-    @CurrentUser() user?: { id: string },
+    @CurrentUser() user?: { id: string; isAdmin?: boolean },
   ): Promise<SerializedPoll> {
-    return this.polls.findOne(communitySlug, pollId, user?.id, subgroupSlug);
+    return this.polls.findOne(
+      communitySlug,
+      pollId,
+      user?.id,
+      subgroupSlug,
+      !!user?.isAdmin,
+    );
+  }
+
+  /** Admins and moderators only: who voted for which option. */
+  @Get('communities/:communitySlug/polls/:pollId/voters')
+  @UseGuards(JwtAuthGuard)
+  votersCommunity(
+    @Param('communitySlug') communitySlug: string,
+    @Param('pollId', ParseUUIDPipe) pollId: string,
+    @CurrentUser() user: { id: string; isAdmin?: boolean },
+  ): Promise<PollVoters> {
+    return this.polls.voters(communitySlug, pollId, user.id, !!user.isAdmin);
+  }
+
+  @Get(
+    'communities/:communitySlug/subgroups/:subgroupSlug/polls/:pollId/voters',
+  )
+  @UseGuards(JwtAuthGuard)
+  votersSubgroup(
+    @Param('communitySlug') communitySlug: string,
+    @Param('subgroupSlug') subgroupSlug: string,
+    @Param('pollId', ParseUUIDPipe) pollId: string,
+    @CurrentUser() user: { id: string; isAdmin?: boolean },
+  ): Promise<PollVoters> {
+    return this.polls.voters(
+      communitySlug,
+      pollId,
+      user.id,
+      !!user.isAdmin,
+      subgroupSlug,
+    );
   }
 }

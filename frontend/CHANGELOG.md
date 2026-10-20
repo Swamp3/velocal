@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Poll detail: "Who voted" dialog for admins and moderators, note for voters
+
 ## [0.17.1] - 2026-10-18
 
 ## [0.17.0] - 2026-10-18

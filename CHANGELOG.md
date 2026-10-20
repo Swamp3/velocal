@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Polls: club admins, subgroup moderators and site admins get a "Who voted" button on the poll page that lists the voters per answer. Members who vote are told that admins and moderators can see this.
+
 ## [0.17.1] - 2026-10-18
 
 ### Fixed

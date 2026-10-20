@@ -141,6 +141,14 @@ export interface CommunityPollOption {
   selected: boolean;
 }
 
+export interface PollVoters {
+  options: {
+    id: string;
+    label: string;
+    voters: { userId: string; displayName: string | null; votedAt: string }[];
+  }[];
+}
+
 export interface CommunityPoll {
   id: string;
   question: string;
@@ -162,6 +170,8 @@ export interface CommunityPoll {
   /** People who voted (not votes: a multiple-choice voter counts once). Null while hidden. */
   totalVoters: number | null;
   canSeeResults: boolean;
+  /** Admins, moderators and site admins may see who voted for what. */
+  canSeeVoters: boolean;
   canEdit: boolean;
   canDelete: boolean;
   options: CommunityPollOption[];
