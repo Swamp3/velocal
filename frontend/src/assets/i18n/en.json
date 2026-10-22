@@ -1111,7 +1111,11 @@
       "missingBody": "The poll doesn't exist or was deleted.",
       "votesOne": "1 vote",
       "votersOne": "1 voter",
-      "backToHost": "Back to the community"
+      "backToHost": "Back to the community",
+      "whoVoted": "Who voted",
+      "votersVisibleNote": "Admins and moderators can see who voted for what.",
+      "noVoters": "No votes",
+      "unknownVoter": "Deleted account"
     },
     "events": {
       "moreOptions": "More options",

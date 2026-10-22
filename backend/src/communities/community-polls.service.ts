@@ -67,6 +67,8 @@ export interface SerializedPoll {
   closesAt: Date | null;
   closed: boolean;
   canSeeResults: boolean;
+  /** Viewer may open the list of who voted for what (admins, moderators, site admins). */
+  canSeeVoters: boolean;
   canEdit: boolean;
   canDelete: boolean;
   options: SerializedPollOption[];
@@ -79,6 +81,16 @@ interface HostAccess {
   canModerate: boolean;
   /** Member of the host (or club admin); others only read public polls. */
   isMember: boolean;
+  /** Site admin: may read and moderate any poll, but is no member and cannot vote. */
+  isSiteAdmin: boolean;
+}
+
+export interface PollVoters {
+  options: {
+    id: string;
+    label: string;
+    voters: { userId: string; displayName: string | null; votedAt: Date }[];
+  }[];
 }
 
 @Injectable()
@@ -129,10 +141,16 @@ export class CommunityPollsService {
     pollId: string,
     userId: string | undefined,
     subgroupSlug?: string,
+    siteAdmin = false,
   ): Promise<SerializedPoll> {
-    const host = await this.resolveHost(communitySlug, userId, subgroupSlug);
+    const host = await this.resolveHost(
+      communitySlug,
+      userId,
+      subgroupSlug,
+      siteAdmin,
+    );
     const poll = await this.requireHostPoll(host, pollId);
-    if (!host.isMember) {
+    if (!host.isMember && !host.isSiteAdmin) {
       const readable =
         poll.visibility === PollVisibility.PUBLIC &&
         canBePublic(
@@ -142,6 +160,61 @@ export class CommunityPollsService {
       if (!readable) throw communityForbidden(CommunityErrorCode.membersOnly);
     }
     return this.serialize(poll, userId, host);
+  }
+
+  /**
+   * Who voted for what. Only for club admins, subgroup moderators (of a subgroup poll) and site
+   * admins; the voters see a note that this list exists.
+   */
+  async voters(
+    communitySlug: string,
+    pollId: string,
+    userId: string,
+    siteAdmin: boolean,
+    subgroupSlug?: string,
+  ): Promise<PollVoters> {
+    const host = await this.resolveHost(
+      communitySlug,
+      userId,
+      subgroupSlug,
+      siteAdmin,
+    );
+    if (!host.canModerate) {
+      throw new ForbiddenException(
+        'Only admins and moderators can see who voted',
+      );
+    }
+    const poll = await this.requireHostPoll(host, pollId);
+    const options = [...(poll.options ?? [])].sort(
+      (a, b) => a.position - b.position,
+    );
+    const rows: {
+      optionId: string;
+      userId: string;
+      displayName: string | null;
+      votedAt: Date;
+    }[] = await this.votes.query(
+      `SELECT v."option_id" AS "optionId", v."user_id" AS "userId",
+              u."displayName" AS "displayName", v."createdAt" AS "votedAt"
+         FROM "community_poll_votes" v
+         JOIN "users" u ON u."id" = v."user_id"
+        WHERE v."option_id" = ANY($1::uuid[])
+        ORDER BY LOWER(COALESCE(u."displayName", '')), v."createdAt"`,
+      [options.map((option) => option.id)],
+    );
+    return {
+      options: options.map((option) => ({
+        id: option.id,
+        label: option.label,
+        voters: rows
+          .filter((row) => row.optionId === option.id)
+          .map(({ userId: id, displayName, votedAt }) => ({
+            userId: id,
+            displayName,
+            votedAt,
+          })),
+      })),
+    };
   }
 
   async create(
@@ -336,7 +409,7 @@ export class CommunityPollsService {
     );
     const optionIds = options.map((option) => option.id);
     const canSeeResults =
-      host.isMember &&
+      (host.isMember || host.isSiteAdmin) &&
       (poll.resultsVisibility === PollResultsVisibility.MEMBERS ||
         host.canModerate);
     const [counts, totalVoters] = canSeeResults
@@ -371,6 +444,7 @@ export class CommunityPollsService {
       closesAt: poll.closesAt,
       closed,
       canSeeResults,
+      canSeeVoters: host.canModerate,
       canEdit: !!userId && poll.authorId === userId,
       canDelete: !!userId && (poll.authorId === userId || host.canModerate),
       options: options.map((option) => ({
@@ -496,6 +570,7 @@ export class CommunityPollsService {
     communitySlug: string,
     userId: string | undefined,
     subgroupSlug?: string,
+    siteAdmin = false,
   ): Promise<HostAccess> {
     const community = await this.communities.findOne({
       where: { slug: communitySlug },
@@ -508,7 +583,8 @@ export class CommunityPollsService {
       : null;
     if (
       community.visibility === CommunityVisibility.PRIVATE &&
-      !communityMember
+      !communityMember &&
+      !siteAdmin
     ) {
       throw new NotFoundException('Community not found');
     }
@@ -518,8 +594,9 @@ export class CommunityPollsService {
       return {
         community,
         subgroup: null,
-        canModerate: isAdmin,
+        canModerate: isAdmin || siteAdmin,
         isMember: !!communityMember,
+        isSiteAdmin: siteAdmin,
       };
     }
     const subgroup = await this.subgroups.findOne({
@@ -534,6 +611,7 @@ export class CommunityPollsService {
     if (
       subgroup.visibility === SubgroupVisibility.INVITE &&
       !isAdmin &&
+      !siteAdmin &&
       !subgroupMember
     ) {
       throw new NotFoundException('Subgroup not found');
@@ -542,8 +620,11 @@ export class CommunityPollsService {
       community,
       subgroup,
       canModerate:
-        isAdmin || subgroupMember?.role === SubgroupMemberRole.MODERATOR,
+        isAdmin ||
+        siteAdmin ||
+        subgroupMember?.role === SubgroupMemberRole.MODERATOR,
       isMember: isAdmin || !!subgroupMember,
+      isSiteAdmin: siteAdmin,
     };
   }
 }

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-10-22
+
+### Added
+
+- `GET communities/:slug/polls/:id/voters` (and subgroup variant) for admins, moderators and site admins; polls carry `canSeeVoters`; site admins can read any poll
+
 ## [0.17.1] - 2026-10-18
 
 ### Fixed

@@ -1111,7 +1111,11 @@
       "missingBody": "Die Umfrage existiert nicht oder wurde gelöscht.",
       "votesOne": "1 Stimme",
       "votersOne": "1 Person",
-      "backToHost": "Zurück zur Community"
+      "backToHost": "Zurück zur Community",
+      "whoVoted": "Wer hat abgestimmt",
+      "votersVisibleNote": "Admins und Moderatoren können sehen, wer wofür abgestimmt hat.",
+      "noVoters": "Keine Stimmen",
+      "unknownVoter": "Gelöschtes Konto"
     },
     "events": {
       "moreOptions": "Weitere Optionen",

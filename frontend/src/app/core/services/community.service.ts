@@ -6,6 +6,7 @@ import {
   CommunityPoll,
   CommunityPost,
   PollResultsVisibility,
+  PollVoters,
   PollVisibility,
   CommunityMember,
   CommunityRole,
@@ -292,6 +293,15 @@ export class CommunityService {
     subgroupSlug?: string | null,
   ): Observable<CommunityPoll> {
     return this.api.get(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}`);
+  }
+
+  /** Who voted for what; admins, moderators and site admins only. */
+  getPollVoters(
+    communitySlug: string,
+    pollId: string,
+    subgroupSlug?: string | null,
+  ): Observable<PollVoters> {
+    return this.api.get(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}/voters`);
   }
 
   createPoll(

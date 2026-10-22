@@ -16,12 +16,14 @@ import { CommunityService } from '@core/services/community.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { ShareButtonComponent } from '@shared/components/share-button/share-button.component';
-import { CommunityPoll } from '@shared/models';
+import { CommunityPoll, PollVoters } from '@shared/models';
 import {
   ActionMenuComponent,
   ActionMenuItem,
   BadgeComponent,
   ButtonComponent,
+  ButtonStyleDirective,
+  ModalComponent,
   ToastService,
 } from '@shared/ui';
 import { timeLeft } from '@shared/utils/time-left';
@@ -38,6 +40,8 @@ import { PollEdit, PollEditDialogComponent } from '../poll-edit-dialog/poll-edit
     ActionMenuComponent,
     BadgeComponent,
     ButtonComponent,
+    ButtonStyleDirective,
+    ModalComponent,
     ShareButtonComponent,
     PollEditDialogComponent,
   ],
@@ -60,6 +64,9 @@ export class CommunityPollDetailComponent implements OnInit {
   protected readonly selection = signal<string[]>([]);
   protected readonly voting = signal(false);
   protected readonly editing = signal(false);
+  protected readonly voters = signal<PollVoters | null>(null);
+  protected readonly showVoters = signal(false);
+  protected readonly loadingVoters = signal(false);
   protected readonly savingEdit = signal(false);
   protected readonly loggedIn = this.auth.isAuthenticated;
 
@@ -175,6 +182,27 @@ export class CommunityPollDetailComponent implements OnInit {
         },
         error: (err: ApiError) => {
           this.voting.set(false);
+          this.toast.error(this.transloco.translate(communityErrorKey(err)));
+        },
+      });
+  }
+
+  protected openVoters(): void {
+    const poll = this.poll();
+    if (!poll || this.loadingVoters()) return;
+    this.showVoters.set(true);
+    this.loadingVoters.set(true);
+    this.communityService
+      .getPollVoters(this.communitySlug, poll.id, this.subgroupSlug)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (voters) => {
+          this.voters.set(voters);
+          this.loadingVoters.set(false);
+        },
+        error: (err: ApiError) => {
+          this.loadingVoters.set(false);
+          this.showVoters.set(false);
           this.toast.error(this.transloco.translate(communityErrorKey(err)));
         },
       });
