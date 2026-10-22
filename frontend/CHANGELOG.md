@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.17.3] - 2026-10-22
+
+### Fixed
+
+- `AppUpdateService`: on a lazy-chunk load failure during navigation, activate the pending update and load the intended URL (once per 30 s); `isChunkLoadError` helper with spec
+
 ## [0.17.2] - 2026-10-22
 
 ### Added
