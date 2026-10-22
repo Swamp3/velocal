@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.17.3] - 2026-10-22
+
 ### Fixed
 
 - Opening a link while the app has an update waiting (or after a new version went live) no longer leaves you on the old page: when the target page cannot be loaded because its files were replaced, the app reloads straight to the link.
