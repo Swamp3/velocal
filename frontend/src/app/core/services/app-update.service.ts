@@ -1,11 +1,15 @@
 import { isPlatformBrowser } from '@angular/common';
 import { ApplicationRef, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, NavigationError, Router } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { concat, first, interval } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { isChunkLoadError } from '@shared/utils/chunk-error';
 
 const CHECK_EVERY_MS = 5 * 60 * 1000;
+const RELOAD_KEY = 'velocal-chunk-reload';
+/** A second failed page load within this time is not retried, so a real outage cannot loop. */
+const RELOAD_GUARD_MS = 30_000;
 
 /**
  * Notices new deployments through the Angular service worker.
@@ -25,7 +29,17 @@ export class AppUpdateService {
   readonly updateReady = signal(false);
 
   start(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.sw.isEnabled) return;
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // A page opened before a deployment cannot fetch the new page's script any more. Load the
+    // address that was meant instead of staying on the old page.
+    this.router.events
+      .pipe(filter((event): event is NavigationError => event instanceof NavigationError))
+      .subscribe((event) => {
+        if (isChunkLoadError(event.error)) void this.reloadTo(event.url);
+      });
+
+    if (!this.sw.isEnabled) return;
 
     this.sw.versionUpdates
       .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
@@ -53,6 +67,23 @@ export class AppUpdateService {
       await this.sw.activateUpdate();
     } finally {
       document.location.reload();
+    }
+  }
+
+  private async reloadTo(url: string): Promise<void> {
+    try {
+      const last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0);
+      if (Date.now() - last < RELOAD_GUARD_MS) return;
+      sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+    } catch {
+      // Storage blocked: reload anyway, the browser limits repeated failures itself.
+    }
+    try {
+      if (this.sw.isEnabled) await this.sw.activateUpdate();
+    } catch {
+      // No update to activate.
+    } finally {
+      window.location.assign(url);
     }
   }
 
