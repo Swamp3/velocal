@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Member pages: `app-member-filters` (search + role), `ui-pagination`, server-side subgroup suggestions
+
 ## [0.17.3] - 2026-10-22
 
 ### Fixed

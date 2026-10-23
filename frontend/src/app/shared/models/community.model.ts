@@ -1,3 +1,20 @@
+/** One page of a member list; the server filters and sorts (admins/moderators first). */
+export interface MemberPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface MemberQuery {
+  q?: string;
+  role?: 'all' | 'admin' | 'moderator' | 'member';
+  page?: number;
+  limit?: number;
+  /** Club list: leave out people already in this subgroup (by id). */
+  excludeSubgroup?: string;
+}
+
 export type CommunityVisibility = 'public' | 'request' | 'private';
 
 export type CommunityRole = 'member' | 'admin';

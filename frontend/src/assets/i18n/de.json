@@ -997,7 +997,16 @@
       "searchPlaceholder": "Namen eingeben…",
       "noMatches": "Keine passenden Community-Mitglieder",
       "stravaProfile": "Strava-Profil von {{name}}",
-      "byEmailHint": "Nutze die E-Mail-Adresse, wenn mehrere Mitglieder denselben Anzeigenamen haben. Die Person muss schon Mitglied der Community sein."
+      "byEmailHint": "Nutze die E-Mail-Adresse, wenn mehrere Mitglieder denselben Anzeigenamen haben. Die Person muss schon Mitglied der Community sein.",
+      "filterPlaceholder": "Mitglieder suchen…",
+      "filterRole": "Nach Rolle filtern",
+      "filterAll": "Alle",
+      "filterAdmins": "Admins",
+      "filterModerators": "Moderatoren",
+      "filterMembers": "Mitglieder",
+      "count": "{{count}} Mitglieder",
+      "noResults": "Keine passenden Mitglieder",
+      "countOne": "1 Mitglied"
     },
     "requests": {
       "title": "Beitrittsanfragen",

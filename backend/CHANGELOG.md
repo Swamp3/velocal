@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `GET communities/:id/members` and `GET communities/:slug/subgroups/:slug/members` now return `{ items, total, page, limit }` and accept `q`, `role`, `page`, `limit` (and `excludeSubgroup` for the club list); admins/moderators are listed first, then by name
+
 ## [0.17.3] - 2026-10-22
 
 ## [0.17.2] - 2026-10-22

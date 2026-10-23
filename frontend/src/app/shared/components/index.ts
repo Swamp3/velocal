@@ -15,6 +15,7 @@ export { ImageUploadComponent } from './image-upload/image-upload.component';
 export { InviteByEmailComponent } from './invite-by-email/invite-by-email.component';
 export { CommunityCardComponent } from './community-card/community-card.component';
 export { CommunityHeroComponent } from './community-hero/community-hero.component';
+export { MemberFiltersComponent } from './member-filters/member-filters.component';
 export { MemberListComponent, type MemberListItem } from './member-list/member-list.component';
 export { FormActionsComponent } from './form-actions/form-actions.component';
 export { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';

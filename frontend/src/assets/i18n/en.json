@@ -997,7 +997,16 @@
       "searchPlaceholder": "Type a name…",
       "noMatches": "No matching community members",
       "stravaProfile": "Strava profile of {{name}}",
-      "byEmailHint": "Use the email address when several members share a display name. The person must already be a member of the club."
+      "byEmailHint": "Use the email address when several members share a display name. The person must already be a member of the club.",
+      "filterPlaceholder": "Search members…",
+      "filterRole": "Filter by role",
+      "filterAll": "All",
+      "filterAdmins": "Admins",
+      "filterModerators": "Moderators",
+      "filterMembers": "Members",
+      "count": "{{count}} members",
+      "noResults": "No members match",
+      "countOne": "1 member"
     },
     "requests": {
       "title": "Join requests",

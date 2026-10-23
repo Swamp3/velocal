@@ -1,3 +1,4 @@
+import { MemberSearchDto, Paged } from './dto/member-search.dto';
 import {
   Body,
   Controller,
@@ -10,6 +11,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -170,9 +172,10 @@ export class SubgroupsController {
   listMembers(
     @Param('communitySlug') communitySlug: string,
     @Param('slug') slug: string,
+    @Query() search: MemberSearchDto,
     @CurrentUser() user: { id: string },
-  ): Promise<SerializedSubgroupMember[]> {
-    return this.subgroups.listMembers(communitySlug, slug, user.id);
+  ): Promise<Paged<SerializedSubgroupMember>> {
+    return this.subgroups.listMembers(communitySlug, slug, user.id, search);
   }
 
   @Patch(':slug/members/:userId')

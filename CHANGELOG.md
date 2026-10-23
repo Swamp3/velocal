@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Member lists of clubs and subgroups load 30 at a time with page buttons, a search box and a role filter (all / admins or moderators / members). The "add from club members" suggestions of a subgroup are searched on the server, so they work with very large clubs.
+
 ## [0.17.3] - 2026-10-22
 
 ### Fixed

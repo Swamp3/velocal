@@ -1,3 +1,5 @@
+import { MEMBER_PAGE_SIZE, likePattern } from './member-search';
+import { MemberSearchDto, Paged } from './dto/member-search.dto';
 import {
   ForbiddenException,
   Injectable,
@@ -396,7 +398,8 @@ export class SubgroupsService {
     communitySlug: string,
     slug: string,
     userId: string,
-  ): Promise<SerializedSubgroupMember[]> {
+    search: MemberSearchDto = {},
+  ): Promise<Paged<SerializedSubgroupMember>> {
     const { subgroup, isAdmin } = await this.requireVisible(
       communitySlug,
       slug,
@@ -409,25 +412,46 @@ export class SubgroupsService {
       throw new ForbiddenException('Subgroup members only');
     }
 
-    const rows = await this.members.find({
-      where: { subgroupId: subgroup.id },
-      relations: { user: true },
-    });
-    rows.sort((left, right) => {
-      if (left.role !== right.role) {
-        return left.role === SubgroupMemberRole.MODERATOR ? -1 : 1;
-      }
-      return (left.user?.displayName ?? '').localeCompare(
-        right.user?.displayName ?? '',
-      );
-    });
-    return rows.map((member) => ({
-      userId: member.userId,
-      displayName: member.user?.displayName ?? null,
-      stravaUrl: member.user?.stravaUrl ?? null,
-      role: member.role,
-      joinedAt: member.createdAt,
-    }));
+    const page = search.page ?? 1;
+    const limit = search.limit ?? MEMBER_PAGE_SIZE;
+    const qb = this.members
+      .createQueryBuilder('member')
+      .innerJoinAndSelect('member.user', 'user')
+      .where('member.subgroupId = :id', { id: subgroup.id });
+    if (search.q) {
+      qb.andWhere('user.displayName ILIKE :q', { q: likePattern(search.q) });
+    }
+    if (search.role === 'moderator') {
+      qb.andWhere('member.role = :role', {
+        role: SubgroupMemberRole.MODERATOR,
+      });
+    } else if (search.role === 'member') {
+      qb.andWhere('member.role = :role', { role: SubgroupMemberRole.MEMBER });
+    }
+    const total = await qb.getCount();
+    const rows = await qb
+      .addSelect(
+        `CASE WHEN member.role = '${SubgroupMemberRole.MODERATOR}' THEN 0 ELSE 1 END`,
+        'role_rank',
+      )
+      .orderBy('role_rank', 'ASC')
+      .addOrderBy('LOWER("user"."displayName")', 'ASC', 'NULLS LAST')
+      .addOrderBy('member.id', 'ASC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getMany();
+    return {
+      items: rows.map((member) => ({
+        userId: member.userId,
+        displayName: member.user?.displayName ?? null,
+        stravaUrl: member.user?.stravaUrl ?? null,
+        role: member.role,
+        joinedAt: member.createdAt,
+      })),
+      total,
+      page,
+      limit,
+    };
   }
 
   async updateMemberRole(
@@ -925,7 +949,8 @@ export class SubgroupsService {
       userId,
     );
     const pendingRequestCount =
-      viewerIsCommunityAdmin || membership?.role === SubgroupMemberRole.MODERATOR
+      viewerIsCommunityAdmin ||
+      membership?.role === SubgroupMemberRole.MODERATOR
         ? await this.joinRequests.count({
             where: {
               subgroupId: subgroup.id,

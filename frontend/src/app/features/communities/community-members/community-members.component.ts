@@ -16,12 +16,19 @@ import {
   ConfirmDialogComponent,
   EmptyStateComponent,
   InviteByEmailComponent,
+  MemberFiltersComponent,
   MemberListComponent,
   MemberListItem,
 } from '@shared/components';
 import { Community, CommunityMember, CommunityRole } from '@shared/models';
 import { communityErrorKey } from '../community-error';
-import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
+import {
+  ButtonStyleDirective,
+  PaginationComponent,
+  SegmentedOption,
+  SkeletonComponent,
+  ToastService,
+} from '@shared/ui';
 
 @Component({
   selector: 'app-community-members',
@@ -34,6 +41,8 @@ import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/u
     EmptyStateComponent,
     InviteByEmailComponent,
     MemberListComponent,
+    MemberFiltersComponent,
+    PaginationComponent,
     ButtonStyleDirective,
   ],
   templateUrl: './community-members.component.html',
@@ -55,6 +64,19 @@ export class CommunityMembersComponent implements OnInit {
   protected readonly notFound = signal(false);
   protected readonly mutating = signal(false);
   private readonly members = signal<CommunityMember[]>([]);
+  protected readonly total = signal(0);
+  protected readonly page = signal(1);
+  protected readonly pageSize = 30;
+  protected readonly query = signal('');
+  protected readonly role = signal<string>('all');
+  /** True while a filter or page change is loading; the list stays on screen meanwhile. */
+  protected readonly listLoading = signal(false);
+  protected readonly roleOptions: SegmentedOption<string>[] = [
+    { value: 'all', labelKey: 'communities.members.filterAll' },
+    { value: 'admin', labelKey: 'communities.members.filterAdmins' },
+    { value: 'member', labelKey: 'communities.members.filterMembers' },
+  ];
+  protected readonly filtered = computed(() => this.query() !== '' || this.role() !== 'all');
 
   protected readonly promoteCandidate = signal<CommunityMember | null>(null);
   protected readonly canManage = computed(() => this.community()?.myRole === 'admin');
@@ -106,6 +128,28 @@ export class CommunityMembersComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  protected onSearch(text: string): void {
+    this.query.set(text);
+    this.page.set(1);
+    this.reloadPeople();
+  }
+
+  protected onRoleFilter(role: string): void {
+    this.role.set(role);
+    this.page.set(1);
+    this.reloadPeople();
+  }
+
+  protected onPage(page: number): void {
+    this.page.set(page);
+    this.reloadPeople();
+  }
+
+  private reloadPeople(): void {
+    const community = this.community();
+    if (community) this.loadPeople(community);
   }
 
   protected onRoleToggle(userId: string): void {
@@ -196,17 +240,32 @@ export class CommunityMembersComponent implements OnInit {
   }
 
   private loadPeople(community: Community): void {
+    this.listLoading.set(true);
     this.communityService
-      .members(community.id)
+      .members(community.id, {
+        q: this.query(),
+        role: this.role() as 'all' | 'admin' | 'member',
+        page: this.page(),
+        limit: this.pageSize,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (members) => {
-          this.members.set(members);
+        next: (result) => {
+          // The last row of a page was removed: show the page before it.
+          if (result.items.length === 0 && this.page() > 1) {
+            this.page.set(Math.max(1, Math.ceil(result.total / this.pageSize)));
+            this.loadPeople(community);
+            return;
+          }
+          this.members.set(result.items);
+          this.total.set(result.total);
           this.loading.set(false);
+          this.listLoading.set(false);
           this.mutating.set(false);
         },
         error: (err: ApiError) => {
           this.loading.set(false);
+          this.listLoading.set(false);
           this.mutating.set(false);
           this.toastMembershipError(err);
         },

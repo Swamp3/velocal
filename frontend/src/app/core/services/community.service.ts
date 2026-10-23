@@ -5,6 +5,8 @@ import {
   CommunityJoinRequest,
   CommunityPoll,
   CommunityPost,
+  MemberPage,
+  MemberQuery,
   PollResultsVisibility,
   PollVoters,
   PollVisibility,
@@ -65,8 +67,8 @@ export class CommunityService {
     return this.api.post(`/communities/${id}/leave`, {});
   }
 
-  members(id: string): Observable<CommunityMember[]> {
-    return this.api.get(`/communities/${id}/members`);
+  members(id: string, query: MemberQuery = {}): Observable<MemberPage<CommunityMember>> {
+    return this.api.get(`/communities/${id}/members`, this.memberParams(query));
   }
 
   /**
@@ -129,8 +131,15 @@ export class CommunityService {
     return this.api.post(`/communities/${communitySlug}/subgroups/${slug}/leave`, {});
   }
 
-  subgroupMembers(communitySlug: string, slug: string): Observable<SubgroupMember[]> {
-    return this.api.get(`/communities/${communitySlug}/subgroups/${slug}/members`);
+  subgroupMembers(
+    communitySlug: string,
+    slug: string,
+    query: MemberQuery = {},
+  ): Observable<MemberPage<SubgroupMember>> {
+    return this.api.get(
+      `/communities/${communitySlug}/subgroups/${slug}/members`,
+      this.memberParams(query),
+    );
   }
 
   updateSubgroupRole(
@@ -387,6 +396,16 @@ export class CommunityService {
     subgroupSlug?: string | null,
   ): Observable<void> {
     return this.api.delete(`${this.pollsPath(communitySlug, subgroupSlug)}/${pollId}`);
+  }
+
+  private memberParams(query: MemberQuery): Record<string, string | number> {
+    const params: Record<string, string | number> = {};
+    if (query.q) params['q'] = query.q;
+    if (query.role && query.role !== 'all') params['role'] = query.role;
+    if (query.page && query.page > 1) params['page'] = query.page;
+    if (query.limit) params['limit'] = query.limit;
+    if (query.excludeSubgroup) params['excludeSubgroup'] = query.excludeSubgroup;
+    return params;
   }
 
   private pollsPath(communitySlug: string, subgroupSlug?: string | null): string {
