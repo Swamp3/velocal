@@ -5,9 +5,9 @@ function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
 
-function formatIcsDate(iso: string): string {
+function formatIcsDate(iso: string, allDay = !hasTime(iso)): string {
   const d = new Date(iso);
-  if (!hasTime(iso)) {
+  if (allDay) {
     return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
   }
   return (
@@ -22,12 +22,12 @@ function escapeIcs(text: string | undefined | null): string {
 }
 
 export function generateIcs(event: CyclingEvent): string {
-  const allDay = !hasTime(event.startDate);
+  const allDay = event.startTimeKnown === false || !hasTime(event.startDate);
   const dtStart = allDay
-    ? `DTSTART;VALUE=DATE:${formatIcsDate(event.startDate)}`
+    ? `DTSTART;VALUE=DATE:${formatIcsDate(event.startDate, true)}`
     : `DTSTART:${formatIcsDate(event.startDate)}`;
   const dtEnd = allDay
-    ? `DTEND;VALUE=DATE:${formatIcsDate(event.endDate || event.startDate)}`
+    ? `DTEND;VALUE=DATE:${formatIcsDate(event.endDate || event.startDate, true)}`
     : `DTEND:${formatIcsDate(event.endDate || event.startDate)}`;
 
   return [

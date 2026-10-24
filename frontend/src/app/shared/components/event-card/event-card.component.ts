@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CyclingEvent } from '@shared/models';
-import { formatTime } from '@shared/utils/event-date';
+import { eventStartTime } from '@shared/utils/event-date';
 import { DisciplineChipComponent } from '../discipline-chip/discipline-chip.component';
 import { EventStatusBadgeComponent } from '../event-status-badge/event-status-badge.component';
 import { DatePipe } from '@angular/common';
@@ -21,5 +21,5 @@ import { DatePipe } from '@angular/common';
 export class EventCardComponent {
   readonly event = input.required<CyclingEvent>();
   readonly distance = input<number | undefined>();
-  protected readonly startTime = computed(() => formatTime(this.event().startDate));
+  protected readonly startTime = computed(() => eventStartTime(this.event()));
 }

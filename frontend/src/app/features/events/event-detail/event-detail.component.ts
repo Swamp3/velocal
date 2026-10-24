@@ -28,6 +28,7 @@ import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
 import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
+import { EventImportInfoComponent } from '../event-import-info/event-import-info.component';
 import {
   ActionMenuComponent,
   type ActionMenuItem,
@@ -37,7 +38,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
-import { formatTime } from '@shared/utils/event-date';
+import { eventEndTime, eventStartTime, formatTime } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 
 @Pipe({ name: 'externalUrlDisplay' })
@@ -76,6 +77,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     ShareButtonComponent,
     IconButtonComponent,
     ActionMenuComponent,
+    EventImportInfoComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -102,8 +104,9 @@ export class EventDetailComponent implements OnInit {
   protected readonly eventSeries = signal<RaceSeries[]>([]);
   protected readonly linkedPosts = signal<PostListItem[]>([]);
 
-  protected readonly startTime = computed(() => formatTime(this.event()?.startDate));
-  protected readonly endTime = computed(() => formatTime(this.event()?.endDate));
+  protected readonly isAdmin = computed(() => !!this.auth.currentUser()?.isAdmin);
+  protected readonly startTime = computed(() => eventStartTime(this.event()));
+  protected readonly endTime = computed(() => eventEndTime(this.event()));
   protected readonly registrationStartTime = computed(() =>
     formatTime(this.event()?.registrationStart),
   );

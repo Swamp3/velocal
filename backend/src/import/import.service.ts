@@ -28,6 +28,8 @@ import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
+/** Issues decided against the database; recomputed when the run writes. */
+const PLAN_CODES = new Set(['possibleDuplicate', 'otherSource', 'protectedFields']);
 
 /**
  * - `file`: events from a JSON file. An event is only ever updated when it was imported from
@@ -347,16 +349,17 @@ export class ImportService {
         const candidates = await this.loadCandidates(rawEvents);
         const seenIds = new Set<string>();
         for (const [index, raw] of rawEvents.entries()) {
+          const before = checked?.entries.find(
+            (e) => e.externalId === raw.externalId,
+          );
           const entry: ReportEntry = {
-            index: checked
-              ? (checked.entries.find((e) => e.externalId === raw.externalId)
-                  ?.index ?? index)
-              : index,
+            index: before?.index ?? index,
             externalId: raw.externalId,
             name: raw.name,
             startDate: raw.startDate.toISOString(),
             action: 'skip',
-            issues: [],
+            // Keep the file's own warnings (conflicts, vague place …) in the run's report.
+            issues: (before?.issues ?? []).filter((i) => !PLAN_CODES.has(i.code)),
           };
           try {
             const plan = await this.planEvent(raw, mode, candidates);

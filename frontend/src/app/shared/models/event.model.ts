@@ -7,6 +7,8 @@ export interface CyclingEvent {
   description?: string;
   startDate: string;
   endDate?: string;
+  /** False when only the day is known; no time is shown. */
+  startTimeKnown?: boolean;
   status: EventStatus;
   locationName: string;
   address?: string;
@@ -38,6 +40,8 @@ export interface CyclingEvent {
   canInvite?: boolean;
   canEdit?: boolean;
   imageUrl?: string;
+  /** Where the event's data comes from (name and link). */
+  sources?: { name: string; url: string }[];
   source: EventSource;
   discipline: Discipline;
   disciplineSlug: string;

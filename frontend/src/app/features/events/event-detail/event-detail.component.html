@@ -259,7 +259,43 @@
           </div>
         </div>
       }
+
+      @if (event.sources?.length) {
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
+            >fact_check</span
+          >
+          <div class="min-w-0">
+            <dt class="text-[var(--color-text-muted)]">
+              {{ 'events.detail.sources' | transloco }}
+            </dt>
+            <dd>
+              <ul class="space-y-0.5">
+                @for (source of event.sources; track source.url) {
+                  <li class="break-words">
+                    <a
+                      [href]="source.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="font-medium text-[var(--color-primary)] hover:underline"
+                      >{{ source.name }}</a
+                    >
+                  </li>
+                }
+              </ul>
+            </dd>
+          </div>
+        </div>
+      }
     </dl>
+
+    @if (isAdmin() && event.source === 'imported') {
+      @defer (on viewport) {
+        <app-event-import-info [eventId]="event.id" />
+      } @placeholder {
+        <div class="mt-8 h-10"></div>
+      }
+    }
 
     <!-- Community-only area: everything inside is visible to members only -->
     @if (event.hostCommunity && (event.canRsvp || event.canComment)) {

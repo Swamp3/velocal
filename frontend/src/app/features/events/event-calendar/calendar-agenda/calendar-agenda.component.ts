@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CyclingEvent } from '@shared/models';
-import { formatTime } from '@shared/utils/event-date';
+import { eventStartTime } from '@shared/utils/event-date';
 import { DisciplineChipComponent } from '@shared/components/discipline-chip/discipline-chip.component';
 
 interface AgendaDay {
@@ -120,7 +120,7 @@ export class CalendarAgendaComponent {
         this.expandedMonth.set(this.pastOpen() ? null : this.monthKey());
     }
 
-    protected formatTime = formatTime;
+    protected formatTime = eventStartTime;
 
     private toKey(d: Date): string {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
