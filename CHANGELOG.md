@@ -8,8 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Import files in the admin area** (Admin → Imports → Import file): the file is checked first, errors and warnings are shown per event, warnings must be confirmed, then it is imported. Every run keeps a report (new, changed with old and new value, unchanged, skipped and why). How to create files: `docs/IMPORT-FILE-FORMAT.md`.
+- Imports can no longer overwrite or delete data by mistake: only events of the same source and id are updated, look-alikes of other origins are skipped with a warning, fields edited by hand are kept, missing fields never clear anything.
+- Events show their **sources** publicly; admins also see when each source was checked, documented conflicts between sources, fields edited by hand and the import run.
+- **Rating classes** (Wertungsklassen) per event with age by year of birth, gender, licence and start time, shown on the event page and editable in the event form.
+- **Championships** (club to world level) per event or class, and **series formats**: cup (runs) and league (matchdays) with season.
+- Profile: year of birth, gender and licence (only for filtering). Event list filters **Fits me**, **Championships** and **Hide league matchdays**.
 - Admins can import a JSON file of events that someone collected outside the app (`scripts/import-file.sh events.json`); the whole file is checked first and rejected with a list of problems if anything is wrong. Format: see `docs/IMPORTING.md`.
 - Member lists of clubs and subgroups load 30 at a time with page buttons, a search box and a role filter (all / admins or moderators / members). The "add from club members" suggestions of a subgroup are searched on the server, so they work with very large clubs.
+
+### Fixed
+
+- Events without a start time no longer show 01:00 or 02:00; imported dates are repaired. Calendar exports use all-day entries for them.
+- The import no longer merges different events that share a calendar page or PDF as their source link, and keeps different classes or rounds at the same hall apart.
 
 ## [0.17.3] - 2026-10-22
 

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Event, EventSource } from '../events/entities/event.entity';
 import { EventClass } from '../events/entities/event-class.entity';
 import { compareEvents } from '../events/event-matching';
@@ -389,7 +389,6 @@ export class ImportService {
             entry.action = plan.action;
             if (plan.action === 'create') {
               const saved = await this.createEvent(raw, run.id, entry);
-              await this.linkSeries(saved, raw);
               candidates.push({
                 event: saved,
                 lat: raw.lat ?? null,
@@ -410,8 +409,11 @@ export class ImportService {
               seenIds.add(plan.event.id);
               updated++;
             } else {
-              if (plan.action === 'unchanged' && plan.event)
+              if (plan.action === 'unchanged' && plan.event) {
                 seenIds.add(plan.event.id);
+                const unchanged = plan.event;
+                await this.dataSource.transaction((m) => this.linkSeries(m, unchanged, raw));
+              }
               entry.eventId = plan.event?.id;
               skipped++;
             }
@@ -619,19 +621,28 @@ export class ImportService {
         };
       }
     }
-    await this.eventRepo.save(existing);
-    if (changes.some((c) => c.field === 'classes')) {
-      await this.writeClasses(existing.id, raw);
-    }
+    // Event, classes and series links are saved together or not at all.
+    await this.dataSource.transaction(async (manager) => {
+      await manager.save(existing);
+      if (changes.some((c) => c.field === 'classes')) {
+        await this.writeClasses(manager, existing.id, raw);
+      }
+      await this.linkSeries(manager, existing, raw);
+    });
   }
 
   /** Replaces the classes of an event the import owns. */
-  private async writeClasses(eventId: string, raw: RawEvent): Promise<void> {
-    await this.classRepo.delete({ eventId });
+  private async writeClasses(
+    manager: EntityManager,
+    eventId: string,
+    raw: RawEvent,
+  ): Promise<void> {
+    const classRepo = manager.getRepository(EventClass);
+    await classRepo.delete({ eventId });
     if (!raw.classes?.length) return;
-    await this.classRepo.save(
+    await classRepo.save(
       raw.classes.map((c, position) =>
-        this.classRepo.create({ ...c, eventId, position } as Partial<EventClass>),
+        classRepo.create({ ...c, eventId, position } as Partial<EventClass>),
       ),
     );
   }
@@ -641,30 +652,36 @@ export class ImportService {
    * import creates it when missing and keeps name, kind and season of series it created up to
    * date. Series made by hand are never changed.
    */
-  private async linkSeries(event: Event, raw: RawEvent): Promise<void> {
+  private async linkSeries(
+    manager: EntityManager,
+    event: Event,
+    raw: RawEvent,
+  ): Promise<void> {
     for (const ref of raw.series ?? []) {
-      const [found] = await this.dataSource.query<{ id: string }[]>(
+      const [found] = await manager.query<{ id: string }[]>(
         `SELECT "id" FROM "race_series" WHERE "source_name" = $1 AND "external_key" = $2`,
         [raw.sourceName, ref.key],
       );
       let seriesId = found?.id;
       if (seriesId) {
-        await this.dataSource.query(
-          `UPDATE "race_series" SET "name" = $2, "kind" = $3, "season" = COALESCE($4, "season"), "updatedAt" = now()
+        await manager.query(
+          `UPDATE "race_series" SET "name" = $2, "kind" = $3::series_kind, "season" = COALESCE($4, "season"), "updatedAt" = now()
             WHERE "id" = $1 AND ("name" <> $2 OR "kind"::text <> $3 OR "season" IS DISTINCT FROM COALESCE($4, "season"))`,
           [seriesId, ref.name, ref.kind, ref.season],
         );
       } else {
         const year = Number(berlinDay(event.startDate).slice(0, 4));
-        const slug = await this.freeSeriesSlug(`${ref.name} ${ref.season ?? year}`);
-        const [created] = await this.dataSource.query<{ id: string }[]>(
+        const slug = await this.freeSeriesSlug(
+          manager,
+          `${ref.name} ${ref.season ?? year}`);
+        const [created] = await manager.query<{ id: string }[]>(
           `INSERT INTO "race_series" ("name", "slug", "year", "discipline_slug", "kind", "season", "source_name", "external_key")
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"`,
+           VALUES ($1, $2, $3, $4, $5::series_kind, $6, $7, $8) RETURNING "id"`,
           [ref.name, slug, year, event.disciplineSlug, ref.kind, ref.season, raw.sourceName, ref.key],
         );
         seriesId = created.id;
       }
-      await this.dataSource.query(
+      await manager.query(
         `INSERT INTO "race_series_events" ("series_id", "event_id", "stageNumber", "label")
          VALUES ($1, $2, $3, $4)
          ON CONFLICT ("series_id", "event_id")
@@ -674,7 +691,10 @@ export class ImportService {
     }
   }
 
-  private async freeSeriesSlug(text: string): Promise<string> {
+  private async freeSeriesSlug(
+    manager: EntityManager,
+    text: string,
+  ): Promise<string> {
     const base =
       text
         .toLowerCase()
@@ -689,7 +709,7 @@ export class ImportService {
         .slice(0, 80) || 'serie';
     let slug = base;
     for (let n = 2; ; n++) {
-      const [taken] = await this.dataSource.query<{ id: string }[]>(
+      const [taken] = await manager.query<{ id: string }[]>(
         `SELECT "id" FROM "race_series" WHERE "slug" = $1`,
         [slug],
       );
@@ -730,9 +750,13 @@ export class ImportService {
       disciplineSlug: raw.disciplineSlug,
       championship: raw.championship ?? null,
     });
-    const saved = await this.eventRepo.save(event);
-    await this.writeClasses(saved.id, raw);
-    return saved;
+    // Event, classes and series links are saved together or not at all.
+    return this.dataSource.transaction(async (manager) => {
+      const saved = await manager.save(event);
+      await this.writeClasses(manager, saved.id, raw);
+      await this.linkSeries(manager, saved, raw);
+      return saved;
+    });
   }
 
   private summarize(report: ImportReport): void {

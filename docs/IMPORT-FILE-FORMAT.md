@@ -94,7 +94,68 @@ why). Admins find it under Admin → Imports → Report, and on each imported ev
 | `source` | no | List of sources: `{ "name", "url", "checkedAt"?, "updatedAt"? }`. Name and link are shown **publicly** on the event page; `checkedAt`/`updatedAt` (`YYYY-MM-DD`) only to admins. |
 | `conflicts` | no | Disagreements between sources: a text, or `{ "field", "values"?, "selectedSource"?, "reason"? }`. Shown **only to admins**; each event with conflicts is a warning to confirm. |
 
+| `championship` | no | Championship level of the whole event: `club`, `district`, `state`, `regional`, `national`, `continental`, `world`. |
+| `classes` | no | Rating classes (Wertungsklassen), see below. When given, they replace the stored classes. |
+| `series` | no | Series the event belongs to: one object or a list, see below. |
+
 Unknown fields are reported as warnings and ignored.
+
+### Rating classes (`classes`)
+
+One entry per class with its own result list. Riders can filter for classes they may start in
+("Fits me", using year of birth, gender and licence from their profile).
+
+```json
+"classes": [
+  { "name": "U15 männlich", "gender": "male", "ageMin": 13, "ageMax": 14, "license": "license", "startTime": "2026-11-14T10:00:00+01:00" },
+  { "name": "Elite Frauen", "gender": "female", "ageMin": 19, "license": "license", "championship": "state" },
+  { "name": "Hobby", "license": "none", "ageMin": 18 }
+]
+```
+
+| Field | Required | Rules |
+|---|---|---|
+| `name` | yes | Max. 120 characters, as the organiser names the class. |
+| `gender` | no | `open` (default), `male`, `female`. |
+| `ageMin`, `ageMax` | no | Whole years, inclusive. Cycling counts by **year of birth**: the age reached in the event's year (U15 = 13 and 14, U19 = 17 and 18, Elite = 19 and older). |
+| `license` | no | Needed licence: `none` (default, open to everyone or with a day licence), `hobby`, `license` (race licence). |
+| `startTime` | no | ISO 8601 with offset. |
+| `championship` | no | Championship level of this class only. |
+| `note` | no | Max. 300 characters. |
+
+Several competitions at one hall on one day (U13 and U17 matchdays) stay **separate events**, each
+with its own class. One race with several classes is **one event** with several classes.
+
+### Series (`series`)
+
+Links the event to a series. VeloCal creates the series on first import and finds it again by
+`sourceName` + `key`; later files update its name, kind and season. Series created by hand are
+never changed by an import.
+
+```json
+"series": { "key": "gunsha-cross-challenge-2026-27", "name": "GUNSHA Cross Challenge", "kind": "cup", "season": "2026/27", "round": 3 }
+```
+
+| Field | Required | Rules |
+|---|---|---|
+| `key` | yes | Stable key within your source, max. 200 characters. |
+| `name` | yes | Max. 200 characters. |
+| `kind` | no | `cup` (runs counting for one ranking: Cup, Challenge, Bundesliga in cross), `league` (matchdays of a league season, e.g. Radball), `series` (default, anything else). |
+| `season` | no | E.g. `2026/27` or `2027`. |
+| `round` | no | Number of the run or matchday, from 1. |
+| `roundLabel` | no | Text such as `2. Spieltag` or `Gruppe 1 - 3`. |
+
+Championships are not a series: set `championship` on the event or the class. Tournaments (Pokal)
+without a ranking across events are plain events.
+
+Visitors can hide league matchdays in the event list ("Hide league matchdays") and filter for
+championships.
+
+### Adding series and classes to an existing file
+
+`scripts/enrich-import.py in.json out.json` adds `series` (Radball leagues from
+`Radball — <league> — <matchday>`, and known cyclo-cross cups) and age classes (U11-U19, Frauen)
+from names and ids. It writes a new file; check its result in the admin page before importing.
 
 ## How to create a file
 
@@ -125,6 +186,9 @@ Unknown fields are reported as warnings and ignored.
 | `hasConflicts` | warning | Documented conflicts, confirm before importing |
 | `locationVague` | warning | Town known, venue not |
 | `pastEvent`, `farFuture`, `deadlineAfterStart`, `sameNameSameDay`, `timeIgnored` | warning | Plausibility |
+| `championshipUnknown`, `classInvalid`, `classGenderUnknown`, `classLicenseUnknown`, `ageInvalid`, `ageRange` | error | Class entry wrong |
+| `seriesInvalid`, `seriesKindUnknown`, `roundInvalid` | error | Series entry wrong |
+| `seriesSummary` | note | How many series the file names and how many are new |
 | `possibleDuplicate` | warning | Looks like an existing event of another origin: not imported |
 | `markedMissing` | warning | `complete: true` marks missing upcoming events |
 | `noCoordinates`, `protectedFields`, `otherSource` | note | What will happen |
