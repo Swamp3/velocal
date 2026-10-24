@@ -1,3 +1,4 @@
+import { berlinMidnight } from '../dates';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ImportSource, RawEvent } from '../interfaces/import-source.interface';
@@ -144,8 +145,9 @@ export class RaceResultSource implements ImportSource {
         externalId: `rr-${t[0]}`,
         sourceName: this.name,
         name: String(t[2]).trim(),
-        startDate: new Date(`${t[3]}T00:00:00Z`),
-        endDate: t[4] ? new Date(`${t[4]}T00:00:00Z`) : undefined,
+        startDate: dayOf(t[3] as string),
+        endDate: t[4] ? dayOf(t[4] as string) : undefined,
+        startTimeKnown: false,
         locationName: String(t[5]),
         country: String(t[6]),
         lat: Number(t[7]),
@@ -160,4 +162,10 @@ export class RaceResultSource implements ImportSource {
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+}
+
+/** `YYYY-MM-DD` from the API as midnight in Europe/Berlin (the API gives no times). */
+function dayOf(value: string): Date {
+  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
+  return berlinMidnight(y, m, d);
 }

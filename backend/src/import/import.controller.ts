@@ -16,10 +16,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { ImportService } from './import.service';
+import { ImportCheck, ImportService } from './import.service';
 import { ImportRun } from './entities/import-run.entity';
 import { TriggerImportDto } from './dto/trigger-import.dto';
-import { ImportEventsDto } from './dto/import-events.dto';
 
 interface ImportJobResponse {
   id: string;
@@ -30,6 +29,7 @@ interface ImportJobResponse {
   result: { created: number; updated: number; skipped: number } | null;
   error: string | null;
   triggeredBy: string | null;
+  fileName: string | null;
 }
 
 function toJobResponse(run: ImportRun): ImportJobResponse {
@@ -49,6 +49,7 @@ function toJobResponse(run: ImportRun): ImportJobResponse {
       : null,
     error: run.errorLog,
     triggeredBy: run.triggeredBy,
+    fileName: run.fileName ?? null,
   };
 }
 
@@ -67,15 +68,45 @@ export class ImportController {
     return toJobResponse(run);
   }
 
-  /** Import a file of events collected outside the app. Runs as a job; poll `jobs/:id`. */
+  /**
+   * Checks an import file (the JSON as body) without writing anything and returns what the
+   * import would do, with errors and warnings per event.
+   */
+  @Post('events/check')
+  @HttpCode(HttpStatus.OK)
+  checkEvents(
+    @Body() body: unknown,
+    @Query('fileName') fileName?: string,
+  ): Promise<ImportCheck> {
+    return this.importService.checkFile(body, fileName);
+  }
+
+  /**
+   * Imports a file of events (the JSON as body). Runs as a job; poll `jobs/:id`. Refused with
+   * the check report when the file has errors, or warnings without `acceptWarnings=true`.
+   */
   @Post('events')
   @HttpCode(HttpStatus.ACCEPTED)
   async importEvents(
-    @Body() dto: ImportEventsDto,
+    @Body() body: unknown,
     @CurrentUser() user: User,
+    @Query('fileName') fileName?: string,
+    @Query('acceptWarnings') acceptWarnings?: string,
   ): Promise<ImportJobResponse> {
-    const run = await this.importService.startFileImport(dto, user.email);
+    const run = await this.importService.startFileImport(
+      body,
+      { fileName, acceptWarnings: acceptWarnings === 'true' },
+      user.email,
+    );
     return toJobResponse(run);
+  }
+
+  /** One run with its full report (per event: action, changes, problems). */
+  @Get('jobs/:id/report')
+  async getReport(@Param('id') id: string): Promise<{ report: unknown }> {
+    const run = await this.importService.getJob(id);
+    if (!run) throw new NotFoundException(`Import job ${id} not found`);
+    return { report: run.report ?? null };
   }
 
   @Get('jobs')

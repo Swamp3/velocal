@@ -82,9 +82,38 @@ export function distanceKm(
   return 6371 * 2 * Math.asin(Math.sqrt(h));
 }
 
+const CLASS_WORDS =
+  /\b(u\s?\d{2}|elite|frauen|damen|herren|m(?:ä|ae)nner|junior(?:en|innen)?|jugend|masters?(?:\s?\d)?|sch(?:ü|ue)ler(?:\s[a-d])?|nachwuchs|senioren|bambini)\b/g;
+const ROUND_BEFORE =
+  /\b(\d{1,3})\s*\.?\s*(spieltag|lauf|runde|etappe|durchgang|vorrunde)\b/g;
+const ROUND_AFTER =
+  /\b(spieltag|lauf|staffel|gruppe|runde|etappe|durchgang)\s*(\d{1,3}(?:\s*(?:-|und|\/)\s*\d{1,3})?)\b/g;
+
+/**
+ * Words that tell two competitions on the same day and place apart: age or rating class
+ * (U13, Elite, Frauen) and round or group (2. Spieltag, Staffel 1, Gruppe 2 - 4). Normalised
+ * text drops them, so they are compared separately.
+ */
+export function distinguishingTokens(name: string): Set<string> {
+  const text = name.toLowerCase().replace(/\s+/g, ' ');
+  const tokens = new Set<string>();
+  for (const m of text.matchAll(CLASS_WORDS))
+    tokens.add(m[1].replace(/\s/g, ''));
+  for (const m of text.matchAll(ROUND_BEFORE)) tokens.add(`${m[2]}:${m[1]}`);
+  for (const m of text.matchAll(ROUND_AFTER)) {
+    tokens.add(`${m[1]}:${m[2].replace(/\s+/g, '').replace('und', '/')}`);
+  }
+  return tokens;
+}
+
+function sameTokens(a: Set<string>, b: Set<string>): boolean {
+  return a.size === b.size && [...a].every((token) => b.has(token));
+}
+
 /**
  * Two events on the same day are the same event when their names are almost
- * identical, or fairly similar and at the same place.
+ * identical, or fairly similar and at the same place. Names that name different
+ * classes or rounds (U13 vs U17, Staffel 1 vs Staffel 2) are never the same event.
  */
 export function compareEvents(
   a: MatchableEvent,
@@ -103,10 +132,16 @@ export function compareEvents(
   if (samePlace) reasons.push('sameLocation');
   if (near) reasons.push('nearby');
 
+  const tokensA = distinguishingTokens(a.name);
+  const tokensB = distinguishingTokens(b.name);
+  const differentClass =
+    tokensA.size > 0 && tokensB.size > 0 && !sameTokens(tokensA, tokensB);
+
   const match =
-    name >= 0.85 ||
-    (name >= 0.6 && (samePlace || near)) ||
-    (name >= 0.45 && samePlace && near);
+    !differentClass &&
+    (name >= 0.85 ||
+      (name >= 0.6 && (samePlace || near)) ||
+      (name >= 0.45 && samePlace && near));
   const score = Math.min(1, name * 0.7 + Math.max(place, near ? 0.8 : 0) * 0.3);
   return { match, score, reasons };
 }

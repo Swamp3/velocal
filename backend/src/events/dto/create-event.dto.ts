@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import { PaceGroupDto, StravaLinkDto } from './pace-groups.dto';
 import {
+  IsBoolean,
   ArrayMaxSize,
   IsArray,
   IsEnum,
@@ -66,6 +67,11 @@ export class CreateEventDto {
   @IsOptional()
   @IsISO8601()
   endDate?: string;
+
+  /** False when only the day is known (no time shown). Derived from the start time when missing. */
+  @IsOptional()
+  @IsBoolean()
+  startTimeKnown?: boolean;
 
   @IsOptional()
   @IsEnum(EventStatus)

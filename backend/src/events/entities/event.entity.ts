@@ -25,6 +25,24 @@ export enum EventStatus {
   COMPLETED = 'completed',
 }
 
+/** Where a piece of information about an event was found (shown publicly: name and link). */
+export interface EventSourceRef {
+  name: string;
+  url: string;
+  /** Admins only: when the collector last checked the source. */
+  checkedAt?: string;
+  /** Admins only: last update the source itself states. */
+  updatedAt?: string;
+}
+
+/** A field on which the sources disagree, and which value was chosen (admins only). */
+export interface EventConflict {
+  field: string;
+  values?: unknown[];
+  selectedSource?: string;
+  reason?: string;
+}
+
 export enum EventSource {
   MANUAL = 'manual',
   IMPORTED = 'imported',
@@ -46,6 +64,13 @@ export class Event {
 
   @Column({ type: 'timestamptz', nullable: true })
   endDate: Date;
+
+  /**
+   * False when only the day is known. `startDate`/`endDate` then hold midnight in Europe/Berlin
+   * and no time is shown.
+   */
+  @Column({ type: 'boolean', name: 'start_time_known', default: true })
+  startTimeKnown: boolean;
 
   @Column({ type: 'enum', enum: EventStatus, default: EventStatus.PUBLISHED })
   status: EventStatus;
@@ -167,6 +192,25 @@ export class Event {
   @Index('IDX_events_recurrence_id')
   @Column({ type: 'uuid', name: 'recurrence_id', nullable: true })
   recurrenceId: string | null;
+
+  /** Sources of the event's data; name and link are public. */
+  @Column({ type: 'jsonb', nullable: true })
+  sources: EventSourceRef[] | null;
+
+  /** Admins only: conflicts between sources noted by the collector. */
+  @Column({ type: 'jsonb', name: 'import_conflicts', nullable: true })
+  importConflicts: EventConflict[] | null;
+
+  /** Import run that created the event (file and scraper imports). */
+  @Column({ type: 'uuid', name: 'import_run_id', nullable: true })
+  importRunId: string | null;
+
+  /**
+   * Fields a person changed after the event was imported. Imports never overwrite them, so a
+   * correction made by hand survives the next import.
+   */
+  @Column({ type: 'text', name: 'edited_fields', array: true, default: () => "'{}'" })
+  editedFields: string[];
 
   @CreateDateColumn()
   createdAt: Date;

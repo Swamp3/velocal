@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsISO8601,
   IsNumber,
@@ -50,6 +51,11 @@ export class UpdateEventDto {
   @IsOptional()
   @IsISO8601()
   endDate?: string;
+
+  /** False when only the day is known (no time shown). Derived from the start time when missing. */
+  @IsOptional()
+  @IsBoolean()
+  startTimeKnown?: boolean;
 
   @IsOptional()
   @IsEnum(EventStatus)

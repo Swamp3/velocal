@@ -1,4 +1,5 @@
 import {
+  distinguishingTokens,
   compareEvents,
   distanceKm,
   normalizeText,
@@ -78,5 +79,41 @@ describe('event matching', () => {
         },
       ).match,
     ).toBe(false);
+  });
+});
+
+describe('distinguishing classes and rounds', () => {
+  it('keeps different age classes and rounds at the same hall apart', () => {
+    const hall = 'Kissing, Paartalhalle';
+    expect(
+      compareEvents(
+        { name: 'Radball — Bayernliga U13 Süd — 1. Spieltag', locationName: hall },
+        { name: 'Radball — Bayernliga U17 Süd — 1. Spieltag', locationName: hall },
+      ).match,
+    ).toBe(false);
+    expect(
+      compareEvents(
+        { name: 'Landesliga Staffel 1 — 2. Spieltag', locationName: hall },
+        { name: 'Landesliga Staffel 2 — 2. Spieltag', locationName: hall },
+      ).match,
+    ).toBe(false);
+    expect(
+      compareEvents(
+        { name: '5er Bundesliga — Gruppe 1 - 3', locationName: hall },
+        { name: '5er Bundesliga — Gruppe 2 - 4', locationName: hall },
+      ).match,
+    ).toBe(false);
+  });
+
+  it('still matches the same competition', () => {
+    expect(
+      compareEvents(
+        { name: 'Bayernliga U13 Süd 1. Spieltag', locationName: 'Kissing' },
+        { name: 'Bayernliga U13 Süd - 1 . Spieltag', locationName: 'Kissing' },
+      ).match,
+    ).toBe(true);
+    expect(distinguishingTokens('Bayernliga U13 Süd - 1 . Spieltag')).toEqual(
+      new Set(['u13', 'spieltag:1']),
+    );
   });
 });

@@ -1,3 +1,8 @@
+import type {
+  EventConflict,
+  EventSourceRef,
+} from '../../events/entities/event.entity';
+
 export interface RawEvent {
   externalId: string;
   sourceName: string;
@@ -5,6 +10,8 @@ export interface RawEvent {
   description?: string;
   startDate: Date;
   endDate?: Date;
+  /** False for day-only dates (then stored as midnight Europe/Berlin). Default true. */
+  startTimeKnown?: boolean;
   disciplineSlug: string;
   locationName: string;
   address?: string;
@@ -16,6 +23,10 @@ export interface RawEvent {
   /** The page of the source that lists this event. */
   sourceUrl?: string;
   status: string;
+  /** All sources of the record; name and link are shown publicly. */
+  sources?: EventSourceRef[];
+  /** Conflicts between sources, for admins. */
+  conflicts?: EventConflict[];
 }
 
 export interface ImportSource {

@@ -1,3 +1,4 @@
+import { berlinDay, berlinMidnight } from '../dates';
 import { Injectable, Logger } from '@nestjs/common';
 import { load, type CheerioAPI } from 'cheerio';
 import { ImportSource, RawEvent } from '../interfaces/import-source.interface';
@@ -160,12 +161,12 @@ export class RadNetSource implements ImportSource {
         : undefined;
 
       events.push({
-        externalId:
-          externalId ?? `rad-net-${name}-${start.toISOString().slice(0, 10)}`,
+        externalId: externalId ?? `rad-net-${name}-${berlinDay(start)}`,
         sourceName: this.name,
         name,
         startDate: start,
         endDate: end,
+        startTimeKnown: false,
         disciplineSlug,
         locationName,
         country: 'DE',
@@ -200,7 +201,7 @@ export class RadNetSource implements ImportSource {
     if (!match) return null;
 
     const [, day, month, year] = match;
-    return new Date(`${year}-${month}-${day}T00:00:00Z`);
+    return berlinMidnight(Number(year), Number(month), Number(day));
   }
 
   private mapDiscipline(text: string): string {

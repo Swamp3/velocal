@@ -16,6 +16,8 @@ import { EventPaceGroup } from './entities/event-pace-group.entity';
 import { EventStravaLink } from './entities/event-strava-link.entity';
 import { Route } from '../routes/entities/route.entity';
 import { serializeRoute } from '../routes/serialize';
+import { berlinTimeOfDay } from '../import/dates';
+import { IMPORT_FIELDS } from '../import/import-diff';
 import {
   PaceGroupDto,
   SetPaceGroupsDto,
@@ -665,6 +667,8 @@ export class EventsService {
       createdById: userId ?? undefined,
       startDate: new Date(dto.startDate),
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      startTimeKnown:
+        dto.startTimeKnown ?? hasBerlinTime(new Date(dto.startDate)),
       registrationStart: dto.registrationStart
         ? new Date(dto.registrationStart)
         : undefined,
@@ -726,7 +730,13 @@ export class EventsService {
       partial.routeId = dto.routeId || null;
     }
 
-    if (dto.startDate) partial.startDate = new Date(dto.startDate);
+    if (dto.startDate) {
+      partial.startDate = new Date(dto.startDate);
+      partial.startTimeKnown =
+        dto.startTimeKnown ?? hasBerlinTime(partial.startDate);
+    } else if (dto.startTimeKnown !== undefined) {
+      partial.startTimeKnown = dto.startTimeKnown;
+    }
     if (dto.endDate) partial.endDate = new Date(dto.endDate);
     if (dto.registrationStart !== undefined) {
       partial.registrationStart = dto.registrationStart
@@ -768,9 +778,49 @@ export class EventsService {
       };
     }
 
+    // Corrections to an imported event survive the next import (see ImportService).
+    if (event.source === EventSource.IMPORTED) {
+      const edited = editedImportFields(event, partial);
+      if (edited.length) {
+        partial.editedFields = [
+          ...new Set([...(event.editedFields ?? []), ...edited]),
+        ];
+      }
+    }
+
     Object.assign(event, partial);
     const saved = await this.repo.save(event);
     return this.present(saved, user?.id);
+  }
+
+  /** Admins only: the import bookkeeping of an event. */
+  async getImportInfo(id: string) {
+    const event = await this.findEntity(id);
+    const run = event.importRunId
+      ? await this.dataSource.query<
+          {
+            id: string;
+            fileName: string | null;
+            startedAt: Date;
+            triggeredBy: string | null;
+          }[]
+        >(
+          `SELECT "id", "file_name" AS "fileName", "startedAt", "triggeredBy" FROM "import_runs" WHERE "id" = $1`,
+          [event.importRunId],
+        )
+      : [];
+    return {
+      source: event.source,
+      sourceName: event.sourceName,
+      externalId: event.externalId,
+      sourceUrl: event.sourceUrl,
+      lastSeenAt: event.lastSeenAt,
+      missingSince: event.missingSince,
+      sources: event.sources ?? [],
+      conflicts: event.importConflicts ?? [],
+      editedFields: event.editedFields ?? [],
+      importRun: run[0] ?? null,
+    };
   }
 
   async remove(
@@ -1962,6 +2012,15 @@ export class EventsService {
           : null,
       ...rest,
     };
+    // Who checked a source when, the sources' conflicts and the import bookkeeping are for
+    // admins only (`GET admin/events/:id/import-info`).
+    serialized.sources = (event.sources ?? []).map(({ name, url }) => ({
+      name,
+      url,
+    }));
+    delete serialized.importConflicts;
+    delete serialized.editedFields;
+    delete serialized.importRunId;
     if (!includeCommunityFields) {
       serialized.meetupPlace = null;
       serialized.meetupAt = null;
@@ -1976,6 +2035,26 @@ export class EventsService {
     if (event.listing !== EventListing.MEMBERS) return event.imageUrl;
     return this.imageAccess.sign(event.imageUrl, true);
   }
+}
+
+/** A time other than midnight in Europe/Berlin was given. */
+function hasBerlinTime(date: Date): boolean {
+  return berlinTimeOfDay(date) !== '00:00';
+}
+
+/** Fields of an imported event that this edit actually changes. */
+function editedImportFields(event: Event, partial: Partial<Event>): string[] {
+  const fields: string[] = [];
+  const current = event as unknown as Record<string, unknown>;
+  const next = partial as unknown as Record<string, unknown>;
+  const same = (a: unknown, b: unknown) =>
+    JSON.stringify(a instanceof Date ? a.getTime() : (a ?? null)) ===
+    JSON.stringify(b instanceof Date ? b.getTime() : (b ?? null));
+  for (const field of [...IMPORT_FIELDS, 'coordinates']) {
+    if (!(field in next) || next[field] === undefined) continue;
+    if (!same(current[field], next[field])) fields.push(field);
+  }
+  return fields;
 }
 
 /** Sign-up cannot open after it closes. */
