@@ -6,14 +6,16 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Event, EventSource } from '../events/entities/event.entity';
+import { EventClass } from '../events/entities/event-class.entity';
 import { compareEvents } from '../events/event-matching';
 import { GeocodingService } from '../events/geocoding.service';
 import { berlinDay } from './dates';
 import { ImportRun, ImportRunStatus } from './entities/import-run.entity';
 import {
   applyChanges,
+  comparableClasses,
   diffImportedEvent,
   FieldChange,
   mapStatus,
@@ -112,8 +114,11 @@ export class ImportService {
     private readonly eventRepo: Repository<Event>,
     @InjectRepository(ImportRun)
     private readonly importRunRepo: Repository<ImportRun>,
+    @InjectRepository(EventClass)
+    private readonly classRepo: Repository<EventClass>,
     private readonly config: ConfigService,
     private readonly geocoding: GeocodingService,
+    private readonly dataSource: DataSource,
     radNetSource: RadNetSource,
     raceResultSource: RaceResultSource,
   ) {
@@ -221,6 +226,23 @@ export class ImportService {
           }),
         );
       }
+    }
+
+    const seriesKeys = new Map<string, string>();
+    for (const raw of raws) for (const ref of raw.series ?? []) seriesKeys.set(ref.key, ref.name);
+    if (validated.sourceName && seriesKeys.size > 0) {
+      const known = await this.dataSource.query<{ external_key: string }[]>(
+        `SELECT "external_key" FROM "race_series" WHERE "source_name" = $1 AND "external_key" = ANY($2)`,
+        [validated.sourceName, [...seriesKeys.keys()]],
+      );
+      const fresh = seriesKeys.size - known.length;
+      report.fileIssues.push(
+        withMessage({
+          severity: 'info',
+          code: 'seriesSummary',
+          params: { total: seriesKeys.size, created: fresh },
+        }),
+      );
     }
 
     this.summarize(report);
@@ -367,6 +389,7 @@ export class ImportService {
             entry.action = plan.action;
             if (plan.action === 'create') {
               const saved = await this.createEvent(raw, run.id, entry);
+              await this.linkSeries(saved, raw);
               candidates.push({
                 event: saved,
                 lat: raw.lat ?? null,
@@ -451,7 +474,7 @@ export class ImportService {
     });
     const existing =
       own ?? (mode === 'scraper' ? await this.findBySourcePage(raw) : null);
-    if (existing) return this.planUpdate(existing, raw);
+    if (existing) return await this.planUpdate(existing, raw);
 
     const duplicate = this.findDuplicate(raw, candidates);
     if (duplicate) {
@@ -480,7 +503,7 @@ export class ImportService {
     return { action: 'create', issues: [] };
   }
 
-  private planUpdate(existing: Event, raw: RawEvent): Plan {
+  private async planUpdate(existing: Event, raw: RawEvent): Promise<Plan> {
     // Manual events and events of another source stay as they are.
     if (
       existing.source !== EventSource.IMPORTED ||
@@ -498,7 +521,16 @@ export class ImportService {
         ],
       };
     }
-    const { changes, protected: kept } = diffImportedEvent(existing, raw);
+    const current =
+      raw.classes !== undefined
+        ? comparableClasses(
+            await this.classRepo.find({
+              where: { eventId: existing.id },
+              order: { position: 'ASC' },
+            }),
+          )
+        : undefined;
+    const { changes, protected: kept } = diffImportedEvent(existing, raw, current);
     const issues: ImportIssue[] = kept.length
       ? [
           {
@@ -588,6 +620,82 @@ export class ImportService {
       }
     }
     await this.eventRepo.save(existing);
+    if (changes.some((c) => c.field === 'classes')) {
+      await this.writeClasses(existing.id, raw);
+    }
+  }
+
+  /** Replaces the classes of an event the import owns. */
+  private async writeClasses(eventId: string, raw: RawEvent): Promise<void> {
+    await this.classRepo.delete({ eventId });
+    if (!raw.classes?.length) return;
+    await this.classRepo.save(
+      raw.classes.map((c, position) =>
+        this.classRepo.create({ ...c, eventId, position } as Partial<EventClass>),
+      ),
+    );
+  }
+
+  /**
+   * Links the event to the series named in the record. A series is found by source and key; the
+   * import creates it when missing and keeps name, kind and season of series it created up to
+   * date. Series made by hand are never changed.
+   */
+  private async linkSeries(event: Event, raw: RawEvent): Promise<void> {
+    for (const ref of raw.series ?? []) {
+      const [found] = await this.dataSource.query<{ id: string }[]>(
+        `SELECT "id" FROM "race_series" WHERE "source_name" = $1 AND "external_key" = $2`,
+        [raw.sourceName, ref.key],
+      );
+      let seriesId = found?.id;
+      if (seriesId) {
+        await this.dataSource.query(
+          `UPDATE "race_series" SET "name" = $2, "kind" = $3, "season" = COALESCE($4, "season"), "updatedAt" = now()
+            WHERE "id" = $1 AND ("name" <> $2 OR "kind"::text <> $3 OR "season" IS DISTINCT FROM COALESCE($4, "season"))`,
+          [seriesId, ref.name, ref.kind, ref.season],
+        );
+      } else {
+        const year = Number(berlinDay(event.startDate).slice(0, 4));
+        const slug = await this.freeSeriesSlug(`${ref.name} ${ref.season ?? year}`);
+        const [created] = await this.dataSource.query<{ id: string }[]>(
+          `INSERT INTO "race_series" ("name", "slug", "year", "discipline_slug", "kind", "season", "source_name", "external_key")
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"`,
+          [ref.name, slug, year, event.disciplineSlug, ref.kind, ref.season, raw.sourceName, ref.key],
+        );
+        seriesId = created.id;
+      }
+      await this.dataSource.query(
+        `INSERT INTO "race_series_events" ("series_id", "event_id", "stageNumber", "label")
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT ("series_id", "event_id")
+         DO UPDATE SET "stageNumber" = EXCLUDED."stageNumber", "label" = EXCLUDED."label"`,
+        [seriesId, event.id, ref.round, ref.roundLabel],
+      );
+    }
+  }
+
+  private async freeSeriesSlug(text: string): Promise<string> {
+    const base =
+      text
+        .toLowerCase()
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/ß/g, 'ss')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 80) || 'serie';
+    let slug = base;
+    for (let n = 2; ; n++) {
+      const [taken] = await this.dataSource.query<{ id: string }[]>(
+        `SELECT "id" FROM "race_series" WHERE "slug" = $1`,
+        [slug],
+      );
+      if (!taken) return slug;
+      slug = `${base}-${n}`;
+    }
   }
 
   private async createEvent(
@@ -620,8 +728,11 @@ export class ImportService {
       importRunId: runId,
       lastSeenAt: new Date(),
       disciplineSlug: raw.disciplineSlug,
+      championship: raw.championship ?? null,
     });
-    return this.eventRepo.save(event);
+    const saved = await this.eventRepo.save(event);
+    await this.writeClasses(saved.id, raw);
+    return saved;
   }
 
   private summarize(report: ImportReport): void {

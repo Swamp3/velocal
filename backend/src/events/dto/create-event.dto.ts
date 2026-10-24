@@ -1,6 +1,8 @@
+import { CHAMPIONSHIP_LEVELS, EventClassDto } from './event-class.dto';
 import { Type } from 'class-transformer';
 import { PaceGroupDto, StravaLinkDto } from './pace-groups.dto';
 import {
+  IsIn,
   IsBoolean,
   ArrayMaxSize,
   IsArray,
@@ -72,6 +74,19 @@ export class CreateEventDto {
   @IsOptional()
   @IsBoolean()
   startTimeKnown?: boolean;
+
+  /** Championship level of the whole event, or null for none. */
+  @IsOptional()
+  @IsIn([...CHAMPIONSHIP_LEVELS, null])
+  championship?: string | null;
+
+  /** Rating classes; replaces the stored list when given. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(60)
+  @ValidateNested({ each: true })
+  @Type(() => EventClassDto)
+  classes?: EventClassDto[];
 
   @IsOptional()
   @IsEnum(EventStatus)

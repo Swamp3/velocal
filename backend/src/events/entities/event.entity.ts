@@ -193,6 +193,10 @@ export class Event {
   @Column({ type: 'uuid', name: 'recurrence_id', nullable: true })
   recurrenceId: string | null;
 
+  /** The event is (or includes) a championship of this level. */
+  @Column({ type: 'enum', enum: ['club', 'district', 'state', 'regional', 'national', 'continental', 'world'], enumName: 'championship_level', name: 'championship', nullable: true })
+  championship: string | null;
+
   /** Sources of the event's data; name and link are public. */
   @Column({ type: 'jsonb', nullable: true })
   sources: EventSourceRef[] | null;

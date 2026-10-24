@@ -39,6 +39,24 @@ export class RaceSeries {
   @JoinColumn({ name: 'discipline_slug', referencedColumnName: 'slug' })
   discipline: Discipline;
 
+  /**
+   * `series`: a loose series. `cup`: races counting for one ranking (Läufe). `league`: a league
+   * with matchdays in one season (Spieltage).
+   */
+  @Column({ type: 'enum', enum: ['series', 'cup', 'league'], enumName: 'series_kind', default: 'series' })
+  kind: 'series' | 'cup' | 'league';
+
+  /** Season label for seasons across years, e.g. `2026/27`. */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  season: string | null;
+
+  /** Set when an import created the series: it is found again by source and key. */
+  @Column({ type: 'varchar', length: 40, name: 'source_name', nullable: true })
+  sourceName: string | null;
+
+  @Column({ type: 'varchar', length: 200, name: 'external_key', nullable: true })
+  externalKey: string | null;
+
   @Column({ nullable: true })
   imageUrl: string;
 

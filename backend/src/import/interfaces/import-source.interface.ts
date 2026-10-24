@@ -27,6 +27,32 @@ export interface RawEvent {
   sources?: EventSourceRef[];
   /** Conflicts between sources, for admins. */
   conflicts?: EventConflict[];
+  /** Rating classes; replaces the stored classes when given. */
+  classes?: RawEventClass[];
+  championship?: string;
+  /** Series the event belongs to (cup run, league matchday). */
+  series?: RawEventSeries[];
+}
+
+export interface RawEventClass {
+  name: string;
+  gender: 'open' | 'male' | 'female';
+  ageMin: number | null;
+  ageMax: number | null;
+  license: 'none' | 'hobby' | 'license';
+  startTime: Date | null;
+  championship: string | null;
+  note: string | null;
+}
+
+export interface RawEventSeries {
+  /** Stable key of the series within the source. */
+  key: string;
+  name: string;
+  kind: 'series' | 'cup' | 'league';
+  season: string | null;
+  round: number | null;
+  roundLabel: string | null;
 }
 
 export interface ImportSource {

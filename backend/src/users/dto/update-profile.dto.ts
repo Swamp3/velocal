@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, ValidateIf } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -29,6 +29,24 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   homeCountry?: string;
+
+  /** For the "fits me" class filter only; null clears it. */
+  @IsOptional()
+  @ValidateIf((_dto, value) => value !== null)
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
+  birthYear?: number | null;
+
+  @IsOptional()
+  @ValidateIf((_dto, value) => value !== null)
+  @IsIn(['male', 'female', 'diverse'])
+  gender?: 'male' | 'female' | 'diverse' | null;
+
+  @IsOptional()
+  @ValidateIf((_dto, value) => value !== null)
+  @IsIn(['none', 'hobby', 'license'])
+  licenseType?: 'none' | 'hobby' | 'license' | null;
 
   @IsOptional()
   @IsIn(['de', 'en'])

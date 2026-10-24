@@ -9,6 +9,9 @@ import { notInSuspendedCommunitySql } from '../communities/community-suspension'
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
+import { EventClass } from './entities/event-class.entity';
+import { classFitsSql } from './class-match';
+import { EventClassDto } from './dto/event-class.dto';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRecurrence } from './entities/event-recurrence.entity';
@@ -77,6 +80,28 @@ export interface SerializedEvent {
   [key: string]: any;
 }
 
+export interface SerializedEventClass {
+  id: string;
+  name: string;
+  gender: string;
+  ageMin: number | null;
+  ageMax: number | null;
+  license: string;
+  startTime: Date | null;
+  championship: string | null;
+  note: string | null;
+}
+
+export interface SerializedEventSeries {
+  id: string;
+  slug: string;
+  name: string;
+  kind: string;
+  season: string | null;
+  round: number | null;
+  label: string | null;
+}
+
 export interface HostQuery {
   community?: string;
   subgroup?: string;
@@ -142,6 +167,8 @@ export class EventsService {
     private readonly subgroupMembers: Repository<SubgroupMember>,
     @InjectRepository(User)
     private readonly users: Repository<User>,
+    @InjectRepository(EventClass)
+    private readonly eventClasses: Repository<EventClass>,
     private readonly geocoding: GeocodingService,
     private readonly uploads: UploadsService,
     private readonly imageAccess: ImageAccessService,
@@ -196,6 +223,26 @@ export class EventsService {
       qb.andWhere('event.disciplineSlug IN (:...slugs)', { slugs });
     }
 
+    if (params.fitsMe && userId) {
+      const rider = await this.users.findOne({
+        where: { id: userId },
+        select: { id: true, birthYear: true, gender: true, licenseType: true },
+      });
+      if (rider) {
+        const fit = classFitsSql(rider);
+        qb.andWhere(fit.sql, fit.params);
+      }
+    }
+    if (params.championship) {
+      qb.andWhere(
+        `(event.championship IS NOT NULL OR EXISTS (SELECT 1 FROM "event_classes" cc WHERE cc.event_id = event.id AND cc.championship IS NOT NULL))`,
+      );
+    }
+    if (params.hideLeagues) {
+      qb.andWhere(
+        `NOT EXISTS (SELECT 1 FROM "race_series_events" lse JOIN "race_series" ls ON ls.id = lse.series_id WHERE lse.event_id = event.id AND ls.kind = 'league')`,
+      );
+    }
     if (params.from) {
       qb.andWhere('event.startDate >= :from', { from: params.from });
     }
@@ -238,6 +285,7 @@ export class EventsService {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
       const access = marker ? null : await this.accessMap(entities, userId);
+      const racing = marker ? null : await this.racingDetails(entities.map((e) => e.id));
 
       const data = entities.map((entity, i) =>
         this.toListEvent(entity, marker, {
@@ -245,6 +293,7 @@ export class EventsService {
             ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
             : undefined,
           includeCommunityFields: access?.get(entity.id)?.member ?? false,
+          ...(racing ? racing(entity.id) : {}),
         }),
       );
 
@@ -259,10 +308,12 @@ export class EventsService {
 
     const [rows, total] = await qb.getManyAndCount();
     const access = marker ? null : await this.accessMap(rows, userId);
+    const racing = marker ? null : await this.racingDetails(rows.map((e) => e.id));
     return {
       data: rows.map((event) =>
         this.toListEvent(event, marker, {
           includeCommunityFields: access?.get(event.id)?.member ?? false,
+          ...(racing ? racing(event.id) : {}),
         }),
       ),
       total,
@@ -314,6 +365,7 @@ export class EventsService {
         ? await this.saveSeries(manager, first, dto.recurrence, userId)
         : await manager.save(first);
       await this.writeRideDetails(manager, saved, dto);
+      if (dto.classes?.length) await this.writeClasses(manager, saved.id, dto.classes);
       return saved;
     });
   }
@@ -778,9 +830,11 @@ export class EventsService {
       };
     }
 
+    delete (partial as Record<string, unknown>)['classes'];
     // Corrections to an imported event survive the next import (see ImportService).
     if (event.source === EventSource.IMPORTED) {
       const edited = editedImportFields(event, partial);
+      if (dto.classes !== undefined) edited.push('classes');
       if (edited.length) {
         partial.editedFields = [
           ...new Set([...(event.editedFields ?? []), ...edited]),
@@ -789,8 +843,38 @@ export class EventsService {
     }
 
     Object.assign(event, partial);
-    const saved = await this.repo.save(event);
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const row = await manager.save(event);
+      if (dto.classes !== undefined) await this.writeClasses(manager, row.id, dto.classes);
+      return row;
+    });
     return this.present(saved, user?.id);
+  }
+
+  /** Replaces the rating classes of an event. */
+  private async writeClasses(
+    manager: EntityManager,
+    eventId: string,
+    classes: EventClassDto[],
+  ): Promise<void> {
+    await manager.delete(EventClass, { eventId });
+    if (!classes.length) return;
+    await manager.save(
+      classes.map((c, position) =>
+        manager.create(EventClass, {
+          eventId,
+          position,
+          name: c.name.trim(),
+          gender: (c.gender ?? 'open') as EventClass['gender'],
+          ageMin: c.ageMin ?? null,
+          ageMax: c.ageMax ?? null,
+          license: (c.license ?? 'none') as EventClass['license'],
+          startTime: c.startTime ? new Date(c.startTime) : null,
+          championship: (c.championship ?? null) as EventClass['championship'],
+          note: c.note?.trim() || null,
+        }),
+      ),
+    );
   }
 
   /** Admins only: the import bookkeeping of an event. */
@@ -1742,8 +1826,10 @@ export class EventsService {
       ? await this.recurrences.findOne({ where: { id: event.recurrenceId } })
       : null;
     const ride = await this.rideDetails(event, userId);
+    const racing = await this.racingDetails([event.id]);
     return this.serializeEvent(event, {
       ...ride,
+      ...racing(event.id),
       recurrence: recurrence
         ? { id: recurrence.id, frequency: recurrence.frequency }
         : null,
@@ -1759,6 +1845,44 @@ export class EventsService {
       hostCommunity,
       ...(audience?.share ? this.shareFields(audience.share, isMember) : {}),
       includeCommunityFields: access.member || isMember,
+    });
+  }
+
+  /** Classes and series memberships of events, loaded once for a page of events. */
+  private async racingDetails(
+    ids: string[],
+  ): Promise<(id: string) => { classes: SerializedEventClass[]; series: SerializedEventSeries[] }> {
+    if (ids.length === 0) return () => ({ classes: [], series: [] });
+    const classes = await this.eventClasses.find({
+      where: { eventId: In(ids) },
+      order: { position: 'ASC' },
+    });
+    const series = await this.dataSource.query<(SerializedEventSeries & { eventId: string })[]>(
+      `SELECT rse."event_id" AS "eventId", s."id", s."slug", s."name", s."kind", s."season",
+              rse."stageNumber" AS "round", rse."label"
+         FROM "race_series_events" rse
+         JOIN "race_series" s ON s."id" = rse."series_id"
+        WHERE rse."event_id" = ANY($1::uuid[])
+        ORDER BY s."name"`,
+      [ids],
+    );
+    return (id) => ({
+      classes: classes
+        .filter((c) => c.eventId === id)
+        .map(({ id: classId, name, gender, ageMin, ageMax, license, startTime, championship, note }) => ({
+          id: classId,
+          name,
+          gender,
+          ageMin,
+          ageMax,
+          license,
+          startTime,
+          championship,
+          note,
+        })),
+      series: series
+        .filter((row) => row.eventId === id)
+        .map(({ eventId: _eventId, ...rest }) => rest),
     });
   }
 

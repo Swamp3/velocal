@@ -4,7 +4,11 @@ import type {
   EventSourceRef,
 } from '../events/entities/event.entity';
 import { berlinDay, parseEventDate } from './dates';
-import type { RawEvent } from './interfaces/import-source.interface';
+import type {
+  RawEvent,
+  RawEventClass,
+  RawEventSeries,
+} from './interfaces/import-source.interface';
 
 export const MAX_IMPORT_EVENTS = 5000;
 export const IMPORT_STATUSES = ['published', 'cancelled', 'completed'];
@@ -107,8 +111,27 @@ const EVENT_FIELDS = new Set([
   'status',
   'source',
   'conflicts',
+  'classes',
+  'championship',
+  'series',
 ]);
+export const CHAMPIONSHIP_LEVELS = [
+  'club',
+  'district',
+  'state',
+  'regional',
+  'national',
+  'continental',
+  'world',
+];
+const CLASS_FIELDS = new Set(['name', 'gender', 'ageMin', 'ageMax', 'license', 'startTime', 'championship', 'note']);
+const SERIES_FIELDS = new Set(['key', 'name', 'kind', 'season', 'round', 'roundLabel']);
 const FILE_FIELDS = new Set(['sourceName', 'complete', 'events']);
+
+/** A value for a message: strings as they are, anything else as JSON. */
+function show(value: unknown): string {
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -547,6 +570,152 @@ export function validateImportFile(
       }
     }
 
+    // Championship
+    let championship: string | undefined;
+    if (item.championship !== undefined && item.championship !== null) {
+      if (
+        typeof item.championship !== 'string' ||
+        !CHAMPIONSHIP_LEVELS.includes(item.championship)
+      ) {
+        add({
+          severity: 'error',
+          code: 'championshipUnknown',
+          field: 'championship',
+          params: { value: show(item.championship) },
+        });
+      } else {
+        championship = item.championship;
+      }
+    }
+
+    // Rating classes
+    let classes: RawEventClass[] | undefined;
+    if (item.classes !== undefined) {
+      if (!Array.isArray(item.classes)) {
+        add({ severity: 'error', code: 'type', field: 'classes', params: { expected: 'array' } });
+      } else {
+        const list: RawEventClass[] = [];
+        item.classes.forEach((entry: unknown, i: number) => {
+          const field = `classes[${i}]`;
+          if (!isObject(entry)) {
+            add({ severity: 'error', code: 'classInvalid', field });
+            return;
+          }
+          for (const key of Object.keys(entry)) {
+            if (!CLASS_FIELDS.has(key)) {
+              add({ severity: 'warning', code: 'unknownField', field: `${field}.${key}` });
+            }
+          }
+          const name = typeof entry.name === 'string' ? entry.name.trim() : '';
+          if (!name) add({ severity: 'error', code: 'required', field: `${field}.name` });
+          if (name.length > 120) {
+            add({ severity: 'error', code: 'tooLong', field: `${field}.name`, params: { max: 120 } });
+          }
+          const gender = entry.gender ?? 'open';
+          if (typeof gender !== 'string' || !['open', 'male', 'female'].includes(gender)) {
+            add({ severity: 'error', code: 'classGenderUnknown', field: `${field}.gender`, params: { value: show(gender) } });
+          }
+          const license = entry.license ?? 'none';
+          if (typeof license !== 'string' || !['none', 'hobby', 'license'].includes(license)) {
+            add({ severity: 'error', code: 'classLicenseUnknown', field: `${field}.license`, params: { value: show(license) } });
+          }
+          const age = (key: 'ageMin' | 'ageMax'): number | null => {
+            const value = entry[key];
+            if (value === undefined || value === null) return null;
+            if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 120) {
+              add({ severity: 'error', code: 'ageInvalid', field: `${field}.${key}` });
+              return null;
+            }
+            return value;
+          };
+          const ageMin = age('ageMin');
+          const ageMax = age('ageMax');
+          if (ageMin != null && ageMax != null && ageMin > ageMax) {
+            add({ severity: 'error', code: 'ageRange', field: `${field}.ageMax` });
+          }
+          let startTime: Date | null = null;
+          if (entry.startTime !== undefined && entry.startTime !== null) {
+            const parsed =
+              typeof entry.startTime === 'string'
+                ? parseEventDate(entry.startTime)
+                : ({ kind: 'invalid' } as const);
+            if (parsed.kind === 'dateTime') {
+              startTime = parsed.date;
+            } else {
+              add({
+                severity: 'error',
+                code: parsed.kind === 'missingOffset' ? 'dateNeedsOffset' : 'dateInvalid',
+                field: `${field}.startTime`,
+                params: { value: show(entry.startTime) },
+              });
+            }
+          }
+          const level = entry.championship ?? null;
+          if (level !== null && (typeof level !== 'string' || !CHAMPIONSHIP_LEVELS.includes(level))) {
+            add({ severity: 'error', code: 'championshipUnknown', field: `${field}.championship`, params: { value: show(level) } });
+          }
+          const note = typeof entry.note === 'string' ? entry.note.trim().slice(0, 300) || null : null;
+          list.push({
+            name,
+            gender: gender as RawEventClass['gender'],
+            ageMin,
+            ageMax,
+            license: license as RawEventClass['license'],
+            startTime,
+            championship: typeof level === 'string' ? level : null,
+            note,
+          });
+        });
+        classes = list;
+      }
+    }
+
+    // Series (one object or a list)
+    let series: RawEventSeries[] | undefined;
+    if (item.series !== undefined && item.series !== null) {
+      const many = Array.isArray(item.series);
+      const list: unknown[] = many ? (item.series as unknown[]) : [item.series];
+      const parsedSeries: RawEventSeries[] = [];
+      list.forEach((entry, i) => {
+        const field = many ? `series[${i}]` : 'series';
+        if (!isObject(entry)) {
+          add({ severity: 'error', code: 'seriesInvalid', field });
+          return;
+        }
+        for (const key of Object.keys(entry)) {
+          if (!SERIES_FIELDS.has(key)) {
+            add({ severity: 'warning', code: 'unknownField', field: `${field}.${key}` });
+          }
+        }
+        const key = typeof entry.key === 'string' ? entry.key.trim() : '';
+        const name = typeof entry.name === 'string' ? entry.name.trim() : '';
+        if (!key) add({ severity: 'error', code: 'required', field: `${field}.key` });
+        if (key.length > 200) add({ severity: 'error', code: 'tooLong', field: `${field}.key`, params: { max: 200 } });
+        if (!name) add({ severity: 'error', code: 'required', field: `${field}.name` });
+        if (name.length > 200) add({ severity: 'error', code: 'tooLong', field: `${field}.name`, params: { max: 200 } });
+        const kind = entry.kind ?? 'series';
+        if (typeof kind !== 'string' || !['series', 'cup', 'league'].includes(kind)) {
+          add({ severity: 'error', code: 'seriesKindUnknown', field: `${field}.kind`, params: { value: show(kind) } });
+        }
+        const season = typeof entry.season === 'string' ? entry.season.trim().slice(0, 20) || null : null;
+        const round = entry.round;
+        if (round !== undefined && round !== null && (typeof round !== 'number' || !Number.isInteger(round) || round < 1)) {
+          add({ severity: 'error', code: 'roundInvalid', field: `${field}.round` });
+        }
+        const roundLabel =
+          typeof entry.roundLabel === 'string' ? entry.roundLabel.trim().slice(0, 100) || null : null;
+        parsedSeries.push({
+          key,
+          name,
+          kind: kind as RawEventSeries['kind'],
+          season,
+          round: typeof round === 'number' ? round : null,
+          roundLabel,
+        });
+      });
+      series = parsedSeries;
+    }
+
     for (const issue of own)
       issues.push({ ...issue, index, externalId: externalId ?? undefined });
     if (
@@ -578,6 +747,9 @@ export function validateImportFile(
       status: status as string,
       sources: sources.length ? sources : undefined,
       conflicts: conflicts.length ? conflicts : undefined,
+      classes,
+      championship,
+      series,
     });
   });
   return result;
@@ -641,6 +813,16 @@ const MESSAGES: Record<string, (issue: ImportIssue) => string> = {
   geocodeFailed: () =>
     'The place could not be found: the event is not shown on the map',
   saveFailed: (i) => `Could not be saved: ${i.params?.message}`,
+  championshipUnknown: (i) => `Unknown championship level ${i.params?.value}`,
+  classInvalid: (i) => `${i.field} must be an object`,
+  classGenderUnknown: (i) => `Unknown gender ${i.params?.value} (open, male, female)`,
+  classLicenseUnknown: (i) => `Unknown licence ${i.params?.value} (none, hobby, license)`,
+  ageInvalid: (i) => `${i.field} must be a whole number of years`,
+  ageRange: () => 'ageMax is lower than ageMin',
+  seriesInvalid: (i) => `${i.field} must be an object`,
+  seriesKindUnknown: (i) => `Unknown series kind ${i.params?.value} (series, cup, league)`,
+  roundInvalid: (i) => `${i.field} must be a whole number from 1`,
+  seriesSummary: (i) => `${i.params?.total} series in the file, ${i.params?.created} of them new`,
 };
 
 /** English text of an issue, for the API and the command line (the admin page translates codes). */

@@ -18,6 +18,7 @@ import { RouteFile } from '../routes/entities/route-file.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRsvp } from './entities/event-rsvp.entity';
 import { Event } from './entities/event.entity';
+import { EventClass } from './entities/event-class.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { UploadsModule } from '../uploads/uploads.module';
 import { User } from '../users/entities/user.entity';
@@ -26,6 +27,7 @@ import { User } from '../users/entities/user.entity';
   imports: [
     TypeOrmModule.forFeature([
       Event,
+      EventClass,
       EventRsvp,
       EventComment,
       EventShare,

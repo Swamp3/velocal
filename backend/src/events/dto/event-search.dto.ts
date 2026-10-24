@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsEnum,
   IsIn,
@@ -93,4 +93,19 @@ export class EventSearchDto {
   @IsOptional()
   @IsIn([EventListView.FULL, EventListView.MARKER])
   view?: EventListView;
+
+  /** Signed-in riders: only events with a class that fits their age, gender and licence. */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  fitsMe?: boolean;
+
+  /** Only championships (the event or one of its classes). */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  championship?: boolean;
+
+  /** Leave out league matchdays (events of a series of kind `league`). */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  hideLeagues?: boolean;
 }

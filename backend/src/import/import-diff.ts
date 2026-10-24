@@ -19,8 +19,45 @@ export const IMPORT_FIELDS = [
   'disciplineSlug',
   'sources',
   'importConflicts',
+  'championship',
 ] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
+
+/** A rating class reduced to what an import compares. */
+export interface ComparableClass {
+  name: string;
+  gender: string;
+  ageMin: number | null;
+  ageMax: number | null;
+  license: string;
+  startTime: string | null;
+  championship: string | null;
+  note: string | null;
+}
+
+export function comparableClasses(
+  classes: {
+    name: string;
+    gender: string;
+    ageMin: number | null;
+    ageMax: number | null;
+    license: string;
+    startTime: Date | null;
+    championship: string | null;
+    note: string | null;
+  }[],
+): ComparableClass[] {
+  return classes.map((c) => ({
+    name: c.name,
+    gender: c.gender,
+    ageMin: c.ageMin ?? null,
+    ageMax: c.ageMax ?? null,
+    license: c.license,
+    startTime: c.startTime ? c.startTime.toISOString() : null,
+    championship: c.championship ?? null,
+    note: c.note ?? null,
+  }));
+}
 
 export interface FieldChange {
   field: string;
@@ -87,6 +124,7 @@ function plain(value: unknown): unknown {
 export function diffImportedEvent(
   existing: Event,
   raw: RawEvent,
+  currentClasses?: ComparableClass[],
 ): { changes: FieldChange[]; protected: FieldChange[] } {
   const changes: FieldChange[] = [];
   const kept: FieldChange[] = [];
@@ -100,6 +138,14 @@ export function diffImportedEvent(
     if (edited.has(field)) kept.push(change);
     else changes.push(change);
   }
+  if (raw.classes !== undefined && currentClasses) {
+    const next = comparableClasses(raw.classes);
+    if (stableJson(next) !== stableJson(currentClasses)) {
+      const change = { field: 'classes', before: currentClasses, after: next };
+      if (edited.has('classes')) kept.push(change);
+      else changes.push(change);
+    }
+  }
   return { changes, protected: kept };
 }
 
@@ -111,6 +157,8 @@ export function applyChanges(
 ): void {
   const target = existing as unknown as Record<string, unknown>;
   for (const { field } of changes) {
+    // Classes live in their own table; the import service writes them.
+    if (field === 'classes') continue;
     target[field] = incoming(raw, field as ImportField);
   }
 }

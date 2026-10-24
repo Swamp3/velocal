@@ -70,6 +70,17 @@ export class User {
   @Column({ type: 'jsonb', nullable: true })
   pushPreferences: Record<string, boolean> | null;
 
+  /** Only used to find fitting race classes; never shown to others. */
+  @Column({ type: 'int', name: 'birth_year', nullable: true })
+  birthYear: number | null;
+
+  @Column({ type: 'enum', enum: ['male', 'female', 'diverse'], enumName: 'user_gender', nullable: true })
+  gender: 'male' | 'female' | 'diverse' | null;
+
+  /** Licence the rider holds: none, hobby or race licence. */
+  @Column({ type: 'enum', enum: ['none', 'hobby', 'license'], enumName: 'user_license', name: 'license_type', nullable: true })
+  licenseType: 'none' | 'hobby' | 'license' | null;
+
   @Column({ default: 'de' })
   preferredLanguage: string;
 
