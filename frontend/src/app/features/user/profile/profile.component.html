@@ -51,6 +51,45 @@
       </div>
     </app-profile-section>
 
+    <!-- Rider: for finding fitting race classes -->
+    <app-profile-section
+      id="rider"
+      [title]="'profile.sections.rider' | transloco"
+      [description]="'profile.sections.riderHint' | transloco"
+    >
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <ui-input
+          [label]="'profile.birthYear' | transloco"
+          formControlName="birthYear"
+          [placeholder]="'profile.birthYearPlaceholder' | transloco"
+          [error]="profileForm.controls.birthYear.invalid ? ('profile.birthYearInvalid' | transloco) : ''"
+        />
+        <div class="flex flex-col gap-1.5">
+          <label for="profile-gender" class="text-sm font-medium text-[var(--color-text)]">
+            {{ 'profile.gender' | transloco }}
+          </label>
+          <select id="profile-gender" formControlName="gender" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]">
+            <option value="">{{ 'profile.notSpecified' | transloco }}</option>
+            <option value="female">{{ 'profile.genderFemale' | transloco }}</option>
+            <option value="male">{{ 'profile.genderMale' | transloco }}</option>
+            <option value="diverse">{{ 'profile.genderDiverse' | transloco }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label for="profile-license" class="text-sm font-medium text-[var(--color-text)]">
+            {{ 'profile.license' | transloco }}
+          </label>
+          <select id="profile-license" formControlName="licenseType" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]">
+            <option value="">{{ 'profile.notSpecified' | transloco }}</option>
+            <option value="none">{{ 'classes.license.none' | transloco }}</option>
+            <option value="hobby">{{ 'classes.license.hobby' | transloco }}</option>
+            <option value="license">{{ 'classes.license.license' | transloco }}</option>
+          </select>
+        </div>
+      </div>
+      <p class="-mt-2 text-xs text-[var(--color-text-muted)]">{{ 'profile.riderPrivacy' | transloco }}</p>
+    </app-profile-section>
+
     <!-- Region, language and formats -->
     <app-profile-section
       [title]="'profile.sections.region' | transloco"

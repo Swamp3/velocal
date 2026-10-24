@@ -12,4 +12,11 @@ export interface User {
   isAdmin?: boolean;
   emailVerified?: boolean;
   hasPassword?: boolean;
+  /** Rider data, only used for the "fits me" class filter. */
+  birthYear?: number | null;
+  gender?: RiderGender | null;
+  licenseType?: RiderLicense | null;
 }
+
+export type RiderGender = 'male' | 'female' | 'diverse';
+export type RiderLicense = 'none' | 'hobby' | 'license';

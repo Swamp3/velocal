@@ -24,3 +24,4 @@ export { RequestListComponent, type RequestListItem } from './request-list/reque
 export { RichTextComponent } from './rich-text/rich-text.component';
 export { RichTextViewComponent } from './rich-text/rich-text-view.component';
 export { normalizeRichText, plainText, toDisplayHtml } from './rich-text/rich-text';
+export { EventClassesComponent } from './event-classes/event-classes.component';

@@ -834,7 +834,9 @@ export class EventsService {
     // Corrections to an imported event survive the next import (see ImportService).
     if (event.source === EventSource.IMPORTED) {
       const edited = editedImportFields(event, partial);
-      if (dto.classes !== undefined) edited.push('classes');
+      if (dto.classes !== undefined && (await this.classesDiffer(event.id, dto.classes))) {
+        edited.push('classes');
+      }
       if (edited.length) {
         partial.editedFields = [
           ...new Set([...(event.editedFields ?? []), ...edited]),
@@ -849,6 +851,31 @@ export class EventsService {
       return row;
     });
     return this.present(saved, user?.id);
+  }
+
+  private async classesDiffer(eventId: string, next: EventClassDto[]): Promise<boolean> {
+    const current = await this.eventClasses.find({ where: { eventId }, order: { position: 'ASC' } });
+    const norm = (c: {
+      name: string;
+      gender?: string | null;
+      ageMin?: number | null;
+      ageMax?: number | null;
+      license?: string | null;
+      startTime?: Date | string | null;
+      championship?: string | null;
+      note?: string | null;
+    }) =>
+      JSON.stringify([
+        c.name.trim(),
+        c.gender ?? 'open',
+        c.ageMin ?? null,
+        c.ageMax ?? null,
+        c.license ?? 'none',
+        c.startTime ? new Date(c.startTime).getTime() : null,
+        c.championship ?? null,
+        c.note?.trim() || null,
+      ]);
+    return current.map(norm).join('|') !== next.map(norm).join('|');
   }
 
   /** Replaces the rating classes of an event. */

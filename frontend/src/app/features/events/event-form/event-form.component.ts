@@ -28,6 +28,7 @@ import {
   PaceGroupInput,
   RecurrenceDto,
   Route,
+  EventClass,
 } from '@shared/models';
 import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import {
@@ -149,6 +150,8 @@ export class EventFormComponent implements OnInit {
     routeId: new FormControl('', { nonNullable: true }),
     stravaLinksText: new FormControl('', { nonNullable: true }),
     paceGroups: new FormArray<ReturnType<EventFormComponent['newPaceGroup']>>([]),
+    championship: new FormControl<string>('', { nonNullable: true }),
+    classes: new FormArray<ReturnType<EventFormComponent['newClass']>>([]),
     stravaUrl: new FormControl('', { nonNullable: true }),
     meetupPlace: new FormControl('', { nonNullable: true }),
     meetupDate: new FormControl('', { nonNullable: true }),
@@ -196,6 +199,47 @@ export class EventFormComponent implements OnInit {
       routeId: new FormControl(init?.routeId ?? '', { nonNullable: true }),
       stravaText: new FormControl(init?.stravaText ?? '', { nonNullable: true }),
     });
+  }
+
+  protected readonly championshipLevels = [
+    'club',
+    'district',
+    'state',
+    'regional',
+    'national',
+    'continental',
+    'world',
+  ] as const;
+  /** Classes are only sent when changed, so an imported event keeps its imported classes. */
+  private classesChanged = false;
+
+  protected newClass(init?: Partial<EventClass>) {
+    return new FormGroup({
+      name: new FormControl(init?.name ?? '', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(120)],
+      }),
+      gender: new FormControl<EventClass['gender']>(init?.gender ?? 'open', { nonNullable: true }),
+      ageMin: new FormControl<number | null>(init?.ageMin ?? null, [Validators.min(0), Validators.max(120)]),
+      ageMax: new FormControl<number | null>(init?.ageMax ?? null, [Validators.min(0), Validators.max(120)]),
+      license: new FormControl<EventClass['license']>(init?.license ?? 'none', { nonNullable: true }),
+      startTime: new FormControl(init?.startTime ? this.toTimeString(init.startTime) : '', {
+        nonNullable: true,
+        validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+      }),
+      championship: new FormControl<string>(init?.championship ?? '', { nonNullable: true }),
+      note: new FormControl(init?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+    });
+  }
+
+  protected addClass(): void {
+    this.form.controls.classes.push(this.newClass());
+    this.classesChanged = true;
+  }
+
+  protected removeClass(index: number): void {
+    this.form.controls.classes.removeAt(index);
+    this.classesChanged = true;
   }
 
   protected addPaceGroup(): void {
@@ -316,6 +360,21 @@ export class EventFormComponent implements OnInit {
           ? null
           : undefined,
       externalUrl: raw.externalUrl || undefined,
+      championship: raw.championship || null,
+      ...(this.classesChanged || this.form.controls.classes.dirty || !this.isEdit()
+        ? {
+            classes: raw.classes.map((c) => ({
+              name: c.name.trim(),
+              gender: c.gender,
+              ageMin: c.ageMin ?? null,
+              ageMax: c.ageMax ?? null,
+              license: c.license,
+              startTime: c.startTime ? this.combineDatetime(raw.startDate, c.startTime) : null,
+              championship: c.championship || null,
+              note: c.note.trim() || null,
+            })),
+          }
+        : {}),
       recurrence: undefined as RecurrenceDto | undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
       ...(this.hosted()
@@ -461,7 +520,11 @@ export class EventFormComponent implements OnInit {
       meetupNote: event.meetupNote ?? '',
       routeId: event.routeId ?? '',
       stravaLinksText: this.linksToText(event.stravaLinks),
+      championship: event.championship ?? '',
     });
+    this.form.controls.classes.clear();
+    for (const cls of event.classes ?? []) this.form.controls.classes.push(this.newClass(cls));
+    this.classesChanged = false;
     this.usedRoutes.set(
       [event.route, ...(event.paceGroups ?? []).map((group) => group.route)].filter(
         (route): route is Route => !!route,

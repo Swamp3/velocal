@@ -7,6 +7,9 @@ export interface RaceSeries {
   slug: string;
   description?: string;
   year?: number;
+  /** `cup`: runs for one ranking; `league`: matchdays of a season. */
+  kind?: 'series' | 'cup' | 'league';
+  season?: string;
   discipline?: Discipline;
   imageUrl?: string;
   externalUrl?: string;

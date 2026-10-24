@@ -1,3 +1,4 @@
+import type { RiderGender, RiderLicense } from '@shared/models';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -89,6 +90,9 @@ export class ProfileComponent implements OnInit {
     homeCountry: [''],
     preferredLanguage: ['de', Validators.required],
     preferredLocale: ['de', Validators.required],
+    birthYear: ['', [Validators.pattern(/^(19|20)\d{2}$/)]],
+    gender: [''],
+    licenseType: [''],
   });
 
   ngOnInit(): void {
@@ -120,6 +124,9 @@ export class ProfileComponent implements OnInit {
       homeCountry: user.homeCountry ?? '',
       preferredLanguage: user.preferredLanguage ?? 'de',
       preferredLocale: user.preferredLocale ?? 'de',
+      birthYear: user.birthYear ? String(user.birthYear) : '',
+      gender: user.gender ?? '',
+      licenseType: user.licenseType ?? '',
     });
   }
 
@@ -140,7 +147,14 @@ export class ProfileComponent implements OnInit {
     this.saving.set(true);
 
     const vals = this.profileForm.getRawValue();
-    this.userService.updateProfile(vals).subscribe({
+    this.userService
+      .updateProfile({
+        ...vals,
+        birthYear: vals.birthYear ? Number(vals.birthYear) : null,
+        gender: (vals.gender || null) as RiderGender | null,
+        licenseType: (vals.licenseType || null) as RiderLicense | null,
+      })
+      .subscribe({
       next: (user) => {
         this.auth.updateCurrentUser(user);
 

@@ -161,6 +161,12 @@
       "checkedAt": "checked {{date}}",
       "updatedAt": "source updated {{date}}",
       "conflicts": "{{count}} conflicts between sources"
+    },
+    "racing": {
+      "fitsMe": "Fits me",
+      "fitsMeHint": "Uses your year of birth, gender and licence from your profile",
+      "championship": "Championships",
+      "hideLeagues": "Hide league matchdays"
     }
   },
   "event": {
@@ -330,7 +336,9 @@
       "personal": "Personal details",
       "personalHint": "Your name and how others see you.",
       "region": "Region and language",
-      "regionHint": "Home area for event suggestions, language and number formats."
+      "regionHint": "Home area for event suggestions, language and number formats.",
+      "rider": "Racing",
+      "riderHint": "Find classes you may start in."
     },
     "disciplinesHint": "Choose the types of events you are interested in. They are used as a default filter.",
     "title": "Profile",
@@ -429,7 +437,17 @@
       "error": "Could not load your events.",
       "cancelled": "Cancelled",
       "subtitle": "Events you signed up for that are still ahead."
-    }
+    },
+    "birthYear": "Year of birth",
+    "birthYearPlaceholder": "e.g. 1990",
+    "birthYearInvalid": "Four digits, e.g. 1990",
+    "gender": "Gender",
+    "genderFemale": "Female",
+    "genderMale": "Male",
+    "genderDiverse": "Diverse",
+    "notSpecified": "Not specified",
+    "license": "Licence",
+    "riderPrivacy": "Only used for the \"Fits me\" filter and the class hints on events. Nobody else sees it."
   },
   "series": {
     "title": "Race Series",
@@ -458,7 +476,19 @@
     "notFoundMessage": "This race series does not exist or has been removed.",
     "image": "Cover image",
     "externalUrl": "External Link",
-    "externalUrlLabel": "External URL"
+    "externalUrlLabel": "External URL",
+    "kindLabel": "Format",
+    "kind": {
+      "series": "Series",
+      "cup": "Cup (runs)",
+      "league": "League (matchdays)"
+    },
+    "season": "Season",
+    "round": {
+      "series": "Round {{n}}",
+      "cup": "Run {{n}}",
+      "league": "Matchday {{n}}"
+    }
   },
   "validation": {
     "required": "Required",
@@ -681,7 +711,17 @@
         "otherSource": "Belongs to another source ({{source}}) or was created by hand: not changed.",
         "markedMissing": "{{count}} upcoming events of this source are not in the file and will be marked as no longer listed.",
         "geocodeFailed": "The place could not be found: the event is not shown on the map.",
-        "saveFailed": "Could not be saved: {{message}}"
+        "saveFailed": "Could not be saved: {{message}}",
+        "championshipUnknown": "Unknown championship level {{value}}.",
+        "classInvalid": "{{field}} must be an object.",
+        "classGenderUnknown": "Unknown gender {{value}} (open, male, female).",
+        "classLicenseUnknown": "Unknown licence {{value}} (none, hobby, license).",
+        "ageInvalid": "{{field}} must be a whole number of years.",
+        "ageRange": "The upper age is lower than the lower age.",
+        "seriesInvalid": "{{field}} must be an object.",
+        "seriesKindUnknown": "Unknown series kind {{value}} (series, cup, league).",
+        "roundInvalid": "{{field}} must be a whole number from 1.",
+        "seriesSummary": "{{total}} series in the file, {{created}} of them new."
       }
     },
     "users": {
@@ -1351,5 +1391,51 @@
       "post": "Report post",
       "comment": "Report comment"
     }
+  },
+  "classes": {
+    "title": "Classes",
+    "fitCount": "{{count}} of {{total}} fit you",
+    "setProfile": "Add year of birth and licence to see which classes fit you",
+    "fitsYou": "Fits you",
+    "years": "Born {{from}}–{{to}}",
+    "yearsAndOlder": "Born {{year}} and earlier",
+    "yearsAndYounger": "Born {{year}} and later",
+    "allAges": "All ages",
+    "start": "Start",
+    "count": "{{count}} classes",
+    "championshipAny": "Championship",
+    "championship": {
+      "club": "Club championship",
+      "district": "District championship",
+      "state": "State championship",
+      "regional": "Regional championship",
+      "national": "National championship",
+      "continental": "Continental championship",
+      "world": "World championship"
+    },
+    "gender": {
+      "open": "open",
+      "male": "men",
+      "female": "women"
+    },
+    "license": {
+      "none": "no licence needed",
+      "hobby": "hobby licence",
+      "license": "race licence"
+    },
+    "formTitle": "Championship and classes",
+    "championshipLabel": "Championship (whole event)",
+    "noChampionship": "No championship",
+    "formHint": "Add one entry per rating class. Ages count by year of birth: the age a rider reaches in the year of the event (U15 = 13 and 14).",
+    "name": "Class",
+    "namePlaceholder": "e.g. U15 male, Elite women, Hobby",
+    "genderLabel": "Who",
+    "licenseLabel": "Licence",
+    "ageMin": "Age from",
+    "ageMax": "Age to",
+    "championshipShort": "Championship",
+    "note": "Note",
+    "remove": "Remove class",
+    "add": "Add class"
   }
 }

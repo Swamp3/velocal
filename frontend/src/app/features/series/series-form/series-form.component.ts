@@ -57,6 +57,8 @@ export class SeriesFormComponent implements OnInit {
     name: ['', Validators.required],
     description: [''],
     year: [null as number | null],
+    kind: ['series' as 'series' | 'cup' | 'league'],
+    season: [''],
     disciplineSlug: [''],
     externalUrl: [''],
   });
@@ -90,6 +92,8 @@ export class SeriesFormComponent implements OnInit {
       name: raw.name,
       description: raw.description || undefined,
       year: raw.year ?? undefined,
+      kind: raw.kind,
+      season: raw.season || undefined,
       disciplineSlug: raw.disciplineSlug || undefined,
       externalUrl: raw.externalUrl || undefined,
     };
@@ -123,6 +127,8 @@ export class SeriesFormComponent implements OnInit {
       name: s.name,
       description: s.description ?? '',
       year: s.year ?? null,
+      kind: s.kind ?? 'series',
+      season: s.season ?? '',
       disciplineSlug: s.discipline?.slug ?? '',
       externalUrl: s.externalUrl ?? '',
     });

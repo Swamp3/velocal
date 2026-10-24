@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class CreateSeriesDto {
   @IsString()
@@ -23,4 +23,15 @@ export class CreateSeriesDto {
   @IsOptional()
   @IsUrl()
   externalUrl?: string;
+
+  /** `series`, `cup` (runs for one ranking) or `league` (matchdays of a season). */
+  @IsOptional()
+  @IsIn(['series', 'cup', 'league'])
+  kind?: 'series' | 'cup' | 'league';
+
+  /** Season across years, e.g. `2026/27`. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  season?: string;
 }

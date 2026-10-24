@@ -161,6 +161,12 @@
       "checkedAt": "geprüft {{date}}",
       "updatedAt": "Quelle aktualisiert {{date}}",
       "conflicts": "{{count}} Widersprüche zwischen Quellen"
+    },
+    "racing": {
+      "fitsMe": "Passt zu mir",
+      "fitsMeHint": "Nutzt Jahrgang, Geschlecht und Lizenz aus deinem Profil",
+      "championship": "Meisterschaften",
+      "hideLeagues": "Ligaspieltage ausblenden"
     }
   },
   "event": {
@@ -330,7 +336,9 @@
       "personal": "Persönliche Daten",
       "personalHint": "Dein Name und wie andere dich sehen.",
       "region": "Region und Sprache",
-      "regionHint": "Heimatort für Event-Vorschläge, Sprache und Zahlenformate."
+      "regionHint": "Heimatort für Event-Vorschläge, Sprache und Zahlenformate.",
+      "rider": "Rennsport",
+      "riderHint": "Finde Wertungsklassen, in denen du starten darfst."
     },
     "disciplinesHint": "Wähle die Arten von Events, die dich interessieren. Sie dienen als Standardfilter.",
     "title": "Profil",
@@ -429,7 +437,17 @@
       "error": "Deine Events konnten nicht geladen werden.",
       "cancelled": "Abgesagt",
       "subtitle": "Events, für die du dich angemeldet hast und die noch anstehen."
-    }
+    },
+    "birthYear": "Jahrgang",
+    "birthYearPlaceholder": "z. B. 1990",
+    "birthYearInvalid": "Vier Ziffern, z. B. 1990",
+    "gender": "Geschlecht",
+    "genderFemale": "Weiblich",
+    "genderMale": "Männlich",
+    "genderDiverse": "Divers",
+    "notSpecified": "Keine Angabe",
+    "license": "Lizenz",
+    "riderPrivacy": "Wird nur für den Filter „Passt zu mir“ und die Hinweise bei Wertungsklassen verwendet. Niemand sonst sieht diese Angaben."
   },
   "series": {
     "title": "Rennserien",
@@ -458,7 +476,19 @@
     "notFoundMessage": "Diese Rennserie existiert nicht oder wurde entfernt.",
     "image": "Titelbild",
     "externalUrl": "Externe Seite",
-    "externalUrlLabel": "Externe URL"
+    "externalUrlLabel": "Externe URL",
+    "kindLabel": "Format",
+    "kind": {
+      "series": "Serie",
+      "cup": "Cup (Läufe)",
+      "league": "Liga (Spieltage)"
+    },
+    "season": "Saison",
+    "round": {
+      "series": "Runde {{n}}",
+      "cup": "{{n}}. Lauf",
+      "league": "{{n}}. Spieltag"
+    }
   },
   "validation": {
     "required": "Pflichtfeld",
@@ -681,7 +711,17 @@
         "otherSource": "Gehört zu einer anderen Quelle ({{source}}) oder wurde von Hand angelegt: wird nicht geändert.",
         "markedMissing": "{{count}} kommende Events dieser Quelle fehlen in der Datei und werden als nicht mehr gelistet markiert.",
         "geocodeFailed": "Der Ort wurde nicht gefunden: Das Event erscheint nicht auf der Karte.",
-        "saveFailed": "Konnte nicht gespeichert werden: {{message}}"
+        "saveFailed": "Konnte nicht gespeichert werden: {{message}}",
+        "championshipUnknown": "Unbekannte Meisterschaftsebene {{value}}.",
+        "classInvalid": "{{field}} muss ein Objekt sein.",
+        "classGenderUnknown": "Unbekanntes Geschlecht {{value}} (open, male, female).",
+        "classLicenseUnknown": "Unbekannte Lizenz {{value}} (none, hobby, license).",
+        "ageInvalid": "{{field}} muss eine ganze Zahl (Jahre) sein.",
+        "ageRange": "Das Höchstalter ist kleiner als das Mindestalter.",
+        "seriesInvalid": "{{field}} muss ein Objekt sein.",
+        "seriesKindUnknown": "Unbekanntes Serienformat {{value}} (series, cup, league).",
+        "roundInvalid": "{{field}} muss eine ganze Zahl ab 1 sein.",
+        "seriesSummary": "{{total}} Serien in der Datei, davon {{created}} neu."
       }
     },
     "users": {
@@ -1351,5 +1391,51 @@
       "post": "Beitrag melden",
       "comment": "Kommentar melden"
     }
+  },
+  "classes": {
+    "title": "Wertungsklassen",
+    "fitCount": "{{count}} von {{total}} passen zu dir",
+    "setProfile": "Jahrgang und Lizenz im Profil angeben, um passende Klassen zu sehen",
+    "fitsYou": "Passt zu dir",
+    "years": "Jahrgang {{from}}–{{to}}",
+    "yearsAndOlder": "Jahrgang {{year}} und älter",
+    "yearsAndYounger": "Jahrgang {{year}} und jünger",
+    "allAges": "Alle Altersklassen",
+    "start": "Start",
+    "count": "{{count}} Wertungsklassen",
+    "championshipAny": "Meisterschaft",
+    "championship": {
+      "club": "Vereinsmeisterschaft",
+      "district": "Bezirksmeisterschaft",
+      "state": "Landesmeisterschaft",
+      "regional": "Regionalmeisterschaft",
+      "national": "Deutsche Meisterschaft",
+      "continental": "Kontinentalmeisterschaft",
+      "world": "Weltmeisterschaft"
+    },
+    "gender": {
+      "open": "offen",
+      "male": "männlich",
+      "female": "weiblich"
+    },
+    "license": {
+      "none": "ohne Lizenz",
+      "hobby": "Hobbylizenz",
+      "license": "Rennlizenz"
+    },
+    "formTitle": "Meisterschaft und Wertungsklassen",
+    "championshipLabel": "Meisterschaft (ganzes Event)",
+    "noChampionship": "Keine Meisterschaft",
+    "formHint": "Ein Eintrag pro Wertungsklasse. Das Alter zählt nach Jahrgang: das Alter, das man im Jahr des Events erreicht (U15 = 13 und 14).",
+    "name": "Klasse",
+    "namePlaceholder": "z. B. U15 männlich, Elite Frauen, Hobby",
+    "genderLabel": "Wer",
+    "licenseLabel": "Lizenz",
+    "ageMin": "Alter ab",
+    "ageMax": "Alter bis",
+    "championshipShort": "Meisterschaft",
+    "note": "Hinweis",
+    "remove": "Klasse entfernen",
+    "add": "Klasse hinzufügen"
   }
 }

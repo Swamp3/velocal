@@ -74,6 +74,26 @@
           </div>
         }
 
+        <!-- Classes, championships, leagues -->
+        <div class="mb-5 flex flex-wrap items-center gap-2">
+          @if (authService.isAuthenticated()) {
+            <ui-chip [selected]="fitsMe()" icon="how_to_reg" (selectedChange)="onRacingFilter('fitsMe')">
+              {{ 'events.racing.fitsMe' | transloco }}
+            </ui-chip>
+          }
+          <ui-chip [selected]="championshipOnly()" icon="emoji_events" (selectedChange)="onRacingFilter('championship')">
+            {{ 'events.racing.championship' | transloco }}
+          </ui-chip>
+          <ui-chip [selected]="hideLeagues()" icon="visibility_off" (selectedChange)="onRacingFilter('hideLeagues')">
+            {{ 'events.racing.hideLeagues' | transloco }}
+          </ui-chip>
+          @if (fitsMe()) {
+            <a routerLink="/profile" fragment="rider" class="text-xs text-[var(--color-primary)] hover:underline">
+              {{ 'events.racing.fitsMeHint' | transloco }}
+            </a>
+          }
+        </div>
+
         <!-- Date + Geo filters -->
         <div class="flex flex-col gap-6 sm:flex-row">
           <!-- Date filters -->
