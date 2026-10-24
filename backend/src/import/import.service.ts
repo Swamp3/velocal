@@ -15,6 +15,7 @@ import {
   ImportSource,
   RawEvent,
 } from './interfaces/import-source.interface';
+import { ImportEventsDto } from './dto/import-events.dto';
 import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 
@@ -103,10 +104,65 @@ export class ImportService {
     return this.sources.map((s) => s.name);
   }
 
-  private async executeImport(run: ImportRun): Promise<void> {
-    const sources = run.source
-      ? this.sources.filter((s) => s.name === run.source)
-      : this.sources;
+  /**
+   * Imports events that someone collected outside the app (a JSON file). Runs as a job like a
+   * scraper run, so the caller polls `getJob`. There is no cooldown: the file is the caller's
+   * own, and only one import may run at a time.
+   */
+  async startFileImport(
+    dto: ImportEventsDto,
+    triggeredBy?: string,
+  ): Promise<ImportRun> {
+    if (this.importRunning) {
+      throw new ConflictException('An import is already running');
+    }
+    const run = this.importRunRepo.create({
+      source: dto.sourceName,
+      status: ImportRunStatus.RUNNING,
+      triggeredBy: triggeredBy ?? null,
+    });
+    await this.importRunRepo.save(run);
+
+    const events: RawEvent[] = dto.events.map((event) => ({
+      externalId: event.externalId,
+      sourceName: dto.sourceName,
+      name: event.name,
+      description: event.description,
+      startDate: new Date(event.startDate),
+      endDate: event.endDate ? new Date(event.endDate) : undefined,
+      disciplineSlug: event.disciplineSlug,
+      locationName: event.locationName,
+      address: event.address,
+      country: event.country,
+      lat: event.lat,
+      lng: event.lng,
+      registrationDeadline: event.registrationDeadline
+        ? new Date(event.registrationDeadline)
+        : undefined,
+      externalUrl: event.externalUrl,
+      sourceUrl: event.sourceUrl,
+      status: event.status,
+    }));
+    const source: ImportSource = {
+      name: dto.sourceName,
+      lastFetchComplete: dto.complete === true,
+      fetch: () => Promise.resolve(events),
+    };
+
+    this.importRunning = true;
+    void this.executeImport(run, [source]);
+    return run;
+  }
+
+  private async executeImport(
+    run: ImportRun,
+    given?: ImportSource[],
+  ): Promise<void> {
+    const sources =
+      given ??
+      (run.source
+        ? this.sources.filter((s) => s.name === run.source)
+        : this.sources);
 
     if (sources.length === 0) {
       this.logger.warn(`No import source found for: ${run.source}`);

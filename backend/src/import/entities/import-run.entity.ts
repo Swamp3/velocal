@@ -19,7 +19,11 @@ export class ImportRun {
   @Column({ type: 'varchar', nullable: true })
   source: string | null;
 
-  @Column({ type: 'enum', enum: ImportRunStatus, default: ImportRunStatus.RUNNING })
+  @Column({
+    type: 'enum',
+    enum: ImportRunStatus,
+    default: ImportRunStatus.RUNNING,
+  })
   status: ImportRunStatus;
 
   @CreateDateColumn({ type: 'timestamptz' })

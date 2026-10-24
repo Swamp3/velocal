@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Admins can import a JSON file of events that someone collected outside the app (`scripts/import-file.sh events.json`); the whole file is checked first and rejected with a list of problems if anything is wrong. Format: see `docs/IMPORTING.md`.
 - Member lists of clubs and subgroups load 30 at a time with page buttons, a search box and a role filter (all / admins or moderators / members). The "add from club members" suggestions of a subgroup are searched on the server, so they work with very large clubs.
 
 ## [0.17.3] - 2026-10-22

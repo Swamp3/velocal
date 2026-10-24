@@ -138,6 +138,63 @@ curl http://localhost:3000/api/import/jobs/b3f1a2c8-... \
 
 Only the most recent 20 jobs are retained in memory; older job ids return `404`.
 
+## Importing your own data (JSON file)
+
+Anyone can collect events outside the app (a script, a spreadsheet export) and hand an admin one JSON file to import. No code change is needed.
+
+```bash
+./scripts/import-file.sh events.json
+```
+
+The script asks for admin credentials, uploads the file, waits for the job and prints how many events were created, updated and skipped. A file with errors is rejected as a whole and lists every problem (for example `events.3.startDate must be a valid ISO 8601 date string`), so nothing is half-imported.
+
+Without the script: `POST /api/import/events` with the file as body, then poll `GET /api/import/jobs/:id` (same job response as above).
+
+**File format**
+
+```json
+{
+  "sourceName": "uci-calendar",
+  "complete": false,
+  "events": [
+    {
+      "externalId": "12345",
+      "name": "Rund um den Henninger Turm",
+      "startDate": "2027-05-01T09:00:00+02:00",
+      "disciplineSlug": "strasse",
+      "locationName": "Frankfurt am Main",
+      "address": "Römerberg 27, 60311 Frankfurt",
+      "country": "DE",
+      "lat": 50.1106,
+      "lng": 8.6821,
+      "registrationDeadline": "2027-04-24T23:59:00+02:00",
+      "externalUrl": "https://example.org/ausschreibung/12345",
+      "status": "published"
+    }
+  ]
+}
+```
+
+| Field | Required | Rules |
+|-------|----------|-------|
+| `sourceName` | yes | 3-40 characters: lower-case letters, digits, hyphens. One name per collector; it identifies the events on later imports. |
+| `complete` | no | `true` only when the file lists **every** upcoming event of this source. Upcoming events of the source that are missing from it are then marked as gone. Default `false`. |
+| `events` | yes | 1 to 5000 events per file. |
+| `events[].externalId` | yes | Stable id at the source (max. 200 characters). Importing the same id again updates the event instead of creating a new one. |
+| `events[].name` | yes | 2-300 characters. |
+| `events[].startDate` | yes | ISO 8601 including the offset, e.g. `2027-05-01T09:00:00+02:00`. |
+| `events[].endDate`, `registrationDeadline` | no | ISO 8601. |
+| `events[].disciplineSlug` | yes | `strasse`, `bahn`, `cyclo-cross`, `mtb`, `bmx`, `halle`, `trial`, `breitensport`, `tt`, `gravel` |
+| `events[].locationName` | yes | Venue or town, max. 255 characters. |
+| `events[].address` | no | Max. 255 characters. |
+| `events[].country` | no | Two-letter code in capitals, default `DE`. |
+| `events[].lat`, `lng` | no | Decimal degrees. Without them the address is geocoded; give both or neither. |
+| `events[].externalUrl`, `sourceUrl` | no | Full `http(s)` URLs (max. 500). `externalUrl` is the announcement/sign-up page, `sourceUrl` the page that lists the event. |
+| `events[].status` | yes | `published`, `cancelled` or `completed`. |
+| `events[].description` | no | Plain text, max. 10 000 characters. |
+
+**How duplicates are handled**: an event is found again by `(sourceName, externalId)`. If that finds nothing, an event with the same page URL, or the same name on the same day at the same place, counts as the same race and is updated instead of duplicated. Events that were created by hand or by another source are left unchanged (counted as skipped).
+
 ## Scheduling automatic imports
 
 `scripts/setup-import-cron.sh` installs a scheduled job that runs `scripts/import-cron.sh` (default: **every Saturday at 23:00 local time**). It supports three backends and auto-detects the best one available:

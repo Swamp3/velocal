@@ -19,6 +19,7 @@ import { User } from '../users/entities/user.entity';
 import { ImportService } from './import.service';
 import { ImportRun } from './entities/import-run.entity';
 import { TriggerImportDto } from './dto/trigger-import.dto';
+import { ImportEventsDto } from './dto/import-events.dto';
 
 interface ImportJobResponse {
   id: string;
@@ -63,6 +64,17 @@ export class ImportController {
     @CurrentUser() user: User,
   ): Promise<ImportJobResponse> {
     const run = await this.importService.startImport(dto.source, user.email);
+    return toJobResponse(run);
+  }
+
+  /** Import a file of events collected outside the app. Runs as a job; poll `jobs/:id`. */
+  @Post('events')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async importEvents(
+    @Body() dto: ImportEventsDto,
+    @CurrentUser() user: User,
+  ): Promise<ImportJobResponse> {
+    const run = await this.importService.startFileImport(dto, user.email);
     return toJobResponse(run);
   }
 
