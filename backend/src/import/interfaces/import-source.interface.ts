@@ -39,7 +39,10 @@ export interface RawEventClass {
   gender: 'open' | 'male' | 'female';
   ageMin: number | null;
   ageMax: number | null;
-  license: 'none' | 'hobby' | 'license';
+  category: string | null;
+  license: 'open' | 'unlicensed' | 'license' | 'uci';
+  dayLicense: boolean;
+  licenseClasses: ('elite_amateur' | 'amateur' | 'master')[] | null;
   startTime: Date | null;
   championship: string | null;
   note: string | null;

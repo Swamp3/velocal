@@ -11,6 +11,7 @@ import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
 import { EventClass } from './entities/event-class.entity';
 import { classFitsSql } from './class-match';
+import { classAges } from './categories';
 import { EventClassDto } from './dto/event-class.dto';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
@@ -86,7 +87,10 @@ export interface SerializedEventClass {
   gender: string;
   ageMin: number | null;
   ageMax: number | null;
+  category: string | null;
   license: string;
+  dayLicense: boolean;
+  licenseClasses: string[] | null;
   startTime: Date | null;
   championship: string | null;
   note: string | null;
@@ -226,7 +230,13 @@ export class EventsService {
     if (params.fitsMe && userId) {
       const rider = await this.users.findOne({
         where: { id: userId },
-        select: { id: true, birthYear: true, gender: true, licenseType: true },
+        select: {
+          id: true,
+          birthYear: true,
+          gender: true,
+          licenseType: true,
+          licenseClass: true,
+        },
       });
       if (rider) {
         const fit = classFitsSql(rider);
@@ -285,7 +295,9 @@ export class EventsService {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
       const access = marker ? null : await this.accessMap(entities, userId);
-      const racing = marker ? null : await this.racingDetails(entities.map((e) => e.id));
+      const racing = marker
+        ? null
+        : await this.racingDetails(entities.map((e) => e.id));
 
       const data = entities.map((entity, i) =>
         this.toListEvent(entity, marker, {
@@ -308,7 +320,9 @@ export class EventsService {
 
     const [rows, total] = await qb.getManyAndCount();
     const access = marker ? null : await this.accessMap(rows, userId);
-    const racing = marker ? null : await this.racingDetails(rows.map((e) => e.id));
+    const racing = marker
+      ? null
+      : await this.racingDetails(rows.map((e) => e.id));
     return {
       data: rows.map((event) =>
         this.toListEvent(event, marker, {
@@ -365,7 +379,8 @@ export class EventsService {
         ? await this.saveSeries(manager, first, dto.recurrence, userId)
         : await manager.save(first);
       await this.writeRideDetails(manager, saved, dto);
-      if (dto.classes?.length) await this.writeClasses(manager, saved.id, dto.classes);
+      if (dto.classes?.length)
+        await this.writeClasses(manager, saved.id, dto.classes);
       return saved;
     });
   }
@@ -834,7 +849,10 @@ export class EventsService {
     // Corrections to an imported event survive the next import (see ImportService).
     if (event.source === EventSource.IMPORTED) {
       const edited = editedImportFields(event, partial);
-      if (dto.classes !== undefined && (await this.classesDiffer(event.id, dto.classes))) {
+      if (
+        dto.classes !== undefined &&
+        (await this.classesDiffer(event.id, dto.classes))
+      ) {
         edited.push('classes');
       }
       if (edited.length) {
@@ -847,34 +865,49 @@ export class EventsService {
     Object.assign(event, partial);
     const saved = await this.dataSource.transaction(async (manager) => {
       const row = await manager.save(event);
-      if (dto.classes !== undefined) await this.writeClasses(manager, row.id, dto.classes);
+      if (dto.classes !== undefined)
+        await this.writeClasses(manager, row.id, dto.classes);
       return row;
     });
     return this.present(saved, user?.id);
   }
 
-  private async classesDiffer(eventId: string, next: EventClassDto[]): Promise<boolean> {
-    const current = await this.eventClasses.find({ where: { eventId }, order: { position: 'ASC' } });
+  private async classesDiffer(
+    eventId: string,
+    next: EventClassDto[],
+  ): Promise<boolean> {
+    const current = await this.eventClasses.find({
+      where: { eventId },
+      order: { position: 'ASC' },
+    });
     const norm = (c: {
       name: string;
       gender?: string | null;
       ageMin?: number | null;
       ageMax?: number | null;
+      category?: string | null;
       license?: string | null;
+      dayLicense?: boolean | null;
+      licenseClasses?: string[] | null;
       startTime?: Date | string | null;
       championship?: string | null;
       note?: string | null;
-    }) =>
-      JSON.stringify([
+    }) => {
+      const ages = classAges(c.category, c.ageMin, c.ageMax);
+      return JSON.stringify([
         c.name.trim(),
         c.gender ?? 'open',
-        c.ageMin ?? null,
-        c.ageMax ?? null,
-        c.license ?? 'none',
+        ages.ageMin,
+        ages.ageMax,
+        c.category ?? null,
+        c.license ?? 'open',
+        !!c.dayLicense,
+        c.licenseClasses?.length ? [...c.licenseClasses].sort() : null,
         c.startTime ? new Date(c.startTime).getTime() : null,
         c.championship ?? null,
         c.note?.trim() || null,
       ]);
+    };
     return current.map(norm).join('|') !== next.map(norm).join('|');
   }
 
@@ -893,9 +926,11 @@ export class EventsService {
           position,
           name: c.name.trim(),
           gender: (c.gender ?? 'open') as EventClass['gender'],
-          ageMin: c.ageMin ?? null,
-          ageMax: c.ageMax ?? null,
-          license: (c.license ?? 'none') as EventClass['license'],
+          ...classAges(c.category, c.ageMin, c.ageMax),
+          category: c.category ?? null,
+          license: (c.license ?? 'open') as EventClass['license'],
+          dayLicense: !!c.dayLicense,
+          licenseClasses: c.licenseClasses?.length ? c.licenseClasses : null,
           startTime: c.startTime ? new Date(c.startTime) : null,
           championship: (c.championship ?? null) as EventClass['championship'],
           note: c.note?.trim() || null,
@@ -1876,15 +1911,20 @@ export class EventsService {
   }
 
   /** Classes and series memberships of events, loaded once for a page of events. */
-  private async racingDetails(
-    ids: string[],
-  ): Promise<(id: string) => { classes: SerializedEventClass[]; series: SerializedEventSeries[] }> {
+  private async racingDetails(ids: string[]): Promise<
+    (id: string) => {
+      classes: SerializedEventClass[];
+      series: SerializedEventSeries[];
+    }
+  > {
     if (ids.length === 0) return () => ({ classes: [], series: [] });
     const classes = await this.eventClasses.find({
       where: { eventId: In(ids) },
       order: { position: 'ASC' },
     });
-    const series = await this.dataSource.query<(SerializedEventSeries & { eventId: string })[]>(
+    const series = await this.dataSource.query<
+      (SerializedEventSeries & { eventId: string })[]
+    >(
       `SELECT rse."event_id" AS "eventId", s."id", s."slug", s."name", s."kind", s."season",
               rse."stageNumber" AS "round", rse."label"
          FROM "race_series_events" rse
@@ -1896,16 +1936,19 @@ export class EventsService {
     return (id) => ({
       classes: classes
         .filter((c) => c.eventId === id)
-        .map(({ id: classId, name, gender, ageMin, ageMax, license, startTime, championship, note }) => ({
-          id: classId,
-          name,
-          gender,
-          ageMin,
-          ageMax,
-          license,
-          startTime,
-          championship,
-          note,
+        .map((c) => ({
+          id: c.id,
+          name: c.name,
+          gender: c.gender,
+          ageMin: c.ageMin,
+          ageMax: c.ageMax,
+          category: c.category,
+          license: c.license,
+          dayLicense: c.dayLicense,
+          licenseClasses: c.licenseClasses,
+          startTime: c.startTime,
+          championship: c.championship,
+          note: c.note,
         })),
       series: series
         .filter((row) => row.eventId === id)

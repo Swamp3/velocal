@@ -1,4 +1,7 @@
-import type { RiderGender, RiderLicense } from '@shared/models';
+import type { LicenseClass, RiderGender, RiderLicense } from '@shared/models';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
+import { categoryForAge, licenseClassesForAge } from '@shared/utils/event-class';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -93,6 +96,30 @@ export class ProfileComponent implements OnInit {
     birthYear: ['', [Validators.pattern(/^(19|20)\d{2}$/)]],
     gender: [''],
     licenseType: [''],
+    licenseClass: [''],
+  });
+
+  private readonly riderValues = toSignal(
+    this.profileForm.valueChanges.pipe(startWith(this.profileForm.value)),
+    { initialValue: this.profileForm.value },
+  );
+  private readonly riderAge = computed(() => {
+    const year = Number(this.riderValues().birthYear);
+    return /^(19|20)\d{2}$/.test(String(this.riderValues().birthYear ?? '')) ? new Date().getFullYear() - year : null;
+  });
+
+  /** Licence classes a licensed rider of this age can hold (none for youth licences). */
+  protected readonly licenseClassOptions = computed<LicenseClass[]>(() => {
+    const type = this.riderValues().licenseType;
+    return type === 'license' || type === 'uci' ? licenseClassesForAge(this.riderAge()) : [];
+  });
+
+  /** The age category of this year, derived from the year of birth. */
+  protected readonly riderCategory = computed(() => {
+    const age = this.riderAge();
+    if (age == null) return null;
+    const key = categoryForAge(age);
+    return { key, year: new Date().getFullYear(), mastersChoice: key.startsWith('masters') };
   });
 
   ngOnInit(): void {
@@ -127,6 +154,7 @@ export class ProfileComponent implements OnInit {
       birthYear: user.birthYear ? String(user.birthYear) : '',
       gender: user.gender ?? '',
       licenseType: user.licenseType ?? '',
+      licenseClass: user.licenseClass ?? '',
     });
   }
 
@@ -153,6 +181,9 @@ export class ProfileComponent implements OnInit {
         birthYear: vals.birthYear ? Number(vals.birthYear) : null,
         gender: (vals.gender || null) as RiderGender | null,
         licenseType: (vals.licenseType || null) as RiderLicense | null,
+        licenseClass: this.licenseClassOptions().includes(vals.licenseClass as LicenseClass)
+          ? (vals.licenseClass as LicenseClass)
+          : null,
       })
       .subscribe({
       next: (user) => {

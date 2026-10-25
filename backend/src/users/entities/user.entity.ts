@@ -74,12 +74,33 @@ export class User {
   @Column({ type: 'int', name: 'birth_year', nullable: true })
   birthYear: number | null;
 
-  @Column({ type: 'enum', enum: ['male', 'female', 'diverse'], enumName: 'user_gender', nullable: true })
+  @Column({
+    type: 'enum',
+    enum: ['male', 'female', 'diverse'],
+    enumName: 'user_gender',
+    nullable: true,
+  })
   gender: 'male' | 'female' | 'diverse' | null;
 
-  /** Licence the rider holds: none, hobby or race licence. */
-  @Column({ type: 'enum', enum: ['none', 'hobby', 'license'], enumName: 'user_license', name: 'license_type', nullable: true })
-  licenseType: 'none' | 'hobby' | 'license' | null;
+  /** Licence the rider holds: none, a federation race licence, or a UCI team licence. */
+  @Column({
+    type: 'enum',
+    enum: ['none', 'license', 'uci'],
+    enumName: 'user_license',
+    name: 'license_type',
+    nullable: true,
+  })
+  licenseType: 'none' | 'license' | 'uci' | null;
+
+  /** Licensed adults: Elite Amateure, Amateure or Masters. */
+  @Column({
+    type: 'enum',
+    enum: ['elite_amateur', 'amateur', 'master'],
+    enumName: 'user_license_class',
+    name: 'license_class',
+    nullable: true,
+  })
+  licenseClass: 'elite_amateur' | 'amateur' | 'master' | null;
 
   @Column({ default: 'de' })
   preferredLanguage: string;

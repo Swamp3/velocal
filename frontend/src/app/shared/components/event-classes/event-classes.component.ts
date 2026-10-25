@@ -62,6 +62,12 @@ import { birthYears, classFits, hasRiderData } from '@shared/utils/event-class';
                 }
                 · {{ 'classes.gender.' + row.cls.gender | transloco }}
                 · {{ 'classes.license.' + row.cls.license | transloco }}
+                @if (row.cls.license === 'license' && row.cls.dayLicense) {
+                  · {{ 'classes.dayLicense' | transloco }}
+                }
+                @if (row.cls.licenseClasses?.length) {
+                  · @for (lc of row.cls.licenseClasses; track lc; let last = $last) {{{ 'classes.licenseClass.' + lc | transloco }}@if (!last) {, }}
+                }
               </p>
               @if (row.cls.note) {
                 <p class="mt-0.5 break-words text-xs text-[var(--color-text-muted)]">{{ row.cls.note }}</p>

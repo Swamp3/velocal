@@ -447,7 +447,13 @@
     "genderDiverse": "Divers",
     "notSpecified": "Keine Angabe",
     "license": "Lizenz",
-    "riderPrivacy": "Wird nur für den Filter „Passt zu mir“ und die Hinweise bei Wertungsklassen verwendet. Niemand sonst sieht diese Angaben."
+    "riderPrivacy": "Wird nur für den Filter „Passt zu mir“ und die Hinweise bei Wertungsklassen verwendet. Niemand sonst sieht diese Angaben.",
+    "licenseNone": "Keine Lizenz (Hobby/Jedermann)",
+    "licenseFederation": "Verbandslizenz (z. B. BDR)",
+    "licenseUci": "UCI-Lizenz (Profi-/Kontinentalteam)",
+    "licenseClass": "Lizenzklasse",
+    "category": "Deine Altersklasse {{year}}: {{category}}",
+    "mastersChoice": " – mit Lizenz kannst du auch Elite Amateure oder Amateure wählen."
   },
   "series": {
     "title": "Rennserien",
@@ -715,13 +721,15 @@
         "championshipUnknown": "Unbekannte Meisterschaftsebene {{value}}.",
         "classInvalid": "{{field}} muss ein Objekt sein.",
         "classGenderUnknown": "Unbekanntes Geschlecht {{value}} (open, male, female).",
-        "classLicenseUnknown": "Unbekannte Lizenz {{value}} (none, hobby, license).",
+        "classLicenseUnknown": "Unbekannte Lizenz {{value}} (open, unlicensed, license, uci).",
         "ageInvalid": "{{field}} muss eine ganze Zahl (Jahre) sein.",
         "ageRange": "Das Höchstalter ist kleiner als das Mindestalter.",
         "seriesInvalid": "{{field}} muss ein Objekt sein.",
         "seriesKindUnknown": "Unbekanntes Serienformat {{value}} (series, cup, league).",
         "roundInvalid": "{{field}} muss eine ganze Zahl ab 1 sein.",
-        "seriesSummary": "{{total}} Serien in der Datei, davon {{created}} neu."
+        "seriesSummary": "{{total}} Serien in der Datei, davon {{created}} neu.",
+        "classLicenseClassUnknown": "Unbekannte Lizenzklassen {{value}} (elite_amateur, amateur, master).",
+        "classCategoryUnknown": "Unbekannte Altersklasse {{value}} (u11 … u23, elite, masters1 … masters4)."
       }
     },
     "users": {
@@ -1419,14 +1427,15 @@
       "female": "weiblich"
     },
     "license": {
-      "none": "ohne Lizenz",
-      "hobby": "Hobbylizenz",
-      "license": "Rennlizenz"
+      "open": "offen für alle",
+      "unlicensed": "Hobby (ohne Lizenz)",
+      "license": "mit Lizenz",
+      "uci": "UCI-Lizenz"
     },
     "formTitle": "Meisterschaft und Wertungsklassen",
     "championshipLabel": "Meisterschaft (ganzes Event)",
     "noChampionship": "Keine Meisterschaft",
-    "formHint": "Ein Eintrag pro Wertungsklasse. Das Alter zählt nach Jahrgang: das Alter, das man im Jahr des Events erreicht (U15 = 13 und 14).",
+    "formHint": "Ein Eintrag pro Wertungsklasse. Eine Altersklasse füllt das Alter vor. Das Alter zählt nach Jahrgang: das Alter, das man im Jahr des Events erreicht (U15 = 13 und 14).",
     "name": "Klasse",
     "namePlaceholder": "z. B. U15 männlich, Elite Frauen, Hobby",
     "genderLabel": "Wer",
@@ -1436,6 +1445,28 @@
     "championshipShort": "Meisterschaft",
     "note": "Hinweis",
     "remove": "Klasse entfernen",
-    "add": "Klasse hinzufügen"
+    "add": "Klasse hinzufügen",
+    "dayLicense": "Tageslizenz möglich",
+    "dayLicenseLabel": "Tageslizenz möglich",
+    "licenseClassesLabel": "Nur Lizenzklassen:",
+    "licenseClass": {
+      "elite_amateur": "Elite Amateure",
+      "amateur": "Amateure",
+      "master": "Masters"
+    },
+    "categoryLabel": "Altersklasse",
+    "category": {
+      "u11": "U11",
+      "u13": "U13",
+      "u15": "U15",
+      "u17": "U17",
+      "u19": "U19 (Junioren)",
+      "u23": "U23",
+      "elite": "Elite",
+      "masters1": "Masters 1 (30–39)",
+      "masters2": "Masters 2 (40–49)",
+      "masters3": "Masters 3 (50–59)",
+      "masters4": "Masters 4 (60+)"
+    }
   }
 }

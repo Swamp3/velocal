@@ -1,4 +1,13 @@
-import { IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, ValidateIf } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  ValidateIf,
+} from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -45,8 +54,13 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @ValidateIf((_dto, value) => value !== null)
-  @IsIn(['none', 'hobby', 'license'])
-  licenseType?: 'none' | 'hobby' | 'license' | null;
+  @IsIn(['none', 'license', 'uci'])
+  licenseType?: 'none' | 'license' | 'uci' | null;
+
+  @IsOptional()
+  @ValidateIf((_dto, value) => value !== null)
+  @IsIn(['elite_amateur', 'amateur', 'master'])
+  licenseClass?: 'elite_amateur' | 'amateur' | 'master' | null;
 
   @IsOptional()
   @IsIn(['de', 'en'])

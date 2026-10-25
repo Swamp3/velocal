@@ -4,6 +4,7 @@ import type {
   EventSourceRef,
 } from '../events/entities/event.entity';
 import { berlinDay, parseEventDate } from './dates';
+import { CATEGORY_KEYS, classAges } from '../events/categories';
 import type {
   RawEvent,
   RawEventClass,
@@ -124,8 +125,29 @@ export const CHAMPIONSHIP_LEVELS = [
   'continental',
   'world',
 ];
-const CLASS_FIELDS = new Set(['name', 'gender', 'ageMin', 'ageMax', 'license', 'startTime', 'championship', 'note']);
-const SERIES_FIELDS = new Set(['key', 'name', 'kind', 'season', 'round', 'roundLabel']);
+const CLASS_FIELDS = new Set([
+  'name',
+  'gender',
+  'ageMin',
+  'ageMax',
+  'category',
+  'license',
+  'dayLicense',
+  'licenseClasses',
+  'startTime',
+  'championship',
+  'note',
+]);
+const CLASS_LICENSES = ['open', 'unlicensed', 'license', 'uci'];
+const LICENSE_CLASSES = ['elite_amateur', 'amateur', 'master'];
+const SERIES_FIELDS = new Set([
+  'key',
+  'name',
+  'kind',
+  'season',
+  'round',
+  'roundLabel',
+]);
 const FILE_FIELDS = new Set(['sourceName', 'complete', 'events']);
 
 /** A value for a message: strings as they are, anything else as JSON. */
@@ -592,7 +614,12 @@ export function validateImportFile(
     let classes: RawEventClass[] | undefined;
     if (item.classes !== undefined) {
       if (!Array.isArray(item.classes)) {
-        add({ severity: 'error', code: 'type', field: 'classes', params: { expected: 'array' } });
+        add({
+          severity: 'error',
+          code: 'type',
+          field: 'classes',
+          params: { expected: 'array' },
+        });
       } else {
         const list: RawEventClass[] = [];
         item.classes.forEach((entry: unknown, i: number) => {
@@ -603,35 +630,132 @@ export function validateImportFile(
           }
           for (const key of Object.keys(entry)) {
             if (!CLASS_FIELDS.has(key)) {
-              add({ severity: 'warning', code: 'unknownField', field: `${field}.${key}` });
+              add({
+                severity: 'warning',
+                code: 'unknownField',
+                field: `${field}.${key}`,
+              });
             }
           }
           const name = typeof entry.name === 'string' ? entry.name.trim() : '';
-          if (!name) add({ severity: 'error', code: 'required', field: `${field}.name` });
+          if (!name)
+            add({
+              severity: 'error',
+              code: 'required',
+              field: `${field}.name`,
+            });
           if (name.length > 120) {
-            add({ severity: 'error', code: 'tooLong', field: `${field}.name`, params: { max: 120 } });
+            add({
+              severity: 'error',
+              code: 'tooLong',
+              field: `${field}.name`,
+              params: { max: 120 },
+            });
           }
           const gender = entry.gender ?? 'open';
-          if (typeof gender !== 'string' || !['open', 'male', 'female'].includes(gender)) {
-            add({ severity: 'error', code: 'classGenderUnknown', field: `${field}.gender`, params: { value: show(gender) } });
+          if (
+            typeof gender !== 'string' ||
+            !['open', 'male', 'female'].includes(gender)
+          ) {
+            add({
+              severity: 'error',
+              code: 'classGenderUnknown',
+              field: `${field}.gender`,
+              params: { value: show(gender) },
+            });
           }
-          const license = entry.license ?? 'none';
-          if (typeof license !== 'string' || !['none', 'hobby', 'license'].includes(license)) {
-            add({ severity: 'error', code: 'classLicenseUnknown', field: `${field}.license`, params: { value: show(license) } });
+          const license = entry.license ?? 'open';
+          if (
+            typeof license !== 'string' ||
+            !CLASS_LICENSES.includes(license)
+          ) {
+            add({
+              severity: 'error',
+              code: 'classLicenseUnknown',
+              field: `${field}.license`,
+              params: { value: show(license) },
+            });
+          }
+          if (
+            entry.dayLicense !== undefined &&
+            typeof entry.dayLicense !== 'boolean'
+          ) {
+            add({
+              severity: 'error',
+              code: 'type',
+              field: `${field}.dayLicense`,
+              params: { expected: 'boolean' },
+            });
+          }
+          let licenseClasses: RawEventClass['licenseClasses'] = null;
+          if (
+            entry.licenseClasses !== undefined &&
+            entry.licenseClasses !== null
+          ) {
+            const values = entry.licenseClasses;
+            if (
+              !Array.isArray(values) ||
+              values.some(
+                (v) => typeof v !== 'string' || !LICENSE_CLASSES.includes(v),
+              )
+            ) {
+              add({
+                severity: 'error',
+                code: 'classLicenseClassUnknown',
+                field: `${field}.licenseClasses`,
+                params: { value: show(values) },
+              });
+            } else if (values.length) {
+              licenseClasses = [
+                ...new Set(values),
+              ] as RawEventClass['licenseClasses'];
+            }
+          }
+          let category: string | null = null;
+          if (entry.category !== undefined && entry.category !== null) {
+            if (
+              typeof entry.category !== 'string' ||
+              !CATEGORY_KEYS.includes(entry.category)
+            ) {
+              add({
+                severity: 'error',
+                code: 'classCategoryUnknown',
+                field: `${field}.category`,
+                params: { value: show(entry.category) },
+              });
+            } else {
+              category = entry.category;
+            }
           }
           const age = (key: 'ageMin' | 'ageMax'): number | null => {
             const value = entry[key];
             if (value === undefined || value === null) return null;
-            if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 120) {
-              add({ severity: 'error', code: 'ageInvalid', field: `${field}.${key}` });
+            if (
+              typeof value !== 'number' ||
+              !Number.isInteger(value) ||
+              value < 0 ||
+              value > 120
+            ) {
+              add({
+                severity: 'error',
+                code: 'ageInvalid',
+                field: `${field}.${key}`,
+              });
               return null;
             }
             return value;
           };
-          const ageMin = age('ageMin');
-          const ageMax = age('ageMax');
+          const { ageMin, ageMax } = classAges(
+            category,
+            age('ageMin'),
+            age('ageMax'),
+          );
           if (ageMin != null && ageMax != null && ageMin > ageMax) {
-            add({ severity: 'error', code: 'ageRange', field: `${field}.ageMax` });
+            add({
+              severity: 'error',
+              code: 'ageRange',
+              field: `${field}.ageMax`,
+            });
           }
           let startTime: Date | null = null;
           if (entry.startTime !== undefined && entry.startTime !== null) {
@@ -644,23 +768,42 @@ export function validateImportFile(
             } else {
               add({
                 severity: 'error',
-                code: parsed.kind === 'missingOffset' ? 'dateNeedsOffset' : 'dateInvalid',
+                code:
+                  parsed.kind === 'missingOffset'
+                    ? 'dateNeedsOffset'
+                    : 'dateInvalid',
                 field: `${field}.startTime`,
                 params: { value: show(entry.startTime) },
               });
             }
           }
           const level = entry.championship ?? null;
-          if (level !== null && (typeof level !== 'string' || !CHAMPIONSHIP_LEVELS.includes(level))) {
-            add({ severity: 'error', code: 'championshipUnknown', field: `${field}.championship`, params: { value: show(level) } });
+          if (
+            level !== null &&
+            (typeof level !== 'string' || !CHAMPIONSHIP_LEVELS.includes(level))
+          ) {
+            add({
+              severity: 'error',
+              code: 'championshipUnknown',
+              field: `${field}.championship`,
+              params: { value: show(level) },
+            });
           }
-          const note = typeof entry.note === 'string' ? entry.note.trim().slice(0, 300) || null : null;
+          const note =
+            typeof entry.note === 'string'
+              ? entry.note.trim().slice(0, 300) || null
+              : null;
           list.push({
             name,
             gender: gender as RawEventClass['gender'],
             ageMin,
             ageMax,
-            license: license as RawEventClass['license'],
+            category,
+            license: (CLASS_LICENSES.includes(license as string)
+              ? license
+              : 'open') as RawEventClass['license'],
+            dayLicense: entry.dayLicense === true,
+            licenseClasses,
             startTime,
             championship: typeof level === 'string' ? level : null,
             note,
@@ -684,26 +827,65 @@ export function validateImportFile(
         }
         for (const key of Object.keys(entry)) {
           if (!SERIES_FIELDS.has(key)) {
-            add({ severity: 'warning', code: 'unknownField', field: `${field}.${key}` });
+            add({
+              severity: 'warning',
+              code: 'unknownField',
+              field: `${field}.${key}`,
+            });
           }
         }
         const key = typeof entry.key === 'string' ? entry.key.trim() : '';
         const name = typeof entry.name === 'string' ? entry.name.trim() : '';
-        if (!key) add({ severity: 'error', code: 'required', field: `${field}.key` });
-        if (key.length > 200) add({ severity: 'error', code: 'tooLong', field: `${field}.key`, params: { max: 200 } });
-        if (!name) add({ severity: 'error', code: 'required', field: `${field}.name` });
-        if (name.length > 200) add({ severity: 'error', code: 'tooLong', field: `${field}.name`, params: { max: 200 } });
+        if (!key)
+          add({ severity: 'error', code: 'required', field: `${field}.key` });
+        if (key.length > 200)
+          add({
+            severity: 'error',
+            code: 'tooLong',
+            field: `${field}.key`,
+            params: { max: 200 },
+          });
+        if (!name)
+          add({ severity: 'error', code: 'required', field: `${field}.name` });
+        if (name.length > 200)
+          add({
+            severity: 'error',
+            code: 'tooLong',
+            field: `${field}.name`,
+            params: { max: 200 },
+          });
         const kind = entry.kind ?? 'series';
-        if (typeof kind !== 'string' || !['series', 'cup', 'league'].includes(kind)) {
-          add({ severity: 'error', code: 'seriesKindUnknown', field: `${field}.kind`, params: { value: show(kind) } });
+        if (
+          typeof kind !== 'string' ||
+          !['series', 'cup', 'league'].includes(kind)
+        ) {
+          add({
+            severity: 'error',
+            code: 'seriesKindUnknown',
+            field: `${field}.kind`,
+            params: { value: show(kind) },
+          });
         }
-        const season = typeof entry.season === 'string' ? entry.season.trim().slice(0, 20) || null : null;
+        const season =
+          typeof entry.season === 'string'
+            ? entry.season.trim().slice(0, 20) || null
+            : null;
         const round = entry.round;
-        if (round !== undefined && round !== null && (typeof round !== 'number' || !Number.isInteger(round) || round < 1)) {
-          add({ severity: 'error', code: 'roundInvalid', field: `${field}.round` });
+        if (
+          round !== undefined &&
+          round !== null &&
+          (typeof round !== 'number' || !Number.isInteger(round) || round < 1)
+        ) {
+          add({
+            severity: 'error',
+            code: 'roundInvalid',
+            field: `${field}.round`,
+          });
         }
         const roundLabel =
-          typeof entry.roundLabel === 'string' ? entry.roundLabel.trim().slice(0, 100) || null : null;
+          typeof entry.roundLabel === 'string'
+            ? entry.roundLabel.trim().slice(0, 100) || null
+            : null;
         parsedSeries.push({
           key,
           name,
@@ -815,14 +997,22 @@ const MESSAGES: Record<string, (issue: ImportIssue) => string> = {
   saveFailed: (i) => `Could not be saved: ${i.params?.message}`,
   championshipUnknown: (i) => `Unknown championship level ${i.params?.value}`,
   classInvalid: (i) => `${i.field} must be an object`,
-  classGenderUnknown: (i) => `Unknown gender ${i.params?.value} (open, male, female)`,
-  classLicenseUnknown: (i) => `Unknown licence ${i.params?.value} (none, hobby, license)`,
+  classGenderUnknown: (i) =>
+    `Unknown gender ${i.params?.value} (open, male, female)`,
+  classLicenseUnknown: (i) =>
+    `Unknown licence ${i.params?.value} (open, unlicensed, license, uci)`,
+  classLicenseClassUnknown: (i) =>
+    `Unknown licence classes ${i.params?.value} (elite_amateur, amateur, master)`,
+  classCategoryUnknown: (i) =>
+    `Unknown category ${i.params?.value} (${CATEGORY_KEYS.join(', ')})`,
   ageInvalid: (i) => `${i.field} must be a whole number of years`,
   ageRange: () => 'ageMax is lower than ageMin',
   seriesInvalid: (i) => `${i.field} must be an object`,
-  seriesKindUnknown: (i) => `Unknown series kind ${i.params?.value} (series, cup, league)`,
+  seriesKindUnknown: (i) =>
+    `Unknown series kind ${i.params?.value} (series, cup, league)`,
   roundInvalid: (i) => `${i.field} must be a whole number from 1`,
-  seriesSummary: (i) => `${i.params?.total} series in the file, ${i.params?.created} of them new`,
+  seriesSummary: (i) =>
+    `${i.params?.total} series in the file, ${i.params?.created} of them new`,
 };
 
 /** English text of an issue, for the API and the command line (the admin page translates codes). */

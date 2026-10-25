@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Event } from './event.entity';
 
 /** Who may start in a class. */
@@ -9,14 +16,23 @@ export enum ClassGender {
 }
 
 /**
- * Licence a rider needs, from the lowest: `none` (open to everyone, a day licence is bought on
- * site), `hobby` (hobby/Jedermann licence), `license` (race licence of the federation).
+ * Who may start, by licence:
+ * - `open`: everyone (Jedermann; licence holders usually too)
+ * - `unlicensed`: only riders without a licence (Hobby class)
+ * - `license`: a race licence of the federation (German Cycling); with `dayLicense` a rider
+ *   without one may buy a day licence on site
+ * - `uci`: a licence of a UCI-registered team (Continental, ProTeam, WorldTeam)
  */
 export enum ClassLicense {
-  NONE = 'none',
-  HOBBY = 'hobby',
+  OPEN = 'open',
+  UNLICENSED = 'unlicensed',
   LICENSE = 'license',
+  UCI = 'uci',
 }
+
+/** Performance classes of licensed adults in road racing (German Cycling, since 2019). */
+export const LICENSE_CLASSES = ['elite_amateur', 'amateur', 'master'] as const;
+export type LicenseClass = (typeof LICENSE_CLASSES)[number];
 
 /** Level of a championship, from local to world. */
 export enum ChampionshipLevel {
@@ -52,7 +68,12 @@ export class EventClass {
   @Column({ type: 'varchar', length: 120 })
   name: string;
 
-  @Column({ type: 'enum', enum: ClassGender, enumName: 'event_class_gender', default: ClassGender.OPEN })
+  @Column({
+    type: 'enum',
+    enum: ClassGender,
+    enumName: 'event_class_gender',
+    default: ClassGender.OPEN,
+  })
   gender: ClassGender;
 
   @Column({ type: 'int', name: 'age_min', nullable: true })
@@ -61,13 +82,40 @@ export class EventClass {
   @Column({ type: 'int', name: 'age_max', nullable: true })
   ageMax: number | null;
 
-  @Column({ type: 'enum', enum: ClassLicense, enumName: 'event_class_license', default: ClassLicense.NONE })
+  /** Age category the class is for (`u15`, `elite`, `masters2` …); ages are filled from it. */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  category: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: ClassLicense,
+    enumName: 'event_class_license',
+    default: ClassLicense.OPEN,
+  })
   license: ClassLicense;
+
+  /** With `license`: riders without one may start with a day licence. */
+  @Column({ type: 'boolean', name: 'day_license', default: false })
+  dayLicense: boolean;
+
+  /** Licence classes admitted (e.g. `amateur` and `master`); null for all. */
+  @Column({
+    type: 'text',
+    name: 'license_classes',
+    array: true,
+    nullable: true,
+  })
+  licenseClasses: LicenseClass[] | null;
 
   @Column({ type: 'timestamptz', name: 'start_time', nullable: true })
   startTime: Date | null;
 
-  @Column({ type: 'enum', enum: ChampionshipLevel, enumName: 'championship_level', nullable: true })
+  @Column({
+    type: 'enum',
+    enum: ChampionshipLevel,
+    enumName: 'championship_level',
+    nullable: true,
+  })
   championship: ChampionshipLevel | null;
 
   @Column({ type: 'varchar', length: 300, nullable: true })

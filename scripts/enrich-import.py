@@ -53,7 +53,7 @@ def classes_from(name):
     found = []
     for m in AGE_GROUP.finditer(name):
         limit = int(m.group(1))
-        found.append({"name": f"U{limit}", "ageMin": limit - 2, "ageMax": limit - 1})
+        found.append({"name": f"U{limit}", "category": f"u{limit}", "ageMin": limit - 2, "ageMax": limit - 1})
     if re.search(r"\bFrauen\b", name):
         if found:
             for c in found:

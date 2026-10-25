@@ -1,4 +1,7 @@
+import { CATEGORY_KEYS } from '../categories';
 import {
+  IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsISO8601,
@@ -43,9 +46,23 @@ export class EventClassDto {
   @Max(120)
   ageMax?: number | null;
 
+  /** Age category key (`u15`, `elite`, `masters2` …). Fills missing ages. */
   @IsOptional()
-  @IsIn(['none', 'hobby', 'license'])
-  license?: 'none' | 'hobby' | 'license';
+  @IsIn([...CATEGORY_KEYS, null])
+  category?: string | null;
+
+  @IsOptional()
+  @IsIn(['open', 'unlicensed', 'license', 'uci'])
+  license?: 'open' | 'unlicensed' | 'license' | 'uci';
+
+  @IsOptional()
+  @IsBoolean()
+  dayLicense?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsIn(['elite_amateur', 'amateur', 'master'], { each: true })
+  licenseClasses?: ('elite_amateur' | 'amateur' | 'master')[] | null;
 
   @IsOptional()
   @IsISO8601()

@@ -2,20 +2,22 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
  * Rating classes per event (age, gender, licence), championship level, series kinds (cup, league
- * with season) and the rider data a personal class filter needs (year of birth, gender, licence).
+ * with season) and the rider data a personal class filter needs (year of birth, gender, licence,
+ * licence class).
  */
 export class AddEventClasses1778700000000 implements MigrationInterface {
   name = 'AddEventClasses1778700000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE TYPE "event_class_gender" AS ENUM('open', 'male', 'female')`);
-    await queryRunner.query(`CREATE TYPE "event_class_license" AS ENUM('none', 'hobby', 'license')`);
+    await queryRunner.query(`CREATE TYPE "event_class_license" AS ENUM('open', 'unlicensed', 'license', 'uci')`);
     await queryRunner.query(
       `CREATE TYPE "championship_level" AS ENUM('club', 'district', 'state', 'regional', 'national', 'continental', 'world')`,
     );
     await queryRunner.query(`CREATE TYPE "series_kind" AS ENUM('series', 'cup', 'league')`);
     await queryRunner.query(`CREATE TYPE "user_gender" AS ENUM('male', 'female', 'diverse')`);
-    await queryRunner.query(`CREATE TYPE "user_license" AS ENUM('none', 'hobby', 'license')`);
+    await queryRunner.query(`CREATE TYPE "user_license" AS ENUM('none', 'license', 'uci')`);
+    await queryRunner.query(`CREATE TYPE "user_license_class" AS ENUM('elite_amateur', 'amateur', 'master')`);
 
     await queryRunner.query(`
       CREATE TABLE "event_classes" (
@@ -26,7 +28,10 @@ export class AddEventClasses1778700000000 implements MigrationInterface {
         "gender" "event_class_gender" NOT NULL DEFAULT 'open',
         "age_min" integer,
         "age_max" integer,
-        "license" "event_class_license" NOT NULL DEFAULT 'none',
+        "category" character varying(20),
+        "license" "event_class_license" NOT NULL DEFAULT 'open',
+        "day_license" boolean NOT NULL DEFAULT false,
+        "license_classes" text array,
         "start_time" TIMESTAMP WITH TIME ZONE,
         "championship" "championship_level",
         "note" character varying(300),
@@ -47,9 +52,11 @@ export class AddEventClasses1778700000000 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "users" ADD "birth_year" integer`);
     await queryRunner.query(`ALTER TABLE "users" ADD "gender" "user_gender"`);
     await queryRunner.query(`ALTER TABLE "users" ADD "license_type" "user_license"`);
+    await queryRunner.query(`ALTER TABLE "users" ADD "license_class" "user_license_class"`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "license_class"`);
     await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "license_type"`);
     await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "gender"`);
     await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "birth_year"`);
@@ -60,6 +67,7 @@ export class AddEventClasses1778700000000 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "race_series" DROP COLUMN "kind"`);
     await queryRunner.query(`ALTER TABLE "events" DROP COLUMN "championship"`);
     await queryRunner.query(`DROP TABLE "event_classes"`);
+    await queryRunner.query(`DROP TYPE "user_license_class"`);
     await queryRunner.query(`DROP TYPE "user_license"`);
     await queryRunner.query(`DROP TYPE "user_gender"`);
     await queryRunner.query(`DROP TYPE "series_kind"`);

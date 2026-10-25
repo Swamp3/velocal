@@ -107,7 +107,9 @@ export type ChampionshipLevel =
   | 'world';
 
 export type ClassGender = 'open' | 'male' | 'female';
-export type ClassLicense = 'none' | 'hobby' | 'license';
+/** open: everyone; unlicensed: Hobby, only without licence; license: needs a licence; uci: UCI licence. */
+export type ClassLicense = 'open' | 'unlicensed' | 'license' | 'uci';
+export type LicenseClass = 'elite_amateur' | 'amateur' | 'master';
 
 /** A rating class. Ages count by year of birth (age reached in the event's year). */
 export interface EventClass {
@@ -116,7 +118,13 @@ export interface EventClass {
   gender: ClassGender;
   ageMin: number | null;
   ageMax: number | null;
+  /** Age category key (`u15`, `elite`, `masters2` …). */
+  category?: string | null;
   license: ClassLicense;
+  /** A rider without licence may start with a day licence. */
+  dayLicense?: boolean;
+  /** Only these licence classes may start (empty: all). */
+  licenseClasses?: LicenseClass[] | null;
   startTime: string | null;
   championship: ChampionshipLevel | null;
   note: string | null;

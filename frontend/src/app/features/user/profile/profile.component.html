@@ -81,12 +81,36 @@
           </label>
           <select id="profile-license" formControlName="licenseType" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]">
             <option value="">{{ 'profile.notSpecified' | transloco }}</option>
-            <option value="none">{{ 'classes.license.none' | transloco }}</option>
-            <option value="hobby">{{ 'classes.license.hobby' | transloco }}</option>
-            <option value="license">{{ 'classes.license.license' | transloco }}</option>
+            <option value="none">{{ 'profile.licenseNone' | transloco }}</option>
+            <option value="license">{{ 'profile.licenseFederation' | transloco }}</option>
+            <option value="uci">{{ 'profile.licenseUci' | transloco }}</option>
           </select>
         </div>
       </div>
+      @if (licenseClassOptions().length) {
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div class="flex flex-col gap-1.5 sm:col-start-3">
+            <label for="profile-license-class" class="text-sm font-medium text-[var(--color-text)]">
+              {{ 'profile.licenseClass' | transloco }}
+            </label>
+            <select id="profile-license-class" formControlName="licenseClass" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]">
+              <option value="">{{ 'profile.notSpecified' | transloco }}</option>
+              @for (value of licenseClassOptions(); track value) {
+                <option [value]="value">{{ 'classes.licenseClass.' + value | transloco }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      }
+      @if (riderCategory(); as cat) {
+        <p class="text-sm text-[var(--color-text)]">
+          <span class="material-symbols-outlined align-[-3px] text-[16px] text-[var(--color-primary)]" aria-hidden="true">badge</span>
+          {{ 'profile.category' | transloco: { year: cat.year, category: ('classes.category.' + cat.key | transloco) } }}
+          @if (cat.mastersChoice) {
+            <span class="text-[var(--color-text-muted)]">{{ 'profile.mastersChoice' | transloco }}</span>
+          }
+        </p>
+      }
       <p class="-mt-2 text-xs text-[var(--color-text-muted)]">{{ 'profile.riderPrivacy' | transloco }}</p>
     </app-profile-section>
 

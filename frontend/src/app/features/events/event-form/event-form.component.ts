@@ -29,7 +29,9 @@ import {
   RecurrenceDto,
   Route,
   EventClass,
+  LicenseClass,
 } from '@shared/models';
+import { RIDER_CATEGORIES } from '@shared/utils/event-class';
 import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import {
   toDisplayDate as toDisplayDateUtil,
@@ -222,7 +224,10 @@ export class EventFormComponent implements OnInit {
       gender: new FormControl<EventClass['gender']>(init?.gender ?? 'open', { nonNullable: true }),
       ageMin: new FormControl<number | null>(init?.ageMin ?? null, [Validators.min(0), Validators.max(120)]),
       ageMax: new FormControl<number | null>(init?.ageMax ?? null, [Validators.min(0), Validators.max(120)]),
-      license: new FormControl<EventClass['license']>(init?.license ?? 'none', { nonNullable: true }),
+      category: new FormControl<string>(init?.category ?? '', { nonNullable: true }),
+      license: new FormControl<EventClass['license']>(init?.license ?? 'open', { nonNullable: true }),
+      dayLicense: new FormControl(!!init?.dayLicense, { nonNullable: true }),
+      licenseClasses: new FormControl<LicenseClass[]>(init?.licenseClasses ?? [], { nonNullable: true }),
       startTime: new FormControl(init?.startTime ? this.toTimeString(init.startTime) : '', {
         nonNullable: true,
         validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
@@ -230,6 +235,27 @@ export class EventFormComponent implements OnInit {
       championship: new FormControl<string>(init?.championship ?? '', { nonNullable: true }),
       note: new FormControl(init?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
     });
+  }
+
+  protected readonly categories = RIDER_CATEGORIES;
+  protected readonly licenseClassOptions: LicenseClass[] = ['elite_amateur', 'amateur', 'master'];
+
+  /** Choosing a category fills its ages (and the name when empty). */
+  protected onCategoryChange(index: number): void {
+    const group = this.form.controls.classes.at(index);
+    const preset = RIDER_CATEGORIES.find((c) => c.key === group.controls.category.value);
+    if (!preset) return;
+    group.patchValue({ ageMin: preset.ageMin, ageMax: preset.ageMax });
+    if (!group.controls.name.value.trim()) {
+      group.controls.name.setValue(this.transloco.translate('classes.category.' + preset.key));
+    }
+  }
+
+  protected toggleLicenseClass(index: number, value: LicenseClass, checked: boolean): void {
+    const control = this.form.controls.classes.at(index).controls.licenseClasses;
+    const next = control.value.filter((v) => v !== value);
+    control.setValue(checked ? [...next, value] : next);
+    control.markAsDirty();
   }
 
   protected addClass(): void {
@@ -368,7 +394,10 @@ export class EventFormComponent implements OnInit {
               gender: c.gender,
               ageMin: c.ageMin ?? null,
               ageMax: c.ageMax ?? null,
+              category: c.category || null,
               license: c.license,
+              dayLicense: c.license === 'license' && c.dayLicense,
+              licenseClasses: c.license === 'license' || c.license === 'uci' ? c.licenseClasses : [],
               startTime: c.startTime ? this.combineDatetime(raw.startDate, c.startTime) : null,
               championship: c.championship || null,
               note: c.note.trim() || null,

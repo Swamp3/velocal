@@ -29,7 +29,10 @@ export interface ComparableClass {
   gender: string;
   ageMin: number | null;
   ageMax: number | null;
+  category: string | null;
   license: string;
+  dayLicense: boolean;
+  licenseClasses: string[] | null;
   startTime: string | null;
   championship: string | null;
   note: string | null;
@@ -41,7 +44,10 @@ export function comparableClasses(
     gender: string;
     ageMin: number | null;
     ageMax: number | null;
+    category: string | null;
     license: string;
+    dayLicense: boolean;
+    licenseClasses: string[] | null;
     startTime: Date | null;
     championship: string | null;
     note: string | null;
@@ -52,7 +58,12 @@ export function comparableClasses(
     gender: c.gender,
     ageMin: c.ageMin ?? null,
     ageMax: c.ageMax ?? null,
+    category: c.category ?? null,
     license: c.license,
+    dayLicense: !!c.dayLicense,
+    licenseClasses: c.licenseClasses?.length
+      ? [...c.licenseClasses].sort()
+      : null,
     startTime: c.startTime ? c.startTime.toISOString() : null,
     championship: c.championship ?? null,
     note: c.note ?? null,

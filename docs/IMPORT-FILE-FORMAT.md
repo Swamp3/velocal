@@ -107,9 +107,11 @@ One entry per class with its own result list. Riders can filter for classes they
 
 ```json
 "classes": [
-  { "name": "U15 männlich", "gender": "male", "ageMin": 13, "ageMax": 14, "license": "license", "startTime": "2026-11-14T10:00:00+01:00" },
-  { "name": "Elite Frauen", "gender": "female", "ageMin": 19, "license": "license", "championship": "state" },
-  { "name": "Hobby", "license": "none", "ageMin": 18 }
+  { "name": "U15 männlich", "gender": "male", "category": "u15", "license": "license", "startTime": "2026-11-14T10:00:00+01:00" },
+  { "name": "Elite Frauen", "gender": "female", "ageMin": 19, "license": "license", "licenseClasses": ["elite_amateur"], "championship": "state" },
+  { "name": "Amateure / Masters", "license": "license", "dayLicense": true, "licenseClasses": ["amateur", "master"] },
+  { "name": "Hobby", "license": "unlicensed", "ageMin": 17 },
+  { "name": "Jedermann", "license": "open" }
 ]
 ```
 
@@ -117,8 +119,31 @@ One entry per class with its own result list. Riders can filter for classes they
 |---|---|---|
 | `name` | yes | Max. 120 characters, as the organiser names the class. |
 | `gender` | no | `open` (default), `male`, `female`. |
-| `ageMin`, `ageMax` | no | Whole years, inclusive. Cycling counts by **year of birth**: the age reached in the event's year (U15 = 13 and 14, U19 = 17 and 18, Elite = 19 and older). |
-| `license` | no | Needed licence: `none` (default, open to everyone or with a day licence), `hobby`, `license` (race licence). |
+| `category` | no | Age category; fills `ageMin`/`ageMax` when they are missing (given ages win). See the table below. |
+| `ageMin`, `ageMax` | no | Whole years, inclusive. Cycling counts by **year of birth**: the age reached in the event's year (U15 = 13 and 14, U19 = 17 and 18, U23 = 19 to 22). |
+| `license` | no | Who may start: `open` (default; everyone, e.g. Jedermann), `unlicensed` (Hobby: only riders **without** a licence), `license` (needs a federation licence such as BDR), `uci` (needs a UCI licence). |
+| `dayLicense` | no | `true` when riders without a licence may start in a `license` class with a day licence (BDR: up to five per year). |
+| `licenseClasses` | no | Only for `license`/`uci` classes: list of `elite_amateur`, `amateur`, `master` that may start. Missing or empty: all licence classes. Youth licences (U11–U19) have no licence class, so this list does not exclude them. |
+
+Age categories (BDR/UCI; age reached in the calendar year):
+
+| `category` | Ages | Note |
+|---|---|---|
+| `u11` | up to 10 | Youth |
+| `u13` | 11–12 | Youth |
+| `u15` | 13–14 | Youth |
+| `u17` | 15–16 | Youth |
+| `u19` | 17–18 | Juniors |
+| `u23` | 19–22 | Riders in their licence class (Elite Amateure or Amateure) |
+| `elite` | 23–29 | |
+| `masters1` | 30–39 | From 30 a licensed rider may choose a Masters licence |
+| `masters2` | 40–49 | |
+| `masters3` | 50–59 | |
+| `masters4` | 60+ | |
+
+Licence classes of adult licensed riders (BDR since 2019): **Elite Amateure** (the best riders of
+the ranking, Bundesliga riders), **Amateure** (all others), **Masters** (from 30, by choice).
+UCI licences belong to riders of UCI teams.
 | `startTime` | no | ISO 8601 with offset. |
 | `championship` | no | Championship level of this class only. |
 | `note` | no | Max. 300 characters. |
