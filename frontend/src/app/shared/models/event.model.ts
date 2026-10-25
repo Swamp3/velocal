@@ -108,8 +108,8 @@ export type ChampionshipLevel =
   | 'world';
 
 /** Licence race, Jedermann, or a touring format without times or placings (Breitensport). */
-export type EventFormat = 'race' | 'jedermann' | 'rtf' | 'ctf' | 'marathon' | 'brevet' | 'gravel_ride' | 'tour';
-export const EVENT_FORMATS: readonly EventFormat[] = ['race', 'jedermann', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
+export type EventFormat = 'race' | 'jedermann' | 'rtf' | 'ctf' | 'marathon' | 'brevet' | 'gravel_ride' | 'tour' | 'kids';
+export const EVENT_FORMATS: readonly EventFormat[] = ['race', 'jedermann', 'kids', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
 export const TOURING_FORMATS: readonly EventFormat[] = ['rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
 
 export type ClassGender = 'open' | 'male' | 'female';

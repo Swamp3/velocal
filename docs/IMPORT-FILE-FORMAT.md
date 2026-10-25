@@ -95,7 +95,7 @@ why). Admins find it under Admin → Imports → Report, and on each imported ev
 | `conflicts` | no | Disagreements between sources: a text, or `{ "field", "values"?, "selectedSource"?, "reason"? }`. Shown **only to admins**; each event with conflicts is a warning to confirm. |
 
 | `championship` | no | Championship level of the whole event: `club`, `district`, `state`, `regional`, `national`, `continental`, `world`. |
-| `format` | no | What kind of event it is, see [Formats](#formats). When missing, a new event takes it from a clear name (`RTF`, `CTF`, `Radmarathon`, `Brevet`, `Jedermann`, `Gran Fondo`, `Gravel Ride`); otherwise it stays empty. An update without `format` keeps the stored one. |
+| `format` | no | What kind of event it is, see [Formats](#formats). When missing, a new event takes it from a clear name (`RTF`, `CTF`, `Radmarathon`, `Brevet`, `Jedermann`, `Gran Fondo`, `Gravel Ride`, `Fette Reifen`, `Laufradrennen`, `Kinderrennen`); otherwise it stays empty. An update without `format` keeps the stored one. |
 | `classes` | no | Rating classes (Wertungsklassen), see below. When given, they replace the stored classes. |
 | `series` | no | Series the event belongs to: one object or a list, see below. |
 
@@ -130,7 +130,9 @@ Age categories (BDR/UCI; age reached in the calendar year):
 
 | `category` | Ages | Note |
 |---|---|---|
-| `u11` | up to 10 | Youth |
+| `u7` | up to 6 | Kids (balance bike) |
+| `u9` | 7–8 | Kids |
+| `u11` | 9–10 | Youth |
 | `u13` | 11–12 | Youth |
 | `u15` | 13–14 | Youth |
 | `u17` | 15–16 | Youth |
@@ -166,6 +168,7 @@ with its own class. One race with several classes is **one event** with several 
 | `brevet` | Randonneur ride (Audax, ARA/ACP: 200/300/400/600 km) with a time limit | no (time limit only) | Everyone |
 | `gravel_ride` | Gravel tour | no | Everyone |
 | `tour` | Radwandern, Volksradfahren, club tours | no | Everyone |
+| `kids` | Kids' races: Fette-Reifen-Rennen (own bike, tyres from 30 mm, no road bikes), Laufradrennen, Bambini races | mostly yes | Children without a licence; usually helmet and parental consent required |
 
 Touring formats (`rtf` to `tour`) list their **routes** as `classes`: one entry per route with
 `name`, `distanceKm`, `elevationM`, `startTime` (start window opens) and, if needed, `ageMin` and a
@@ -179,6 +182,11 @@ everyone in the "Fits me" filter.
     { "name": "Strecke 3", "distanceKm": 153, "elevationM": 2300, "ageMin": 16, "startTime": "2027-05-16T07:00:00+02:00" }
   ] }
 ```
+
+A kids' race is its own event with `"format": "kids"` and classes such as
+`{ "name": "Laufrad", "category": "u7" }`, `{ "name": "Fette Reifen U9", "category": "u9", "license": "unlicensed" }`.
+When it runs alongside an RTF or race, add it as a class of that event instead (`ageMax` of 12
+or less): the "Kids' races" filter finds both.
 
 A Jedermann race that admits licensed riders of the Amateur and Masters classes only:
 

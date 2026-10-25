@@ -12,7 +12,12 @@ import { EventComment } from './entities/event-comment.entity';
 import { EventClass } from './entities/event-class.entity';
 import { classFitsSql } from './class-match';
 import { classAges } from './categories';
-import { EVENT_FORMATS, TOURING_FORMATS, TOURING_GROUP } from './formats';
+import {
+  EVENT_FORMATS,
+  KIDS_MAX_AGE,
+  TOURING_FORMATS,
+  TOURING_GROUP,
+} from './formats';
 import { EventClassDto } from './dto/event-class.dto';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
@@ -242,11 +247,23 @@ export class EventsService {
         },
       });
       if (rider) {
-        // Touring events without listed routes are open to everyone.
+        // Touring events without listed routes are open to everyone; kids' races without
+        // classes to children without a licence.
+        const kidsFit =
+          rider.licenseType === 'license' || rider.licenseType === 'uci'
+            ? 'FALSE'
+            : rider.birthYear == null
+              ? 'TRUE'
+              : `EXTRACT(YEAR FROM (event.startDate AT TIME ZONE 'Europe/Berlin'))::int - :fitKidsYear <= :fitKidsAge`;
         const fit = classFitsSql(rider);
         qb.andWhere(
-          `(${fit.sql} OR (event.format IN (:...fitTouring) AND NOT EXISTS (SELECT 1 FROM "event_classes" tc WHERE tc.event_id = event.id)))`,
-          { ...fit.params, fitTouring: TOURING_FORMATS },
+          `(${fit.sql} OR (NOT EXISTS (SELECT 1 FROM "event_classes" tc WHERE tc.event_id = event.id) AND (event.format IN (:...fitTouring) OR (event.format = 'kids' AND ${kidsFit}))))`,
+          {
+            ...fit.params,
+            fitTouring: TOURING_FORMATS,
+            fitKidsAge: KIDS_MAX_AGE,
+            fitKidsYear: rider.birthYear,
+          },
         );
       }
     }
@@ -259,8 +276,15 @@ export class EventsService {
             .filter((f) => (EVENT_FORMATS as readonly string[]).includes(f)),
         ),
       ];
+      // Kids' races also include events with a class for children (Fette-Reifen-Rennen at an RTF).
+      const kids = formats.includes('kids')
+        ? ` OR EXISTS (SELECT 1 FROM "event_classes" kc WHERE kc.event_id = event.id AND kc.age_max <= :kidsMaxAge)`
+        : '';
       if (formats.length)
-        qb.andWhere('event.format IN (:...formats)', { formats });
+        qb.andWhere(`(event.format IN (:...formats)${kids})`, {
+          formats,
+          kidsMaxAge: KIDS_MAX_AGE,
+        });
     }
     if (params.championship) {
       qb.andWhere(

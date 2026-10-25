@@ -10,6 +10,7 @@
  * - `brevet`: randonneur ride (Audax, ARA/ACP brevets of 200/300/400/600 km)
  * - `gravel_ride`: gravel tour without timing
  * - `tour`: other rides (Radwandern, Volksradfahren, club tours)
+ * - `kids`: races for young children without licence (Fette-Reifen-Rennen, Laufradrennen)
  */
 export const EVENT_FORMATS = [
   'race',
@@ -20,6 +21,7 @@ export const EVENT_FORMATS = [
   'brevet',
   'gravel_ride',
   'tour',
+  'kids',
 ] as const;
 export type EventFormat = (typeof EVENT_FORMATS)[number];
 
@@ -36,6 +38,9 @@ export const TOURING_FORMATS: readonly EventFormat[] = [
 /** Search shortcut for all touring formats. */
 export const TOURING_GROUP = 'touring';
 
+/** Oldest age (reached in the year) of a kids' race; also finds kids' classes of other events. */
+export const KIDS_MAX_AGE = 12;
+
 const RULES: [RegExp, EventFormat][] = [
   [/\bRTF\b|Radtourenfahrt/i, 'rtf'],
   [/\bCTF\b|Country[-\s]?Tour/i, 'ctf'],
@@ -44,6 +49,11 @@ const RULES: [RegExp, EventFormat][] = [
   [/Jedermann|Jederfrau|Gran\s?Fondo/i, 'jedermann'],
   [/Gravel[-\s]?(Ride|Tour|Fahrt)/i, 'gravel_ride'],
   [/Radwander|Volksradfahr/i, 'tour'],
+  // Last: kids' races often run alongside an RTF or race named first.
+  [
+    /Fette[-\s]?Reifen|Laufrad[-\s]?Rennen|Kinder[-\s]?Rennen|Kids[-\s]?(Race|Rennen|Cup)|Bambini/i,
+    'kids',
+  ],
 ];
 
 /** The format an event name clearly states, or null (a plain race name says nothing). */

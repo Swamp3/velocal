@@ -190,8 +190,10 @@
         "marathon": "Radmarathon: lange Straßenstrecken ab 200 km, ohne Zeitnahme und Platzierung.",
         "brevet": "Langstreckenfahrt der Randonneure (200/300/400/600 km) mit Zeitlimit, ohne Platzierung; zählt z. B. für Paris–Brest–Paris.",
         "gravel_ride": "Gravel-Tour auf Schotter und Feldwegen, ohne Zeitnahme und Platzierung.",
-        "tour": "Radwandern, Volksradfahren oder Vereinstour für alle."
-      }
+        "tour": "Radwandern, Volksradfahren oder Vereinstour für alle.",
+        "kids": "Rennen für Kinder ohne Lizenz mit dem eigenen Rad (Fette-Reifen-Rennen: Reifen ab 30 mm, keine Rennräder) oder Laufrad; meist Helmpflicht und Einverständnis der Eltern. Im Filter auch Events mit einer Kinderklasse (bis 12 Jahre)."
+      },
+      "kids": "Kinderrennen (Fette Reifen, Laufrad)"
     }
   },
   "event": {
@@ -755,7 +757,7 @@
         "seriesSummary": "{{total}} Serien in der Datei, davon {{created}} neu.",
         "classLicenseClassUnknown": "Unbekannte Lizenzklassen {{value}} (elite_amateur, amateur, master).",
         "classCategoryUnknown": "Unbekannte Altersklasse {{value}} (u11 … u23, elite, masters1 … masters4).",
-        "formatUnknown": "Unbekanntes Format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour).",
+        "formatUnknown": "Unbekanntes Format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour, kids).",
         "numberInvalid": "Muss eine Zahl von 0 bis {{max}} sein."
       }
     },
@@ -1483,7 +1485,9 @@
     },
     "categoryLabel": "Altersklasse",
     "category": {
-      "u11": "U11",
+      "u7": "U7 (Laufrad, bis 6)",
+      "u9": "U9 (7–8)",
+      "u11": "U11 (9–10)",
       "u13": "U13",
       "u15": "U15",
       "u17": "U17",

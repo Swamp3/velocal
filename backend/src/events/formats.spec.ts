@@ -8,6 +8,9 @@ describe('inferFormat', () => {
     expect(inferFormat('Brevet 300 km Hamburg')).toBe('brevet');
     expect(inferFormat('Jedermannrennen Rund um Köln')).toBe('jedermann');
     expect(inferFormat('Gravel Ride Odenwald')).toBe('gravel_ride');
+    expect(inferFormat('Fette-Reifen-Rennen Bolanden')).toBe('kids');
+    expect(inferFormat('Laufradrennen am Marktplatz')).toBe('kids');
+    expect(inferFormat('RTF Münster mit Fette-Reifen-Rennen')).toBe('rtf');
   });
 
   it('says nothing for plain race names', () => {

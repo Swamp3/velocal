@@ -12,7 +12,9 @@ export interface Rider {
  * calendar year; from 30 a licensed rider may choose Masters instead of Elite.
  */
 export const RIDER_CATEGORIES: readonly { key: string; ageMin: number | null; ageMax: number | null }[] = [
-  { key: 'u11', ageMin: null, ageMax: 10 },
+  { key: 'u7', ageMin: null, ageMax: 6 },
+  { key: 'u9', ageMin: 7, ageMax: 8 },
+  { key: 'u11', ageMin: 9, ageMax: 10 },
   { key: 'u13', ageMin: 11, ageMax: 12 },
   { key: 'u15', ageMin: 13, ageMax: 14 },
   { key: 'u17', ageMin: 15, ageMax: 16 },

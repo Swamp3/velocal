@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Event format (licence race, Jedermann, RTF, CTF, Radmarathon, brevet, gravel ride, tour) and
+ * Event format (licence race, Jedermann, RTF, CTF, Radmarathon, brevet, gravel ride, tour, kids' race) and
  * distance and climbing per class, so touring events can list their routes. Fills the format of
  * existing events only where the name states it clearly.
  */
@@ -10,7 +10,7 @@ export class AddEventFormat1778800000000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TYPE "event_format" AS ENUM('race', 'jedermann', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour')`,
+      `CREATE TYPE "event_format" AS ENUM('race', 'jedermann', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour', 'kids')`,
     );
     await queryRunner.query(`ALTER TABLE "events" ADD "format" "event_format"`);
     await queryRunner.query(
@@ -29,6 +29,7 @@ export class AddEventFormat1778800000000 implements MigrationInterface {
         WHEN "name" ~* 'Jedermann|Jederfrau|Gran ?Fondo' THEN 'jedermann'
         WHEN "name" ~* 'Gravel[- ]?(Ride|Tour|Fahrt)' THEN 'gravel_ride'
         WHEN "name" ~* 'Radwander|Volksradfahr' THEN 'tour'
+        WHEN "name" ~* 'Fette[- ]?Reifen|Laufrad[- ]?Rennen|Kinder[- ]?Rennen|Kids[- ]?(Race|Rennen|Cup)|Bambini' THEN 'kids'
       END::"event_format"
       WHERE "format" IS NULL`);
   }

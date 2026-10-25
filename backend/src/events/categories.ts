@@ -11,7 +11,9 @@ export interface RiderCategory {
 }
 
 export const RIDER_CATEGORIES: readonly RiderCategory[] = [
-  { key: 'u11', ageMin: null, ageMax: 10 },
+  { key: 'u7', ageMin: null, ageMax: 6 },
+  { key: 'u9', ageMin: 7, ageMax: 8 },
+  { key: 'u11', ageMin: 9, ageMax: 10 },
   { key: 'u13', ageMin: 11, ageMax: 12 },
   { key: 'u15', ageMin: 13, ageMax: 14 },
   { key: 'u17', ageMin: 15, ageMax: 16 },
@@ -40,7 +42,7 @@ export function categoryForAge(age: number): RiderCategory {
 /** Reads "U15", "u 15", "Junioren", "Masters 2", "M2", "Elite" … into a category key. */
 export function parseCategory(text: string): string | null {
   const t = text.toLowerCase().replace(/[\s_-]+/g, '');
-  const u = /^u(11|13|15|17|19|23)$/.exec(t);
+  const u = /^u(7|9|11|13|15|17|19|23)$/.exec(t);
   if (u) return `u${u[1]}`;
   if (t === 'junioren' || t === 'juniorinnen' || t === 'juniors') return 'u19';
   if (t === 'elite') return 'elite';

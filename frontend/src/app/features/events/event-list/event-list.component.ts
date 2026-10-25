@@ -73,7 +73,7 @@ export class EventListComponent implements OnInit {
   readonly hideLeagues = signal(false);
   /** '' (all), a format, or `touring` for all Breitensport formats. */
   readonly format = signal('');
-  protected readonly formatOptions = ['race', 'jedermann', 'touring', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
+  protected readonly formatOptions = ['race', 'jedermann', 'kids', 'touring', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
   readonly selectedYear = signal<number | null>(null);
   readonly availableYears = computed(() => {
     const currentYear = new Date().getFullYear();

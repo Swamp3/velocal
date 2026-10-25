@@ -190,8 +190,10 @@
         "marathon": "Long road routes of 200 km and more, no timing or placings.",
         "brevet": "Randonneur ride (200/300/400/600 km) with a time limit and no placings; counts e.g. for Paris–Brest–Paris.",
         "gravel_ride": "Gravel tour on tracks and farm roads, no timing or placings.",
-        "tour": "Leisure ride or club tour for everyone."
-      }
+        "tour": "Leisure ride or club tour for everyone.",
+        "kids": "Races for children without licence on their own bike (fat-tyre races: tyres from 30 mm, no road bikes) or balance bike; usually helmet required and parental consent. The filter also finds events with a children's class (up to 12)."
+      },
+      "kids": "Kids' races (fat tyres, balance bike)"
     }
   },
   "event": {
@@ -755,7 +757,7 @@
         "seriesSummary": "{{total}} series in the file, {{created}} of them new.",
         "classLicenseClassUnknown": "Unknown licence classes {{value}} (elite_amateur, amateur, master).",
         "classCategoryUnknown": "Unknown age category {{value}} (u11 … u23, elite, masters1 … masters4).",
-        "formatUnknown": "Unknown format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour).",
+        "formatUnknown": "Unknown format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour, kids).",
         "numberInvalid": "Must be a number from 0 to {{max}}."
       }
     },
@@ -1483,7 +1485,9 @@
     },
     "categoryLabel": "Age category",
     "category": {
-      "u11": "U11",
+      "u7": "U7 (balance bike, up to 6)",
+      "u9": "U9 (7–8)",
+      "u11": "U11 (9–10)",
       "u13": "U13",
       "u15": "U15",
       "u17": "U17",
