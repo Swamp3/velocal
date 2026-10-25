@@ -1477,7 +1477,7 @@
     "add": "Klasse hinzufügen",
     "dayLicense": "Tageslizenz möglich",
     "dayLicenseLabel": "Tageslizenz möglich",
-    "licenseClassesLabel": "Nur Lizenzklassen:",
+    "licenseClassesLabel": "Mit Lizenz nur:",
     "licenseClass": {
       "elite_amateur": "Elite Amateure",
       "amateur": "Amateure",

@@ -8,16 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Import files in the admin area** (Admin → Imports → Import file): the file is checked first, errors and warnings are shown per event, warnings must be confirmed, then it is imported. Every run keeps a report (new, changed with old and new value, unchanged, skipped and why). How to create files: `docs/IMPORT-FILE-FORMAT.md`.
+- **Import files in the admin area** (Admin → Imports → Import file): the file is checked first, errors and warnings are shown per event, warnings must be confirmed, then it is imported. Every run keeps a report (new, changed with old and new value, unchanged, skipped and why). How to create files: `docs/IMPORT-FILE-FORMAT.md`; command line: `scripts/import-file.sh events.json`.
 - Imports can no longer overwrite or delete data by mistake: only events of the same source and id are updated, look-alikes of other origins are skipped with a warning, fields edited by hand are kept, missing fields never clear anything.
 - Events show their **sources** publicly; admins also see when each source was checked, documented conflicts between sources, fields edited by hand and the import run.
-- **Rating classes** (Wertungsklassen) per event with age category (U11 to Masters 4, fills the ages), gender, who may start (open, Hobby without licence, licence, UCI licence), day licence, licence classes (Elite Amateure, Amateure, Masters) and start time, shown on the event page and editable in the event form.
+- **Rating classes** (Wertungsklassen) per event with age category (U7 to Masters 4, fills the ages), gender, who may start (open, Hobby without licence, licence, UCI licence), day licence, licence classes (Elite Amateure, Amateure, Masters) and start time, shown on the event page and editable in the event form.
 - **Event formats**: licence race, Jedermann race (also Gran Fondo) and the recreational formats RTF, CTF, Radmarathon, brevet, gravel ride and tour, with a short explanation each. Shown on cards and the event page, filterable in the event list (one format or all recreational rides). Existing and imported events take the format from a clear name (e.g. "RTF …", "Jedermannrennen …").
 - **Kids' races** (Fette-Reifen-Rennen, Laufradrennen) as their own format with the age categories U7 and U9; the filter also finds events that include a children's class.
 - Recreational events list their **routes** (Strecken) with length and climbing; "Fits me" counts recreational events as open to everyone. Jedermann classes can admit licensed riders of chosen licence classes only.
 - **Championships** (club to world level) per event or class, and **series formats**: cup (runs) and league (matchdays) with season.
 - Profile: year of birth, gender, licence (none, federation, UCI) and licence class (only for filtering); the age category of the year is shown automatically. Event list filters **Fits me**, **Championships** and **Hide league matchdays**.
-- Admins can import a JSON file of events that someone collected outside the app (`scripts/import-file.sh events.json`); the whole file is checked first and rejected with a list of problems if anything is wrong. Format: see `docs/IMPORTING.md`.
 - Member lists of clubs and subgroups load 30 at a time with page buttons, a search box and a role filter (all / admins or moderators / members). The "add from club members" suggestions of a subgroup are searched on the server, so they work with very large clubs.
 
 ### Fixed

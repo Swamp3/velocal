@@ -27,6 +27,29 @@ describe('event classes', () => {
     ).toBe(false);
   });
 
+  it('counts the age by year of birth', () => {
+    const u15 = cls({ ageMin: 13, ageMax: 14 });
+    expect(classFits(u15, { birthYear: 2013 }, 2026)).toBe(true);
+    expect(classFits(u15, { birthYear: 2014 }, 2026)).toBe(false);
+  });
+
+  it('lets diverse riders start in any gender class', () => {
+    expect(classFits(cls({ gender: 'female' }), { gender: 'diverse' }, 2026)).toBe(true);
+  });
+
+  it('admits licensed Jedermann riders only of the listed licence classes', () => {
+    const jedermann = cls({ licenseClasses: ['amateur', 'master'] });
+    expect(classFits(jedermann, { licenseType: 'none' }, 2026)).toBe(true);
+    expect(classFits(jedermann, { licenseType: 'license', licenseClass: 'master' }, 2026)).toBe(true);
+    expect(classFits(jedermann, { licenseType: 'license', licenseClass: 'elite_amateur' }, 2026)).toBe(false);
+    expect(classFits(jedermann, { licenseType: 'license' }, 2026)).toBe(true);
+  });
+
+  it('accepts UCI riders in licence classes and excludes nothing unstated', () => {
+    expect(classFits(cls({ license: 'license' }), { licenseType: 'uci' }, 2026)).toBe(true);
+    expect(classFits(cls({ ageMin: 17, ageMax: 18, gender: 'female', license: 'uci' }), {}, 2026)).toBe(true);
+  });
+
   it('derives category and licence classes from the age', () => {
     expect(categoryForAge(14)).toBe('u15');
     expect(categoryForAge(22)).toBe('u23');

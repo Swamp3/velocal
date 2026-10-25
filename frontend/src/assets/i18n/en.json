@@ -1477,7 +1477,7 @@
     "add": "Add class",
     "dayLicense": "day licence possible",
     "dayLicenseLabel": "Day licence possible",
-    "licenseClassesLabel": "Only licence classes:",
+    "licenseClassesLabel": "Licensed riders only:",
     "licenseClass": {
       "elite_amateur": "Elite amateurs",
       "amateur": "Amateurs",

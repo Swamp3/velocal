@@ -67,8 +67,12 @@ import { birthYears, classFits, hasRiderData } from '@shared/utils/event-class';
                 } @else {
                   {{ 'classes.allAges' | transloco }}
                 }
-                · {{ 'classes.gender.' + row.cls.gender | transloco }}
-                · {{ 'classes.license.' + row.cls.license | transloco }}
+                @if (row.cls.gender !== 'open') {
+                  · {{ 'classes.gender.' + row.cls.gender | transloco }}
+                }
+                @if (row.cls.license !== 'open') {
+                  · {{ 'classes.license.' + row.cls.license | transloco }}
+                }
                 @if (row.cls.license === 'license' && row.cls.dayLicense) {
                   · {{ 'classes.dayLicense' | transloco }}
                 }

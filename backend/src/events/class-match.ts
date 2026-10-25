@@ -6,61 +6,13 @@ export interface RiderProfile {
   licenseClass: 'elite_amateur' | 'amateur' | 'master' | null;
 }
 
-export interface ClassRequirements {
-  gender: 'open' | 'male' | 'female';
-  ageMin: number | null;
-  ageMax: number | null;
-  license: 'open' | 'unlicensed' | 'license' | 'uci';
-  dayLicense: boolean;
-  licenseClasses: string[] | null;
-}
-
 /**
- * Whether a rider may start in a class. Ages count by year of birth: the age reached in the
- * event's year. Unknown profile data does not exclude a class; a rider who chose "diverse" may
- * start in any gender class.
- *
- * Licences: `unlicensed` classes (Hobby) are only for riders without a licence; `license` classes
- * need a federation or UCI licence, or allow a day licence; `uci` classes need a UCI licence.
- * A class limited to licence classes (Elite Amateure, Amateure, Masters) admits only those.
- */
-export function classFits(
-  cls: ClassRequirements,
-  rider: RiderProfile,
-  eventYear: number,
-): boolean {
-  if (rider.birthYear != null) {
-    const age = eventYear - rider.birthYear;
-    if (cls.ageMin != null && age < cls.ageMin) return false;
-    if (cls.ageMax != null && age > cls.ageMax) return false;
-  }
-  if (
-    cls.gender !== 'open' &&
-    (rider.gender === 'male' || rider.gender === 'female')
-  ) {
-    if (cls.gender !== rider.gender) return false;
-  }
-  const licensed =
-    rider.licenseType === 'license' || rider.licenseType === 'uci';
-  if (rider.licenseType != null) {
-    if (cls.license === 'unlicensed' && licensed) return false;
-    if (cls.license === 'license' && !licensed && !cls.dayLicense) return false;
-    if (cls.license === 'uci' && rider.licenseType !== 'uci') return false;
-  }
-  if (
-    licensed &&
-    rider.licenseClass != null &&
-    cls.licenseClasses?.length &&
-    !cls.licenseClasses.includes(rider.licenseClass)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * The same rule as SQL for the event search: an event fits when at least one of its classes
- * fits. Uses the alias `event` and named parameters prefixed with `fit`.
+ * Whether one of an event's classes fits the rider, as SQL for the event search (the browser has
+ * the same rule as `classFits` in `shared/utils/event-class.ts`). Ages count by year of birth;
+ * unknown profile data excludes nothing; "diverse" may start in any gender class. Hobby classes
+ * (`unlicensed`) are only for riders without licence; `license` classes need a licence unless they
+ * allow a day licence; `uci` classes need a UCI licence; `license_classes` admits only those
+ * licence classes. Uses the alias `event` and named parameters prefixed with `fit`.
  */
 export function classFitsSql(rider: RiderProfile): {
   sql: string;

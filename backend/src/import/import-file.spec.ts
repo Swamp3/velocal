@@ -158,4 +158,73 @@ describe('locationQuality', () => {
     ).toBe('ok');
     expect(locationQuality('München, Olympiapark')).toBe('ok');
   });
+
+  it('reads classes: category fills ages, licence fields and distances', () => {
+    const result = validateImportFile(
+      file([
+        {
+          ...base,
+          format: 'rtf',
+          classes: [
+            { name: 'U15', category: 'u15' },
+            { name: 'Kurz', distanceKm: 42.26, elevationM: 450.4 },
+            {
+              name: 'Masters',
+              license: 'license',
+              dayLicense: true,
+              licenseClasses: ['master', 'master'],
+            },
+          ],
+        },
+      ]),
+      now,
+    );
+    expect(result.issues.filter((i) => i.severity === 'error')).toEqual([]);
+    const [event] = result.events;
+    expect(event?.format).toBe('rtf');
+    expect(event?.classes?.[0]).toMatchObject({
+      category: 'u15',
+      ageMin: 13,
+      ageMax: 14,
+      license: 'open',
+    });
+    expect(event?.classes?.[1]).toMatchObject({
+      distanceKm: 42.3,
+      elevationM: 450,
+    });
+    expect(event?.classes?.[2]).toMatchObject({
+      dayLicense: true,
+      licenseClasses: ['master'],
+    });
+  });
+
+  it('refuses unknown formats, licences, categories and bad numbers', () => {
+    expect(
+      codes(
+        file([
+          {
+            ...base,
+            format: 'cyclo',
+            classes: [
+              {
+                name: 'X',
+                license: 'hobby',
+                category: 'u99',
+                licenseClasses: ['pro'],
+                distanceKm: -1,
+              },
+            ],
+          },
+        ]),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        'error:formatUnknown:format',
+        'error:classLicenseUnknown:classes[0].license',
+        'error:classCategoryUnknown:classes[0].category',
+        'error:classLicenseClassUnknown:classes[0].licenseClasses',
+        'error:numberInvalid:classes[0].distanceKm',
+      ]),
+    );
+  });
 });
