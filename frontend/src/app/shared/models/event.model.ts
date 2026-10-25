@@ -1,4 +1,12 @@
-import type { ChampionshipLevel, ClassGender, ClassLicense, EventFormat, LicenseClass, SeriesKind } from './racing.model';
+import type {
+  ChampionshipLevel,
+  ClassGender,
+  ClassLicense,
+  EventFormat,
+  LicenseClass,
+  ParkingArea,
+  SeriesKind,
+} from './racing.model';
 import { Discipline } from './discipline.model';
 import { PaceGroup, PaceGroupInput, Route, StravaLink } from './route.model';
 
@@ -44,6 +52,7 @@ export interface CyclingEvent {
   /** Championship level of the event, if it is one. */
   championship?: ChampionshipLevel | null;
   format?: EventFormat | null;
+  parkingAreas?: ParkingArea[];
   /** Rating classes (Wertungsklassen). */
   classes?: EventClass[];
   /** Series the event belongs to (cup run, league matchday). */
@@ -95,6 +104,7 @@ export interface CreateEventDto {
   routeId?: string | null;
   paceGroups?: PaceGroupInput[];
   stravaLinks?: { url: string; label?: string }[];
+  parkingAreas?: ParkingArea[];
 }
 
 export type UpdateEventDto = Partial<CreateEventDto>;

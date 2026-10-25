@@ -1,3 +1,5 @@
+import type { ParkingArea } from '@shared/models';
+import { addParkingMarkers, boundsWithParking } from '@shared/utils/parking-markers';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { IconButtonComponent } from '../../ui/icon-button/icon-button.component';
 import {
@@ -126,6 +128,7 @@ export class EventMapDialogComponent implements AfterViewInit {
   readonly coordinates = input.required<{ lat: number; lng: number }>();
   readonly eventId = input.required<string>();
   readonly locationName = input<string | null | undefined>(null);
+  readonly parkingAreas = input<ParkingArea[]>([]);
   readonly close = output<void>();
 
   private readonly mapContainer = viewChild.required<ElementRef<HTMLElement>>('mapContainer');
@@ -213,9 +216,14 @@ export class EventMapDialogComponent implements AfterViewInit {
     }).addTo(this.map);
 
     L.marker([lat, lng]).addTo(this.map);
+    addParkingMarkers(L, this.map, this.parkingAreas(), true);
+    const bounds = boundsWithParking(L, { lat, lng }, this.parkingAreas());
 
     // Leaflet needs a size recalc once laid out inside the flex container.
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    setTimeout(() => {
+      this.map?.invalidateSize();
+      if (bounds) this.map?.fitBounds(bounds, { padding: [48, 48], maxZoom: 17 });
+    }, 0);
 
     this.destroyRef.onDestroy(() => {
       this.map?.remove();

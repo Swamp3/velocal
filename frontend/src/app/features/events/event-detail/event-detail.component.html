@@ -598,8 +598,13 @@
           [coordinates]="event.coordinates"
           [eventId]="event.id"
           [locationName]="event.locationName"
+          [parkingAreas]="event.parkingAreas ?? []"
         />
       </div>
+    }
+
+    @if (event.parkingAreas?.length) {
+      <app-event-parking [areas]="event.parkingAreas!" />
     }
 
     <!-- Linked posts -->

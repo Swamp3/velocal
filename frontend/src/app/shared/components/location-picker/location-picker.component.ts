@@ -18,6 +18,7 @@ import type * as LeafletNS from 'leaflet';
 const DEFAULT_CENTER: LeafletNS.LatLngExpression = [51.1657, 10.4515];
 const DEFAULT_ZOOM = 6;
 const MARKER_ZOOM = 13;
+const CENTER_ZOOM = 15;
 
 @Component({
   selector: 'app-location-picker',
@@ -34,6 +35,8 @@ const MARKER_ZOOM = 13;
 export class LocationPickerComponent implements AfterViewInit, OnChanges {
   readonly coordinates = input<{ lat: number; lng: number } | null>(null);
   readonly coordinatesChange = output<{ lat: number; lng: number }>();
+  /** Where the map starts when no point is set yet (e.g. the event's place). */
+  readonly center = input<{ lat: number; lng: number } | null>(null);
 
   private readonly mapContainer = viewChild.required<ElementRef<HTMLElement>>('mapContainer');
   private readonly destroyRef = inject(DestroyRef);
@@ -80,8 +83,9 @@ export class LocationPickerComponent implements AfterViewInit, OnChanges {
     });
 
     const coords = this.coordinates();
-    const center = coords ? ([coords.lat, coords.lng] as LeafletNS.LatLngExpression) : DEFAULT_CENTER;
-    const zoom = coords ? MARKER_ZOOM : DEFAULT_ZOOM;
+    const start = coords ?? this.center();
+    const center = start ? ([start.lat, start.lng] as LeafletNS.LatLngExpression) : DEFAULT_CENTER;
+    const zoom = coords ? MARKER_ZOOM : start ? CENTER_ZOOM : DEFAULT_ZOOM;
 
     this.map = L.map(this.mapContainer().nativeElement, {
       center,

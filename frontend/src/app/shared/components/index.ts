@@ -25,3 +25,4 @@ export { RichTextComponent } from './rich-text/rich-text.component';
 export { RichTextViewComponent } from './rich-text/rich-text-view.component';
 export { normalizeRichText, plainText, toDisplayHtml } from './rich-text/rich-text';
 export { EventClassesComponent } from './event-classes/event-classes.component';
+export { EventParkingComponent } from './event-parking/event-parking.component';

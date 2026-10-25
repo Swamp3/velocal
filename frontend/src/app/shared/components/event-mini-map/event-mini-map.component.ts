@@ -13,6 +13,8 @@ import {
   viewChild,
 } from '@angular/core';
 import type * as LeafletNS from 'leaflet';
+import type { ParkingArea } from '@shared/models';
+import { addParkingMarkers, boundsWithParking } from '@shared/utils/parking-markers';
 
 const DEFAULT_ZOOM = 13;
 
@@ -30,6 +32,7 @@ const DEFAULT_ZOOM = 13;
 })
 export class EventMiniMapComponent implements AfterViewInit, OnChanges {
   readonly coordinates = input.required<{ lat: number; lng: number }>();
+  readonly parkingAreas = input<ParkingArea[]>([]);
 
   private readonly mapContainer = viewChild.required<ElementRef<HTMLElement>>('mapContainer');
   private readonly destroyRef = inject(DestroyRef);
@@ -92,6 +95,9 @@ export class EventMiniMapComponent implements AfterViewInit, OnChanges {
     }).addTo(this.map);
 
     this.marker = L.marker([lat, lng]).addTo(this.map);
+    addParkingMarkers(L, this.map, this.parkingAreas());
+    const bounds = boundsWithParking(L, { lat, lng }, this.parkingAreas());
+    if (bounds) this.map.fitBounds(bounds, { padding: [32, 32], maxZoom: 16 });
 
     this.destroyRef.onDestroy(() => {
       this.map?.remove();

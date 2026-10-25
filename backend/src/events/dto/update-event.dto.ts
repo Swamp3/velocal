@@ -5,6 +5,8 @@ import {
   type EventFormat,
 } from '../racing';
 import { EventClassDto } from './event-class.dto';
+import { ParkingAreaDto } from './parking-area.dto';
+import { MAX_PARKING_AREAS } from '../parking';
 import { Type } from 'class-transformer';
 import {
   IsIn,
@@ -84,6 +86,14 @@ export class UpdateEventDto {
   @ValidateNested({ each: true })
   @Type(() => EventClassDto)
   classes?: EventClassDto[];
+
+  /** Parking areas; replaces the stored list when given. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_PARKING_AREAS)
+  @ValidateNested({ each: true })
+  @Type(() => ParkingAreaDto)
+  parkingAreas?: ParkingAreaDto[];
 
   @IsOptional()
   @IsEnum(EventStatus)

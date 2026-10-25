@@ -1,3 +1,4 @@
+import { googleMapsDirectionsUrl } from './map-links';
 import { CyclingEvent } from '@shared/models';
 import { hasTime } from './event-date';
 
@@ -21,6 +22,15 @@ function escapeIcs(text: string | undefined | null): string {
   return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
 
+/** The description plus one line per parking area with a navigation link. */
+function descriptionWithParking(event: CyclingEvent): string {
+  const lines = (event.parkingAreas ?? []).map(
+    (area) =>
+      `P ${area.name}: ${googleMapsDirectionsUrl(`${area.coordinates.lat},${area.coordinates.lng}`)}`,
+  );
+  return [event.description ?? '', ...lines].filter(Boolean).join('\n\n');
+}
+
 export function generateIcs(event: CyclingEvent): string {
   const allDay = event.startTimeKnown === false || !hasTime(event.startDate);
   const dtStart = allDay
@@ -40,7 +50,7 @@ export function generateIcs(event: CyclingEvent): string {
     dtStart,
     dtEnd,
     `SUMMARY:${escapeIcs(event.name)}`,
-    `DESCRIPTION:${escapeIcs(event.description)}`,
+    `DESCRIPTION:${escapeIcs(descriptionWithParking(event))}`,
     `LOCATION:${escapeIcs([event.locationName, event.address].filter(Boolean).join(', '))}`,
     `URL:https://velocal.cc/events/${event.id}`,
     `UID:${event.id}@velocal.cc`,

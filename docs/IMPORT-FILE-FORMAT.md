@@ -97,11 +97,12 @@ why). Admins find it under Admin → Imports → Report, and on each imported ev
 | `format` | no | What kind of event it is, see [Formats](#formats). When neither the file nor the stored event has one, it is taken from a clear name (`RTF`, `CTF`, `Radmarathon`, `Brevet`, `ARA …`, `Jedermann`, `Gran Fondo`, `Gravel Ride`, `Fette Reifen`, `Laufradrennen`, `Kinderrennen`). A stored format is never replaced by a guess. |
 | `classes` | no | Rating classes (Wertungsklassen) or routes, see below. When given, they replace the stored classes. |
 | `series` | no | Series the event belongs to: one object or a list, see below. |
+| `parking` | no | Parking areas, see [Parking](#parking-parking). When given, they replace the stored ones. |
 
 Unknown fields are reported as warnings and ignored.
 
 All allowed values (disciplines aside) are defined once, in `backend/src/events/racing.ts`, and
-served to the app at `GET /api/events/racing-meta`. The tables below describe them.
+served to the app at `GET /api/events/meta`. The tables below describe them.
 
 ### Formats
 
@@ -208,6 +209,34 @@ with its own class. One race with several classes is **one event** with several 
 them: `elite_amateur` (19+; the best riders of the ranking, Bundesliga riders), `amateur` (19+;
 all others), `master` (30+, by choice). UCI licences belong to riders of UCI teams.
 
+### Parking (`parking`)
+
+Where participants, teams or spectators should park. Shown **publicly** on the event page and map
+with a note that the details may be wrong; each area links to Google and Apple Maps navigation.
+An area is a **point**: the place to drive to (the entrance, or the middle of a small car park).
+Describe large fields in `note`.
+
+```json
+"parking": [
+  { "name": "Wiese am Main", "kinds": ["participants", "camper"], "lat": 50.1090, "lng": 8.6840, "fee": "free", "openFrom": "07:00", "note": "Zufahrt über die Lindenstraße" },
+  { "name": "Teamparkplatz", "kinds": ["teams", "accessible"], "lat": 50.1082, "lng": 8.6812, "capacity": 20 }
+]
+```
+
+| Field | Required | Rules |
+|---|---|---|
+| `name` | yes | Max. 80 characters. |
+| `kinds` | yes | One or more of `participants`, `teams` (team cars and buses), `spectators`, `accessible`, `bikes`, `camper`. |
+| `lat`, `lng` | yes | Decimal degrees of the entrance. More than 5 km from the event's `lat`/`lng` is a warning. |
+| `address` | no | Max. 255 characters. |
+| `capacity` | no | Rough number of spaces, whole number from 1. |
+| `fee` | no | `free` or `paid`; missing means unknown. |
+| `feeNote` | no | Max. 80 characters, e.g. `5 € pro Tag`. |
+| `openFrom`, `openUntil` | no | `HH:mm` on the event day. |
+| `note` | no | Max. 300 characters. |
+
+At most 10 areas per event. Areas edited by hand in VeloCal are kept by later imports.
+
 ### Series (`series`)
 
 Links the event to a series. VeloCal creates the series on first import and finds it again by
@@ -270,6 +299,8 @@ from names and ids. It writes a new file; check its result in the admin page bef
 | `pastEvent`, `farFuture`, `deadlineAfterStart`, `sameNameSameDay`, `timeIgnored` | warning | Plausibility |
 | `championshipUnknown`, `classInvalid`, `classGenderUnknown`, `classLicenseUnknown`, `classLicenseClassUnknown`, `classCategoryUnknown`, `ageInvalid`, `ageRange`, `numberInvalid` | error | Class entry wrong |
 | `formatUnknown` | error | `format` is not one of the formats |
+| `parkingInvalid`, `parkingTooMany`, `parkingKindUnknown`, `parkingFeeUnknown`, `timeInvalid` | error | Parking entry wrong |
+| `parkingFar` | warning | A parking area is more than 5 km from the event |
 | `seriesInvalid`, `seriesKindUnknown`, `roundInvalid` | error | Series entry wrong |
 | `seriesSummary` | note | How many series the file names and how many are new |
 | `possibleDuplicate` | warning | Looks like an existing event of another origin: not imported |

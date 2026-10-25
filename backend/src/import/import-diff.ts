@@ -175,8 +175,8 @@ export function applyChanges(
 ): void {
   const target = existing as unknown as Record<string, unknown>;
   for (const { field } of changes) {
-    // Classes live in their own table; the import service writes them.
-    if (field === 'classes') continue;
+    // Classes and parking areas live in their own tables; the import service writes them.
+    if (field === 'classes' || field === 'parkingAreas') continue;
     target[field] = incoming(raw, field as ImportField);
   }
 }

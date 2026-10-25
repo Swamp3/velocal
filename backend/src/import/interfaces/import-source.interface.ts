@@ -1,3 +1,4 @@
+import type { ParkingAreaInput } from '../../events/parking.service';
 import type {
   ChampionshipLevel,
   ClassGender,
@@ -40,6 +41,8 @@ export interface RawEvent {
   championship?: ChampionshipLevel;
   /** Licence race, Jedermann or touring format (RTF, CTF …). */
   format?: EventFormat;
+  /** Parking areas; replace the stored ones when given. */
+  parkingAreas?: ParkingAreaInput[];
   /** Series the event belongs to (cup run, league matchday). */
   series?: RawEventSeries[];
 }

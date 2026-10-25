@@ -587,6 +587,101 @@
         </ui-button>
       </fieldset>
 
+      <!-- Parking areas -->
+      <fieldset class="space-y-4 rounded-2xl border border-[var(--color-border)] p-4">
+        <legend class="px-2 text-sm font-semibold text-[var(--color-text)]">
+          {{ 'parking.formTitle' | transloco }}
+        </legend>
+        <p class="text-xs text-[var(--color-text-muted)]">{{ 'parking.formHint' | transloco }}</p>
+        <div formArrayName="parkingAreas" class="space-y-3">
+          @for (area of form.controls.parkingAreas.controls; track area; let i = $index) {
+            <div [formGroupName]="i" class="space-y-3 rounded-xl bg-[var(--color-bg-alt)] p-3">
+              <div>
+                <label [for]="'pk-name-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.name' | transloco }} *</label>
+                <input [id]="'pk-name-' + i" formControlName="name" [placeholder]="'parking.namePlaceholder' | transloco" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+              </div>
+              <fieldset>
+                <legend class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.kindsLabel' | transloco }} *</legend>
+                <div class="mt-1 flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--color-text)]">
+                  @for (kind of parkingKinds(); track kind) {
+                    <label class="inline-flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 accent-[var(--color-primary)]"
+                        [checked]="area.controls.kinds.value.includes(kind)"
+                        (change)="toggleParkingKind(i, kind, $any($event.target).checked)"
+                      />
+                      {{ 'parking.kind.' + kind | transloco }}
+                    </label>
+                  }
+                </div>
+                @if (area.controls.kinds.invalid) {
+                  <p class="mt-1 text-xs text-red-600">{{ 'parking.kindsRequired' | transloco }}</p>
+                }
+              </fieldset>
+              <div>
+                <p class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.pointLabel' | transloco }} *</p>
+                <div class="mt-1">
+                  <app-location-picker
+                    [coordinates]="area.controls.coordinates.value"
+                    [center]="mapCoordinates()"
+                    (coordinatesChange)="setParkingPoint(i, $event)"
+                  />
+                </div>
+                @if (area.controls.coordinates.invalid) {
+                  <p class="mt-1 text-xs text-red-600">{{ 'parking.pointRequired' | transloco }}</p>
+                }
+              </div>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label [for]="'pk-addr-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.address' | transloco }}</label>
+                  <input [id]="'pk-addr-' + i" formControlName="address" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'pk-cap-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.capacityLabel' | transloco }}</label>
+                  <input [id]="'pk-cap-' + i" type="number" min="1" formControlName="capacity" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <label [for]="'pk-fee-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.feeLabel' | transloco }}</label>
+                  <select [id]="'pk-fee-' + i" formControlName="fee" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+                    <option value="">—</option>
+                    @for (fee of parkingFees(); track fee) {
+                      <option [value]="fee">{{ 'parking.fee.' + fee | transloco }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label [for]="'pk-feenote-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.feeNote' | transloco }}</label>
+                  <input [id]="'pk-feenote-' + i" formControlName="feeNote" [placeholder]="'parking.feeNotePlaceholder' | transloco" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'pk-from-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.openFrom' | transloco }}</label>
+                  <input [id]="'pk-from-' + i" formControlName="openFrom" placeholder="HH:mm" maxlength="5" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'pk-until-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.openUntil' | transloco }}</label>
+                  <input [id]="'pk-until-' + i" formControlName="openUntil" placeholder="HH:mm" maxlength="5" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+              </div>
+              <div>
+                <label [for]="'pk-note-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.note' | transloco }}</label>
+                <input [id]="'pk-note-' + i" formControlName="note" [placeholder]="'parking.notePlaceholder' | transloco" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+              </div>
+              <ui-button type="button" variant="outline" size="sm" (click)="removeParkingArea(i)">
+                {{ 'parking.remove' | transloco }}
+              </ui-button>
+            </div>
+          }
+        </div>
+        @if (form.controls.parkingAreas.length < maxParkingAreas()) {
+          <ui-button type="button" variant="outline" size="sm" (click)="addParkingArea()">
+            {{ 'parking.add' | transloco }}
+          </ui-button>
+        }
+      </fieldset>
+
       <!-- Ride details: route, Strava links, pace groups -->
       <fieldset class="space-y-4 rounded-2xl border border-[var(--color-border)] p-4">
         <legend class="px-2 text-sm font-semibold text-[var(--color-text)]">

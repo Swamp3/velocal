@@ -31,6 +31,7 @@ import {
   EventClass,
   LicenseClass,
   EventFormat,
+  ParkingArea,
 } from '@shared/models';
 import { RacingService } from '@core/services/racing.service';
 import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
@@ -156,6 +157,7 @@ export class EventFormComponent implements OnInit {
     championship: new FormControl<string>('', { nonNullable: true }),
     format: new FormControl<string>('', { nonNullable: true }),
     classes: new FormArray<ReturnType<EventFormComponent['newClass']>>([]),
+    parkingAreas: new FormArray<ReturnType<EventFormComponent['newParkingArea']>>([]),
     stravaUrl: new FormControl('', { nonNullable: true }),
     meetupPlace: new FormControl('', { nonNullable: true }),
     meetupDate: new FormControl('', { nonNullable: true }),
@@ -258,6 +260,59 @@ export class EventFormComponent implements OnInit {
     const control = this.form.controls.classes.at(index).controls.licenseClasses;
     const next = control.value.filter((v) => v !== value);
     control.setValue(checked ? [...next, value] : next);
+    control.markAsDirty();
+  }
+
+  /** Parking areas are only sent when changed, so an imported event keeps its imported ones. */
+  private parkingChanged = false;
+  protected readonly parkingKinds = this.racing.parkingKinds;
+  protected readonly parkingFees = this.racing.parkingFees;
+  protected readonly maxParkingAreas = this.racing.maxParkingAreas;
+
+  protected newParkingArea(init?: Partial<ParkingArea>) {
+    const time = [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)];
+    return new FormGroup({
+      name: new FormControl(init?.name ?? '', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(80)],
+      }),
+      kinds: new FormControl<string[]>(init?.kinds ?? ['participants'], {
+        nonNullable: true,
+        validators: [Validators.required, (c) => (c.value?.length ? null : { required: true })],
+      }),
+      coordinates: new FormControl<{ lat: number; lng: number } | null>(init?.coordinates ?? null, [
+        Validators.required,
+      ]),
+      address: new FormControl(init?.address ?? '', { nonNullable: true, validators: [Validators.maxLength(255)] }),
+      capacity: new FormControl<number | null>(init?.capacity ?? null, [Validators.min(1), Validators.max(100000)]),
+      fee: new FormControl<string>(init?.fee ?? '', { nonNullable: true }),
+      feeNote: new FormControl(init?.feeNote ?? '', { nonNullable: true, validators: [Validators.maxLength(80)] }),
+      openFrom: new FormControl(init?.openFrom ?? '', { nonNullable: true, validators: time }),
+      openUntil: new FormControl(init?.openUntil ?? '', { nonNullable: true, validators: time }),
+      note: new FormControl(init?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+    });
+  }
+
+  protected addParkingArea(): void {
+    this.form.controls.parkingAreas.push(this.newParkingArea());
+    this.parkingChanged = true;
+  }
+
+  protected removeParkingArea(index: number): void {
+    this.form.controls.parkingAreas.removeAt(index);
+    this.parkingChanged = true;
+  }
+
+  protected toggleParkingKind(index: number, kind: string, checked: boolean): void {
+    const control = this.form.controls.parkingAreas.at(index).controls.kinds;
+    const next = control.value.filter((k) => k !== kind);
+    control.setValue(checked ? [...next, kind] : next);
+    control.markAsDirty();
+  }
+
+  protected setParkingPoint(index: number, coords: { lat: number; lng: number }): void {
+    const control = this.form.controls.parkingAreas.at(index).controls.coordinates;
+    control.setValue(coords);
     control.markAsDirty();
   }
 
@@ -416,6 +471,22 @@ export class EventFormComponent implements OnInit {
             })),
           }
         : {}),
+      ...(this.parkingChanged || this.form.controls.parkingAreas.dirty || !this.isEdit()
+        ? {
+            parkingAreas: raw.parkingAreas.map((p) => ({
+              name: p.name.trim(),
+              kinds: p.kinds,
+              coordinates: p.coordinates!,
+              address: p.address.trim() || null,
+              capacity: p.capacity ?? null,
+              fee: p.fee || null,
+              feeNote: p.feeNote.trim() || null,
+              openFrom: p.openFrom || null,
+              openUntil: p.openUntil || null,
+              note: p.note.trim() || null,
+            })),
+          }
+        : {}),
       recurrence: undefined as RecurrenceDto | undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
       ...(this.hosted()
@@ -567,6 +638,11 @@ export class EventFormComponent implements OnInit {
     this.form.controls.classes.clear();
     for (const cls of event.classes ?? []) this.form.controls.classes.push(this.newClass(cls));
     this.classesChanged = false;
+    this.form.controls.parkingAreas.clear();
+    for (const area of event.parkingAreas ?? []) {
+      this.form.controls.parkingAreas.push(this.newParkingArea(area));
+    }
+    this.parkingChanged = false;
     this.usedRoutes.set(
       [event.route, ...(event.paceGroups ?? []).map((group) => group.route)].filter(
         (route): route is Route => !!route,

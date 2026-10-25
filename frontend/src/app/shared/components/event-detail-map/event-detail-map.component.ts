@@ -1,3 +1,4 @@
+import type { ParkingArea } from '@shared/models';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,7 +22,7 @@ import { EventMapDialogComponent } from './event-map-dialog.component';
   template: `
     <div class="relative group">
       @defer (on viewport) {
-        <app-event-mini-map [coordinates]="coordinates()" />
+        <app-event-mini-map [coordinates]="coordinates()" [parkingAreas]="parkingAreas()" />
       } @placeholder {
         <div
           class="h-[300px] w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-alt)]"
@@ -57,6 +58,7 @@ import { EventMapDialogComponent } from './event-map-dialog.component';
         [coordinates]="coordinates()"
         [eventId]="eventId()"
         [locationName]="locationName()"
+        [parkingAreas]="parkingAreas()"
         (close)="onClose()"
       />
     }
@@ -66,6 +68,7 @@ export class EventDetailMapComponent {
   readonly coordinates = input.required<{ lat: number; lng: number }>();
   readonly eventId = input.required<string>();
   readonly locationName = input<string | null | undefined>(null);
+  readonly parkingAreas = input<ParkingArea[]>([]);
 
   protected readonly expanded = signal(false);
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));

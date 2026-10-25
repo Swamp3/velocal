@@ -1,7 +1,7 @@
 /**
  * The racing model: every list of values and every rule about classes, licences, age categories,
  * championships and event formats lives here and nowhere else. Entities, DTOs and the import use
- * these lists; the browser loads them from `GET /api/events/racing-meta` (see `racingMeta()`).
+ * these lists; the browser loads them from `GET /api/events/meta` (see `racingMeta()`).
  * Migrations keep their own copies, because a migration must not change once released.
  */
 
@@ -283,7 +283,7 @@ export function eventFitsSql(rider: RiderProfile): {
 
 // ── For the browser ──────────────────────────────────────────────────────────
 
-/** All lists the browser needs, served by `GET /api/events/racing-meta`. */
+/** All lists the browser needs, served by `GET /api/events/meta`. */
 export function racingMeta() {
   return {
     classGenders: CLASS_GENDERS,

@@ -6,8 +6,8 @@
 | POST   | `/api/auth/login`                  | No       | Log in, receive JWT            |
 | GET    | `/api/events`                      | Optional | List/search/filter events. Members-only events are included only when the caller can see the host |
 |        |                                    |          | Filters: `q`, `discipline` (comma list; `breitensport` also finds every touring format), `format` (comma list; `kids` also finds events with a class up to age 12), `fitsMe` (signed in), `championship`, `hideLeagues`, `from`, `to`, geo `zip`/`lat`/`lng`/`radius` |
-| GET    | `/api/events/racing-meta`          | No       | Lists of the racing model (classes, licences, licence classes, age categories, championship levels, series kinds, formats). Defined once in `backend/src/events/racing.ts` |
-| GET    | `/api/events/:id`                  | Optional | Event detail, including the going count. Members-only events are 404 for outsiders | Classes carry `fitsYou` for a viewer with rider data |
+| GET    | `/api/events/meta`                 | No       | Value lists for forms and filters: racing model (classes, licences, licence classes, age categories, championship levels, series kinds, formats; `backend/src/events/racing.ts`) and parking (kinds, fees; `backend/src/events/parking.ts`) |
+| GET    | `/api/events/:id`                  | Optional | Event detail (with public `parkingAreas` and the straight-line `distanceM` to the venue), including the going count. Members-only events are 404 for outsiders | Classes carry `fitsYou` for a viewer with rider data |
 | POST   | `/api/events/:id/invites`          | JWT      | Invite a host member by email. Host admins and moderators. Returns `outcome`, `emailed`, `emailSkipped` |
 | POST   | `/api/events/:id/rsvp`             | JWT      | Set `going`, `maybe`, or `declined` |
 | GET    | `/api/events/:id/rsvps`            | JWT      | RSVP names. Host admins and moderators, or the creator of an unhosted event |

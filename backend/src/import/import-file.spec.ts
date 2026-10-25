@@ -227,4 +227,65 @@ describe('locationQuality', () => {
       ]),
     );
   });
+
+  it('reads parking areas with several kinds and warns when one is far away', () => {
+    const result = validateImportFile(
+      file([
+        {
+          ...base,
+          lat: 50.1109,
+          lng: 8.6821,
+          parking: [
+            {
+              name: 'P1 Sporthalle',
+              kinds: ['participants', 'camper'],
+              lat: 50.112,
+              lng: 8.684,
+              fee: 'free',
+              openFrom: '07:00',
+            },
+            { name: 'Weit weg', kinds: ['spectators'], lat: 50.2, lng: 8.9 },
+          ],
+        },
+      ]),
+      now,
+    );
+    expect(result.issues.filter((i) => i.severity === 'error')).toEqual([]);
+    expect(result.issues.map((i) => i.code)).toContain('parkingFar');
+    expect(result.events[0]?.parkingAreas?.[0]).toMatchObject({
+      kinds: ['participants', 'camper'],
+      coordinates: { lat: 50.112, lng: 8.684 },
+      fee: 'free',
+      openFrom: '07:00',
+    });
+  });
+
+  it('refuses parking areas without kinds or coordinates', () => {
+    expect(
+      codes(
+        file([
+          {
+            ...base,
+            parking: [
+              {
+                name: 'P',
+                kinds: [],
+                lat: 'x',
+                fee: 'maybe',
+                openFrom: '7 Uhr',
+              },
+            ],
+          },
+        ]),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        'error:parkingKindUnknown:parking[0].kinds',
+        'error:coordinateInvalid:parking[0].lat',
+        'error:coordinateInvalid:parking[0].lng',
+        'error:parkingFeeUnknown:parking[0].fee',
+        'error:timeInvalid:parking[0].openFrom',
+      ]),
+    );
+  });
 });

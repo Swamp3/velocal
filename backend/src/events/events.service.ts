@@ -24,6 +24,7 @@ import {
   type RiderProfile,
 } from './racing';
 import { EventClassDto } from './dto/event-class.dto';
+import { ParkingService } from './parking.service';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRecurrence } from './entities/event-recurrence.entity';
@@ -194,6 +195,7 @@ export class EventsService {
     private readonly notifications: NotificationsService,
     private readonly dataSource: DataSource,
     private readonly badWords: BadWordService,
+    private readonly parking: ParkingService,
   ) {}
 
   async findAll(
@@ -403,6 +405,7 @@ export class EventsService {
     const user = { id: userId ?? '', isAdmin: false };
     if (dto.paceGroups?.length)
       await this.validatePaceGroups(dto.paceGroups, user);
+    if (dto.parkingAreas?.length) this.parking.assertClean(dto.parkingAreas);
     return this.dataSource.transaction(async (manager) => {
       const saved = dto.recurrence
         ? await this.saveSeries(manager, first, dto.recurrence, userId)
@@ -410,6 +413,13 @@ export class EventsService {
       await this.writeRideDetails(manager, saved, dto);
       if (dto.classes?.length)
         await this.writeClasses(manager, saved.id, dto.classes);
+      if (dto.parkingAreas?.length) {
+        await this.parking.write(
+          manager,
+          await this.occurrenceIds(manager, saved),
+          dto.parkingAreas,
+        );
+      }
       return saved;
     });
   }
@@ -421,14 +431,7 @@ export class EventsService {
     dto: Pick<CreateEventDto, 'paceGroups' | 'stravaLinks'>,
   ): Promise<void> {
     if (!dto.paceGroups?.length && !dto.stravaLinks?.length) return;
-    const ids = saved.recurrenceId
-      ? (
-          await manager.find(Event, {
-            where: { recurrenceId: saved.recurrenceId },
-            select: { id: true },
-          })
-        ).map((row) => row.id)
-      : [saved.id];
+    const ids = await this.occurrenceIds(manager, saved);
     await this.writePaceGroups(manager, ids, dto.paceGroups ?? []);
     for (const eventId of ids) {
       await this.writeStravaLinks(
@@ -438,6 +441,19 @@ export class EventsService {
         dto.stravaLinks ?? [],
       );
     }
+  }
+
+  /** Ids of every occurrence of the event's series, or just the event. */
+  private async occurrenceIds(
+    manager: EntityManager,
+    saved: Event,
+  ): Promise<string[]> {
+    if (!saved.recurrenceId) return [saved.id];
+    const rows = await manager.find(Event, {
+      where: { recurrenceId: saved.recurrenceId },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
   }
 
   /**
@@ -885,6 +901,8 @@ export class EventsService {
     }
 
     delete (partial as Record<string, unknown>)['classes'];
+    delete (partial as Record<string, unknown>)['parkingAreas'];
+    if (dto.parkingAreas?.length) this.parking.assertClean(dto.parkingAreas);
     // Corrections to an imported event survive the next import (see ImportService).
     if (event.source === EventSource.IMPORTED) {
       const edited = editedImportFields(event, partial);
@@ -893,6 +911,12 @@ export class EventsService {
         (await this.classesDiffer(event.id, dto.classes))
       ) {
         edited.push('classes');
+      }
+      if (
+        dto.parkingAreas !== undefined &&
+        (await this.parking.differ(event.id, dto.parkingAreas))
+      ) {
+        edited.push('parkingAreas');
       }
       if (edited.length) {
         partial.editedFields = [
@@ -906,6 +930,8 @@ export class EventsService {
       const row = await manager.save(event);
       if (dto.classes !== undefined)
         await this.writeClasses(manager, row.id, dto.classes);
+      if (dto.parkingAreas !== undefined)
+        await this.parking.write(manager, [row.id], dto.parkingAreas);
       return row;
     });
     return this.present(saved, user?.id);
@@ -1937,9 +1963,14 @@ export class EventsService {
       [event.id],
       userId ? await this.riderProfile(userId) : null,
     );
+    const parkingAreas = await this.parking.forEvent(
+      event.id,
+      event.coordinates,
+    );
     return this.serializeEvent(event, {
       ...ride,
       ...racing(event.id),
+      parkingAreas,
       recurrence: recurrence
         ? { id: recurrence.id, frequency: recurrence.frequency }
         : null,

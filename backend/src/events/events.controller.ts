@@ -24,7 +24,8 @@ import {
   SerializedEvent,
 } from './events.service';
 import { EventSearchDto } from './dto/event-search.dto';
-import { racingMeta, type RacingMeta } from './racing';
+import { parkingMeta } from './parking';
+import { racingMeta } from './racing';
 import { CreateEventDto } from './dto/create-event.dto';
 import { CreateEventCommentDto } from './dto/create-event-comment.dto';
 import { InviteEventDto } from './dto/invite-event.dto';
@@ -54,10 +55,10 @@ export class EventsController {
     return this.eventsService.findAll(query, user?.id);
   }
 
-  /** Lists of the racing model (categories, licences, formats …) for forms and filters. */
-  @Get('racing-meta')
-  racingMeta(): RacingMeta {
-    return racingMeta();
+  /** Value lists for forms and filters: racing model (categories, licences, formats …) and parking. */
+  @Get('meta')
+  meta() {
+    return { ...racingMeta(), ...parkingMeta() };
   }
 
   @Get(':id')

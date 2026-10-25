@@ -4,6 +4,16 @@ import type {
   EventSourceRef,
 } from '../events/entities/event.entity';
 import { berlinDay, parseEventDate } from './dates';
+import type { ParkingAreaInput } from '../events/parking.service';
+import {
+  distanceMeters,
+  MAX_PARKING_AREAS,
+  PARKING_FAR_METERS,
+  PARKING_FEES,
+  PARKING_KINDS,
+  type ParkingFee,
+  type ParkingKind,
+} from '../events/parking';
 import {
   CATEGORY_KEYS,
   CHAMPIONSHIP_LEVELS,
@@ -104,6 +114,7 @@ export interface ValidatedFile {
 }
 
 const EVENT_FIELDS = new Set([
+  'parking',
   'externalId',
   'name',
   'description',
@@ -868,6 +879,15 @@ export function validateImportFile(
       }
     }
 
+    // Parking areas
+    let parkingAreas: ParkingAreaInput[] | undefined;
+    if (item.parking !== undefined) {
+      parkingAreas = readParking(item.parking, add, {
+        lat: hasLat && typeof lat === 'number' ? lat : null,
+        lng: hasLng && typeof lng === 'number' ? lng : null,
+      });
+    }
+
     // Series (one object or a list)
     let series: RawEventSeries[] | undefined;
     if (item.series !== undefined && item.series !== null) {
@@ -987,13 +1007,179 @@ export function validateImportFile(
       classes,
       championship,
       format,
+      parkingAreas,
       series,
     });
   });
   return result;
 }
 
+const PARKING_FIELDS = new Set([
+  'name',
+  'kinds',
+  'lat',
+  'lng',
+  'address',
+  'capacity',
+  'fee',
+  'feeNote',
+  'openFrom',
+  'openUntil',
+  'note',
+]);
+const TIME_OF_DAY = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Reads the `parking` list of an event; reports problems through `add`. */
+function readParking(
+  value: unknown,
+  add: (issue: Omit<ImportIssue, 'index' | 'externalId'>) => void,
+  venue: { lat: number | null; lng: number | null },
+): ParkingAreaInput[] | undefined {
+  if (!Array.isArray(value)) {
+    add({
+      severity: 'error',
+      code: 'type',
+      field: 'parking',
+      params: { expected: 'array' },
+    });
+    return undefined;
+  }
+  if (value.length > MAX_PARKING_AREAS) {
+    add({
+      severity: 'error',
+      code: 'parkingTooMany',
+      field: 'parking',
+      params: { max: MAX_PARKING_AREAS },
+    });
+    return undefined;
+  }
+  const list: ParkingAreaInput[] = [];
+  value.forEach((entry: unknown, i: number) => {
+    const field = `parking[${i}]`;
+    if (!isObject(entry)) {
+      add({ severity: 'error', code: 'parkingInvalid', field });
+      return;
+    }
+    for (const key of Object.keys(entry)) {
+      if (!PARKING_FIELDS.has(key))
+        add({
+          severity: 'warning',
+          code: 'unknownField',
+          field: `${field}.${key}`,
+        });
+    }
+    let ok = true;
+    const fail = (
+      code: string,
+      key: string,
+      params?: Record<string, string | number>,
+    ) => {
+      ok = false;
+      add({ severity: 'error', code, field: `${field}.${key}`, params });
+    };
+    const text = (
+      key: string,
+      max: number,
+      required = false,
+    ): string | null => {
+      const raw = entry[key];
+      if (raw === undefined || raw === null || raw === '') {
+        if (required) fail('required', key);
+        return null;
+      }
+      if (typeof raw !== 'string') {
+        fail('type', key, { expected: 'string' });
+        return null;
+      }
+      if (raw.trim().length > max) fail('tooLong', key, { max });
+      return raw.trim() || null;
+    };
+    const name = text('name', 80, true) ?? '';
+    const kinds = entry.kinds;
+    if (
+      !Array.isArray(kinds) ||
+      !kinds.length ||
+      kinds.some(
+        (k) =>
+          typeof k !== 'string' ||
+          !(PARKING_KINDS as readonly string[]).includes(k),
+      )
+    ) {
+      fail('parkingKindUnknown', 'kinds', { value: show(kinds) });
+    }
+    const lat = entry.lat;
+    const lng = entry.lng;
+    if (typeof lat !== 'number' || lat < -90 || lat > 90)
+      fail('coordinateInvalid', 'lat');
+    if (typeof lng !== 'number' || lng < -180 || lng > 180)
+      fail('coordinateInvalid', 'lng');
+    const capacity = entry.capacity ?? null;
+    if (
+      capacity !== null &&
+      (typeof capacity !== 'number' ||
+        !Number.isInteger(capacity) ||
+        capacity < 1)
+    ) {
+      fail('numberInvalid', 'capacity', { max: 100000 });
+    }
+    const fee = entry.fee ?? null;
+    if (
+      fee !== null &&
+      (typeof fee !== 'string' ||
+        !(PARKING_FEES as readonly string[]).includes(fee))
+    ) {
+      fail('parkingFeeUnknown', 'fee', { value: show(fee) });
+    }
+    const time = (key: string): string | null => {
+      const raw = entry[key];
+      if (raw === undefined || raw === null) return null;
+      if (typeof raw !== 'string' || !TIME_OF_DAY.test(raw)) {
+        fail('timeInvalid', key, { value: show(raw) });
+        return null;
+      }
+      return raw;
+    };
+    const area: ParkingAreaInput = {
+      name,
+      kinds: Array.isArray(kinds) ? ([...new Set(kinds)] as ParkingKind[]) : [],
+      coordinates: { lat: lat as number, lng: lng as number },
+      address: text('address', 255),
+      capacity: capacity as number | null,
+      fee: fee as ParkingFee | null,
+      feeNote: text('feeNote', 80),
+      openFrom: time('openFrom'),
+      openUntil: time('openUntil'),
+      note: text('note', 300),
+    };
+    if (!ok) return;
+    if (venue.lat != null && venue.lng != null) {
+      const meters = distanceMeters(
+        { lat: venue.lat, lng: venue.lng },
+        area.coordinates,
+      );
+      if (meters > PARKING_FAR_METERS) {
+        add({
+          severity: 'warning',
+          code: 'parkingFar',
+          field,
+          params: { km: Math.round(meters / 100) / 10 },
+        });
+      }
+    }
+    list.push(area);
+  });
+  return list;
+}
+
 const MESSAGES: Record<string, (issue: ImportIssue) => string> = {
+  parkingTooMany: (i) => `At most ${i.params?.max} parking areas`,
+  parkingInvalid: () => 'A parking area must be an object',
+  parkingKindUnknown: (i) =>
+    `Unknown parking kinds ${i.params?.value} (${PARKING_KINDS.join(', ')}); give at least one`,
+  parkingFeeUnknown: (i) => `Unknown fee ${i.params?.value} (free, paid)`,
+  parkingFar: (i) =>
+    `Parking area is ${i.params?.km} km from the event's place`,
+  timeInvalid: (i) => `Time ${i.params?.value} must be HH:mm`,
   fileNotObject: () =>
     'The file must be a JSON object with sourceName and events',
   sourceNameInvalid: () =>

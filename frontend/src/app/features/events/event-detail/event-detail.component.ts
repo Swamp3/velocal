@@ -20,7 +20,7 @@ import { FavoriteService } from '@core/services/favorite.service';
 import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { AddToCalendarComponent, DisciplineChipComponent, EventClassesComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
+import { AddToCalendarComponent, DisciplineChipComponent, EventClassesComponent, EventParkingComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
 import { appleMapsDirectionsUrl, googleMapsDirectionsUrl } from '@shared/utils/map-links';
 import { CyclingEvent, formatDistance, PostListItem } from '@shared/models';
 import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit.component';
@@ -78,6 +78,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     ActionMenuComponent,
     EventImportInfoComponent,
     EventClassesComponent,
+    EventParkingComponent,
   ],
   templateUrl: './event-detail.component.html',
 })

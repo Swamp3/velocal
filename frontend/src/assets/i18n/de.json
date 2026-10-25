@@ -757,7 +757,13 @@
         "classLicenseClassUnknown": "Unbekannte Lizenzklassen {{value}} (elite_amateur, amateur, master).",
         "classCategoryUnknown": "Unbekannte Altersklasse {{value}} (u11 … u23, elite, masters1 … masters4).",
         "formatUnknown": "Unbekanntes Format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour, kids).",
-        "numberInvalid": "Muss eine Zahl von 0 bis {{max}} sein."
+        "numberInvalid": "Muss eine Zahl von 0 bis {{max}} sein.",
+        "parkingTooMany": "Höchstens {{max}} Parkplätze.",
+        "parkingInvalid": "Ein Parkplatz muss ein Objekt sein.",
+        "parkingKindUnknown": "Unbekannte Parkplatz-Gruppen {{value}}; mindestens eine angeben.",
+        "parkingFeeUnknown": "Unbekannte Gebühr {{value}} (free, paid).",
+        "parkingFar": "Parkplatz ist {{km}} km vom Veranstaltungsort entfernt.",
+        "timeInvalid": "Uhrzeit {{value}} muss HH:mm sein."
       }
     },
     "users": {
@@ -1507,5 +1513,44 @@
     "formHintTouring": "Ein Eintrag pro Strecke mit Länge und Höhenmetern. Mindestalter oder Hinweise (z. B. „unter 18 nur mit Einverständnis der Eltern“) bei Bedarf angeben.",
     "routeCount": "{{count}} Strecken",
     "removeRoute": "Strecke entfernen"
+  },
+  "parking": {
+    "title": "Parken",
+    "disclaimerLabel": "Hinweis zu den Parkangaben",
+    "disclaimer": "Angaben ohne Gewähr: Parkplätze können sich kurzfristig ändern oder falsch eingetragen sein. Bitte die Beschilderung und Hinweise vor Ort beachten.",
+    "distance": "≈ {{meters}} m Luftlinie zum Veranstaltungsort",
+    "capacity": "ca. {{count}} Plätze",
+    "open": "geöffnet {{from}}–{{until}} Uhr",
+    "kind": {
+      "participants": "Teilnehmende",
+      "teams": "Teams/Busse",
+      "spectators": "Zuschauer",
+      "accessible": "Barrierefrei",
+      "bikes": "Fahrräder",
+      "camper": "Wohnmobile"
+    },
+    "fee": {
+      "free": "kostenlos",
+      "paid": "kostenpflichtig"
+    },
+    "formTitle": "Parken",
+    "formHint": "Wo sollen Teilnehmende, Teams oder Zuschauer parken? Setze den Punkt auf die Einfahrt (oder die Mitte eines kleinen Parkplatzes); dorthin führt die Navigation. Große Flächen im Hinweis beschreiben. Parkplätze sind öffentlich sichtbar.",
+    "name": "Bezeichnung",
+    "namePlaceholder": "z. B. Parkplatz Sporthalle Nord",
+    "kindsLabel": "Für wen",
+    "kindsRequired": "Mindestens eine Gruppe wählen.",
+    "pointLabel": "Einfahrt auf der Karte (antippen oder Pin ziehen)",
+    "pointRequired": "Bitte einen Punkt auf der Karte setzen.",
+    "address": "Adresse",
+    "capacityLabel": "Plätze (ca.)",
+    "feeLabel": "Gebühr",
+    "feeNote": "Gebühr-Hinweis",
+    "feeNotePlaceholder": "z. B. 5 € pro Tag",
+    "openFrom": "Geöffnet ab",
+    "openUntil": "Geöffnet bis",
+    "note": "Hinweis",
+    "notePlaceholder": "z. B. Zufahrt über die Lindenstraße, Beschilderung folgen",
+    "remove": "Parkplatz entfernen",
+    "add": "Parkplatz hinzufügen"
   }
 }

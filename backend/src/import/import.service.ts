@@ -29,6 +29,7 @@ import {
 import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 import { disciplineFor, inferFormat, type EventFormat } from '../events/racing';
+import { ParkingService } from '../events/parking.service';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
 /** Issues decided against the database; recomputed when the run writes. */
@@ -123,6 +124,7 @@ export class ImportService {
     private readonly classRepo: Repository<EventClass>,
     private readonly config: ConfigService,
     private readonly geocoding: GeocodingService,
+    private readonly parking: ParkingService,
     private readonly dataSource: DataSource,
     radNetSource: RadNetSource,
     raceResultSource: RaceResultSource,
@@ -566,6 +568,18 @@ export class ImportService {
       raw,
       current,
     );
+    if (
+      raw.parkingAreas !== undefined &&
+      (await this.parking.differ(existing.id, raw.parkingAreas))
+    ) {
+      const change = {
+        field: 'parkingAreas',
+        before: await this.parking.stored(existing.id),
+        after: raw.parkingAreas,
+      };
+      if (existing.editedFields?.includes('parkingAreas')) kept.push(change);
+      else changes.push(change);
+    }
     const issues: ImportIssue[] = kept.length
       ? [
           {
@@ -659,6 +673,13 @@ export class ImportService {
       await manager.save(existing);
       if (changes.some((c) => c.field === 'classes')) {
         await this.writeClasses(manager, existing.id, raw);
+      }
+      if (changes.some((c) => c.field === 'parkingAreas')) {
+        await this.parking.write(
+          manager,
+          [existing.id],
+          raw.parkingAreas ?? [],
+        );
       }
       await this.linkSeries(manager, existing, raw);
     });
@@ -798,6 +819,9 @@ export class ImportService {
     return this.dataSource.transaction(async (manager) => {
       const saved = await manager.save(event);
       await this.writeClasses(manager, saved.id, raw);
+      if (raw.parkingAreas?.length) {
+        await this.parking.write(manager, [saved.id], raw.parkingAreas);
+      }
       await this.linkSeries(manager, saved, raw);
       return saved;
     });

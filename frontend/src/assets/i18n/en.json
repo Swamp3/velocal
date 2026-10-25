@@ -757,7 +757,13 @@
         "classLicenseClassUnknown": "Unknown licence classes {{value}} (elite_amateur, amateur, master).",
         "classCategoryUnknown": "Unknown age category {{value}} (u11 … u23, elite, masters1 … masters4).",
         "formatUnknown": "Unknown format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour, kids).",
-        "numberInvalid": "Must be a number from 0 to {{max}}."
+        "numberInvalid": "Must be a number from 0 to {{max}}.",
+        "parkingTooMany": "At most {{max}} parking areas.",
+        "parkingInvalid": "A parking area must be an object.",
+        "parkingKindUnknown": "Unknown parking kinds {{value}}; give at least one.",
+        "parkingFeeUnknown": "Unknown fee {{value}} (free, paid).",
+        "parkingFar": "Parking area is {{km}} km from the venue.",
+        "timeInvalid": "Time {{value}} must be HH:mm."
       }
     },
     "users": {
@@ -1507,5 +1513,44 @@
     "formHintTouring": "One entry per route with length and climbing. Add a minimum age or notes (e.g. \"under 18 only with parental consent\") where needed.",
     "routeCount": "{{count}} routes",
     "removeRoute": "Remove route"
+  },
+  "parking": {
+    "title": "Parking",
+    "disclaimerLabel": "Note on the parking details",
+    "disclaimer": "No guarantee: parking may change at short notice or be entered incorrectly. Please follow the signs and instructions on site.",
+    "distance": "≈ {{meters}} m in a straight line to the venue",
+    "capacity": "about {{count}} spaces",
+    "open": "open {{from}}–{{until}}",
+    "kind": {
+      "participants": "Participants",
+      "teams": "Teams/buses",
+      "spectators": "Spectators",
+      "accessible": "Accessible",
+      "bikes": "Bicycles",
+      "camper": "Campers"
+    },
+    "fee": {
+      "free": "free",
+      "paid": "paid"
+    },
+    "formTitle": "Parking",
+    "formHint": "Where should participants, teams or spectators park? Put the point on the entrance (or the middle of a small car park); navigation leads there. Describe large fields in the note. Parking is shown publicly.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Car park sports hall north",
+    "kindsLabel": "For whom",
+    "kindsRequired": "Choose at least one group.",
+    "pointLabel": "Entrance on the map (tap or drag the pin)",
+    "pointRequired": "Please set a point on the map.",
+    "address": "Address",
+    "capacityLabel": "Spaces (approx.)",
+    "feeLabel": "Fee",
+    "feeNote": "Fee note",
+    "feeNotePlaceholder": "e.g. €5 per day",
+    "openFrom": "Open from",
+    "openUntil": "Open until",
+    "note": "Note",
+    "notePlaceholder": "e.g. Access via Lindenstraße, follow the signs",
+    "remove": "Remove parking area",
+    "add": "Add parking area"
   }
 }
