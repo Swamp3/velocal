@@ -1,0 +1,142 @@
+@let r = report();
+<div class="space-y-4">
+  <dl class="grid grid-cols-3 gap-2 sm:grid-cols-7">
+    @for (
+      item of [
+        { k: 'create', v: r.summary.create },
+        { k: 'update', v: r.summary.update },
+        { k: 'unchanged', v: r.summary.unchanged },
+        { k: 'skip', v: r.summary.skip },
+        { k: 'invalid', v: r.summary.invalid },
+      ];
+      track item.k
+    ) {
+      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2">
+        <dt class="text-xs text-[var(--color-text-muted)]">{{ 'admin.imports.action.' + item.k | transloco }}</dt>
+        <dd class="text-lg font-semibold tabular-nums text-[var(--color-text)]">{{ item.v }}</dd>
+      </div>
+    }
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2">
+      <dt class="text-xs text-[var(--color-text-muted)]">{{ 'admin.imports.report.errors' | transloco }}</dt>
+      <dd class="text-lg font-semibold tabular-nums" [class.text-[var(--color-danger)]]="r.summary.errors > 0">
+        {{ r.summary.errors }}
+      </dd>
+    </div>
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-2">
+      <dt class="text-xs text-[var(--color-text-muted)]">{{ 'admin.imports.report.warnings' | transloco }}</dt>
+      <dd class="text-lg font-semibold tabular-nums" [class.text-amber-700]="r.summary.warnings > 0">
+        {{ r.summary.warnings }}
+      </dd>
+    </div>
+  </dl>
+
+  @if (r.fileIssues.length > 0) {
+    <ul class="space-y-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-3 text-sm">
+      @for (issue of r.fileIssues; track $index) {
+        <li class="flex items-start gap-2" [class]="severityClass(issue)">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{ severityIcon(issue) }}</span>
+          <span>{{ issueText(issue) }}</span>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (noCoordinates() > 0) {
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'admin.imports.report.noCoordinates' | transloco: { count: noCoordinates() } }}
+    </p>
+  }
+
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+    <input
+      type="search"
+      [placeholder]="'admin.imports.report.search' | transloco"
+      (input)="onQuery($event)"
+      class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] lg:max-w-xs"
+    />
+    <ui-segmented [options]="filters()" [value]="filter()" (valueChange)="setFilter($event)" size="xs" />
+  </div>
+
+  <ul class="divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+    @for (entry of visible(); track entry.index) {
+      @let issues = listed(entry);
+      <li class="px-4 py-3 text-sm">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="break-words font-medium text-[var(--color-text)]">
+              <span class="tabular-nums text-[var(--color-text-muted)]">#{{ entry.index }}</span>
+              {{ entry.name ?? '—' }}
+            </p>
+            <p class="break-all text-xs text-[var(--color-text-muted)]">
+              {{ dateLabel(entry) }}
+              · {{ entry.externalId ?? '—' }}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            @if (entry.eventId && entry.action !== 'invalid') {
+              <a
+                [routerLink]="['/events', entry.eventId]"
+                class="text-xs font-medium text-[var(--color-primary)] hover:underline"
+                target="_blank"
+                >{{ 'admin.imports.report.openEvent' | transloco }}</a
+              >
+            }
+            <ui-badge [variant]="actionVariant[entry.action]">
+              {{ 'admin.imports.action.' + entry.action | transloco }}
+            </ui-badge>
+          </div>
+        </div>
+
+        @if (issues.length > 0) {
+          <ul class="mt-2 space-y-1">
+            @for (issue of issues; track $index) {
+              <li class="flex items-start gap-1.5 text-xs" [class]="severityClass(issue)">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">{{ severityIcon(issue) }}</span>
+                <span class="min-w-0 break-words">{{ issueText(issue) }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (entry.changes?.length) {
+          <button
+            type="button"
+            class="mt-2 text-xs font-medium text-[var(--color-primary)] hover:underline"
+            (click)="toggle(entry.index)"
+          >
+            {{ 'admin.imports.report.changes' | transloco: { count: entry.changes!.length } }}
+          </button>
+          @if (open().has(entry.index)) {
+            <div class="mt-2 overflow-x-auto">
+              <table class="min-w-full text-xs">
+                <tbody>
+                  @for (change of entry.changes; track change.field) {
+                    <tr class="align-top">
+                      <td class="py-1 pr-3 font-medium text-[var(--color-text)]">{{ change.field }}</td>
+                      <td class="max-w-xs break-words py-1 pr-3 text-[var(--color-text-muted)] line-through">{{ value(change.before) }}</td>
+                      <td class="max-w-xs break-words py-1 text-[var(--color-text)]">{{ value(change.after) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </li>
+    } @empty {
+      <li class="px-4 py-6 text-center text-sm text-[var(--color-text-muted)]">
+        {{ 'admin.imports.report.none' | transloco }}
+      </li>
+    }
+  </ul>
+
+  @if (entries().length > shown()) {
+    <button
+      type="button"
+      class="text-sm font-medium text-[var(--color-primary)] hover:underline"
+      (click)="shown.set(shown() + 100)"
+    >
+      {{ 'admin.imports.report.more' | transloco: { count: entries().length - shown() } }}
+    </button>
+  }
+</div>

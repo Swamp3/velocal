@@ -1,3 +1,4 @@
+import type { ChampionshipLevel, ClassGender, ClassLicense, EventFormat, LicenseClass, SeriesKind } from './racing.model';
 import { Discipline } from './discipline.model';
 import { PaceGroup, PaceGroupInput, Route, StravaLink } from './route.model';
 
@@ -7,6 +8,8 @@ export interface CyclingEvent {
   description?: string;
   startDate: string;
   endDate?: string;
+  /** False when only the day is known; no time is shown. */
+  startTimeKnown?: boolean;
   status: EventStatus;
   locationName: string;
   address?: string;
@@ -38,6 +41,15 @@ export interface CyclingEvent {
   canInvite?: boolean;
   canEdit?: boolean;
   imageUrl?: string;
+  /** Championship level of the event, if it is one. */
+  championship?: ChampionshipLevel | null;
+  format?: EventFormat | null;
+  /** Rating classes (Wertungsklassen). */
+  classes?: EventClass[];
+  /** Series the event belongs to (cup run, league matchday). */
+  series?: EventSeriesRef[];
+  /** Where the event's data comes from (name and link). */
+  sources?: { name: string; url: string }[];
   source: EventSource;
   discipline: Discipline;
   disciplineSlug: string;
@@ -86,3 +98,37 @@ export interface CreateEventDto {
 }
 
 export type UpdateEventDto = Partial<CreateEventDto>;
+
+/** A rating class. Ages count by year of birth (age reached in the event's year). */
+export interface EventClass {
+  id?: string;
+  name: string;
+  gender: ClassGender;
+  ageMin: number | null;
+  ageMax: number | null;
+  /** Age category key (`u15`, `elite`, `masters2` …). */
+  category?: string | null;
+  license: ClassLicense;
+  /** A rider without licence may start with a day licence. */
+  dayLicense?: boolean;
+  /** Only these licence classes may start (empty: all). */
+  licenseClasses?: LicenseClass[] | null;
+  /** Length of the race or route. */
+  distanceKm?: number | null;
+  elevationM?: number | null;
+  startTime: string | null;
+  championship: ChampionshipLevel | null;
+  note: string | null;
+  /** Set by the server for a viewer with rider data: whether they may start in this class. */
+  fitsYou?: boolean;
+}
+
+export interface EventSeriesRef {
+  id: string;
+  slug: string;
+  name: string;
+  kind: SeriesKind;
+  season: string | null;
+  round: number | null;
+  label: string | null;
+}

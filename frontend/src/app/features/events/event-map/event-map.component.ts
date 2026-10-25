@@ -29,7 +29,7 @@ import { FilterStateService } from '@core/services/filter-state.service';
 import { CyclingEvent, Discipline } from '@shared/models';
 import { DisciplineFilterComponent } from '@shared/components';
 import { normalizeCoords } from '@shared/utils/coords';
-import { formatTime, toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
+import { eventStartTime, toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 
 const EUROPE_CENTER: LeafletNS.LatLngExpression = [51.1657, 10.4515];
@@ -514,7 +514,7 @@ export class EventMapComponent implements OnInit, AfterViewInit {
         month: '2-digit',
         year: 'numeric',
       });
-      const time = formatTime(ev.startDate);
+      const time = eventStartTime(ev);
       const dateTimeLabel = time ? `${date}, ${time}` : date;
 
       const disciplineName =

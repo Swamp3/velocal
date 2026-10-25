@@ -16,6 +16,16 @@ export default [
     children: [
       { path: '', redirectTo: 'imports', pathMatch: 'full' as const },
       { path: 'imports', component: ImportStatusComponent },
+      {
+        path: 'imports/file',
+        loadComponent: () =>
+          import('./file-import/file-import.component').then((m) => m.FileImportComponent),
+      },
+      {
+        path: 'imports/:id',
+        loadComponent: () =>
+          import('./import-run/import-run.component').then((m) => m.ImportRunComponent),
+      },
       { path: 'users', component: UserListComponent },
       { path: 'communities', component: CommunityListComponent },
       { path: 'communities/:id', component: CommunityReviewComponent },

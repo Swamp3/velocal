@@ -19,15 +19,15 @@ import { EventHostContext, EventService } from '@core/services/event.service';
 import { FavoriteService } from '@core/services/favorite.service';
 import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
-import { SeriesService } from '@core/services/series.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { AddToCalendarComponent, DisciplineChipComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
+import { AddToCalendarComponent, DisciplineChipComponent, EventClassesComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
 import { appleMapsDirectionsUrl, googleMapsDirectionsUrl } from '@shared/utils/map-links';
-import { CyclingEvent, formatDistance, PostListItem, RaceSeries } from '@shared/models';
+import { CyclingEvent, formatDistance, PostListItem } from '@shared/models';
 import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit.component';
 import { EventCommentsComponent } from '../event-comments/event-comments.component';
 import { EventInviteComponent } from '../event-invite/event-invite.component';
 import { EventRsvpComponent } from '../event-rsvp/event-rsvp.component';
+import { EventImportInfoComponent } from '../event-import-info/event-import-info.component';
 import {
   ActionMenuComponent,
   type ActionMenuItem,
@@ -37,7 +37,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { normalizeCoords } from '@shared/utils/coords';
-import { formatTime } from '@shared/utils/event-date';
+import { eventEndTime, eventStartTime, formatTime } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 
 @Pipe({ name: 'externalUrlDisplay' })
@@ -76,6 +76,8 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     ShareButtonComponent,
     IconButtonComponent,
     ActionMenuComponent,
+    EventImportInfoComponent,
+    EventClassesComponent,
   ],
   templateUrl: './event-detail.component.html',
 })
@@ -86,7 +88,6 @@ export class EventDetailComponent implements OnInit {
   private readonly eventService = inject(EventService);
   private readonly routeService = inject(RouteService);
   private readonly favoriteService = inject(FavoriteService);
-  private readonly seriesService = inject(SeriesService);
   private readonly postService = inject(PostService);
   private readonly seo = inject(SeoService);
   private readonly toast = inject(ToastService);
@@ -99,11 +100,11 @@ export class EventDetailComponent implements OnInit {
   protected readonly error = signal(false);
   protected readonly favoriteLoading = signal(false);
   protected readonly deleteLoading = signal(false);
-  protected readonly eventSeries = signal<RaceSeries[]>([]);
   protected readonly linkedPosts = signal<PostListItem[]>([]);
 
-  protected readonly startTime = computed(() => formatTime(this.event()?.startDate));
-  protected readonly endTime = computed(() => formatTime(this.event()?.endDate));
+  protected readonly isAdmin = computed(() => !!this.auth.currentUser()?.isAdmin);
+  protected readonly startTime = computed(() => eventStartTime(this.event()));
+  protected readonly endTime = computed(() => eventEndTime(this.event()));
   protected readonly registrationStartTime = computed(() =>
     formatTime(this.event()?.registrationStart),
   );
@@ -297,7 +298,6 @@ export class EventDetailComponent implements OnInit {
         this.event.set(event);
         this.loading.set(false);
         this.applySeo(event);
-        this.loadSeries(id);
         this.loadLinkedPosts(id);
       },
       error: () => {
@@ -386,12 +386,6 @@ export class EventDetailComponent implements OnInit {
     } catch {
       return start;
     }
-  }
-
-  private loadSeries(eventId: string): void {
-    this.seriesService.getSeriesForEvent(eventId).subscribe({
-      next: (series) => this.eventSeries.set(series),
-    });
   }
 
   private loadLinkedPosts(eventId: string): void {

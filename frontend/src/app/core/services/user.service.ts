@@ -3,12 +3,18 @@ import { CyclingEvent, User } from '@shared/models';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
+import type { LicenseClass, RiderGender, RiderLicense } from '@shared/models';
+
 export interface UpdateProfileDto {
   displayName?: string;
   homeZip?: string;
   homeCountry?: string;
   preferredLanguage?: string;
   preferredLocale?: string;
+  birthYear?: number | null;
+  gender?: RiderGender | null;
+  licenseType?: RiderLicense | null;
+  licenseClass?: LicenseClass | null;
 }
 
 export interface MyUpcomingEvent {

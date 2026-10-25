@@ -41,6 +41,11 @@ export interface EventSearchParams {
   limit?: number;
   /** `marker` asks the API for the map popup fields only. */
   view?: 'marker';
+  fitsMe?: boolean;
+  championship?: boolean;
+  hideLeagues?: boolean;
+  /** Comma-separated formats; `touring` stands for all touring formats. */
+  format?: string;
 }
 
 @Injectable({ providedIn: 'root' })

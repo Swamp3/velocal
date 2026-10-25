@@ -42,6 +42,20 @@ export function formatTime(iso: string | null | undefined): string | null {
   return `${hh}:${mm}`;
 }
 
+/** Start time of an event as `HH:mm`, or null when only the day is known. */
+export function eventStartTime(event: { startDate: string; startTimeKnown?: boolean } | null | undefined): string | null {
+  if (!event || event.startTimeKnown === false) return null;
+  return formatTime(event.startDate);
+}
+
+/** End time of an event as `HH:mm`, or null when unknown. */
+export function eventEndTime(
+  event: { endDate?: string | null; startTimeKnown?: boolean } | null | undefined,
+): string | null {
+  if (!event || event.startTimeKnown === false) return null;
+  return formatTime(event.endDate);
+}
+
 /**
  * Formats a date range for display using the given Intl locale.
  */

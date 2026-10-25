@@ -105,6 +105,11 @@
     <div class="mt-5 flex flex-wrap items-center gap-2">
       <app-discipline-chip [discipline]="event.discipline" />
       <app-event-status-badge [status]="event.status" />
+      @if (event.format) {
+        <ui-chip [title]="'events.format.hint.' + event.format | transloco">
+          {{ 'events.format.' + event.format | transloco }}
+        </ui-chip>
+      }
       @if (event.recurrence) {
         <ui-chip>
           <span class="material-symbols-outlined text-[14px]" aria-hidden="true">repeat</span>
@@ -259,7 +264,68 @@
           </div>
         </div>
       }
+
+      @if (event.sources?.length) {
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined mt-0.5 text-[20px] text-[var(--color-primary)]"
+            >fact_check</span
+          >
+          <div class="min-w-0">
+            <dt class="text-[var(--color-text-muted)]">
+              {{ 'events.detail.sources' | transloco }}
+            </dt>
+            <dd>
+              <ul class="space-y-0.5">
+                @for (source of event.sources; track source.url) {
+                  <li class="break-words">
+                    <a
+                      [href]="source.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="font-medium text-[var(--color-primary)] hover:underline"
+                      >{{ source.name }}</a
+                    >
+                  </li>
+                }
+              </ul>
+            </dd>
+          </div>
+        </div>
+      }
     </dl>
+
+    @if (event.series?.length) {
+      <div class="mt-6 flex flex-wrap gap-2">
+        @for (series of event.series; track series.id) {
+          <a
+            [routerLink]="['/series', series.slug]"
+            class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 py-1 text-sm text-[var(--color-text)] hover:border-[var(--color-primary)]"
+          >
+            <span class="material-symbols-outlined text-[16px] text-[var(--color-primary)]" aria-hidden="true">{{
+              series.kind === 'league' ? 'groups' : 'emoji_events'
+            }}</span>
+            {{ series.name }}@if (series.season) { {{ series.season }}}
+            @if (series.label || series.round) {
+              <span class="text-[var(--color-text-muted)]">
+                · {{ series.label ?? (('series.round.' + series.kind) | transloco: { n: series.round }) }}
+              </span>
+            }
+          </a>
+        }
+      </div>
+    }
+
+    @if (event.classes?.length) {
+      <app-event-classes [classes]="event.classes!" [startDate]="event.startDate" [format]="event.format" />
+    }
+
+    @if (isAdmin() && event.source === 'imported') {
+      @defer (on viewport) {
+        <app-event-import-info [eventId]="event.id" />
+      } @placeholder {
+        <div class="mt-8 h-10"></div>
+      }
+    }
 
     <!-- Community-only area: everything inside is visible to members only -->
     @if (event.hostCommunity && (event.canRsvp || event.canComment)) {
@@ -367,20 +433,6 @@
           }
         </div>
       </section>
-    }
-
-    <!-- Series membership -->
-    @if (eventSeries().length > 0) {
-      <div class="mt-6 flex flex-wrap items-center gap-2">
-        <span class="text-sm text-[var(--color-text-muted)]"
-          >{{ 'series.partOf' | transloco }}:</span
-        >
-        @for (s of eventSeries(); track s.id) {
-          <a [routerLink]="['/series', s.slug]">
-            <ui-chip>{{ s.name }}</ui-chip>
-          </a>
-        }
-      </div>
     }
 
     <!-- Description -->

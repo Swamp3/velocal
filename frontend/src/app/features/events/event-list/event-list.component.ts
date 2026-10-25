@@ -26,6 +26,7 @@ import { ButtonComponent, ButtonStyleDirective, ChipComponent, PaginationCompone
 import { toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
+import { RacingService } from '@core/services/racing.service';
 
 const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
 
@@ -67,6 +68,14 @@ export class EventListComponent implements OnInit {
   readonly limit = signal(20);
 
   readonly futureOnly = signal(true);
+  /** Only events with a class fitting the rider's profile (signed in). */
+  readonly fitsMe = signal(false);
+  readonly championshipOnly = signal(false);
+  readonly hideLeagues = signal(false);
+  /** '' (all), a format, or `touring` for all Breitensport formats. */
+  readonly format = signal('');
+  /** All touring formats together are the "Breitensport" discipline chip. */
+  protected readonly formatOptions = inject(RacingService).formats;
   readonly selectedYear = signal<number | null>(null);
   readonly availableYears = computed(() => {
     const currentYear = new Date().getFullYear();
@@ -157,6 +166,10 @@ export class EventListComponent implements OnInit {
 
     effect(() => {
       this.filterStateService.selectedDisciplines();
+      this.fitsMe();
+      this.championshipOnly();
+      this.hideLeagues();
+      this.format();
       this.dateFrom();
       this.dateTo();
       this.page();
@@ -209,6 +222,18 @@ export class EventListComponent implements OnInit {
 
   onSearchInput(event: Event): void {
     this.searchInput$.next((event.target as HTMLInputElement).value);
+  }
+
+  onRacingFilter(which: 'fitsMe' | 'championship' | 'hideLeagues'): void {
+    const target =
+      which === 'fitsMe' ? this.fitsMe : which === 'championship' ? this.championshipOnly : this.hideLeagues;
+    target.set(!target());
+    this.page.set(1);
+  }
+
+  onFormatChange(value: string): void {
+    this.format.set(value);
+    this.page.set(1);
   }
 
   onDisciplineChange(slugs: string[]): void {
@@ -324,6 +349,10 @@ export class EventListComponent implements OnInit {
     this.skipNextUrlSync = true;
 
     this.searchQuery.set(params['q'] ?? '');
+    this.fitsMe.set(params['fitsMe'] === 'true');
+    this.championshipOnly.set(params['championship'] === 'true');
+    this.hideLeagues.set(params['hideLeagues'] === 'true');
+    this.format.set(typeof params['format'] === 'string' ? params['format'] : '');
     if (params['discipline']) {
       this.filterStateService.setDisciplines(params['discipline'].split(','));
     }
@@ -370,6 +399,10 @@ export class EventListComponent implements OnInit {
       radius: this.geoActive() && this.radius() != null ? String(this.radius()) : undefined,
       lat: this.userLat() != null ? String(this.userLat()) : undefined,
       lng: this.userLng() != null ? String(this.userLng()) : undefined,
+      fitsMe: this.fitsMe() ? 'true' : undefined,
+      championship: this.championshipOnly() ? 'true' : undefined,
+      hideLeagues: this.hideLeagues() ? 'true' : undefined,
+      format: this.format() || undefined,
     };
 
     this.router.navigate([], {
@@ -392,6 +425,10 @@ export class EventListComponent implements OnInit {
       page: this.page(),
       limit: this.limit(),
     };
+    if (this.fitsMe() && this.authService.isAuthenticated()) params.fitsMe = true;
+    if (this.championshipOnly()) params.championship = true;
+    if (this.hideLeagues()) params.hideLeagues = true;
+    if (this.format()) params.format = this.format();
 
     if (this.userLat() != null && this.userLng() != null) {
       params.lat = this.userLat()!;

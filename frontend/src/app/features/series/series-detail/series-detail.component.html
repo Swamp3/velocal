@@ -50,11 +50,18 @@
       @if (s.discipline) {
         <app-discipline-chip [discipline]="s.discipline" />
       }
-      @if (s.year) {
+      @if (s.kind && s.kind !== 'series') {
+        <span
+          class="inline-flex items-center rounded-full bg-[var(--color-primary)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)]"
+        >
+          {{ 'series.kind.' + s.kind | transloco }}
+        </span>
+      }
+      @if (s.season || s.year) {
         <span
           class="inline-flex items-center rounded-full bg-[var(--color-bg-alt)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-muted)]"
         >
-          {{ s.year }}
+          {{ s.season ?? s.year }}
         </span>
       }
     </div>

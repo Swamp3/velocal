@@ -142,12 +142,57 @@
       "meetupError": "Could not save the meetup details",
       "membersOnly": "Members only",
       "registrationStart": "Registration opens",
-      "registrationNotOpen": "Registration has not opened yet."
+      "registrationNotOpen": "Registration has not opened yet.",
+      "sources": "Sources"
     },
     "status": {
       "published": "Published",
       "cancelled": "Cancelled",
       "completed": "Completed"
+    },
+    "importInfo": {
+      "title": "Import (admins only)",
+      "origin": "Origin",
+      "run": "Import run",
+      "lastSeen": "Last listed",
+      "missingSince": "No longer listed since",
+      "edited": "Edited by hand (kept on import)",
+      "sources": "Sources and checks",
+      "checkedAt": "checked {{date}}",
+      "updatedAt": "source updated {{date}}",
+      "conflicts": "{{count}} conflicts between sources"
+    },
+    "racing": {
+      "fitsMe": "Fits me",
+      "fitsMeHint": "Uses your year of birth, gender and licence from your profile",
+      "championship": "Championships",
+      "hideLeagues": "Hide league matchdays"
+    },
+    "format": {
+      "label": "Format",
+      "unknown": "Not specified",
+      "all": "All formats",
+      "filterLabel": "Filter by format",
+      "race": "Licence race",
+      "jedermann": "Open race (Jedermann)",
+      "rtf": "RTF (road tour)",
+      "ctf": "CTF (off-road tour)",
+      "marathon": "Cycling marathon",
+      "brevet": "Brevet",
+      "gravel_ride": "Gravel ride",
+      "tour": "Group ride",
+      "hint": {
+        "race": "Race under competition rules; usually with a licence or day licence, hobby classes without.",
+        "jedermann": "Timed race open to riders without licence (also Gran Fondo). Licensed riders often only of some classes or ranked separately.",
+        "rtf": "Road tour on signposted routes (20–199 km) with checkpoints and food stops, no timing or placings.",
+        "ctf": "Off-road tour for MTB and cross bikes, no timing or placings.",
+        "marathon": "Long road routes of 200 km and more, no timing or placings.",
+        "brevet": "Randonneur ride (200/300/400/600 km) with a time limit and no placings; counts e.g. for Paris–Brest–Paris.",
+        "gravel_ride": "Gravel tour on tracks and farm roads, no timing or placings.",
+        "tour": "Leisure ride or club tour for everyone.",
+        "kids": "Races for children without licence on their own bike (fat-tyre races: tyres from 30 mm, no road bikes) or balance bike; usually helmet required and parental consent. The filter also finds events with a children's class (up to 12)."
+      },
+      "kids": "Kids' races (fat tyres, balance bike)"
     }
   },
   "event": {
@@ -317,7 +362,9 @@
       "personal": "Personal details",
       "personalHint": "Your name and how others see you.",
       "region": "Region and language",
-      "regionHint": "Home area for event suggestions, language and number formats."
+      "regionHint": "Home area for event suggestions, language and number formats.",
+      "rider": "Racing",
+      "riderHint": "Find classes you may start in."
     },
     "disciplinesHint": "Choose the types of events you are interested in. They are used as a default filter.",
     "title": "Profile",
@@ -416,7 +463,23 @@
       "error": "Could not load your events.",
       "cancelled": "Cancelled",
       "subtitle": "Events you signed up for that are still ahead."
-    }
+    },
+    "birthYear": "Year of birth",
+    "birthYearPlaceholder": "e.g. 1990",
+    "birthYearInvalid": "Four digits, e.g. 1990",
+    "gender": "Gender",
+    "genderFemale": "Female",
+    "genderMale": "Male",
+    "genderDiverse": "Diverse",
+    "notSpecified": "Not specified",
+    "license": "Licence",
+    "riderPrivacy": "Only used for the \"Fits me\" filter and the class hints on events. Nobody else sees it.",
+    "licenseNone": "No licence (hobby/open races)",
+    "licenseFederation": "Federation licence (e.g. BDR)",
+    "licenseUci": "UCI licence (pro/continental team)",
+    "licenseClass": "Licence class",
+    "category": "Your age category {{year}}: {{category}}",
+    "mastersChoice": " – with a licence you may also choose elite amateurs or amateurs."
   },
   "series": {
     "title": "Race Series",
@@ -445,7 +508,19 @@
     "notFoundMessage": "This race series does not exist or has been removed.",
     "image": "Cover image",
     "externalUrl": "External Link",
-    "externalUrlLabel": "External URL"
+    "externalUrlLabel": "External URL",
+    "kindLabel": "Format",
+    "kind": {
+      "series": "Series",
+      "cup": "Cup (runs)",
+      "league": "League (matchdays)"
+    },
+    "season": "Season",
+    "round": {
+      "series": "Round {{n}}",
+      "cup": "Run {{n}}",
+      "league": "Matchday {{n}}"
+    }
   },
   "validation": {
     "required": "Required",
@@ -582,6 +657,107 @@
         "updated": "Updated",
         "skipped": "Skipped",
         "total": "Total"
+      },
+      "file": {
+        "title": "Import file",
+        "intro": "Choose a JSON file with events. It is checked first; nothing is saved until you import. Errors block the import, warnings have to be confirmed.",
+        "choose": "Choose file",
+        "other": "Choose another file",
+        "recheck": "Check again",
+        "formatHint": "Format: docs/IMPORT-FILE-FORMAT.md in the repository. One file per source, up to 5000 events, max. 10 MB.",
+        "tooLarge": "The file is larger than 10 MB. Split it into several files.",
+        "notJson": "The file is not valid JSON: {{detail}}",
+        "checking": "Checking…",
+        "blocked": "{{count}} errors: the file cannot be imported. Fix them in the file and check again.",
+        "confirmNeeded": "No errors, but {{count}} warnings. Look at them before importing.",
+        "ready": "No errors or warnings. The file can be imported.",
+        "sourceLine": "Source: {{source}} · {{complete}}",
+        "completeYes": "complete list (missing upcoming events of this source are marked as no longer listed)",
+        "completeNo": "partial list (nothing is marked as missing)",
+        "confirm": "I have looked at the {{count}} warnings",
+        "import": "Import ({{count}} new or changed)",
+        "refused": "The server refused the import. See the report.",
+        "jobRunning": "Importing…",
+        "done": "Import finished"
+      },
+      "report": {
+        "errors": "Errors",
+        "warnings": "Warnings",
+        "search": "Search name or id",
+        "filter": {
+          "all": "All",
+          "errors": "With errors",
+          "warnings": "With warnings"
+        },
+        "none": "No entries",
+        "more": "Show {{count}} more",
+        "changes": "{{count}} changed fields",
+        "openEvent": "Open event",
+        "noCoordinates": "{{count}} events have no coordinates; their place is looked up during the import.",
+        "open": "Report",
+        "missing": "This run has no report (runs before this feature).",
+        "notFound": "Import run not found"
+      },
+      "action": {
+        "create": "New",
+        "update": "Changed",
+        "unchanged": "Unchanged",
+        "skip": "Skipped",
+        "invalid": "Invalid"
+      },
+      "issue": {
+        "fileNotObject": "The file must be a JSON object with sourceName and events.",
+        "sourceNameInvalid": "sourceName must be 3-40 characters: lower-case letters, digits and hyphens.",
+        "eventsMissing": "events must be a non-empty list.",
+        "tooManyEvents": "At most {{max}} events per file.",
+        "eventNotObject": "The event must be a JSON object.",
+        "unknownField": "Unknown field \"{{field}}\" is ignored.",
+        "required": "{{field}} is missing.",
+        "type": "{{field}} must be of type {{expected}}.",
+        "tooShort": "{{field}} needs at least {{min}} characters.",
+        "tooLong": "{{field}} may have at most {{max}} characters.",
+        "duplicateExternalId": "externalId is already used by event #{{other}}.",
+        "locationPlaceholder": "\"{{value}}\" is not a real place.",
+        "locationVague": "\"{{value}}\" names the town but not the venue.",
+        "disciplineUnknown": "Unknown discipline \"{{value}}\".",
+        "statusUnknown": "Unknown status \"{{value}}\" (published, cancelled, completed).",
+        "countryInvalid": "Country \"{{value}}\" must be a two-letter code such as DE.",
+        "urlInvalid": "{{field}} must be a full http(s) link.",
+        "dateInvalid": "{{field}} \"{{value}}\" is not a valid date (YYYY-MM-DD or ISO 8601 with offset).",
+        "dateNeedsOffset": "{{field}} \"{{value}}\" needs a time zone offset such as +01:00.",
+        "startTimeKnownMismatch": "startTimeKnown is true, but startDate has no time.",
+        "timeIgnored": "startDate has a time, but startTimeKnown is false: only the day is shown.",
+        "endBeforeStart": "The end is before the start.",
+        "pastEvent": "The event is in the past ({{value}}).",
+        "farFuture": "The event is more than two years ahead ({{value}}).",
+        "deadlineAfterStart": "The registration deadline is after the event.",
+        "sameNameSameDay": "Same name on the same day as event #{{other}}.",
+        "coordinatesIncomplete": "Give both lat and lng, or neither.",
+        "coordinateInvalid": "{{field}} is not a valid coordinate.",
+        "noCoordinates": "No coordinates: the place is looked up.",
+        "sourceInvalid": "{{field}} is missing.",
+        "conflictInvalid": "{{field}} must be a text or an object with \"field\".",
+        "hasConflicts": "{{count}} documented conflicts between sources. Shown to admins on the event.",
+        "possibleDuplicate": "Looks like the existing event \"{{name}}\" ({{source}}): not imported, nothing is changed.",
+        "protectedFields": "Edited by hand, kept: {{fields}}.",
+        "otherSource": "Belongs to another source ({{source}}) or was created by hand: not changed.",
+        "markedMissing": "{{count}} upcoming events of this source are not in the file and will be marked as no longer listed.",
+        "geocodeFailed": "The place could not be found: the event is not shown on the map.",
+        "saveFailed": "Could not be saved: {{message}}",
+        "championshipUnknown": "Unknown championship level {{value}}.",
+        "classInvalid": "{{field}} must be an object.",
+        "classGenderUnknown": "Unknown gender {{value}} (open, male, female).",
+        "classLicenseUnknown": "Unknown licence {{value}} (open, unlicensed, license, uci).",
+        "ageInvalid": "{{field}} must be a whole number of years.",
+        "ageRange": "The upper age is lower than the lower age.",
+        "seriesInvalid": "{{field}} must be an object.",
+        "seriesKindUnknown": "Unknown series kind {{value}} (series, cup, league).",
+        "roundInvalid": "{{field}} must be a whole number from 1.",
+        "seriesSummary": "{{total}} series in the file, {{created}} of them new.",
+        "classLicenseClassUnknown": "Unknown licence classes {{value}} (elite_amateur, amateur, master).",
+        "classCategoryUnknown": "Unknown age category {{value}} (u11 … u23, elite, masters1 … masters4).",
+        "formatUnknown": "Unknown format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour, kids).",
+        "numberInvalid": "Must be a number from 0 to {{max}}."
       }
     },
     "users": {
@@ -897,7 +1073,7 @@
       "pushServicesTitle": "Push Delivery (browser and operating system vendors)",
       "pushServicesBody": "Push messages are delivered through the push service of your browser or device vendor (for example Google, Mozilla, Apple or Microsoft). Our server sends the message, encrypted for your device, to that service together with the subscription address; the vendor sees that a message was delivered to your device, but cannot read its content. Depending on the vendor, data may be processed outside the EU; the vendors rely on their own safeguards under Chapter V GDPR.",
       "profileTitle": "Profile and Memberships",
-      "profileBody": "In your profile you can voluntarily provide your first and last name (visible only to you and administrators), the postal code and country of your home (for the proximity search), a link or ID of your Strava profile (visible to members of your communities), language and format settings, preferred disciplines and favorites. Your memberships and roles in communities and subgroups are stored. We process this data to provide the features you choose (Art. 6(1)(b) GDPR); you can change or remove the optional details at any time.",
+      "profileBody": "In your profile you can voluntarily provide your first and last name (visible only to you and administrators), the postal code and country of your home (for the proximity search), a link or ID of your Strava profile (visible to members of your communities), language and format settings, preferred disciplines and favorites, as well as year of birth, gender and licence type (only for the filter of fitting race classes, visible to nobody else). Your memberships and roles in communities and subgroups are stored. We process this data to provide the features you choose (Art. 6(1)(b) GDPR); you can change or remove the optional details at any time.",
       "moderationTitle": "Reports and Moderation",
       "moderationBody": "Members can report content. Reports with reason, note and reporter, and actions taken by administrators (e.g. removing content, suspending communities or accounts with a reason) are stored in a log to follow up on abuse and protect the platform (Art. 6(1)(f) GDPR). The logs are visible to administrators only.",
       "analyticsTitle": "Reach Measurement",
@@ -1251,5 +1427,85 @@
       "post": "Report post",
       "comment": "Report comment"
     }
+  },
+  "classes": {
+    "title": "Classes",
+    "fitCount": "{{count}} of {{total}} fit you",
+    "setProfile": "Add year of birth and licence to see which classes fit you",
+    "fitsYou": "Fits you",
+    "years": "Born {{from}}–{{to}}",
+    "yearsAndOlder": "Born {{year}} and earlier",
+    "yearsAndYounger": "Born {{year}} and later",
+    "allAges": "All ages",
+    "start": "Start",
+    "count": "{{count}} classes",
+    "championshipAny": "Championship",
+    "championship": {
+      "club": "Club championship",
+      "district": "District championship",
+      "state": "State championship",
+      "regional": "Regional championship",
+      "national": "National championship",
+      "continental": "Continental championship",
+      "world": "World championship"
+    },
+    "gender": {
+      "open": "open",
+      "male": "men",
+      "female": "women"
+    },
+    "license": {
+      "open": "open to all",
+      "unlicensed": "hobby (no licence)",
+      "license": "licence required",
+      "uci": "UCI licence"
+    },
+    "formTitle": "Championship and classes",
+    "championshipLabel": "Championship (whole event)",
+    "noChampionship": "No championship",
+    "formHint": "One entry per rating class. An age category fills in the ages. Age counts by year of birth: the age reached in the event's year (U15 = 13 and 14).",
+    "name": "Class",
+    "namePlaceholder": "e.g. U15 male, Elite women, Hobby",
+    "genderLabel": "Who",
+    "licenseLabel": "Licence",
+    "ageMin": "Age from",
+    "ageMax": "Age to",
+    "championshipShort": "Championship",
+    "note": "Note",
+    "remove": "Remove class",
+    "add": "Add class",
+    "dayLicense": "day licence possible",
+    "dayLicenseLabel": "Day licence possible",
+    "licenseClassesLabel": "Licensed riders only:",
+    "licenseClass": {
+      "elite_amateur": "Elite amateurs",
+      "amateur": "Amateurs",
+      "master": "Masters"
+    },
+    "categoryLabel": "Age category",
+    "category": {
+      "u7": "U7 (balance bike, up to 6)",
+      "u9": "U9 (7–8)",
+      "u11": "U11 (9–10)",
+      "u13": "U13",
+      "u15": "U15",
+      "u17": "U17",
+      "u19": "U19 (juniors)",
+      "u23": "U23",
+      "elite": "Elite",
+      "masters1": "Masters 1 (30–39)",
+      "masters2": "Masters 2 (40–49)",
+      "masters3": "Masters 3 (50–59)",
+      "masters4": "Masters 4 (60+)"
+    },
+    "routesTitle": "Routes",
+    "addRoute": "Add route",
+    "distanceKm": "Length (km)",
+    "elevationM": "Climbing (m)",
+    "km": "{{value}} km",
+    "hm": "{{value}} m",
+    "formHintTouring": "One entry per route with length and climbing. Add a minimum age or notes (e.g. \"under 18 only with parental consent\") where needed.",
+    "routeCount": "{{count}} routes",
+    "removeRoute": "Remove route"
   }
 }

@@ -450,6 +450,143 @@
         />
       </div>
 
+      <!-- Championship and rating classes -->
+      <fieldset class="space-y-4 rounded-2xl border border-[var(--color-border)] p-4">
+        <legend class="px-2 text-sm font-semibold text-[var(--color-text)]">
+          {{ 'classes.formTitle' | transloco }}
+        </legend>
+        <div>
+          <label for="format" class="block text-sm text-[var(--color-text-muted)]">
+            {{ 'events.format.label' | transloco }}
+          </label>
+          <select id="format" formControlName="format" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+            <option value="">{{ 'events.format.unknown' | transloco }}</option>
+            @for (f of formats(); track f) {
+              <option [value]="f">{{ 'events.format.' + f | transloco }}</option>
+            }
+          </select>
+          @if (form.controls.format.value) {
+            <p class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'events.format.hint.' + form.controls.format.value | transloco }}</p>
+          }
+        </div>
+        <div>
+          <label for="championship" class="block text-sm text-[var(--color-text-muted)]">
+            {{ 'classes.championshipLabel' | transloco }}
+          </label>
+          <select id="championship" formControlName="championship" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+            <option value="">{{ 'classes.noChampionship' | transloco }}</option>
+            @for (level of championshipLevels(); track level) {
+              <option [value]="level">{{ 'classes.championship.' + level | transloco }}</option>
+            }
+          </select>
+        </div>
+        <p class="text-xs text-[var(--color-text-muted)]">{{ (isTouring() ? 'classes.formHintTouring' : 'classes.formHint') | transloco }}</p>
+        <div formArrayName="classes" class="space-y-3">
+          @for (cls of form.controls.classes.controls; track cls; let i = $index) {
+            <div [formGroupName]="i" class="space-y-3 rounded-xl bg-[var(--color-bg-alt)] p-3">
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label [for]="'cl-name-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.name' | transloco }}</label>
+                  <input [id]="'cl-name-' + i" formControlName="name" [placeholder]="'classes.namePlaceholder' | transloco" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label [for]="'cl-gender-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.genderLabel' | transloco }}</label>
+                    <select [id]="'cl-gender-' + i" formControlName="gender" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+                      <option value="open">{{ 'classes.gender.open' | transloco }}</option>
+                      <option value="female">{{ 'classes.gender.female' | transloco }}</option>
+                      <option value="male">{{ 'classes.gender.male' | transloco }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label [for]="'cl-license-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.licenseLabel' | transloco }}</label>
+                    <select [id]="'cl-license-' + i" formControlName="license" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+                      @for (value of classLicenses(); track value) {
+                        <option [value]="value">{{ 'classes.license.' + value | transloco }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+              @if (cls.controls.license.value !== 'unlicensed' && (!isTouring() || cls.controls.license.value !== 'open')) {
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--color-text)]">
+                  @if (cls.controls.license.value === 'license') {
+                    <label class="inline-flex items-center gap-2">
+                      <input type="checkbox" formControlName="dayLicense" class="h-4 w-4 accent-[var(--color-primary)]" />
+                      {{ 'classes.dayLicenseLabel' | transloco }}
+                    </label>
+                  }
+                  <span class="text-[var(--color-text-muted)]">{{ 'classes.licenseClassesLabel' | transloco }}</span>
+                  @for (value of licenseClassOptions(); track value) {
+                    <label class="inline-flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 accent-[var(--color-primary)]"
+                        [checked]="cls.controls.licenseClasses.value.includes(value)"
+                        (change)="toggleLicenseClass(i, value, $any($event.target).checked)"
+                      />
+                      {{ 'classes.licenseClass.' + value | transloco }}
+                    </label>
+                  }
+                </div>
+              }
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                <div>
+                  <label [for]="'cl-cat-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.categoryLabel' | transloco }}</label>
+                  <select [id]="'cl-cat-' + i" formControlName="category" (change)="onCategoryChange(i)" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+                    <option value="">—</option>
+                    @for (c of categories(); track c.key) {
+                      <option [value]="c.key">{{ 'classes.category.' + c.key | transloco }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label [for]="'cl-min-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.ageMin' | transloco }}</label>
+                  <input [id]="'cl-min-' + i" type="number" min="0" max="120" formControlName="ageMin" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'cl-max-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.ageMax' | transloco }}</label>
+                  <input [id]="'cl-max-' + i" type="number" min="0" max="120" formControlName="ageMax" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'cl-start-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.start' | transloco }}</label>
+                  <input [id]="'cl-start-' + i" formControlName="startTime" placeholder="HH:mm" maxlength="5" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'cl-ch-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.championshipShort' | transloco }}</label>
+                  <select [id]="'cl-ch-' + i" formControlName="championship" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+                    <option value="">—</option>
+                    @for (level of championshipLevels(); track level) {
+                      <option [value]="level">{{ 'classes.championship.' + level | transloco }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <label [for]="'cl-km-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.distanceKm' | transloco }}</label>
+                  <input [id]="'cl-km-' + i" type="number" min="0" max="9999" step="0.1" formControlName="distanceKm" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'cl-hm-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.elevationM' | transloco }}</label>
+                  <input [id]="'cl-hm-' + i" type="number" min="0" max="99999" formControlName="elevationM" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+              </div>
+              <div>
+                <label [for]="'cl-note-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.note' | transloco }}</label>
+                <input [id]="'cl-note-' + i" formControlName="note" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+              </div>
+              <ui-button type="button" variant="outline" size="sm" (click)="removeClass(i)">
+                {{ (isTouring() ? 'classes.removeRoute' : 'classes.remove') | transloco }}
+              </ui-button>
+            </div>
+          }
+        </div>
+        <ui-button type="button" variant="outline" size="sm" (click)="addClass()">
+          {{ (isTouring() ? 'classes.addRoute' : 'classes.add') | transloco }}
+        </ui-button>
+      </fieldset>
+
       <!-- Ride details: route, Strava links, pace groups -->
       <fieldset class="space-y-4 rounded-2xl border border-[var(--color-border)] p-4">
         <legend class="px-2 text-sm font-semibold text-[var(--color-text)]">

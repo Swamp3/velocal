@@ -1,3 +1,7 @@
+import type { LicenseClass, RiderGender, RiderLicense } from '@shared/models';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
+import { RacingService } from '@core/services/racing.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -89,6 +93,35 @@ export class ProfileComponent implements OnInit {
     homeCountry: [''],
     preferredLanguage: ['de', Validators.required],
     preferredLocale: ['de', Validators.required],
+    birthYear: ['', [Validators.pattern(/^(19|20)\d{2}$/)]],
+    gender: [''],
+    licenseType: [''],
+    licenseClass: [''],
+  });
+
+  private readonly racing = inject(RacingService);
+  private readonly riderValues = toSignal(
+    this.profileForm.valueChanges.pipe(startWith(this.profileForm.value)),
+    { initialValue: this.profileForm.value },
+  );
+  private readonly riderAge = computed(() => {
+    const year = Number(this.riderValues().birthYear);
+    return /^(19|20)\d{2}$/.test(String(this.riderValues().birthYear ?? '')) ? new Date().getFullYear() - year : null;
+  });
+
+  /** Licence classes a licensed rider of this age can hold (none for youth licences). */
+  protected readonly licenseClassOptions = computed<LicenseClass[]>(() => {
+    const type = this.riderValues().licenseType;
+    return type === 'license' || type === 'uci' ? this.racing.licenseClassesForAge(this.riderAge()) : [];
+  });
+
+  /** The age category of this year, derived from the year of birth. */
+  protected readonly riderCategory = computed(() => {
+    const age = this.riderAge();
+    if (age == null) return null;
+    const key = this.racing.categoryForAge(age);
+    if (!key) return null;
+    return { key, year: new Date().getFullYear(), mastersChoice: key.startsWith('masters') };
   });
 
   ngOnInit(): void {
@@ -120,6 +153,10 @@ export class ProfileComponent implements OnInit {
       homeCountry: user.homeCountry ?? '',
       preferredLanguage: user.preferredLanguage ?? 'de',
       preferredLocale: user.preferredLocale ?? 'de',
+      birthYear: user.birthYear ? String(user.birthYear) : '',
+      gender: user.gender ?? '',
+      licenseType: user.licenseType ?? '',
+      licenseClass: user.licenseClass ?? '',
     });
   }
 
@@ -140,7 +177,17 @@ export class ProfileComponent implements OnInit {
     this.saving.set(true);
 
     const vals = this.profileForm.getRawValue();
-    this.userService.updateProfile(vals).subscribe({
+    this.userService
+      .updateProfile({
+        ...vals,
+        birthYear: vals.birthYear ? Number(vals.birthYear) : null,
+        gender: (vals.gender || null) as RiderGender | null,
+        licenseType: (vals.licenseType || null) as RiderLicense | null,
+        licenseClass: this.licenseClassOptions().includes(vals.licenseClass as LicenseClass)
+          ? (vals.licenseClass as LicenseClass)
+          : null,
+      })
+      .subscribe({
       next: (user) => {
         this.auth.updateCurrentUser(user);
 
