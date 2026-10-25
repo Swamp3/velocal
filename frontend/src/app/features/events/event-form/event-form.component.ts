@@ -372,8 +372,14 @@ export class EventFormComponent implements OnInit {
       name: raw.name,
       description: raw.description || undefined,
       disciplineSlug: raw.disciplineSlug,
-      startDate: this.combineDatetime(raw.startDate, raw.startTime),
-      endDate: raw.endDate ? this.combineDatetime(raw.endDate, raw.endTime) : undefined,
+      // Without a time only the day is sent; the server stores it as midnight in Germany.
+      startDate: raw.startTime ? this.combineDatetime(raw.startDate, raw.startTime) : this.parseDate(raw.startDate),
+      startTimeKnown: !!raw.startTime,
+      endDate: raw.endDate
+        ? raw.endTime || raw.startTime
+          ? this.combineDatetime(raw.endDate, raw.endTime)
+          : this.parseDate(raw.endDate)
+        : undefined,
       locationName: raw.locationName,
       address: raw.address || undefined,
       country: raw.country || undefined,

@@ -31,7 +31,7 @@ import { EventPaceGroup } from './entities/event-pace-group.entity';
 import { EventStravaLink } from './entities/event-strava-link.entity';
 import { Route } from '../routes/entities/route.entity';
 import { serializeRoute } from '../routes/serialize';
-import { berlinTimeOfDay } from '../import/dates';
+import { berlinTimeOfDay, parseEventDate } from '../import/dates';
 import { IMPORT_FIELDS } from '../import/import-diff';
 import {
   PaceGroupDto,
@@ -762,10 +762,9 @@ export class EventsService {
       source: userId ? EventSource.MANUAL : (dto.source ?? EventSource.MANUAL),
       disciplineSlug: disciplineFor(dto.disciplineSlug, dto.format),
       createdById: userId ?? undefined,
-      startDate: new Date(dto.startDate),
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      startTimeKnown:
-        dto.startTimeKnown ?? hasBerlinTime(new Date(dto.startDate)),
+      startDate: toEventDate(dto.startDate).date,
+      endDate: dto.endDate ? toEventDate(dto.endDate).date : undefined,
+      startTimeKnown: dto.startTimeKnown ?? timeGiven(dto.startDate),
       registrationStart: dto.registrationStart
         ? new Date(dto.registrationStart)
         : undefined,
@@ -839,13 +838,12 @@ export class EventsService {
     }
 
     if (dto.startDate) {
-      partial.startDate = new Date(dto.startDate);
-      partial.startTimeKnown =
-        dto.startTimeKnown ?? hasBerlinTime(partial.startDate);
+      partial.startDate = toEventDate(dto.startDate).date;
+      partial.startTimeKnown = dto.startTimeKnown ?? timeGiven(dto.startDate);
     } else if (dto.startTimeKnown !== undefined) {
       partial.startTimeKnown = dto.startTimeKnown;
     }
-    if (dto.endDate) partial.endDate = new Date(dto.endDate);
+    if (dto.endDate) partial.endDate = toEventDate(dto.endDate).date;
     if (dto.registrationStart !== undefined) {
       partial.registrationStart = dto.registrationStart
         ? new Date(dto.registrationStart)
@@ -2324,9 +2322,18 @@ export class EventsService {
   }
 }
 
-/** A time other than midnight in Europe/Berlin was given. */
-function hasBerlinTime(date: Date): boolean {
-  return berlinTimeOfDay(date) !== '00:00';
+/** `YYYY-MM-DD` (day only) is Berlin midnight of that day; anything else an instant. */
+function toEventDate(value: string): { date: Date; dayOnly: boolean } {
+  const parsed = parseEventDate(value);
+  return parsed.kind === 'date'
+    ? { date: parsed.date, dayOnly: true }
+    : { date: new Date(value), dayOnly: false };
+}
+
+/** A time was given: not a plain day, and not midnight in Europe/Berlin. */
+function timeGiven(value: string): boolean {
+  const { date, dayOnly } = toEventDate(value);
+  return !dayOnly && berlinTimeOfDay(date) !== '00:00';
 }
 
 /** Fields of an imported event that this edit actually changes. */

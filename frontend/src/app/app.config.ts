@@ -18,6 +18,7 @@ import { provideTransloco } from '@jsverse/transloco';
 
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
+import { eventDatesInterceptor } from '@core/interceptors/event-dates.interceptor';
 import { InstallPromptService } from '@core/services/install-prompt.service';
 import { AppUpdateService } from '@core/services/app-update.service';
 import { AuthService } from '@core/services/auth.service';
@@ -52,7 +53,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => inject(InstallPromptService).start()),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor, eventDatesInterceptor])),
     provideTransloco({
       config: {
         availableLangs: ['de', 'en'],
