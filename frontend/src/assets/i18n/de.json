@@ -167,6 +167,31 @@
       "fitsMeHint": "Nutzt Jahrgang, Geschlecht und Lizenz aus deinem Profil",
       "championship": "Meisterschaften",
       "hideLeagues": "Ligaspieltage ausblenden"
+    },
+    "format": {
+      "label": "Format",
+      "unknown": "Nicht angegeben",
+      "all": "Alle Formate",
+      "filterLabel": "Format filtern",
+      "race": "Lizenzrennen",
+      "jedermann": "Jedermannrennen",
+      "touring": "Breitensport (alle Touren)",
+      "rtf": "RTF",
+      "ctf": "CTF",
+      "marathon": "Radmarathon",
+      "brevet": "Brevet",
+      "gravel_ride": "Gravel-Tour",
+      "tour": "Radtour",
+      "hint": {
+        "race": "Rennen nach Wettkampfbestimmungen; Start meist mit Lizenz oder Tageslizenz, Hobbyklassen ohne Lizenz.",
+        "jedermann": "Rennen mit Zeitnahme für alle ohne Lizenz (auch Gran Fondo). Lizenzfahrer oft nur bestimmter Klassen oder getrennt gewertet.",
+        "rtf": "Radtourenfahrt auf ausgeschilderten Straßenstrecken (20–199 km), mit Kontrollen und Verpflegung, ohne Zeitnahme und Platzierung.",
+        "ctf": "Country-Tourenfahrt im Gelände für MTB und Crossräder, ohne Zeitnahme und Platzierung.",
+        "marathon": "Radmarathon: lange Straßenstrecken ab 200 km, ohne Zeitnahme und Platzierung.",
+        "brevet": "Langstreckenfahrt der Randonneure (200/300/400/600 km) mit Zeitlimit, ohne Platzierung; zählt z. B. für Paris–Brest–Paris.",
+        "gravel_ride": "Gravel-Tour auf Schotter und Feldwegen, ohne Zeitnahme und Platzierung.",
+        "tour": "Radwandern, Volksradfahren oder Vereinstour für alle."
+      }
     }
   },
   "event": {
@@ -729,7 +754,9 @@
         "roundInvalid": "{{field}} muss eine ganze Zahl ab 1 sein.",
         "seriesSummary": "{{total}} Serien in der Datei, davon {{created}} neu.",
         "classLicenseClassUnknown": "Unbekannte Lizenzklassen {{value}} (elite_amateur, amateur, master).",
-        "classCategoryUnknown": "Unbekannte Altersklasse {{value}} (u11 … u23, elite, masters1 … masters4)."
+        "classCategoryUnknown": "Unbekannte Altersklasse {{value}} (u11 … u23, elite, masters1 … masters4).",
+        "formatUnknown": "Unbekanntes Format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour).",
+        "numberInvalid": "Muss eine Zahl von 0 bis {{max}} sein."
       }
     },
     "users": {
@@ -1467,6 +1494,15 @@
       "masters2": "Masters 2 (40–49)",
       "masters3": "Masters 3 (50–59)",
       "masters4": "Masters 4 (60+)"
-    }
+    },
+    "routesTitle": "Strecken",
+    "addRoute": "Strecke hinzufügen",
+    "distanceKm": "Länge (km)",
+    "elevationM": "Höhenmeter",
+    "km": "{{value}} km",
+    "hm": "{{value}} hm",
+    "formHintTouring": "Ein Eintrag pro Strecke mit Länge und Höhenmetern. Mindestalter oder Hinweise (z. B. „unter 18 nur mit Einverständnis der Eltern“) bei Bedarf angeben.",
+    "routeCount": "{{count}} Strecken",
+    "removeRoute": "Strecke entfernen"
   }
 }

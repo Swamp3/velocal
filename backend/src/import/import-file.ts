@@ -5,6 +5,7 @@ import type {
 } from '../events/entities/event.entity';
 import { berlinDay, parseEventDate } from './dates';
 import { CATEGORY_KEYS, classAges } from '../events/categories';
+import { EVENT_FORMATS, type EventFormat } from '../events/formats';
 import type {
   RawEvent,
   RawEventClass,
@@ -114,6 +115,7 @@ const EVENT_FIELDS = new Set([
   'conflicts',
   'classes',
   'championship',
+  'format',
   'series',
 ]);
 export const CHAMPIONSHIP_LEVELS = [
@@ -134,6 +136,8 @@ const CLASS_FIELDS = new Set([
   'license',
   'dayLicense',
   'licenseClasses',
+  'distanceKm',
+  'elevationM',
   'startTime',
   'championship',
   'note',
@@ -610,6 +614,24 @@ export function validateImportFile(
       }
     }
 
+    // Format
+    let format: EventFormat | undefined;
+    if (item.format !== undefined && item.format !== null) {
+      if (
+        typeof item.format !== 'string' ||
+        !(EVENT_FORMATS as readonly string[]).includes(item.format)
+      ) {
+        add({
+          severity: 'error',
+          code: 'formatUnknown',
+          field: 'format',
+          params: { value: show(item.format) },
+        });
+      } else {
+        format = item.format as EventFormat;
+      }
+    }
+
     // Rating classes
     let classes: RawEventClass[] | undefined;
     if (item.classes !== undefined) {
@@ -745,6 +767,32 @@ export function validateImportFile(
             }
             return value;
           };
+          const measure = (
+            key: 'distanceKm' | 'elevationM',
+            max: number,
+          ): number | null => {
+            const value = entry[key];
+            if (value === undefined || value === null) return null;
+            if (
+              typeof value !== 'number' ||
+              !Number.isFinite(value) ||
+              value < 0 ||
+              value > max
+            ) {
+              add({
+                severity: 'error',
+                code: 'numberInvalid',
+                field: `${field}.${key}`,
+                params: { max },
+              });
+              return null;
+            }
+            return key === 'elevationM'
+              ? Math.round(value)
+              : Math.round(value * 10) / 10;
+          };
+          const distanceKm = measure('distanceKm', 9999);
+          const elevationM = measure('elevationM', 99999);
           const { ageMin, ageMax } = classAges(
             category,
             age('ageMin'),
@@ -804,6 +852,8 @@ export function validateImportFile(
               : 'open') as RawEventClass['license'],
             dayLicense: entry.dayLicense === true,
             licenseClasses,
+            distanceKm,
+            elevationM,
             startTime,
             championship: typeof level === 'string' ? level : null,
             note,
@@ -931,6 +981,7 @@ export function validateImportFile(
       conflicts: conflicts.length ? conflicts : undefined,
       classes,
       championship,
+      format,
       series,
     });
   });
@@ -1003,6 +1054,9 @@ const MESSAGES: Record<string, (issue: ImportIssue) => string> = {
     `Unknown licence ${i.params?.value} (open, unlicensed, license, uci)`,
   classLicenseClassUnknown: (i) =>
     `Unknown licence classes ${i.params?.value} (elite_amateur, amateur, master)`,
+  formatUnknown: (i) =>
+    `Unknown format ${i.params?.value} (${EVENT_FORMATS.join(', ')})`,
+  numberInvalid: (i) => `Must be a number from 0 to ${i.params?.max}`,
   classCategoryUnknown: (i) =>
     `Unknown category ${i.params?.value} (${CATEGORY_KEYS.join(', ')})`,
   ageInvalid: (i) => `${i.field} must be a whole number of years`,

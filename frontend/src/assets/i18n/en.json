@@ -167,6 +167,31 @@
       "fitsMeHint": "Uses your year of birth, gender and licence from your profile",
       "championship": "Championships",
       "hideLeagues": "Hide league matchdays"
+    },
+    "format": {
+      "label": "Format",
+      "unknown": "Not specified",
+      "all": "All formats",
+      "filterLabel": "Filter by format",
+      "race": "Licence race",
+      "jedermann": "Open race (Jedermann)",
+      "touring": "Recreational (all rides)",
+      "rtf": "RTF (road tour)",
+      "ctf": "CTF (off-road tour)",
+      "marathon": "Cycling marathon",
+      "brevet": "Brevet",
+      "gravel_ride": "Gravel ride",
+      "tour": "Group ride",
+      "hint": {
+        "race": "Race under competition rules; usually with a licence or day licence, hobby classes without.",
+        "jedermann": "Timed race open to riders without licence (also Gran Fondo). Licensed riders often only of some classes or ranked separately.",
+        "rtf": "Road tour on signposted routes (20–199 km) with checkpoints and food stops, no timing or placings.",
+        "ctf": "Off-road tour for MTB and cross bikes, no timing or placings.",
+        "marathon": "Long road routes of 200 km and more, no timing or placings.",
+        "brevet": "Randonneur ride (200/300/400/600 km) with a time limit and no placings; counts e.g. for Paris–Brest–Paris.",
+        "gravel_ride": "Gravel tour on tracks and farm roads, no timing or placings.",
+        "tour": "Leisure ride or club tour for everyone."
+      }
     }
   },
   "event": {
@@ -729,7 +754,9 @@
         "roundInvalid": "{{field}} must be a whole number from 1.",
         "seriesSummary": "{{total}} series in the file, {{created}} of them new.",
         "classLicenseClassUnknown": "Unknown licence classes {{value}} (elite_amateur, amateur, master).",
-        "classCategoryUnknown": "Unknown age category {{value}} (u11 … u23, elite, masters1 … masters4)."
+        "classCategoryUnknown": "Unknown age category {{value}} (u11 … u23, elite, masters1 … masters4).",
+        "formatUnknown": "Unknown format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour).",
+        "numberInvalid": "Must be a number from 0 to {{max}}."
       }
     },
     "users": {
@@ -1467,6 +1494,15 @@
       "masters2": "Masters 2 (40–49)",
       "masters3": "Masters 3 (50–59)",
       "masters4": "Masters 4 (60+)"
-    }
+    },
+    "routesTitle": "Routes",
+    "addRoute": "Add route",
+    "distanceKm": "Length (km)",
+    "elevationM": "Climbing (m)",
+    "km": "{{value}} km",
+    "hm": "{{value}} m",
+    "formHintTouring": "One entry per route with length and climbing. Add a minimum age or notes (e.g. \"under 18 only with parental consent\") where needed.",
+    "routeCount": "{{count}} routes",
+    "removeRoute": "Remove route"
   }
 }

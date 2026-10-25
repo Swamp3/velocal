@@ -1,21 +1,21 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { TranslocoPipe } from '@jsverse/transloco';
-import type { EventClass } from '@shared/models';
+import { TOURING_FORMATS, type EventClass, type EventFormat } from '@shared/models';
 import { birthYears, classFits, hasRiderData } from '@shared/utils/event-class';
 
 /** Rating classes of an event; marks the ones that fit the signed-in rider. */
 @Component({
   selector: 'app-event-classes',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DatePipe, RouterLink],
+  imports: [TranslocoPipe, DatePipe, DecimalPipe, RouterLink],
   template: `
     <section class="mt-8" aria-labelledby="classes-heading">
       <div class="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="classes-heading" class="text-lg font-semibold text-[var(--color-text)]">
-          {{ 'classes.title' | transloco }}
+          {{ (touring() ? 'classes.routesTitle' : 'classes.title') | transloco }}
         </h2>
         @if (auth.isAuthenticated()) {
           @if (riderKnown()) {
@@ -49,6 +49,13 @@ import { birthYears, classFits, hasRiderData } from '@shared/utils/event-class';
                 }
               </p>
               <p class="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                @if (row.cls.distanceKm != null) {
+                  <span class="font-medium text-[var(--color-text)]">{{ 'classes.km' | transloco: { value: (row.cls.distanceKm | number: '1.0-1') } }}</span>
+                  @if (row.cls.elevationM != null) {
+                    <span class="font-medium text-[var(--color-text)]"> · {{ 'classes.hm' | transloco: { value: (row.cls.elevationM | number) } }}</span>
+                  }
+                  <span> · </span>
+                }
                 @if (row.years; as y) {
                   @if (y.from && y.to) {
                     {{ 'classes.years' | transloco: { from: y.from, to: y.to } }}
@@ -89,6 +96,13 @@ export class EventClassesComponent {
 
   readonly classes = input.required<EventClass[]>();
   readonly startDate = input.required<string>();
+  readonly format = input<EventFormat | null | undefined>(null);
+
+  /** Touring events (RTF, CTF …) list routes rather than rating classes. */
+  protected readonly touring = computed(() => {
+    const f = this.format();
+    return !!f && TOURING_FORMATS.includes(f);
+  });
 
   private readonly year = computed(() => new Date(this.startDate()).getFullYear());
   protected readonly riderKnown = computed(() => hasRiderData(this.auth.currentUser()));

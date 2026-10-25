@@ -51,6 +51,11 @@
         {{ (event().championship ? 'classes.championship.' + event().championship : 'classes.championshipAny') | transloco }}
       </span>
     }
+    @if (event().format; as format) {
+      <span class="inline-flex items-center rounded-full border border-[var(--color-border)] px-2.5 py-0.5 text-xs text-[var(--color-text-muted)]">
+        {{ 'events.format.' + format | transloco }}
+      </span>
+    }
     @for (series of event().series ?? []; track series.id) {
       <span class="inline-flex min-w-0 items-center gap-1 rounded-full border border-[var(--color-border)] px-2.5 py-0.5 text-xs text-[var(--color-text-muted)]">
         <span class="material-symbols-outlined text-[14px]" aria-hidden="true">{{ series.kind === 'league' ? 'groups' : 'emoji_events' }}</span>
@@ -59,7 +64,7 @@
     }
     @if (event().classes?.length) {
       <span class="text-xs text-[var(--color-text-muted)]">
-        {{ 'classes.count' | transloco: { count: event().classes!.length } }}
+        {{ (touring() ? 'classes.routeCount' : 'classes.count') | transloco: { count: event().classes!.length } }}
       </span>
     }
   </div>

@@ -28,10 +28,15 @@ import {
 } from './interfaces/import-source.interface';
 import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
+import { inferFormat } from '../events/formats';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
 /** Issues decided against the database; recomputed when the run writes. */
-const PLAN_CODES = new Set(['possibleDuplicate', 'otherSource', 'protectedFields']);
+const PLAN_CODES = new Set([
+  'possibleDuplicate',
+  'otherSource',
+  'protectedFields',
+]);
 
 /**
  * - `file`: events from a JSON file. An event is only ever updated when it was imported from
@@ -229,7 +234,8 @@ export class ImportService {
     }
 
     const seriesKeys = new Map<string, string>();
-    for (const raw of raws) for (const ref of raw.series ?? []) seriesKeys.set(ref.key, ref.name);
+    for (const raw of raws)
+      for (const ref of raw.series ?? []) seriesKeys.set(ref.key, ref.name);
     if (validated.sourceName && seriesKeys.size > 0) {
       const known = await this.dataSource.query<{ external_key: string }[]>(
         `SELECT "external_key" FROM "race_series" WHERE "source_name" = $1 AND "external_key" = ANY($2)`,
@@ -381,7 +387,9 @@ export class ImportService {
             startDate: raw.startDate.toISOString(),
             action: 'skip',
             // Keep the file's own warnings (conflicts, vague place …) in the run's report.
-            issues: (before?.issues ?? []).filter((i) => !PLAN_CODES.has(i.code)),
+            issues: (before?.issues ?? []).filter(
+              (i) => !PLAN_CODES.has(i.code),
+            ),
           };
           try {
             const plan = await this.planEvent(raw, mode, candidates);
@@ -412,7 +420,9 @@ export class ImportService {
               if (plan.action === 'unchanged' && plan.event) {
                 seenIds.add(plan.event.id);
                 const unchanged = plan.event;
-                await this.dataSource.transaction((m) => this.linkSeries(m, unchanged, raw));
+                await this.dataSource.transaction((m) =>
+                  this.linkSeries(m, unchanged, raw),
+                );
               }
               entry.eventId = plan.event?.id;
               skipped++;
@@ -532,7 +542,11 @@ export class ImportService {
             }),
           )
         : undefined;
-    const { changes, protected: kept } = diffImportedEvent(existing, raw, current);
+    const { changes, protected: kept } = diffImportedEvent(
+      existing,
+      raw,
+      current,
+    );
     const issues: ImportIssue[] = kept.length
       ? [
           {
@@ -673,11 +687,21 @@ export class ImportService {
         const year = Number(berlinDay(event.startDate).slice(0, 4));
         const slug = await this.freeSeriesSlug(
           manager,
-          `${ref.name} ${ref.season ?? year}`);
+          `${ref.name} ${ref.season ?? year}`,
+        );
         const [created] = await manager.query<{ id: string }[]>(
           `INSERT INTO "race_series" ("name", "slug", "year", "discipline_slug", "kind", "season", "source_name", "external_key")
            VALUES ($1, $2, $3, $4, $5::series_kind, $6, $7, $8) RETURNING "id"`,
-          [ref.name, slug, year, event.disciplineSlug, ref.kind, ref.season, raw.sourceName, ref.key],
+          [
+            ref.name,
+            slug,
+            year,
+            event.disciplineSlug,
+            ref.kind,
+            ref.season,
+            raw.sourceName,
+            ref.key,
+          ],
         );
         seriesId = created.id;
       }
@@ -749,6 +773,7 @@ export class ImportService {
       lastSeenAt: new Date(),
       disciplineSlug: raw.disciplineSlug,
       championship: raw.championship ?? null,
+      format: raw.format ?? inferFormat(raw.name),
     });
     // Event, classes and series links are saved together or not at all.
     return this.dataSource.transaction(async (manager) => {

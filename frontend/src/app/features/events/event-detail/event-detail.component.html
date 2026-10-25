@@ -105,6 +105,11 @@
     <div class="mt-5 flex flex-wrap items-center gap-2">
       <app-discipline-chip [discipline]="event.discipline" />
       <app-event-status-badge [status]="event.status" />
+      @if (event.format) {
+        <ui-chip [title]="'events.format.hint.' + event.format | transloco">
+          {{ 'events.format.' + event.format | transloco }}
+        </ui-chip>
+      }
       @if (event.recurrence) {
         <ui-chip>
           <span class="material-symbols-outlined text-[14px]" aria-hidden="true">repeat</span>
@@ -311,7 +316,7 @@
     }
 
     @if (event.classes?.length) {
-      <app-event-classes [classes]="event.classes!" [startDate]="event.startDate" />
+      <app-event-classes [classes]="event.classes!" [startDate]="event.startDate" [format]="event.format" />
     }
 
     @if (isAdmin() && event.source === 'imported') {

@@ -76,6 +76,18 @@
 
         <!-- Classes, championships, leagues -->
         <div class="mb-5 flex flex-wrap items-center gap-2">
+          <label class="sr-only" for="format-filter">{{ 'events.format.filterLabel' | transloco }}</label>
+          <select
+            id="format-filter"
+            [value]="format()"
+            (change)="onFormatChange($any($event.target).value)"
+            class="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
+          >
+            <option value="">{{ 'events.format.all' | transloco }}</option>
+            @for (f of formatOptions; track f) {
+              <option [value]="f">{{ 'events.format.' + f | transloco }}</option>
+            }
+          </select>
           @if (authService.isAuthenticated()) {
             <ui-chip [selected]="fitsMe()" icon="how_to_reg" (selectedChange)="onRacingFilter('fitsMe')">
               {{ 'events.racing.fitsMe' | transloco }}

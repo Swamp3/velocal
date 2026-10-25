@@ -30,6 +30,9 @@ import {
   Route,
   EventClass,
   LicenseClass,
+  EventFormat,
+  EVENT_FORMATS,
+  TOURING_FORMATS,
 } from '@shared/models';
 import { RIDER_CATEGORIES } from '@shared/utils/event-class';
 import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
@@ -153,6 +156,7 @@ export class EventFormComponent implements OnInit {
     stravaLinksText: new FormControl('', { nonNullable: true }),
     paceGroups: new FormArray<ReturnType<EventFormComponent['newPaceGroup']>>([]),
     championship: new FormControl<string>('', { nonNullable: true }),
+    format: new FormControl<string>('', { nonNullable: true }),
     classes: new FormArray<ReturnType<EventFormComponent['newClass']>>([]),
     stravaUrl: new FormControl('', { nonNullable: true }),
     meetupPlace: new FormControl('', { nonNullable: true }),
@@ -232,12 +236,19 @@ export class EventFormComponent implements OnInit {
         nonNullable: true,
         validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
       }),
+      distanceKm: new FormControl<number | null>(init?.distanceKm ?? null, [Validators.min(0), Validators.max(9999)]),
+      elevationM: new FormControl<number | null>(init?.elevationM ?? null, [Validators.min(0), Validators.max(99999)]),
       championship: new FormControl<string>(init?.championship ?? '', { nonNullable: true }),
       note: new FormControl(init?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
     });
   }
 
   protected readonly categories = RIDER_CATEGORIES;
+  protected readonly formats = EVENT_FORMATS;
+  /** Touring events (RTF, CTF …) list their routes instead of rating classes. */
+  protected isTouring(): boolean {
+    return TOURING_FORMATS.includes(this.form.controls.format.value as EventFormat);
+  }
   protected readonly licenseClassOptions: LicenseClass[] = ['elite_amateur', 'amateur', 'master'];
 
   /** Choosing a category fills its ages (and the name when empty). */
@@ -387,6 +398,7 @@ export class EventFormComponent implements OnInit {
           : undefined,
       externalUrl: raw.externalUrl || undefined,
       championship: raw.championship || null,
+      format: (raw.format || null) as EventFormat | null,
       ...(this.classesChanged || this.form.controls.classes.dirty || !this.isEdit()
         ? {
             classes: raw.classes.map((c) => ({
@@ -397,7 +409,9 @@ export class EventFormComponent implements OnInit {
               category: c.category || null,
               license: c.license,
               dayLicense: c.license === 'license' && c.dayLicense,
-              licenseClasses: c.license === 'license' || c.license === 'uci' ? c.licenseClasses : [],
+              licenseClasses: c.license === 'unlicensed' ? [] : c.licenseClasses,
+              distanceKm: c.distanceKm ?? null,
+              elevationM: c.elevationM ?? null,
               startTime: c.startTime ? this.combineDatetime(raw.startDate, c.startTime) : null,
               championship: c.championship || null,
               note: c.note.trim() || null,
@@ -550,6 +564,7 @@ export class EventFormComponent implements OnInit {
       routeId: event.routeId ?? '',
       stravaLinksText: this.linksToText(event.stravaLinks),
       championship: event.championship ?? '',
+      format: event.format ?? '',
     });
     this.form.controls.classes.clear();
     for (const cls of event.classes ?? []) this.form.controls.classes.push(this.newClass(cls));

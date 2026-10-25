@@ -107,6 +107,23 @@ export class EventClass {
   })
   licenseClasses: LicenseClass[] | null;
 
+  /** Length of the race or route (touring events list their routes as classes). */
+  @Column({
+    type: 'numeric',
+    precision: 6,
+    scale: 1,
+    name: 'distance_km',
+    nullable: true,
+    transformer: {
+      to: (value: number | null | undefined) => value ?? null,
+      from: (value: string | null) => (value == null ? null : Number(value)),
+    },
+  })
+  distanceKm: number | null;
+
+  @Column({ type: 'int', name: 'elevation_m', nullable: true })
+  elevationM: number | null;
+
   @Column({ type: 'timestamptz', name: 'start_time', nullable: true })
   startTime: Date | null;
 

@@ -71,6 +71,9 @@ export class EventListComponent implements OnInit {
   readonly fitsMe = signal(false);
   readonly championshipOnly = signal(false);
   readonly hideLeagues = signal(false);
+  /** '' (all), a format, or `touring` for all Breitensport formats. */
+  readonly format = signal('');
+  protected readonly formatOptions = ['race', 'jedermann', 'touring', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
   readonly selectedYear = signal<number | null>(null);
   readonly availableYears = computed(() => {
     const currentYear = new Date().getFullYear();
@@ -164,6 +167,7 @@ export class EventListComponent implements OnInit {
       this.fitsMe();
       this.championshipOnly();
       this.hideLeagues();
+      this.format();
       this.dateFrom();
       this.dateTo();
       this.page();
@@ -222,6 +226,11 @@ export class EventListComponent implements OnInit {
     const target =
       which === 'fitsMe' ? this.fitsMe : which === 'championship' ? this.championshipOnly : this.hideLeagues;
     target.set(!target());
+    this.page.set(1);
+  }
+
+  onFormatChange(value: string): void {
+    this.format.set(value);
     this.page.set(1);
   }
 
@@ -341,6 +350,7 @@ export class EventListComponent implements OnInit {
     this.fitsMe.set(params['fitsMe'] === 'true');
     this.championshipOnly.set(params['championship'] === 'true');
     this.hideLeagues.set(params['hideLeagues'] === 'true');
+    this.format.set(typeof params['format'] === 'string' ? params['format'] : '');
     if (params['discipline']) {
       this.filterStateService.setDisciplines(params['discipline'].split(','));
     }
@@ -390,6 +400,7 @@ export class EventListComponent implements OnInit {
       fitsMe: this.fitsMe() ? 'true' : undefined,
       championship: this.championshipOnly() ? 'true' : undefined,
       hideLeagues: this.hideLeagues() ? 'true' : undefined,
+      format: this.format() || undefined,
     };
 
     this.router.navigate([], {
@@ -415,6 +426,7 @@ export class EventListComponent implements OnInit {
     if (this.fitsMe() && this.authService.isAuthenticated()) params.fitsMe = true;
     if (this.championshipOnly()) params.championship = true;
     if (this.hideLeagues()) params.hideLeagues = true;
+    if (this.format()) params.format = this.format();
 
     if (this.userLat() != null && this.userLng() != null) {
       params.lat = this.userLat()!;

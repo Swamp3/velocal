@@ -20,6 +20,7 @@ export const IMPORT_FIELDS = [
   'sources',
   'importConflicts',
   'championship',
+  'format',
 ] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 
@@ -33,6 +34,8 @@ export interface ComparableClass {
   license: string;
   dayLicense: boolean;
   licenseClasses: string[] | null;
+  distanceKm: number | null;
+  elevationM: number | null;
   startTime: string | null;
   championship: string | null;
   note: string | null;
@@ -48,6 +51,8 @@ export function comparableClasses(
     license: string;
     dayLicense: boolean;
     licenseClasses: string[] | null;
+    distanceKm: number | null;
+    elevationM: number | null;
     startTime: Date | null;
     championship: string | null;
     note: string | null;
@@ -64,6 +69,8 @@ export function comparableClasses(
     licenseClasses: c.licenseClasses?.length
       ? [...c.licenseClasses].sort()
       : null,
+    distanceKm: c.distanceKm ?? null,
+    elevationM: c.elevationM ?? null,
     startTime: c.startTime ? c.startTime.toISOString() : null,
     championship: c.championship ?? null,
     note: c.note ?? null,

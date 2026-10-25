@@ -1,3 +1,4 @@
+import type { EventFormat } from '../../events/formats';
 import type {
   EventConflict,
   EventSourceRef,
@@ -30,6 +31,8 @@ export interface RawEvent {
   /** Rating classes; replaces the stored classes when given. */
   classes?: RawEventClass[];
   championship?: string;
+  /** Licence race, Jedermann or touring format (RTF, CTF …). */
+  format?: EventFormat;
   /** Series the event belongs to (cup run, league matchday). */
   series?: RawEventSeries[];
 }
@@ -43,6 +46,8 @@ export interface RawEventClass {
   license: 'open' | 'unlicensed' | 'license' | 'uci';
   dayLicense: boolean;
   licenseClasses: ('elite_amateur' | 'amateur' | 'master')[] | null;
+  distanceKm: number | null;
+  elevationM: number | null;
   startTime: Date | null;
   championship: string | null;
   note: string | null;

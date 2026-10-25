@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CyclingEvent } from '@shared/models';
+import { CyclingEvent, TOURING_FORMATS } from '@shared/models';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { eventStartTime } from '@shared/utils/event-date';
 import { DisciplineChipComponent } from '../discipline-chip/discipline-chip.component';
@@ -22,6 +22,12 @@ import { DatePipe } from '@angular/common';
 })
 export class EventCardComponent {
   readonly event = input.required<CyclingEvent>();
+
+  /** Touring events (RTF, CTF …) list routes instead of rating classes. */
+  protected readonly touring = computed(() => {
+    const format = this.event().format;
+    return !!format && TOURING_FORMATS.includes(format);
+  });
   readonly distance = input<number | undefined>();
   protected readonly startTime = computed(() => eventStartTime(this.event()));
   protected readonly hasClassChampionship = computed(

@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -96,16 +97,28 @@ export class EventSearchDto {
 
   /** Signed-in riders: only events with a class that fits their age, gender and licence. */
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @Transform(
+    ({ value }: { value: unknown }) => value === true || value === 'true',
+  )
   fitsMe?: boolean;
 
   /** Only championships (the event or one of its classes). */
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @Transform(
+    ({ value }: { value: unknown }) => value === true || value === 'true',
+  )
   championship?: boolean;
+
+  /** Only these formats, comma separated (`race,jedermann`); `touring` stands for all touring formats. */
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z_]+(,[a-z_]+)*$/)
+  format?: string;
 
   /** Leave out league matchdays (events of a series of kind `league`). */
   @IsOptional()
-  @Transform(({ value }: { value: unknown }) => value === true || value === 'true')
+  @Transform(
+    ({ value }: { value: unknown }) => value === true || value === 'true',
+  )
   hideLeagues?: boolean;
 }

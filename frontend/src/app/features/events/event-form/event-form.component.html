@@ -456,6 +456,20 @@
           {{ 'classes.formTitle' | transloco }}
         </legend>
         <div>
+          <label for="format" class="block text-sm text-[var(--color-text-muted)]">
+            {{ 'events.format.label' | transloco }}
+          </label>
+          <select id="format" formControlName="format" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
+            <option value="">{{ 'events.format.unknown' | transloco }}</option>
+            @for (f of formats; track f) {
+              <option [value]="f">{{ 'events.format.' + f | transloco }}</option>
+            }
+          </select>
+          @if (form.controls.format.value) {
+            <p class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'events.format.hint.' + form.controls.format.value | transloco }}</p>
+          }
+        </div>
+        <div>
           <label for="championship" class="block text-sm text-[var(--color-text-muted)]">
             {{ 'classes.championshipLabel' | transloco }}
           </label>
@@ -466,7 +480,7 @@
             }
           </select>
         </div>
-        <p class="text-xs text-[var(--color-text-muted)]">{{ 'classes.formHint' | transloco }}</p>
+        <p class="text-xs text-[var(--color-text-muted)]">{{ (isTouring() ? 'classes.formHintTouring' : 'classes.formHint') | transloco }}</p>
         <div formArrayName="classes" class="space-y-3">
           @for (cls of form.controls.classes.controls; track cls; let i = $index) {
             <div [formGroupName]="i" class="space-y-3 rounded-xl bg-[var(--color-bg-alt)] p-3">
@@ -494,7 +508,7 @@
                   </div>
                 </div>
               </div>
-              @if (cls.controls.license.value === 'license' || cls.controls.license.value === 'uci') {
+              @if (cls.controls.license.value !== 'unlicensed' && (!isTouring() || cls.controls.license.value !== 'open')) {
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--color-text)]">
                   @if (cls.controls.license.value === 'license') {
                     <label class="inline-flex items-center gap-2">
@@ -548,18 +562,28 @@
                   </select>
                 </div>
               </div>
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <label [for]="'cl-km-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.distanceKm' | transloco }}</label>
+                  <input [id]="'cl-km-' + i" type="number" min="0" max="9999" step="0.1" formControlName="distanceKm" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <label [for]="'cl-hm-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.elevationM' | transloco }}</label>
+                  <input [id]="'cl-hm-' + i" type="number" min="0" max="99999" formControlName="elevationM" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
+                </div>
+              </div>
               <div>
                 <label [for]="'cl-note-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.note' | transloco }}</label>
                 <input [id]="'cl-note-' + i" formControlName="note" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]" />
               </div>
               <ui-button type="button" variant="outline" size="sm" (click)="removeClass(i)">
-                {{ 'classes.remove' | transloco }}
+                {{ (isTouring() ? 'classes.removeRoute' : 'classes.remove') | transloco }}
               </ui-button>
             </div>
           }
         </div>
         <ui-button type="button" variant="outline" size="sm" (click)="addClass()">
-          {{ 'classes.add' | transloco }}
+          {{ (isTouring() ? 'classes.addRoute' : 'classes.add') | transloco }}
         </ui-button>
       </fieldset>
 

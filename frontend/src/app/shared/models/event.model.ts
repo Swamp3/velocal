@@ -42,6 +42,7 @@ export interface CyclingEvent {
   imageUrl?: string;
   /** Championship level of the event, if it is one. */
   championship?: ChampionshipLevel | null;
+  format?: EventFormat | null;
   /** Rating classes (Wertungsklassen). */
   classes?: EventClass[];
   /** Series the event belongs to (cup run, league matchday). */
@@ -106,6 +107,11 @@ export type ChampionshipLevel =
   | 'continental'
   | 'world';
 
+/** Licence race, Jedermann, or a touring format without times or placings (Breitensport). */
+export type EventFormat = 'race' | 'jedermann' | 'rtf' | 'ctf' | 'marathon' | 'brevet' | 'gravel_ride' | 'tour';
+export const EVENT_FORMATS: readonly EventFormat[] = ['race', 'jedermann', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
+export const TOURING_FORMATS: readonly EventFormat[] = ['rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
+
 export type ClassGender = 'open' | 'male' | 'female';
 /** open: everyone; unlicensed: Hobby, only without licence; license: needs a licence; uci: UCI licence. */
 export type ClassLicense = 'open' | 'unlicensed' | 'license' | 'uci';
@@ -125,6 +131,9 @@ export interface EventClass {
   dayLicense?: boolean;
   /** Only these licence classes may start (empty: all). */
   licenseClasses?: LicenseClass[] | null;
+  /** Length of the race or route. */
+  distanceKm?: number | null;
+  elevationM?: number | null;
   startTime: string | null;
   championship: ChampionshipLevel | null;
   note: string | null;

@@ -1,3 +1,4 @@
+import { EVENT_FORMATS, type EventFormat } from '../formats';
 import { CHAMPIONSHIP_LEVELS, EventClassDto } from './event-class.dto';
 import { Type } from 'class-transformer';
 import { PaceGroupDto, StravaLinkDto } from './pace-groups.dto';
@@ -79,6 +80,11 @@ export class CreateEventDto {
   @IsOptional()
   @IsIn([...CHAMPIONSHIP_LEVELS, null])
   championship?: string | null;
+
+  /** Licence race, Jedermann or touring format; null when unknown. */
+  @IsOptional()
+  @IsIn([...EVENT_FORMATS, null])
+  format?: EventFormat | null;
 
   /** Rating classes; replaces the stored list when given. */
   @IsOptional()

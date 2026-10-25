@@ -5,6 +5,7 @@ import {
   IsIn,
   IsInt,
   IsISO8601,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -63,6 +64,20 @@ export class EventClassDto {
   @IsArray()
   @IsIn(['elite_amateur', 'amateur', 'master'], { each: true })
   licenseClasses?: ('elite_amateur' | 'amateur' | 'master')[] | null;
+
+  /** Length in km (one decimal). */
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 1 })
+  @Min(0)
+  @Max(9999)
+  distanceKm?: number | null;
+
+  /** Climbing in metres. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(99999)
+  elevationM?: number | null;
 
   @IsOptional()
   @IsISO8601()

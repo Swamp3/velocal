@@ -1,3 +1,4 @@
+import { EVENT_FORMATS, type EventFormat } from '../formats';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -194,8 +195,31 @@ export class Event {
   recurrenceId: string | null;
 
   /** The event is (or includes) a championship of this level. */
-  @Column({ type: 'enum', enum: ['club', 'district', 'state', 'regional', 'national', 'continental', 'world'], enumName: 'championship_level', name: 'championship', nullable: true })
+  @Column({
+    type: 'enum',
+    enum: [
+      'club',
+      'district',
+      'state',
+      'regional',
+      'national',
+      'continental',
+      'world',
+    ],
+    enumName: 'championship_level',
+    name: 'championship',
+    nullable: true,
+  })
   championship: string | null;
+
+  /** Licence race, Jedermann or a touring format (RTF, CTF …); null when unknown. */
+  @Column({
+    type: 'enum',
+    enum: EVENT_FORMATS,
+    enumName: 'event_format',
+    nullable: true,
+  })
+  format: EventFormat | null;
 
   /** Sources of the event's data; name and link are public. */
   @Column({ type: 'jsonb', nullable: true })
@@ -213,7 +237,12 @@ export class Event {
    * Fields a person changed after the event was imported. Imports never overwrite them, so a
    * correction made by hand survives the next import.
    */
-  @Column({ type: 'text', name: 'edited_fields', array: true, default: () => "'{}'" })
+  @Column({
+    type: 'text',
+    name: 'edited_fields',
+    array: true,
+    default: () => "'{}'",
+  })
   editedFields: string[];
 
   @CreateDateColumn()

@@ -12,6 +12,7 @@ import { EventComment } from './entities/event-comment.entity';
 import { EventClass } from './entities/event-class.entity';
 import { classFitsSql } from './class-match';
 import { classAges } from './categories';
+import { EVENT_FORMATS, TOURING_FORMATS, TOURING_GROUP } from './formats';
 import { EventClassDto } from './dto/event-class.dto';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
@@ -91,6 +92,8 @@ export interface SerializedEventClass {
   license: string;
   dayLicense: boolean;
   licenseClasses: string[] | null;
+  distanceKm: number | null;
+  elevationM: number | null;
   startTime: Date | null;
   championship: string | null;
   note: string | null;
@@ -239,9 +242,25 @@ export class EventsService {
         },
       });
       if (rider) {
+        // Touring events without listed routes are open to everyone.
         const fit = classFitsSql(rider);
-        qb.andWhere(fit.sql, fit.params);
+        qb.andWhere(
+          `(${fit.sql} OR (event.format IN (:...fitTouring) AND NOT EXISTS (SELECT 1 FROM "event_classes" tc WHERE tc.event_id = event.id)))`,
+          { ...fit.params, fitTouring: TOURING_FORMATS },
+        );
       }
+    }
+    if (params.format) {
+      const formats = [
+        ...new Set(
+          params.format
+            .split(',')
+            .flatMap((f) => (f === TOURING_GROUP ? [...TOURING_FORMATS] : [f]))
+            .filter((f) => (EVENT_FORMATS as readonly string[]).includes(f)),
+        ),
+      ];
+      if (formats.length)
+        qb.andWhere('event.format IN (:...formats)', { formats });
     }
     if (params.championship) {
       qb.andWhere(
@@ -889,6 +908,8 @@ export class EventsService {
       license?: string | null;
       dayLicense?: boolean | null;
       licenseClasses?: string[] | null;
+      distanceKm?: number | null;
+      elevationM?: number | null;
       startTime?: Date | string | null;
       championship?: string | null;
       note?: string | null;
@@ -903,6 +924,8 @@ export class EventsService {
         c.license ?? 'open',
         !!c.dayLicense,
         c.licenseClasses?.length ? [...c.licenseClasses].sort() : null,
+        c.distanceKm ?? null,
+        c.elevationM ?? null,
         c.startTime ? new Date(c.startTime).getTime() : null,
         c.championship ?? null,
         c.note?.trim() || null,
@@ -931,6 +954,8 @@ export class EventsService {
           license: (c.license ?? 'open') as EventClass['license'],
           dayLicense: !!c.dayLicense,
           licenseClasses: c.licenseClasses?.length ? c.licenseClasses : null,
+          distanceKm: c.distanceKm ?? null,
+          elevationM: c.elevationM ?? null,
           startTime: c.startTime ? new Date(c.startTime) : null,
           championship: (c.championship ?? null) as EventClass['championship'],
           note: c.note?.trim() || null,
@@ -1946,6 +1971,8 @@ export class EventsService {
           license: c.license,
           dayLicense: c.dayLicense,
           licenseClasses: c.licenseClasses,
+          distanceKm: c.distanceKm,
+          elevationM: c.elevationM,
           startTime: c.startTime,
           championship: c.championship,
           note: c.note,
