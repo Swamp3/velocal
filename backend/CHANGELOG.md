@@ -2,14 +2,17 @@
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-25
+
 ### Added
 
-- Migrations `AddEventImportData` (events: `start_time_known`, `sources`, `import_conflicts`, `import_run_id`, `edited_fields`; import_runs: `report`, `file_name`; repairs scraped UTC-midnight dates) and `AddEventClasses` (`event_classes`, `events.championship`, race_series `kind`/`season`/`source_name`/`external_key`, users `birth_year`/`gender`/`license_type`)
+- Migrations `AddEventImportData` (events: `start_time_known`, `sources`, `import_conflicts`, `import_run_id`, `edited_fields`; import_runs: `report`, `file_name`; repairs scraped UTC-midnight dates), `AddRacingModel` (`event_classes` with category, licence, day licence, licence classes, distance, climbing; `events.championship` and `events.format`; race_series `kind`/`season`/`source_name`/`external_key`; users `birth_year`/`gender`/`license_type`/`license_class`; fills formats from clear names and the bike type of "Breitensport" events) and `AddParkingAreas` (`event_parking_areas`)
+- `events/racing.ts` and `events/parking.ts`: the only place for value lists and rules (categories, licences, formats, championship levels, series kinds, parking kinds and fees, fits-me SQL); `GET /events/meta` serves the lists
 - `POST import/events/check` (dry run with report), `POST import/events?acceptWarnings=` (refuses errors; warnings need confirmation), `GET import/jobs/:id/report`, `GET admin/events/:id/import-info`
-- Import validator with error/warning/info codes; file imports update only own events (sourceName + externalId), skip look-alikes, protect `edited_fields`, never clear or delete; events, classes and series links saved in one transaction
-- `GET /events`: `fitsMe`, `championship`, `hideLeagues`; events carry `classes`, `series`, `sources` (name/url), `startTimeKnown`
-- `POST import/events` (admin): validated file import (`ImportEventsDto`, max 5000 events, JSON body limit 10 MB) that runs as a job like the scrapers, without cooldown; `complete: true` marks missing upcoming events of that source
-- `GET communities/:id/members` and `GET communities/:slug/subgroups/:slug/members` now return `{ items, total, page, limit }` and accept `q`, `role`, `page`, `limit` (and `excludeSubgroup` for the club list); admins/moderators are listed first, then by name
+- Import validator with error/warning/info codes; file imports update only own events (sourceName + externalId), skip look-alikes, protect `edited_fields`, never clear or delete; events, classes, parking areas and series links saved in one transaction; format inferred from clear names, never replacing a stored one
+- `GET /events`: `fitsMe`, `championship`, `hideLeagues`, `format` (`kids` also finds children's classes), `discipline=breitensport` also finds touring formats; events carry `classes` (with `fitsYou` for the viewer), `series`, `sources`, `startTimeKnown`, `format`, `parkingAreas` (with `distanceM`)
+- Event create/update take `classes`, `format` and `parkingAreas`; a plain `YYYY-MM-DD` start date is stored as midnight in Germany
+- `GET communities/:id/members` and `GET communities/:slug/subgroups/:slug/members` return `{ items, total, page, limit }` and accept `q`, `role`, `page`, `limit` (and `excludeSubgroup` for the club list); admins/moderators first, then by name
 
 ## [0.17.3] - 2026-10-22
 

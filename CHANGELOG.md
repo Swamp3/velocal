@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-25
+
 ### Added
 
 - **Import files in the admin area** (Admin → Imports → Import file): the file is checked first, errors and warnings are shown per event, warnings must be confirmed, then it is imported. Every run keeps a report (new, changed with old and new value, unchanged, skipped and why). How to create files: `docs/IMPORT-FILE-FORMAT.md`; command line: `scripts/import-file.sh events.json`.
@@ -22,6 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Updating needs three database migrations (import data with a repair of imported dates, racing model, parking areas): back up the database first. Import files can be up to 10 MB.
+- Frontend unit tests now run in CI before a deploy.
 - Event pages and the event form load a map only when you open it, and use one map for the venue and all parking areas (full screen enlarges the same map instead of opening a second one). Pages without an opened map load no map code or tiles.
 
 ### Fixed
