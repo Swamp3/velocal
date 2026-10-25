@@ -23,6 +23,9 @@ async function bootstrap() {
       next();
     },
   );
+  // `POST /api/import/events` takes a few thousand events at once. The proxy in front limits every
+  // other route to 1 MB (see frontend/nginx.conf), so only the import location is allowed more.
+  app.useBodyParser('json', { limit: '10mb' });
   app.disable('x-powered-by');
   app.setGlobalPrefix('api');
 

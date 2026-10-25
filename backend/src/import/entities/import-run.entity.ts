@@ -19,7 +19,11 @@ export class ImportRun {
   @Column({ type: 'varchar', nullable: true })
   source: string | null;
 
-  @Column({ type: 'enum', enum: ImportRunStatus, default: ImportRunStatus.RUNNING })
+  @Column({
+    type: 'enum',
+    enum: ImportRunStatus,
+    default: ImportRunStatus.RUNNING,
+  })
   status: ImportRunStatus;
 
   @CreateDateColumn({ type: 'timestamptz' })
@@ -42,4 +46,12 @@ export class ImportRun {
 
   @Column({ type: 'varchar', nullable: true })
   triggeredBy: string | null;
+
+  /** File imports: the uploaded file's name. */
+  @Column({ type: 'varchar', length: 255, name: 'file_name', nullable: true })
+  fileName: string | null;
+
+  /** Per-event outcome and problems of the run (see `ImportReport`). */
+  @Column({ type: 'jsonb', nullable: true })
+  report: unknown;
 }

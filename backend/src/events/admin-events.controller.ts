@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
   Query,
   UseGuards,
@@ -26,6 +28,12 @@ export class AdminEventsController {
     private readonly eventsService: EventsService,
     private readonly duplicates: EventDuplicatesService,
   ) {}
+
+  /** Where an imported event came from: sources with check dates, conflicts, edits by hand. */
+  @Get(':id/import-info')
+  getImportInfo(@Param('id', ParseUUIDPipe) id: string) {
+    return this.eventsService.getImportInfo(id);
+  }
 
   @Get('missing-data')
   getMissingData(@Query() dto: AdminMissingDataDto) {

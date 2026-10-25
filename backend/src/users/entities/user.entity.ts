@@ -1,4 +1,12 @@
 import {
+  LICENSE_CLASS_KEYS,
+  RIDER_GENDERS,
+  RIDER_LICENSES,
+  type LicenseClass,
+  type RiderGender,
+  type RiderLicense,
+} from '../../events/racing';
+import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
@@ -69,6 +77,38 @@ export class User {
   /** Which kinds of notification are sent as push; null means the defaults. */
   @Column({ type: 'jsonb', nullable: true })
   pushPreferences: Record<string, boolean> | null;
+
+  /** Only used to find fitting race classes; never shown to others. */
+  @Column({ type: 'int', name: 'birth_year', nullable: true })
+  birthYear: number | null;
+
+  @Column({
+    type: 'enum',
+    enum: RIDER_GENDERS,
+    enumName: 'user_gender',
+    nullable: true,
+  })
+  gender: RiderGender | null;
+
+  /** Licence the rider holds: none, a federation race licence, or a UCI team licence. */
+  @Column({
+    type: 'enum',
+    enum: RIDER_LICENSES,
+    enumName: 'user_license',
+    name: 'license_type',
+    nullable: true,
+  })
+  licenseType: RiderLicense | null;
+
+  /** Licensed adults: Elite Amateure, Amateure or Masters. */
+  @Column({
+    type: 'enum',
+    enum: LICENSE_CLASS_KEYS,
+    enumName: 'user_license_class',
+    name: 'license_class',
+    nullable: true,
+  })
+  licenseClass: LicenseClass | null;
 
   @Column({ default: 'de' })
   preferredLanguage: string;

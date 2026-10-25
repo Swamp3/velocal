@@ -1,3 +1,4 @@
+import { berlinMidnight } from '../dates';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ImportSource, RawEvent } from '../interfaces/import-source.interface';
@@ -140,19 +141,21 @@ export class RaceResultSource implements ImportSource {
   private mapEvents(tuples: unknown[][], disciplineSlug: string): RawEvent[] {
     return tuples
       .filter((t) => t[0] != null && t[2])
-      .map((t) => ({
-        externalId: `rr-${t[0]}`,
+      .map((t) => ({ t, id: String(t[0]) }))
+      .map(({ t, id }) => ({
+        externalId: `rr-${id}`,
         sourceName: this.name,
         name: String(t[2]).trim(),
-        startDate: new Date(`${t[3]}T00:00:00Z`),
-        endDate: t[4] ? new Date(`${t[4]}T00:00:00Z`) : undefined,
+        startDate: dayOf(t[3] as string),
+        endDate: t[4] ? dayOf(t[4] as string) : undefined,
+        startTimeKnown: false,
         locationName: String(t[5]),
         country: String(t[6]),
         lat: Number(t[7]),
         lng: Number(t[8]),
         disciplineSlug,
-        externalUrl: `${BASE_URL}/${t[0]}/info`,
-        sourceUrl: `${BASE_URL}/${t[0]}/info`,
+        externalUrl: `${BASE_URL}/${id}/info`,
+        sourceUrl: `${BASE_URL}/${id}/info`,
         status: 'published',
       }));
   }
@@ -160,4 +163,10 @@ export class RaceResultSource implements ImportSource {
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+}
+
+/** `YYYY-MM-DD` from the API as midnight in Europe/Berlin (the API gives no times). */
+function dayOf(value: string): Date {
+  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
+  return berlinMidnight(y, m, d);
 }
