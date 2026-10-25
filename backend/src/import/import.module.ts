@@ -10,7 +10,10 @@ import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Event, EventClass, ImportRun]), EventsModule],
+  imports: [
+    TypeOrmModule.forFeature([Event, EventClass, ImportRun]),
+    EventsModule,
+  ],
   controllers: [ImportController],
   providers: [ImportService, RadNetSource, RaceResultSource],
   exports: [ImportService],

@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Imports can no longer overwrite or delete data by mistake: only events of the same source and id are updated, look-alikes of other origins are skipped with a warning, fields edited by hand are kept, missing fields never clear anything.
 - Events show their **sources** publicly; admins also see when each source was checked, documented conflicts between sources, fields edited by hand and the import run.
 - **Rating classes** (Wertungsklassen) per event with age category (U7 to Masters 4, fills the ages), gender, who may start (open, Hobby without licence, licence, UCI licence), day licence, licence classes (Elite Amateure, Amateure, Masters) and start time, shown on the event page and editable in the event form.
-- **Event formats**: licence race, Jedermann race (also Gran Fondo) and the recreational formats RTF, CTF, Radmarathon, brevet, gravel ride and tour, with a short explanation each. Shown on cards and the event page, filterable in the event list (one format or all recreational rides). Existing and imported events take the format from a clear name (e.g. "RTF …", "Jedermannrennen …").
+- **Event formats**: licence race, Jedermann race (also Gran Fondo) and the recreational formats RTF, CTF, Radmarathon, brevet, gravel ride and tour, with a short explanation each. Shown on cards and the event page, filterable in the event list. Existing and imported events take the format from a clear name (e.g. "RTF …", "Jedermannrennen …"). Recreational events get their bike type (RTF, Radmarathon and brevet: Straße; CTF: MTB; gravel tour: Gravel); the **Breitensport** filter shows all recreational rides.
 - **Kids' races** (Fette-Reifen-Rennen, Laufradrennen) as their own format with the age categories U7 and U9; the filter also finds events that include a children's class.
 - Recreational events list their **routes** (Strecken) with length and climbing; "Fits me" counts recreational events as open to everyone. Jedermann classes can admit licensed riders of chosen licence classes only.
 - **Championships** (club to world level) per event or class, and **series formats**: cup (runs) and league (matchdays) with season.
@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- Events without a start time no longer show 01:00 or 02:00; imported dates are repaired. Calendar exports use all-day entries for them.
+- Events without a start time no longer show 01:00 or 02:00, and show the same calendar day in every time zone (before, viewers west of Germany saw the day before); imported dates are repaired. Calendar exports use all-day entries for them.
 - The import no longer merges different events that share a calendar page or PDF as their source link, and keeps different classes or rounds at the same hall apart.
 
 ## [0.17.3] - 2026-10-22

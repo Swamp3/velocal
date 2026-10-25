@@ -17,7 +17,9 @@ export class AddEventImportData1778600000000 implements MigrationInterface {
       `ALTER TABLE "events" ADD "start_time_known" boolean NOT NULL DEFAULT true`,
     );
     await queryRunner.query(`ALTER TABLE "events" ADD "sources" jsonb`);
-    await queryRunner.query(`ALTER TABLE "events" ADD "import_conflicts" jsonb`);
+    await queryRunner.query(
+      `ALTER TABLE "events" ADD "import_conflicts" jsonb`,
+    );
     await queryRunner.query(`ALTER TABLE "events" ADD "import_run_id" uuid`);
     await queryRunner.query(
       `ALTER TABLE "events" ADD "edited_fields" text array NOT NULL DEFAULT '{}'`,
@@ -57,14 +59,22 @@ export class AddEventImportData1778600000000 implements MigrationInterface {
       UPDATE "events"
          SET "startDate" = (("startDate" AT TIME ZONE 'Europe/Berlin')::date::timestamp AT TIME ZONE 'UTC')
        WHERE "source" = 'imported' AND "start_time_known" = false`);
-    await queryRunner.query(`ALTER TABLE "import_runs" DROP COLUMN "file_name"`);
+    await queryRunner.query(
+      `ALTER TABLE "import_runs" DROP COLUMN "file_name"`,
+    );
     await queryRunner.query(`ALTER TABLE "import_runs" DROP COLUMN "report"`);
     await queryRunner.query(`DROP INDEX "IDX_events_import_run_id"`);
-    await queryRunner.query(`ALTER TABLE "events" DROP CONSTRAINT "FK_events_import_run"`);
+    await queryRunner.query(
+      `ALTER TABLE "events" DROP CONSTRAINT "FK_events_import_run"`,
+    );
     await queryRunner.query(`ALTER TABLE "events" DROP COLUMN "edited_fields"`);
     await queryRunner.query(`ALTER TABLE "events" DROP COLUMN "import_run_id"`);
-    await queryRunner.query(`ALTER TABLE "events" DROP COLUMN "import_conflicts"`);
+    await queryRunner.query(
+      `ALTER TABLE "events" DROP COLUMN "import_conflicts"`,
+    );
     await queryRunner.query(`ALTER TABLE "events" DROP COLUMN "sources"`);
-    await queryRunner.query(`ALTER TABLE "events" DROP COLUMN "start_time_known"`);
+    await queryRunner.query(
+      `ALTER TABLE "events" DROP COLUMN "start_time_known"`,
+    );
   }
 }

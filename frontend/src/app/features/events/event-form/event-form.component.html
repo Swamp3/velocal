@@ -461,7 +461,7 @@
           </label>
           <select id="format" formControlName="format" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
             <option value="">{{ 'events.format.unknown' | transloco }}</option>
-            @for (f of formats; track f) {
+            @for (f of formats(); track f) {
               <option [value]="f">{{ 'events.format.' + f | transloco }}</option>
             }
           </select>
@@ -475,7 +475,7 @@
           </label>
           <select id="championship" formControlName="championship" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
             <option value="">{{ 'classes.noChampionship' | transloco }}</option>
-            @for (level of championshipLevels; track level) {
+            @for (level of championshipLevels(); track level) {
               <option [value]="level">{{ 'classes.championship.' + level | transloco }}</option>
             }
           </select>
@@ -501,7 +501,7 @@
                   <div>
                     <label [for]="'cl-license-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.licenseLabel' | transloco }}</label>
                     <select [id]="'cl-license-' + i" formControlName="license" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
-                      @for (value of ['open', 'unlicensed', 'license', 'uci']; track value) {
+                      @for (value of classLicenses(); track value) {
                         <option [value]="value">{{ 'classes.license.' + value | transloco }}</option>
                       }
                     </select>
@@ -517,7 +517,7 @@
                     </label>
                   }
                   <span class="text-[var(--color-text-muted)]">{{ 'classes.licenseClassesLabel' | transloco }}</span>
-                  @for (value of licenseClassOptions; track value) {
+                  @for (value of licenseClassOptions(); track value) {
                     <label class="inline-flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -535,7 +535,7 @@
                   <label [for]="'cl-cat-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.categoryLabel' | transloco }}</label>
                   <select [id]="'cl-cat-' + i" formControlName="category" (change)="onCategoryChange(i)" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
                     <option value="">—</option>
-                    @for (c of categories; track c.key) {
+                    @for (c of categories(); track c.key) {
                       <option [value]="c.key">{{ 'classes.category.' + c.key | transloco }}</option>
                     }
                   </select>
@@ -556,7 +556,7 @@
                   <label [for]="'cl-ch-' + i" class="block text-sm text-[var(--color-text-muted)]">{{ 'classes.championshipShort' | transloco }}</label>
                   <select [id]="'cl-ch-' + i" formControlName="championship" class="mt-1 w-full rounded-[var(--radius-default)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]">
                     <option value="">—</option>
-                    @for (level of championshipLevels; track level) {
+                    @for (level of championshipLevels(); track level) {
                       <option [value]="level">{{ 'classes.championship.' + level | transloco }}</option>
                     }
                   </select>

@@ -1,4 +1,12 @@
 import {
+  LICENSE_CLASS_KEYS,
+  RIDER_GENDERS,
+  RIDER_LICENSES,
+  type LicenseClass,
+  type RiderGender,
+  type RiderLicense,
+} from '../../events/racing';
+import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
@@ -76,31 +84,31 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: ['male', 'female', 'diverse'],
+    enum: RIDER_GENDERS,
     enumName: 'user_gender',
     nullable: true,
   })
-  gender: 'male' | 'female' | 'diverse' | null;
+  gender: RiderGender | null;
 
   /** Licence the rider holds: none, a federation race licence, or a UCI team licence. */
   @Column({
     type: 'enum',
-    enum: ['none', 'license', 'uci'],
+    enum: RIDER_LICENSES,
     enumName: 'user_license',
     name: 'license_type',
     nullable: true,
   })
-  licenseType: 'none' | 'license' | 'uci' | null;
+  licenseType: RiderLicense | null;
 
   /** Licensed adults: Elite Amateure, Amateure or Masters. */
   @Column({
     type: 'enum',
-    enum: ['elite_amateur', 'amateur', 'master'],
+    enum: LICENSE_CLASS_KEYS,
     enumName: 'user_license_class',
     name: 'license_class',
     nullable: true,
   })
-  licenseClass: 'elite_amateur' | 'amateur' | 'master' | null;
+  licenseClass: LicenseClass | null;
 
   @Column({ default: 'de' })
   preferredLanguage: string;

@@ -3,8 +3,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { TOURING_FORMATS, type EventClass, type EventFormat } from '@shared/models';
-import { birthYears, classFits, hasRiderData } from '@shared/utils/event-class';
+import { RacingService } from '@core/services/racing.service';
+import type { EventClass, EventFormat } from '@shared/models';
+import { birthYears } from '@shared/utils/event-class';
 
 /** Rating classes of an event; marks the ones that fit the signed-in rider. */
 @Component({
@@ -97,29 +98,26 @@ import { birthYears, classFits, hasRiderData } from '@shared/utils/event-class';
 })
 export class EventClassesComponent {
   protected readonly auth = inject(AuthService);
+  private readonly racing = inject(RacingService);
 
   readonly classes = input.required<EventClass[]>();
   readonly startDate = input.required<string>();
   readonly format = input<EventFormat | null | undefined>(null);
 
   /** Touring events (RTF, CTF …) list routes rather than rating classes. */
-  protected readonly touring = computed(() => {
-    const f = this.format();
-    return !!f && TOURING_FORMATS.includes(f);
-  });
+  protected readonly touring = computed(() => this.racing.isTouring(this.format()));
 
   private readonly year = computed(() => new Date(this.startDate()).getFullYear());
-  protected readonly riderKnown = computed(() => hasRiderData(this.auth.currentUser()));
+  /** The server marks fitting classes when the viewer stated rider data. */
+  protected readonly riderKnown = computed(() => this.classes().some((c) => c.fitsYou !== undefined));
 
-  protected readonly rows = computed(() => {
-    const rider = this.auth.currentUser();
-    const known = this.riderKnown();
-    return this.classes().map((cls) => ({
+  protected readonly rows = computed(() =>
+    this.classes().map((cls) => ({
       cls,
       years: birthYears(cls, this.year()),
-      fits: known && !!rider && classFits(cls, rider, this.year()),
-    }));
-  });
+      fits: cls.fitsYou === true,
+    })),
+  );
 
   protected readonly fitCount = computed(() => this.rows().filter((r) => r.fits).length);
 }

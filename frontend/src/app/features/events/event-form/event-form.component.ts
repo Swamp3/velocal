@@ -31,10 +31,8 @@ import {
   EventClass,
   LicenseClass,
   EventFormat,
-  EVENT_FORMATS,
-  TOURING_FORMATS,
 } from '@shared/models';
-import { RIDER_CATEGORIES } from '@shared/utils/event-class';
+import { RacingService } from '@core/services/racing.service';
 import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import {
   toDisplayDate as toDisplayDateUtil,
@@ -207,15 +205,12 @@ export class EventFormComponent implements OnInit {
     });
   }
 
-  protected readonly championshipLevels = [
-    'club',
-    'district',
-    'state',
-    'regional',
-    'national',
-    'continental',
-    'world',
-  ] as const;
+  private readonly racing = inject(RacingService);
+  protected readonly championshipLevels = this.racing.championshipLevels;
+  protected readonly categories = this.racing.categories;
+  protected readonly formats = this.racing.formats;
+  protected readonly classLicenses = this.racing.classLicenses;
+  protected readonly licenseClassOptions = this.racing.licenseClasses;
   /** Classes are only sent when changed, so an imported event keeps its imported classes. */
   private classesChanged = false;
 
@@ -243,18 +238,15 @@ export class EventFormComponent implements OnInit {
     });
   }
 
-  protected readonly categories = RIDER_CATEGORIES;
-  protected readonly formats = EVENT_FORMATS;
   /** Touring events (RTF, CTF …) list their routes instead of rating classes. */
   protected isTouring(): boolean {
-    return TOURING_FORMATS.includes(this.form.controls.format.value as EventFormat);
+    return this.racing.isTouring(this.form.controls.format.value);
   }
-  protected readonly licenseClassOptions: LicenseClass[] = ['elite_amateur', 'amateur', 'master'];
 
   /** Choosing a category fills its ages (and the name when empty). */
   protected onCategoryChange(index: number): void {
     const group = this.form.controls.classes.at(index);
-    const preset = RIDER_CATEGORIES.find((c) => c.key === group.controls.category.value);
+    const preset = this.categories().find((c) => c.key === group.controls.category.value);
     if (!preset) return;
     group.patchValue({ ageMin: preset.ageMin, ageMax: preset.ageMax });
     if (!group.controls.name.value.trim()) {
@@ -380,8 +372,14 @@ export class EventFormComponent implements OnInit {
       name: raw.name,
       description: raw.description || undefined,
       disciplineSlug: raw.disciplineSlug,
-      startDate: this.combineDatetime(raw.startDate, raw.startTime),
-      endDate: raw.endDate ? this.combineDatetime(raw.endDate, raw.endTime) : undefined,
+      // Without a time only the day is sent; the server stores it as midnight in Germany.
+      startDate: raw.startTime ? this.combineDatetime(raw.startDate, raw.startTime) : this.parseDate(raw.startDate),
+      startTimeKnown: !!raw.startTime,
+      endDate: raw.endDate
+        ? raw.endTime || raw.startTime
+          ? this.combineDatetime(raw.endDate, raw.endTime)
+          : this.parseDate(raw.endDate)
+        : undefined,
       locationName: raw.locationName,
       address: raw.address || undefined,
       country: raw.country || undefined,

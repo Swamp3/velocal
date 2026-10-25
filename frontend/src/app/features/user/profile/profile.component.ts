@@ -1,7 +1,7 @@
 import type { LicenseClass, RiderGender, RiderLicense } from '@shared/models';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { categoryForAge, licenseClassesForAge } from '@shared/utils/event-class';
+import { RacingService } from '@core/services/racing.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -99,6 +99,7 @@ export class ProfileComponent implements OnInit {
     licenseClass: [''],
   });
 
+  private readonly racing = inject(RacingService);
   private readonly riderValues = toSignal(
     this.profileForm.valueChanges.pipe(startWith(this.profileForm.value)),
     { initialValue: this.profileForm.value },
@@ -111,14 +112,15 @@ export class ProfileComponent implements OnInit {
   /** Licence classes a licensed rider of this age can hold (none for youth licences). */
   protected readonly licenseClassOptions = computed<LicenseClass[]>(() => {
     const type = this.riderValues().licenseType;
-    return type === 'license' || type === 'uci' ? licenseClassesForAge(this.riderAge()) : [];
+    return type === 'license' || type === 'uci' ? this.racing.licenseClassesForAge(this.riderAge()) : [];
   });
 
   /** The age category of this year, derived from the year of birth. */
   protected readonly riderCategory = computed(() => {
     const age = this.riderAge();
     if (age == null) return null;
-    const key = categoryForAge(age);
+    const key = this.racing.categoryForAge(age);
+    if (!key) return null;
     return { key, year: new Date().getFullYear(), mastersChoice: key.startsWith('masters') };
   });
 

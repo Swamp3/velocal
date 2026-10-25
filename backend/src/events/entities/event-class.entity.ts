@@ -6,44 +6,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import {
+  CHAMPIONSHIP_LEVELS,
+  CLASS_GENDERS,
+  CLASS_LICENSES,
+  type ChampionshipLevel,
+  type ClassGender,
+  type ClassLicense,
+  type LicenseClass,
+} from '../racing';
 import { Event } from './event.entity';
-
-/** Who may start in a class. */
-export enum ClassGender {
-  OPEN = 'open',
-  MALE = 'male',
-  FEMALE = 'female',
-}
-
-/**
- * Who may start, by licence:
- * - `open`: everyone (Jedermann; licence holders usually too)
- * - `unlicensed`: only riders without a licence (Hobby class)
- * - `license`: a race licence of the federation (German Cycling); with `dayLicense` a rider
- *   without one may buy a day licence on site
- * - `uci`: a licence of a UCI-registered team (Continental, ProTeam, WorldTeam)
- */
-export enum ClassLicense {
-  OPEN = 'open',
-  UNLICENSED = 'unlicensed',
-  LICENSE = 'license',
-  UCI = 'uci',
-}
-
-/** Performance classes of licensed adults in road racing (German Cycling, since 2019). */
-export const LICENSE_CLASSES = ['elite_amateur', 'amateur', 'master'] as const;
-export type LicenseClass = (typeof LICENSE_CLASSES)[number];
-
-/** Level of a championship, from local to world. */
-export enum ChampionshipLevel {
-  CLUB = 'club',
-  DISTRICT = 'district',
-  STATE = 'state',
-  REGIONAL = 'regional',
-  NATIONAL = 'national',
-  CONTINENTAL = 'continental',
-  WORLD = 'world',
-}
 
 /**
  * A rating class (Wertungsklasse) of an event: one race, one result list. Ages are the age a rider
@@ -70,9 +42,9 @@ export class EventClass {
 
   @Column({
     type: 'enum',
-    enum: ClassGender,
+    enum: CLASS_GENDERS,
     enumName: 'event_class_gender',
-    default: ClassGender.OPEN,
+    default: 'open',
   })
   gender: ClassGender;
 
@@ -88,9 +60,9 @@ export class EventClass {
 
   @Column({
     type: 'enum',
-    enum: ClassLicense,
+    enum: CLASS_LICENSES,
     enumName: 'event_class_license',
-    default: ClassLicense.OPEN,
+    default: 'open',
   })
   license: ClassLicense;
 
@@ -129,7 +101,7 @@ export class EventClass {
 
   @Column({
     type: 'enum',
-    enum: ChampionshipLevel,
+    enum: CHAMPIONSHIP_LEVELS,
     enumName: 'championship_level',
     nullable: true,
   })

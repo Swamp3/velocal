@@ -1,3 +1,4 @@
+import type { SeriesKind } from './racing.model';
 import { CyclingEvent } from './event.model';
 import { Discipline } from './discipline.model';
 
@@ -8,7 +9,7 @@ export interface RaceSeries {
   description?: string;
   year?: number;
   /** `cup`: runs for one ranking; `league`: matchdays of a season. */
-  kind?: 'series' | 'cup' | 'league';
+  kind?: SeriesKind;
   season?: string;
   discipline?: Discipline;
   imageUrl?: string;

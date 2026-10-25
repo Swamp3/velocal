@@ -1,4 +1,4 @@
-import type { LicenseClass } from './event.model';
+import type { LicenseClass, RiderGender, RiderLicense } from './racing.model';
 
 export interface User {
   id: string;
@@ -21,6 +21,3 @@ export interface User {
   licenseClass?: LicenseClass | null;
 }
 
-export type RiderGender = 'male' | 'female' | 'diverse';
-/** none: no licence (Hobby/Jedermann); license: federation licence (BDR); uci: UCI licence. */
-export type RiderLicense = 'none' | 'license' | 'uci';

@@ -4,8 +4,18 @@ import type {
   EventSourceRef,
 } from '../events/entities/event.entity';
 import { berlinDay, parseEventDate } from './dates';
-import { CATEGORY_KEYS, classAges } from '../events/categories';
-import { EVENT_FORMATS, type EventFormat } from '../events/formats';
+import {
+  CATEGORY_KEYS,
+  CHAMPIONSHIP_LEVELS,
+  CLASS_GENDERS,
+  CLASS_LICENSES,
+  EVENT_FORMAT_KEYS,
+  LICENSE_CLASS_KEYS,
+  SERIES_KINDS,
+  classAges,
+  type ChampionshipLevel,
+  type EventFormat,
+} from '../events/racing';
 import type {
   RawEvent,
   RawEventClass,
@@ -118,15 +128,6 @@ const EVENT_FIELDS = new Set([
   'format',
   'series',
 ]);
-export const CHAMPIONSHIP_LEVELS = [
-  'club',
-  'district',
-  'state',
-  'regional',
-  'national',
-  'continental',
-  'world',
-];
 const CLASS_FIELDS = new Set([
   'name',
   'gender',
@@ -142,8 +143,6 @@ const CLASS_FIELDS = new Set([
   'championship',
   'note',
 ]);
-const CLASS_LICENSES = ['open', 'unlicensed', 'license', 'uci'];
-const LICENSE_CLASSES = ['elite_amateur', 'amateur', 'master'];
 const SERIES_FIELDS = new Set([
   'key',
   'name',
@@ -597,11 +596,11 @@ export function validateImportFile(
     }
 
     // Championship
-    let championship: string | undefined;
+    let championship: ChampionshipLevel | undefined;
     if (item.championship !== undefined && item.championship !== null) {
       if (
         typeof item.championship !== 'string' ||
-        !CHAMPIONSHIP_LEVELS.includes(item.championship)
+        !(CHAMPIONSHIP_LEVELS as readonly string[]).includes(item.championship)
       ) {
         add({
           severity: 'error',
@@ -610,7 +609,7 @@ export function validateImportFile(
           params: { value: show(item.championship) },
         });
       } else {
-        championship = item.championship;
+        championship = item.championship as ChampionshipLevel;
       }
     }
 
@@ -619,7 +618,7 @@ export function validateImportFile(
     if (item.format !== undefined && item.format !== null) {
       if (
         typeof item.format !== 'string' ||
-        !(EVENT_FORMATS as readonly string[]).includes(item.format)
+        !(EVENT_FORMAT_KEYS as string[]).includes(item.format)
       ) {
         add({
           severity: 'error',
@@ -677,7 +676,7 @@ export function validateImportFile(
           const gender = entry.gender ?? 'open';
           if (
             typeof gender !== 'string' ||
-            !['open', 'male', 'female'].includes(gender)
+            !(CLASS_GENDERS as readonly string[]).includes(gender)
           ) {
             add({
               severity: 'error',
@@ -689,7 +688,7 @@ export function validateImportFile(
           const license = entry.license ?? 'open';
           if (
             typeof license !== 'string' ||
-            !CLASS_LICENSES.includes(license)
+            !(CLASS_LICENSES as readonly string[]).includes(license)
           ) {
             add({
               severity: 'error',
@@ -718,7 +717,9 @@ export function validateImportFile(
             if (
               !Array.isArray(values) ||
               values.some(
-                (v) => typeof v !== 'string' || !LICENSE_CLASSES.includes(v),
+                (v) =>
+                  typeof v !== 'string' ||
+                  !(LICENSE_CLASS_KEYS as string[]).includes(v),
               )
             ) {
               add({
@@ -828,7 +829,8 @@ export function validateImportFile(
           const level = entry.championship ?? null;
           if (
             level !== null &&
-            (typeof level !== 'string' || !CHAMPIONSHIP_LEVELS.includes(level))
+            (typeof level !== 'string' ||
+              !(CHAMPIONSHIP_LEVELS as readonly string[]).includes(level))
           ) {
             add({
               severity: 'error',
@@ -847,7 +849,9 @@ export function validateImportFile(
             ageMin,
             ageMax,
             category,
-            license: (CLASS_LICENSES.includes(license as string)
+            license: ((CLASS_LICENSES as readonly string[]).includes(
+              license as string,
+            )
               ? license
               : 'open') as RawEventClass['license'],
             dayLicense: entry.dayLicense === true,
@@ -855,7 +859,8 @@ export function validateImportFile(
             distanceKm,
             elevationM,
             startTime,
-            championship: typeof level === 'string' ? level : null,
+            championship:
+              typeof level === 'string' ? (level as ChampionshipLevel) : null,
             note,
           });
         });
@@ -907,7 +912,7 @@ export function validateImportFile(
         const kind = entry.kind ?? 'series';
         if (
           typeof kind !== 'string' ||
-          !['series', 'cup', 'league'].includes(kind)
+          !(SERIES_KINDS as readonly string[]).includes(kind)
         ) {
           add({
             severity: 'error',
@@ -1055,7 +1060,7 @@ const MESSAGES: Record<string, (issue: ImportIssue) => string> = {
   classLicenseClassUnknown: (i) =>
     `Unknown licence classes ${i.params?.value} (elite_amateur, amateur, master)`,
   formatUnknown: (i) =>
-    `Unknown format ${i.params?.value} (${EVENT_FORMATS.join(', ')})`,
+    `Unknown format ${i.params?.value} (${EVENT_FORMAT_KEYS.join(', ')})`,
   numberInvalid: (i) => `Must be a number from 0 to ${i.params?.max}`,
   classCategoryUnknown: (i) =>
     `Unknown category ${i.params?.value} (${CATEGORY_KEYS.join(', ')})`,

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  computed,
   inject,
   OnInit,
   signal,
@@ -19,6 +20,7 @@ import { RichTextComponent } from '@shared/components/rich-text/rich-text.compon
 import { InputComponent, ToastService } from '@shared/ui';
 
 import { FormActionsComponent } from '@shared/components/form-actions/form-actions.component';
+import { RacingService } from '@core/services/racing.service';
 @Component({
   selector: 'app-series-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,11 +55,13 @@ export class SeriesFormComponent implements OnInit {
     this.uploadService.uploadSeriesImage(this.editId, file);
   protected readonly deleteImageFn = () => this.uploadService.deleteSeriesImage(this.editId);
 
+  private readonly racing = inject(RacingService);
+  protected readonly seriesKinds = computed(() => this.racing.meta()?.seriesKinds ?? ['series']);
   protected readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     description: [''],
     year: [null as number | null],
-    kind: ['series' as 'series' | 'cup' | 'league'],
+    kind: ['series'],
     season: [''],
     disciplineSlug: [''],
     externalUrl: [''],

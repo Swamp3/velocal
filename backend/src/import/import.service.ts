@@ -28,7 +28,7 @@ import {
 } from './interfaces/import-source.interface';
 import { RaceResultSource } from './sources/race-result.source';
 import { RadNetSource } from './sources/rad-net.source';
-import { inferFormat } from '../events/formats';
+import { disciplineFor, inferFormat, type EventFormat } from '../events/racing';
 
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000;
 /** Issues decided against the database; recomputed when the run writes. */
@@ -486,6 +486,7 @@ export class ImportService {
     });
     const existing =
       own ?? (mode === 'scraper' ? await this.findBySourcePage(raw) : null);
+    this.completeRacingData(raw, existing?.format ?? null);
     if (existing) return await this.planUpdate(existing, raw);
 
     const duplicate = this.findDuplicate(raw, candidates);
@@ -513,6 +514,24 @@ export class ImportService {
       };
     }
     return { action: 'create', issues: [] };
+  }
+
+  /**
+   * Fills what the record implies: the format from a clear name when neither the record nor the
+   * stored event has one, and the bike type of a "Breitensport" event of a known format (RTF on
+   * the road, CTF on the MTB). Never replaces a format that is stored or given.
+   */
+  private completeRacingData(
+    raw: RawEvent,
+    storedFormat: EventFormat | null,
+  ): void {
+    if (raw.format === undefined && storedFormat == null) {
+      raw.format = inferFormat(raw.name) ?? undefined;
+    }
+    raw.disciplineSlug = disciplineFor(
+      raw.disciplineSlug,
+      raw.format ?? storedFormat,
+    );
   }
 
   private async planUpdate(existing: Event, raw: RawEvent): Promise<Plan> {
@@ -773,7 +792,7 @@ export class ImportService {
       lastSeenAt: new Date(),
       disciplineSlug: raw.disciplineSlug,
       championship: raw.championship ?? null,
-      format: raw.format ?? inferFormat(raw.name),
+      format: raw.format ?? null,
     });
     // Event, classes and series links are saved together or not at all.
     return this.dataSource.transaction(async (manager) => {

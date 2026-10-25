@@ -1,4 +1,9 @@
-import { EVENT_FORMATS, type EventFormat } from '../formats';
+import {
+  CHAMPIONSHIP_LEVELS,
+  EVENT_FORMAT_KEYS,
+  type ChampionshipLevel,
+  type EventFormat,
+} from '../racing';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -197,25 +202,17 @@ export class Event {
   /** The event is (or includes) a championship of this level. */
   @Column({
     type: 'enum',
-    enum: [
-      'club',
-      'district',
-      'state',
-      'regional',
-      'national',
-      'continental',
-      'world',
-    ],
+    enum: CHAMPIONSHIP_LEVELS,
     enumName: 'championship_level',
     name: 'championship',
     nullable: true,
   })
-  championship: string | null;
+  championship: ChampionshipLevel | null;
 
   /** Licence race, Jedermann or a touring format (RTF, CTF …); null when unknown. */
   @Column({
     type: 'enum',
-    enum: EVENT_FORMATS,
+    enum: EVENT_FORMAT_KEYS,
     enumName: 'event_format',
     nullable: true,
   })

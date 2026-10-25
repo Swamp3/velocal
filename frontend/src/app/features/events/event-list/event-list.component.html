@@ -84,7 +84,7 @@
             class="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text)] focus:outline-2 focus:outline-offset-0 focus:outline-[var(--color-primary)]"
           >
             <option value="">{{ 'events.format.all' | transloco }}</option>
-            @for (f of formatOptions; track f) {
+            @for (f of formatOptions(); track f) {
               <option [value]="f">{{ 'events.format.' + f | transloco }}</option>
             }
           </select>

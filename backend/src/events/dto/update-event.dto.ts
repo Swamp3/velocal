@@ -1,5 +1,10 @@
-import { EVENT_FORMATS, type EventFormat } from '../formats';
-import { CHAMPIONSHIP_LEVELS, EventClassDto } from './event-class.dto';
+import {
+  CHAMPIONSHIP_LEVELS,
+  type ChampionshipLevel,
+  EVENT_FORMAT_KEYS,
+  type EventFormat,
+} from '../racing';
+import { EventClassDto } from './event-class.dto';
 import { Type } from 'class-transformer';
 import {
   IsIn,
@@ -65,11 +70,11 @@ export class UpdateEventDto {
   /** Championship level of the whole event, or null for none. */
   @IsOptional()
   @IsIn([...CHAMPIONSHIP_LEVELS, null])
-  championship?: string | null;
+  championship?: ChampionshipLevel | null;
 
   /** Licence race, Jedermann or touring format; null when unknown. */
   @IsOptional()
-  @IsIn([...EVENT_FORMATS, null])
+  @IsIn([...EVENT_FORMAT_KEYS, null])
   format?: EventFormat | null;
 
   /** Rating classes; replaces the stored list when given. */

@@ -1,3 +1,4 @@
+import type { ChampionshipLevel, ClassGender, ClassLicense, EventFormat, LicenseClass, SeriesKind } from './racing.model';
 import { Discipline } from './discipline.model';
 import { PaceGroup, PaceGroupInput, Route, StravaLink } from './route.model';
 
@@ -98,25 +99,6 @@ export interface CreateEventDto {
 
 export type UpdateEventDto = Partial<CreateEventDto>;
 
-export type ChampionshipLevel =
-  | 'club'
-  | 'district'
-  | 'state'
-  | 'regional'
-  | 'national'
-  | 'continental'
-  | 'world';
-
-/** Licence race, Jedermann, or a touring format without times or placings (Breitensport). */
-export type EventFormat = 'race' | 'jedermann' | 'rtf' | 'ctf' | 'marathon' | 'brevet' | 'gravel_ride' | 'tour' | 'kids';
-export const EVENT_FORMATS: readonly EventFormat[] = ['race', 'jedermann', 'kids', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
-export const TOURING_FORMATS: readonly EventFormat[] = ['rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
-
-export type ClassGender = 'open' | 'male' | 'female';
-/** open: everyone; unlicensed: Hobby, only without licence; license: needs a licence; uci: UCI licence. */
-export type ClassLicense = 'open' | 'unlicensed' | 'license' | 'uci';
-export type LicenseClass = 'elite_amateur' | 'amateur' | 'master';
-
 /** A rating class. Ages count by year of birth (age reached in the event's year). */
 export interface EventClass {
   id?: string;
@@ -137,13 +119,15 @@ export interface EventClass {
   startTime: string | null;
   championship: ChampionshipLevel | null;
   note: string | null;
+  /** Set by the server for a viewer with rider data: whether they may start in this class. */
+  fitsYou?: boolean;
 }
 
 export interface EventSeriesRef {
   id: string;
   slug: string;
   name: string;
-  kind: 'series' | 'cup' | 'league';
+  kind: SeriesKind;
   season: string | null;
   round: number | null;
   label: string | null;

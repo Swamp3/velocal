@@ -1,4 +1,14 @@
-import { CATEGORY_KEYS } from '../categories';
+import {
+  CATEGORY_KEYS,
+  CHAMPIONSHIP_LEVELS,
+  type ChampionshipLevel,
+  CLASS_GENDERS,
+  CLASS_LICENSES,
+  LICENSE_CLASS_KEYS,
+  type ClassGender,
+  type ClassLicense,
+  type LicenseClass,
+} from '../racing';
 import {
   IsArray,
   IsBoolean,
@@ -14,16 +24,6 @@ import {
   MinLength,
 } from 'class-validator';
 
-export const CHAMPIONSHIP_LEVELS = [
-  'club',
-  'district',
-  'state',
-  'regional',
-  'national',
-  'continental',
-  'world',
-] as const;
-
 /** A rating class as entered in the event form. */
 export class EventClassDto {
   @IsString()
@@ -32,8 +32,8 @@ export class EventClassDto {
   name: string;
 
   @IsOptional()
-  @IsIn(['open', 'male', 'female'])
-  gender?: 'open' | 'male' | 'female';
+  @IsIn(CLASS_GENDERS)
+  gender?: ClassGender;
 
   @IsOptional()
   @IsInt()
@@ -53,8 +53,8 @@ export class EventClassDto {
   category?: string | null;
 
   @IsOptional()
-  @IsIn(['open', 'unlicensed', 'license', 'uci'])
-  license?: 'open' | 'unlicensed' | 'license' | 'uci';
+  @IsIn(CLASS_LICENSES)
+  license?: ClassLicense;
 
   @IsOptional()
   @IsBoolean()
@@ -62,8 +62,8 @@ export class EventClassDto {
 
   @IsOptional()
   @IsArray()
-  @IsIn(['elite_amateur', 'amateur', 'master'], { each: true })
-  licenseClasses?: ('elite_amateur' | 'amateur' | 'master')[] | null;
+  @IsIn(LICENSE_CLASS_KEYS, { each: true })
+  licenseClasses?: LicenseClass[] | null;
 
   /** Length in km (one decimal). */
   @IsOptional()
@@ -85,7 +85,7 @@ export class EventClassDto {
 
   @IsOptional()
   @IsIn(CHAMPIONSHIP_LEVELS)
-  championship?: string | null;
+  championship?: ChampionshipLevel | null;
 
   @IsOptional()
   @IsString()

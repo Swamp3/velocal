@@ -1,4 +1,11 @@
-import type { EventFormat } from '../../events/formats';
+import type {
+  ChampionshipLevel,
+  ClassGender,
+  ClassLicense,
+  EventFormat,
+  LicenseClass,
+  SeriesKind,
+} from '../../events/racing';
 import type {
   EventConflict,
   EventSourceRef,
@@ -30,7 +37,7 @@ export interface RawEvent {
   conflicts?: EventConflict[];
   /** Rating classes; replaces the stored classes when given. */
   classes?: RawEventClass[];
-  championship?: string;
+  championship?: ChampionshipLevel;
   /** Licence race, Jedermann or touring format (RTF, CTF …). */
   format?: EventFormat;
   /** Series the event belongs to (cup run, league matchday). */
@@ -39,17 +46,17 @@ export interface RawEvent {
 
 export interface RawEventClass {
   name: string;
-  gender: 'open' | 'male' | 'female';
+  gender: ClassGender;
   ageMin: number | null;
   ageMax: number | null;
   category: string | null;
-  license: 'open' | 'unlicensed' | 'license' | 'uci';
+  license: ClassLicense;
   dayLicense: boolean;
-  licenseClasses: ('elite_amateur' | 'amateur' | 'master')[] | null;
+  licenseClasses: LicenseClass[] | null;
   distanceKm: number | null;
   elevationM: number | null;
   startTime: Date | null;
-  championship: string | null;
+  championship: ChampionshipLevel | null;
   note: string | null;
 }
 
@@ -57,7 +64,7 @@ export interface RawEventSeries {
   /** Stable key of the series within the source. */
   key: string;
   name: string;
-  kind: 'series' | 'cup' | 'league';
+  kind: SeriesKind;
   season: string | null;
   round: number | null;
   roundLabel: string | null;

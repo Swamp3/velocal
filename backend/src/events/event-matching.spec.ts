@@ -87,8 +87,14 @@ describe('distinguishing classes and rounds', () => {
     const hall = 'Kissing, Paartalhalle';
     expect(
       compareEvents(
-        { name: 'Radball — Bayernliga U13 Süd — 1. Spieltag', locationName: hall },
-        { name: 'Radball — Bayernliga U17 Süd — 1. Spieltag', locationName: hall },
+        {
+          name: 'Radball — Bayernliga U13 Süd — 1. Spieltag',
+          locationName: hall,
+        },
+        {
+          name: 'Radball — Bayernliga U17 Süd — 1. Spieltag',
+          locationName: hall,
+        },
       ).match,
     ).toBe(false);
     expect(

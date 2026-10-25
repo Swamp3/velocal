@@ -26,6 +26,7 @@ import { ButtonComponent, ButtonStyleDirective, ChipComponent, PaginationCompone
 import { toDisplayDate, parseDisplayDate, datePlaceholder } from '@shared/utils/event-date';
 import { LocaleService } from '@core/services/locale.service';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, tap } from 'rxjs';
+import { RacingService } from '@core/services/racing.service';
 
 const RADIUS_OPTIONS = [50, 100, 200, 500] as const;
 
@@ -73,7 +74,8 @@ export class EventListComponent implements OnInit {
   readonly hideLeagues = signal(false);
   /** '' (all), a format, or `touring` for all Breitensport formats. */
   readonly format = signal('');
-  protected readonly formatOptions = ['race', 'jedermann', 'kids', 'touring', 'rtf', 'ctf', 'marathon', 'brevet', 'gravel_ride', 'tour'];
+  /** All touring formats together are the "Breitensport" discipline chip. */
+  protected readonly formatOptions = inject(RacingService).formats;
   readonly selectedYear = signal<number | null>(null);
   readonly availableYears = computed(() => {
     const currentYear = new Date().getFullYear();

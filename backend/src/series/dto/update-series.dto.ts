@@ -1,4 +1,12 @@
-import { IsIn, IsInt, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { SERIES_KINDS, type SeriesKind } from '../../events/racing';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdateSeriesDto {
   @IsOptional()
@@ -27,8 +35,8 @@ export class UpdateSeriesDto {
 
   /** `series`, `cup` (runs for one ranking) or `league` (matchdays of a season). */
   @IsOptional()
-  @IsIn(['series', 'cup', 'league'])
-  kind?: 'series' | 'cup' | 'league';
+  @IsIn(SERIES_KINDS)
+  kind?: SeriesKind;
 
   /** Season across years, e.g. `2026/27`. */
   @IsOptional()

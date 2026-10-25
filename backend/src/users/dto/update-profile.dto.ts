@@ -1,4 +1,12 @@
 import {
+  LICENSE_CLASS_KEYS,
+  RIDER_GENDERS,
+  RIDER_LICENSES,
+  type LicenseClass,
+  type RiderGender,
+  type RiderLicense,
+} from '../../events/racing';
+import {
   IsIn,
   IsInt,
   IsOptional,
@@ -49,18 +57,18 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @ValidateIf((_dto, value) => value !== null)
-  @IsIn(['male', 'female', 'diverse'])
-  gender?: 'male' | 'female' | 'diverse' | null;
+  @IsIn(RIDER_GENDERS)
+  gender?: RiderGender | null;
 
   @IsOptional()
   @ValidateIf((_dto, value) => value !== null)
-  @IsIn(['none', 'license', 'uci'])
-  licenseType?: 'none' | 'license' | 'uci' | null;
+  @IsIn(RIDER_LICENSES)
+  licenseType?: RiderLicense | null;
 
   @IsOptional()
   @ValidateIf((_dto, value) => value !== null)
-  @IsIn(['elite_amateur', 'amateur', 'master'])
-  licenseClass?: 'elite_amateur' | 'amateur' | 'master' | null;
+  @IsIn(LICENSE_CLASS_KEYS)
+  licenseClass?: LicenseClass | null;
 
   @IsOptional()
   @IsIn(['de', 'en'])

@@ -77,11 +77,11 @@ why). Admins find it under Admin → Imports → Report, and on each imported ev
 |---|---|---|
 | `externalId` | yes | Stable id, max. 200 characters, unique in the file. Keep it when date or place change later; never reuse it for another event. |
 | `name` | yes | 2-300 characters. Keep class and round in the name (`U13`, `2. Spieltag`, `Staffel 1`). |
-| `startDate` | yes | Day only `YYYY-MM-DD` when no time is known, otherwise ISO 8601 **with offset**, e.g. `2026-10-25T09:00:00+01:00`. A time without offset is an error. |
+| `startDate` | yes | Day only `YYYY-MM-DD` when no time is known, otherwise ISO 8601 **with offset**, e.g. `2026-10-25T09:00:00+01:00`. A time without offset is an error. A day-only date is stored as midnight in Germany and shown as that calendar day in every time zone. |
 | `endDate` | no | Same format; not before `startDate`. For multi-day events. |
 | `startTimeKnown` | no | Optional check: `false` for day-only dates, `true` with a time. A day-only date marked `true` is an error. |
 | `allDay` | no | Accepted, currently not used. |
-| `disciplineSlug` | yes | `strasse`, `bahn`, `cyclo-cross`, `mtb`, `bmx`, `halle`, `trial`, `breitensport`, `tt`, `gravel` |
+| `disciplineSlug` | yes | `strasse`, `bahn`, `cyclo-cross`, `mtb`, `bmx`, `halle`, `trial`, `breitensport`, `tt`, `gravel`. Use `breitensport` only when the bike type is unknown; see [Formats](#formats). |
 | `locationName` | yes | Venue and town, e.g. `73770 Denkendorf, Albert-Schweitzer-Schulsporthalle, Lenaustraße 3`. Placeholders (`TBD`, `Austragungsort nicht angegeben`) or a region alone (`Deutschland`, `Niedersachsen`) are errors; a town with "venue follows" is a warning. |
 | `address` | no | Street address, max. 255 characters. |
 | `country` | no | Two capital letters, default `DE`. |
@@ -93,18 +93,70 @@ why). Admins find it under Admin → Imports → Report, and on each imported ev
 | `description` | no | Plain text, max. 10 000 characters. Shown on the event page. |
 | `source` | no | List of sources: `{ "name", "url", "checkedAt"?, "updatedAt"? }`. Name and link are shown **publicly** on the event page; `checkedAt`/`updatedAt` (`YYYY-MM-DD`) only to admins. |
 | `conflicts` | no | Disagreements between sources: a text, or `{ "field", "values"?, "selectedSource"?, "reason"? }`. Shown **only to admins**; each event with conflicts is a warning to confirm. |
-
 | `championship` | no | Championship level of the whole event: `club`, `district`, `state`, `regional`, `national`, `continental`, `world`. |
-| `format` | no | What kind of event it is, see [Formats](#formats). When missing, a new event takes it from a clear name (`RTF`, `CTF`, `Radmarathon`, `Brevet`, `Jedermann`, `Gran Fondo`, `Gravel Ride`, `Fette Reifen`, `Laufradrennen`, `Kinderrennen`); otherwise it stays empty. An update without `format` keeps the stored one. |
-| `classes` | no | Rating classes (Wertungsklassen), see below. When given, they replace the stored classes. |
+| `format` | no | What kind of event it is, see [Formats](#formats). When neither the file nor the stored event has one, it is taken from a clear name (`RTF`, `CTF`, `Radmarathon`, `Brevet`, `ARA …`, `Jedermann`, `Gran Fondo`, `Gravel Ride`, `Fette Reifen`, `Laufradrennen`, `Kinderrennen`). A stored format is never replaced by a guess. |
+| `classes` | no | Rating classes (Wertungsklassen) or routes, see below. When given, they replace the stored classes. |
 | `series` | no | Series the event belongs to: one object or a list, see below. |
 
 Unknown fields are reported as warnings and ignored.
 
-### Rating classes (`classes`)
+All allowed values (disciplines aside) are defined once, in `backend/src/events/racing.ts`, and
+served to the app at `GET /api/events/racing-meta`. The tables below describe them.
 
-One entry per class with its own result list. Riders can filter for classes they may start in
-("Fits me", using year of birth, gender and licence from their profile).
+### Formats
+
+| `format` | Meaning | Timing | Who may start | Discipline for `breitensport` |
+|---|---|---|---|---|
+| `race` | Licence race (Lizenzrennen), Hobby races included | yes | As the classes say (licence, day licence, Hobby) | – |
+| `jedermann` | Jedermann race, Gran Fondo | yes | Everyone without licence; licensed riders often only of some licence classes or ranked separately | – |
+| `kids` | Kids' races: Fette-Reifen-Rennen (own bike, tyres from 30 mm, no road bikes), Laufradrennen, Bambini | mostly yes | Children without a licence; usually helmet and parental consent | – |
+| `rtf` | Radtourenfahrt: signposted road routes of 20–199 km with checkpoints | no | Everyone | `strasse` |
+| `ctf` | Country-Tourenfahrt: off-road routes for MTB and cross bikes | no | Everyone | `mtb` (set `gravel` when it is a gravel CTF) |
+| `marathon` | Radmarathon: road routes of 200 km and more | no | Everyone | `strasse` |
+| `brevet` | Randonneur ride (Audax, ARA/ACP: 200/300/400/600 km) with a time limit | no (time limit only) | Everyone | `strasse` |
+| `gravel_ride` | Gravel tour | no | Everyone | `gravel` |
+| `tour` | Radwandern, Volksradfahren, club tours | no | Everyone | stays `breitensport` |
+
+**Discipline and format.** The discipline says which bike and terrain (Straße, MTB, Gravel …), the
+format what kind of event. `breitensport` is only for recreational events whose bike type is
+unknown: an event with `disciplineSlug: "breitensport"` and a known format gets the discipline of
+the last column. In the app, the **Breitensport** filter shows all touring formats (`rtf` to
+`tour`) whatever their discipline, plus the remaining `breitensport` events.
+
+**Routes.** Touring formats list their routes as `classes`: one entry per route with `name`,
+`distanceKm`, `elevationM`, `startTime` (start window opens) and, if needed, `ageMin` and a `note`
+("under 18 only with parental consent"). A touring event without routes counts as open to everyone
+in the "Fits me" filter.
+
+```json
+{ "externalId": "rtf-kahler-asten-2026", "name": "RTF Rund um den Kahlen Asten", "format": "rtf",
+  "disciplineSlug": "strasse",
+  "classes": [
+    { "name": "Familienstrecke", "distanceKm": 42, "elevationM": 450 },
+    { "name": "Strecke 3", "distanceKm": 153, "elevationM": 2300, "ageMin": 16, "startTime": "2027-05-16T07:00:00+02:00" }
+  ] }
+```
+
+**Kids' races.** A kids' race is its own event with `"format": "kids"` and classes such as
+`{ "name": "Laufrad", "category": "u7" }` or
+`{ "name": "Fette Reifen U9", "category": "u9", "license": "unlicensed" }`. When it runs alongside
+an RTF or race, add it as a class of that event instead (`ageMax` of 12 or less): the "Kids'
+races" filter finds both. Without classes, a kids' race fits children without a licence.
+
+**Jedermann.** An `open` class with `licenseClasses` admits everyone without a licence plus licensed
+riders of those classes:
+
+```json
+"classes": [
+  { "name": "Jedermann Herren 30–39", "gender": "male", "ageMin": 30, "ageMax": 39, "licenseClasses": ["amateur", "master"] }
+]
+```
+
+### Rating classes and routes (`classes`)
+
+One entry per class with its own result list, or per route of a touring event. Riders can filter
+for classes they may start in ("Fits me", using year of birth, gender, licence and licence class
+from their profile); the event page marks the fitting classes.
 
 ```json
 "classes": [
@@ -118,15 +170,23 @@ One entry per class with its own result list. Riders can filter for classes they
 
 | Field | Required | Rules |
 |---|---|---|
-| `name` | yes | Max. 120 characters, as the organiser names the class. |
+| `name` | yes | Max. 120 characters, as the organiser names the class or route. |
 | `gender` | no | `open` (default), `male`, `female`. |
-| `category` | no | Age category; fills `ageMin`/`ageMax` when they are missing (given ages win). See the table below. |
-| `ageMin`, `ageMax` | no | Whole years, inclusive. Cycling counts by **year of birth**: the age reached in the event's year (U15 = 13 and 14, U19 = 17 and 18, U23 = 19 to 22). |
-| `license` | no | Who may start: `open` (default; everyone, e.g. Jedermann), `unlicensed` (Hobby: only riders **without** a licence), `license` (needs a federation licence such as BDR), `uci` (needs a UCI licence). |
+| `category` | no | Age category, see the table below; fills `ageMin`/`ageMax` when they are missing (given ages win). |
+| `ageMin`, `ageMax` | no | Whole years, inclusive. Cycling counts by **year of birth**: the age reached in the event's year (U15 = 13 and 14, U23 = 19 to 22). |
+| `license` | no | Who may start: `open` (default; everyone), `unlicensed` (Hobby: only riders **without** a licence), `license` (needs a federation licence such as BDR), `uci` (needs a UCI licence). |
 | `dayLicense` | no | `true` when riders without a licence may start in a `license` class with a day licence (BDR: up to five per year). |
-| `licenseClasses` | no | For `open`, `license` and `uci` classes: list of `elite_amateur`, `amateur`, `master` that may start. Missing or empty: all licence classes. Youth licences (U11–U19) have no licence class, so this list does not exclude them. |
+| `licenseClasses` | no | For `open`, `license` and `uci` classes: licence classes that may start (`elite_amateur`, `amateur`, `master`). Missing or empty: all. Youth licences have no licence class, so this list does not exclude them. |
+| `distanceKm` | no | Length in km (one decimal). |
+| `elevationM` | no | Climbing in metres. |
+| `startTime` | no | ISO 8601 with offset. |
+| `championship` | no | Championship level of this class only. |
+| `note` | no | Max. 300 characters. |
 
-Age categories (BDR/UCI; age reached in the calendar year):
+Several competitions at one hall on one day (U13 and U17 matchdays) stay **separate events**, each
+with its own class. One race with several classes is **one event** with several classes.
+
+**Age categories** (BDR/UCI; age reached in the calendar year):
 
 | `category` | Ages | Note |
 |---|---|---|
@@ -137,64 +197,16 @@ Age categories (BDR/UCI; age reached in the calendar year):
 | `u15` | 13–14 | Youth |
 | `u17` | 15–16 | Youth |
 | `u19` | 17–18 | Juniors |
-| `u23` | 19–22 | Riders in their licence class (Elite Amateure or Amateure) |
+| `u23` | 19–22 | Licensed riders in their licence class |
 | `elite` | 23–29 | |
 | `masters1` | 30–39 | From 30 a licensed rider may choose a Masters licence |
 | `masters2` | 40–49 | |
 | `masters3` | 50–59 | |
 | `masters4` | 60+ | |
 
-Licence classes of adult licensed riders (BDR since 2019): **Elite Amateure** (the best riders of
-the ranking, Bundesliga riders), **Amateure** (all others), **Masters** (from 30, by choice).
-UCI licences belong to riders of UCI teams.
-| `startTime` | no | ISO 8601 with offset. |
-| `distanceKm` | no | Length in km (one decimal). |
-| `elevationM` | no | Climbing in metres. |
-| `championship` | no | Championship level of this class only. |
-| `note` | no | Max. 300 characters. |
-
-Several competitions at one hall on one day (U13 and U17 matchdays) stay **separate events**, each
-with its own class. One race with several classes is **one event** with several classes.
-
-### Formats
-
-| `format` | Meaning | Timing | Who may start |
-|---|---|---|---|
-| `race` | Licence race (Lizenzrennen), Hobby races included | yes | As the classes say (licence, day licence, Hobby) |
-| `jedermann` | Jedermann race, Gran Fondo | yes | Everyone without licence; licensed riders often only of some licence classes (put them in `licenseClasses` of the `open` class) or ranked separately (own class) |
-| `rtf` | Radtourenfahrt: signposted road routes of 20–199 km with checkpoints | no | Everyone |
-| `ctf` | Country-Tourenfahrt: off-road routes for MTB and cross bikes | no | Everyone |
-| `marathon` | Radmarathon: road routes of 200 km and more | no | Everyone |
-| `brevet` | Randonneur ride (Audax, ARA/ACP: 200/300/400/600 km) with a time limit | no (time limit only) | Everyone |
-| `gravel_ride` | Gravel tour | no | Everyone |
-| `tour` | Radwandern, Volksradfahren, club tours | no | Everyone |
-| `kids` | Kids' races: Fette-Reifen-Rennen (own bike, tyres from 30 mm, no road bikes), Laufradrennen, Bambini races | mostly yes | Children without a licence; usually helmet and parental consent required |
-
-Touring formats (`rtf` to `tour`) list their **routes** as `classes`: one entry per route with
-`name`, `distanceKm`, `elevationM`, `startTime` (start window opens) and, if needed, `ageMin` and a
-`note` ("under 18 only with parental consent"). A touring event without routes counts as open to
-everyone in the "Fits me" filter.
-
-```json
-{ "externalId": "rtf-kahler-asten-2026", "name": "RTF Rund um den Kahlen Asten", "format": "rtf",
-  "classes": [
-    { "name": "Familienstrecke", "distanceKm": 42, "elevationM": 450 },
-    { "name": "Strecke 3", "distanceKm": 153, "elevationM": 2300, "ageMin": 16, "startTime": "2027-05-16T07:00:00+02:00" }
-  ] }
-```
-
-A kids' race is its own event with `"format": "kids"` and classes such as
-`{ "name": "Laufrad", "category": "u7" }`, `{ "name": "Fette Reifen U9", "category": "u9", "license": "unlicensed" }`.
-When it runs alongside an RTF or race, add it as a class of that event instead (`ageMax` of 12
-or less): the "Kids' races" filter finds both.
-
-A Jedermann race that admits licensed riders of the Amateur and Masters classes only:
-
-```json
-"classes": [
-  { "name": "Jedermann Herren 30–39", "gender": "male", "ageMin": 30, "ageMax": 39, "licenseClasses": ["amateur", "master"] }
-]
-```
+**Licence classes** of licensed adults (BDR since 2019), with the age from which a rider can hold
+them: `elite_amateur` (19+; the best riders of the ranking, Bundesliga riders), `amateur` (19+;
+all others), `master` (30+, by choice). UCI licences belong to riders of UCI teams.
 
 ### Series (`series`)
 

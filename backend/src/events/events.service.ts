@@ -10,14 +10,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
 import { EventClass } from './entities/event-class.entity';
-import { classFitsSql } from './class-match';
-import { classAges } from './categories';
 import {
-  EVENT_FORMATS,
+  EVENT_FORMAT_KEYS,
   KIDS_MAX_AGE,
+  TOURING_DISCIPLINE,
   TOURING_FORMATS,
-  TOURING_GROUP,
-} from './formats';
+  classAges,
+  classFitCondition,
+  disciplineFor,
+  eventFitsSql,
+  hasRiderData,
+  type EventFormat,
+  type RiderProfile,
+} from './racing';
 import { EventClassDto } from './dto/event-class.dto';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
@@ -26,7 +31,7 @@ import { EventPaceGroup } from './entities/event-pace-group.entity';
 import { EventStravaLink } from './entities/event-strava-link.entity';
 import { Route } from '../routes/entities/route.entity';
 import { serializeRoute } from '../routes/serialize';
-import { berlinTimeOfDay } from '../import/dates';
+import { berlinTimeOfDay, parseEventDate } from '../import/dates';
 import { IMPORT_FIELDS } from '../import/import-diff';
 import {
   PaceGroupDto,
@@ -102,6 +107,8 @@ export interface SerializedEventClass {
   startTime: Date | null;
   championship: string | null;
   note: string | null;
+  /** Only for a viewer who stated rider data: whether they may start in this class. */
+  fitsYou?: boolean;
 }
 
 export interface SerializedEventSeries {
@@ -231,51 +238,30 @@ export class EventsService {
     }
 
     if (params.discipline) {
+      // "Breitensport" stands for all touring events, whatever their bike type.
       const slugs = params.discipline.split(',').map((s) => s.trim());
-      qb.andWhere('event.disciplineSlug IN (:...slugs)', { slugs });
+      const touring = slugs.includes(TOURING_DISCIPLINE)
+        ? ' OR event.format IN (:...touringFormats)'
+        : '';
+      qb.andWhere(`(event.disciplineSlug IN (:...slugs)${touring})`, {
+        slugs,
+        touringFormats: TOURING_FORMATS,
+      });
     }
 
     if (params.fitsMe && userId) {
-      const rider = await this.users.findOne({
-        where: { id: userId },
-        select: {
-          id: true,
-          birthYear: true,
-          gender: true,
-          licenseType: true,
-          licenseClass: true,
-        },
-      });
+      const rider = await this.riderProfile(userId);
       if (rider) {
-        // Touring events without listed routes are open to everyone; kids' races without
-        // classes to children without a licence.
-        const kidsFit =
-          rider.licenseType === 'license' || rider.licenseType === 'uci'
-            ? 'FALSE'
-            : rider.birthYear == null
-              ? 'TRUE'
-              : `EXTRACT(YEAR FROM (event.startDate AT TIME ZONE 'Europe/Berlin'))::int - :fitKidsYear <= :fitKidsAge`;
-        const fit = classFitsSql(rider);
-        qb.andWhere(
-          `(${fit.sql} OR (NOT EXISTS (SELECT 1 FROM "event_classes" tc WHERE tc.event_id = event.id) AND (event.format IN (:...fitTouring) OR (event.format = 'kids' AND ${kidsFit}))))`,
-          {
-            ...fit.params,
-            fitTouring: TOURING_FORMATS,
-            fitKidsAge: KIDS_MAX_AGE,
-            fitKidsYear: rider.birthYear,
-          },
-        );
+        const fit = eventFitsSql(rider);
+        qb.andWhere(fit.sql, fit.params);
       }
     }
     if (params.format) {
-      const formats = [
-        ...new Set(
-          params.format
-            .split(',')
-            .flatMap((f) => (f === TOURING_GROUP ? [...TOURING_FORMATS] : [f]))
-            .filter((f) => (EVENT_FORMATS as readonly string[]).includes(f)),
-        ),
-      ];
+      const formats = params.format
+        .split(',')
+        .filter((f): f is EventFormat =>
+          (EVENT_FORMAT_KEYS as string[]).includes(f),
+        );
       // Kids' races also include events with a class for children (Fette-Reifen-Rennen at an RTF).
       const kids = formats.includes('kids')
         ? ` OR EXISTS (SELECT 1 FROM "event_classes" kc WHERE kc.event_id = event.id AND kc.age_max <= :kidsMaxAge)`
@@ -774,11 +760,11 @@ export class EventsService {
     const entity = this.repo.create({
       ...eventFields,
       source: userId ? EventSource.MANUAL : (dto.source ?? EventSource.MANUAL),
+      disciplineSlug: disciplineFor(dto.disciplineSlug, dto.format),
       createdById: userId ?? undefined,
-      startDate: new Date(dto.startDate),
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      startTimeKnown:
-        dto.startTimeKnown ?? hasBerlinTime(new Date(dto.startDate)),
+      startDate: toEventDate(dto.startDate).date,
+      endDate: dto.endDate ? toEventDate(dto.endDate).date : undefined,
+      startTimeKnown: dto.startTimeKnown ?? timeGiven(dto.startDate),
       registrationStart: dto.registrationStart
         ? new Date(dto.registrationStart)
         : undefined,
@@ -813,6 +799,17 @@ export class EventsService {
     await this.assertCanMutate(event, user);
 
     const partial: Partial<Event> = { ...dto } as Partial<Event>;
+    // A "Breitensport" event of a known format gets its bike type (RTF on the road …).
+    const discipline = disciplineFor(
+      dto.disciplineSlug ?? event.disciplineSlug,
+      dto.format !== undefined ? dto.format : event.format,
+    );
+    if (
+      discipline !== event.disciplineSlug ||
+      dto.disciplineSlug !== undefined
+    ) {
+      partial.disciplineSlug = discipline;
+    }
     if (!event.communityId) {
       delete partial.listing;
       delete partial.stravaUrl;
@@ -841,13 +838,12 @@ export class EventsService {
     }
 
     if (dto.startDate) {
-      partial.startDate = new Date(dto.startDate);
-      partial.startTimeKnown =
-        dto.startTimeKnown ?? hasBerlinTime(partial.startDate);
+      partial.startDate = toEventDate(dto.startDate).date;
+      partial.startTimeKnown = dto.startTimeKnown ?? timeGiven(dto.startDate);
     } else if (dto.startTimeKnown !== undefined) {
       partial.startTimeKnown = dto.startTimeKnown;
     }
-    if (dto.endDate) partial.endDate = new Date(dto.endDate);
+    if (dto.endDate) partial.endDate = toEventDate(dto.endDate).date;
     if (dto.registrationStart !== undefined) {
       partial.registrationStart = dto.registrationStart
         ? new Date(dto.registrationStart)
@@ -972,16 +968,16 @@ export class EventsService {
           eventId,
           position,
           name: c.name.trim(),
-          gender: (c.gender ?? 'open') as EventClass['gender'],
+          gender: c.gender ?? 'open',
           ...classAges(c.category, c.ageMin, c.ageMax),
           category: c.category ?? null,
-          license: (c.license ?? 'open') as EventClass['license'],
+          license: c.license ?? 'open',
           dayLicense: !!c.dayLicense,
           licenseClasses: c.licenseClasses?.length ? c.licenseClasses : null,
           distanceKm: c.distanceKm ?? null,
           elevationM: c.elevationM ?? null,
           startTime: c.startTime ? new Date(c.startTime) : null,
-          championship: (c.championship ?? null) as EventClass['championship'],
+          championship: c.championship ?? null,
           note: c.note?.trim() || null,
         }),
       ),
@@ -1937,7 +1933,10 @@ export class EventsService {
       ? await this.recurrences.findOne({ where: { id: event.recurrenceId } })
       : null;
     const ride = await this.rideDetails(event, userId);
-    const racing = await this.racingDetails([event.id]);
+    const racing = await this.racingDetails(
+      [event.id],
+      userId ? await this.riderProfile(userId) : null,
+    );
     return this.serializeEvent(event, {
       ...ride,
       ...racing(event.id),
@@ -1960,7 +1959,41 @@ export class EventsService {
   }
 
   /** Classes and series memberships of events, loaded once for a page of events. */
-  private async racingDetails(ids: string[]): Promise<
+  /** The viewer's rider data for the class rule, or null when they stated none. */
+  private async riderProfile(userId: string): Promise<RiderProfile | null> {
+    const rider = await this.users.findOne({
+      where: { id: userId },
+      select: {
+        id: true,
+        birthYear: true,
+        gender: true,
+        licenseType: true,
+        licenseClass: true,
+      },
+    });
+    return rider && hasRiderData(rider) ? rider : null;
+  }
+
+  /** Ids of the classes (of these events) the rider may start in. */
+  private async fittingClassIds(
+    ids: string[],
+    rider: RiderProfile,
+  ): Promise<Set<string>> {
+    const fit = classFitCondition(rider);
+    const rows = await this.eventClasses
+      .createQueryBuilder('fc')
+      .select('fc.id', 'id')
+      .innerJoin(Event, 'event', 'event.id = fc.event_id')
+      .where('fc.event_id IN (:...fitIds)', { fitIds: ids })
+      .andWhere(fit.sql, fit.params)
+      .getRawMany<{ id: string }>();
+    return new Set(rows.map((r) => r.id));
+  }
+
+  private async racingDetails(
+    ids: string[],
+    rider: RiderProfile | null = null,
+  ): Promise<
     (id: string) => {
       classes: SerializedEventClass[];
       series: SerializedEventSeries[];
@@ -1982,6 +2015,8 @@ export class EventsService {
         ORDER BY s."name"`,
       [ids],
     );
+    const fitting =
+      rider && classes.length ? await this.fittingClassIds(ids, rider) : null;
     return (id) => ({
       classes: classes
         .filter((c) => c.eventId === id)
@@ -2000,10 +2035,15 @@ export class EventsService {
           startTime: c.startTime,
           championship: c.championship,
           note: c.note,
+          ...(fitting ? { fitsYou: fitting.has(c.id) } : {}),
         })),
       series: series
         .filter((row) => row.eventId === id)
-        .map(({ eventId: _eventId, ...rest }) => rest),
+        .map((row) => {
+          const { eventId, ...rest } = row;
+          void eventId;
+          return rest;
+        }),
     });
   }
 
@@ -2282,9 +2322,18 @@ export class EventsService {
   }
 }
 
-/** A time other than midnight in Europe/Berlin was given. */
-function hasBerlinTime(date: Date): boolean {
-  return berlinTimeOfDay(date) !== '00:00';
+/** `YYYY-MM-DD` (day only) is Berlin midnight of that day; anything else an instant. */
+function toEventDate(value: string): { date: Date; dayOnly: boolean } {
+  const parsed = parseEventDate(value);
+  return parsed.kind === 'date'
+    ? { date: parsed.date, dayOnly: true }
+    : { date: new Date(value), dayOnly: false };
+}
+
+/** A time was given: not a plain day, and not midnight in Europe/Berlin. */
+function timeGiven(value: string): boolean {
+  const { date, dayOnly } = toEventDate(value);
+  return !dayOnly && berlinTimeOfDay(date) !== '00:00';
 }
 
 /** Fields of an imported event that this edit actually changes. */

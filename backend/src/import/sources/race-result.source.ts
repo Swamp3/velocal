@@ -141,8 +141,9 @@ export class RaceResultSource implements ImportSource {
   private mapEvents(tuples: unknown[][], disciplineSlug: string): RawEvent[] {
     return tuples
       .filter((t) => t[0] != null && t[2])
-      .map((t) => ({
-        externalId: `rr-${t[0]}`,
+      .map((t) => ({ t, id: String(t[0]) }))
+      .map(({ t, id }) => ({
+        externalId: `rr-${id}`,
         sourceName: this.name,
         name: String(t[2]).trim(),
         startDate: dayOf(t[3] as string),
@@ -153,8 +154,8 @@ export class RaceResultSource implements ImportSource {
         lat: Number(t[7]),
         lng: Number(t[8]),
         disciplineSlug,
-        externalUrl: `${BASE_URL}/${t[0]}/info`,
-        sourceUrl: `${BASE_URL}/${t[0]}/info`,
+        externalUrl: `${BASE_URL}/${id}/info`,
+        sourceUrl: `${BASE_URL}/${id}/info`,
         status: 'published',
       }));
   }
