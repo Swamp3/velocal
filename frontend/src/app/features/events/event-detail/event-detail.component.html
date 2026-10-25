@@ -589,12 +589,11 @@
       </section>
     }
 
-    <!-- Mini map (click to expand into interactive dialog) -->
+    <!-- Map: venue and parking, loaded only when the user opens it -->
     @if (event.coordinates) {
-      <div
-        class="mt-8 overflow-hidden rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-card)]"
-      >
-        <app-event-detail-map
+      <div class="mt-8">
+        <app-event-map
+          #eventMap
           [coordinates]="event.coordinates"
           [eventId]="event.id"
           [locationName]="event.locationName"
@@ -604,7 +603,11 @@
     }
 
     @if (event.parkingAreas?.length) {
-      <app-event-parking [areas]="event.parkingAreas!" />
+      <app-event-parking
+        [areas]="event.parkingAreas!"
+        [canShowOnMap]="!!event.coordinates"
+        (showOnMap)="eventMap()?.showParking($event)"
+      />
     }
 
     <!-- Linked posts -->

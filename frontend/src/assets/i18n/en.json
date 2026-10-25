@@ -121,12 +121,14 @@
       "map": {
         "title": "Event location",
         "dialogLabel": "Event location map",
-        "expand": "Expand map",
-        "tapToExplore": "Tap to explore",
         "openGoogle": "Open in Google Maps",
         "openApple": "Open in Apple Maps",
         "openOsm": "Open in OpenStreetMap",
-        "showOnFullMap": "Show on full map"
+        "showOnFullMap": "Show on full map",
+        "show": "Show map",
+        "withParking": "with {{count}} parking areas",
+        "fullscreen": "Full screen",
+        "exitFullscreen": "Exit full screen"
       },
       "addToCalendar": {
         "button": "Add to calendar",
@@ -257,7 +259,11 @@
         "addGroup": "Add pace group",
         "removeGroup": "Remove group"
       },
-      "registrationStart": "Registration opens"
+      "registrationStart": "Registration opens",
+      "openMap": "Open the map to set points",
+      "mapTarget": "Set point for:",
+      "mapHint": "Tap the map to set \"{{target}}\"; pins can be dragged.",
+      "mapVenue": "Venue"
     },
     "actions": {
       "create": "Create Event",
@@ -1539,7 +1545,7 @@
     "namePlaceholder": "e.g. Car park sports hall north",
     "kindsLabel": "For whom",
     "kindsRequired": "Choose at least one group.",
-    "pointLabel": "Entrance on the map (tap or drag the pin)",
+    "pointLabel": "Entrance on the map",
     "pointRequired": "Please set a point on the map.",
     "address": "Address",
     "capacityLabel": "Spaces (approx.)",
@@ -1551,6 +1557,11 @@
     "note": "Note",
     "notePlaceholder": "e.g. Access via Lindenstraße, follow the signs",
     "remove": "Remove parking area",
-    "add": "Add parking area"
+    "add": "Add parking area",
+    "showOnMap": "Show on map",
+    "unnamed": "Parking area",
+    "pointSet": "Point set",
+    "setPoint": "Set on the map",
+    "movePoint": "Change on the map"
   }
 }

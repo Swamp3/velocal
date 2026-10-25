@@ -5,10 +5,12 @@ import {
   inject,
   OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin, of, switchMap } from 'rxjs';
+import { forkJoin, of, startWith, switchMap } from 'rxjs';
 import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
@@ -20,7 +22,8 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
-import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
+import { PlacesPickerComponent, type PickerPoint } from '@shared/components/places-picker/places-picker.component';
+import { parkingLabel } from '@shared/utils/parking-markers';
 import {
   CyclingEvent,
   Discipline,
@@ -52,7 +55,7 @@ import { LocaleService } from '@core/services/locale.service';
     TranslocoPipe,
     ButtonComponent,
     CountrySelectorComponent,
-    LocationPickerComponent,
+    PlacesPickerComponent,
     ImageUploadComponent,
     RichTextComponent,
   ],
@@ -80,6 +83,9 @@ export class EventFormComponent implements OnInit {
   protected readonly eventId = signal<string | null>(null);
   protected readonly isEdit = computed(() => this.eventId() !== null);
   protected readonly mapCoordinates = signal<{ lat: number; lng: number } | null>(null);
+  /** The form's one map and the point a tap on it sets. */
+  protected readonly placesPicker = viewChild(PlacesPickerComponent);
+  protected readonly mapTarget = signal('venue');
   protected readonly imageUrl = signal<string | null>(null);
 
   protected readonly uploadImageFn = (file: File) =>
@@ -301,6 +307,35 @@ export class EventFormComponent implements OnInit {
   protected removeParkingArea(index: number): void {
     this.form.controls.parkingAreas.removeAt(index);
     this.parkingChanged = true;
+  }
+
+  private readonly parkingValues = toSignal(
+    this.form.controls.parkingAreas.valueChanges.pipe(startWith(this.form.controls.parkingAreas.value)),
+    { initialValue: this.form.controls.parkingAreas.value },
+  );
+
+  /** Venue and parking areas as points of the one map. */
+  protected readonly mapPoints = computed<PickerPoint[]>(() => {
+    const areas = this.parkingValues();
+    return [
+      {
+        key: 'venue',
+        label: String(this.transloco.translate('event.form.mapVenue')),
+        marker: null,
+        coords: this.mapCoordinates(),
+      },
+      ...areas.map((area, i) => ({
+        key: `parking-${i}`,
+        label: area.name?.trim() || String(this.transloco.translate('parking.unnamed')),
+        marker: parkingLabel(i, areas.length),
+        coords: area.coordinates ?? null,
+      })),
+    ];
+  });
+
+  protected onMapPoint({ key, coords }: { key: string; coords: { lat: number; lng: number } }): void {
+    if (key === 'venue') this.onCoordinatesChange(coords);
+    else this.setParkingPoint(Number(key.replace('parking-', '')), coords);
   }
 
   protected toggleParkingKind(index: number, kind: string, checked: boolean): void {

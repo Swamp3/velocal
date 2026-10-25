@@ -1,17 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { toMetaDescription } from '@shared/utils/meta-text';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  OnInit,
-  Pipe,
-  PipeTransform,
-  signal,
-  untracked,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, Pipe, PipeTransform, signal, untracked, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { RouteService } from '@core/services/route.service';
@@ -20,7 +9,7 @@ import { FavoriteService } from '@core/services/favorite.service';
 import { PostService } from '@core/services/post.service';
 import { SeoService } from '@core/services/seo.service';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { AddToCalendarComponent, DisciplineChipComponent, EventClassesComponent, EventParkingComponent, EmptyStateComponent, EventDetailMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
+import { AddToCalendarComponent, DisciplineChipComponent, EventClassesComponent, EventParkingComponent, EmptyStateComponent, EventMapComponent, EventStatusBadgeComponent, NewsCardComponent, RichTextViewComponent, ShareButtonComponent } from '@shared/components';
 import { appleMapsDirectionsUrl, googleMapsDirectionsUrl } from '@shared/utils/map-links';
 import { CyclingEvent, formatDistance, PostListItem } from '@shared/models';
 import { EventMeetupEditComponent } from '../event-meetup-edit/event-meetup-edit.component';
@@ -64,7 +53,7 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
     DisciplineChipComponent,
     EventStatusBadgeComponent,
     EmptyStateComponent,
-    EventDetailMapComponent,
+    EventMapComponent,
     ExternalUrlDisplayPipe,
     ChipComponent,
     NewsCardComponent,
@@ -84,6 +73,8 @@ export class ExternalUrlDisplayPipe implements PipeTransform {
 })
 export class EventDetailComponent implements OnInit {
   protected readonly auth = inject(AuthService);
+  /** The page's one map; parking cards open it at their marker. */
+  protected readonly eventMap = viewChild(EventMapComponent);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);

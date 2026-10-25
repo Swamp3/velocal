@@ -5,11 +5,10 @@ export { DisciplineFilterComponent } from './discipline-filter/discipline-filter
 export { EventCardComponent } from './event-card/event-card.component';
 export { EventStatusBadgeComponent } from './event-status-badge/event-status-badge.component';
 export { EmptyStateComponent } from './empty-state/empty-state.component';
-export { EventMiniMapComponent } from './event-mini-map/event-mini-map.component';
-export { EventDetailMapComponent } from './event-detail-map/event-detail-map.component';
+export { EventMapComponent } from './event-map/event-map.component';
 export { CountrySelectorComponent } from './country-selector/country-selector.component';
 export { SeriesCardComponent } from './series-card/series-card.component';
-export { LocationPickerComponent } from './location-picker/location-picker.component';
+export { PlacesPickerComponent, type PickerPoint } from './places-picker/places-picker.component';
 export { NewsCardComponent } from './news-card/news-card.component';
 export { ImageUploadComponent } from './image-upload/image-upload.component';
 export { InviteByEmailComponent } from './invite-by-email/invite-by-email.component';

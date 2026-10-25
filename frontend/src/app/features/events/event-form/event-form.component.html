@@ -379,10 +379,11 @@
         </p>
       </div>
 
-      <!-- Map picker -->
-      <app-location-picker
-        [coordinates]="mapCoordinates()"
-        (coordinatesChange)="onCoordinatesChange($event)"
+      <!-- One map for the venue and every parking area, loaded only when opened -->
+      <app-places-picker
+        [points]="mapPoints()"
+        [(active)]="mapTarget"
+        (pointChange)="onMapPoint($event)"
       />
 
       <!-- Registration start -->
@@ -621,12 +622,16 @@
               </fieldset>
               <div>
                 <p class="block text-sm text-[var(--color-text-muted)]">{{ 'parking.pointLabel' | transloco }} *</p>
-                <div class="mt-1">
-                  <app-location-picker
-                    [coordinates]="area.controls.coordinates.value"
-                    [center]="mapCoordinates()"
-                    (coordinatesChange)="setParkingPoint(i, $event)"
-                  />
+                <div class="mt-1 flex flex-wrap items-center gap-3 text-sm">
+                  @if (area.controls.coordinates.value; as point) {
+                    <span class="inline-flex items-center gap-1 text-[var(--color-text)]">
+                      <span class="material-symbols-outlined text-[16px] text-emerald-600" aria-hidden="true">check_circle</span>
+                      {{ 'parking.pointSet' | transloco }}
+                    </span>
+                  }
+                  <ui-button type="button" variant="outline" size="sm" (click)="placesPicker()?.focus('parking-' + i)">
+                    {{ (area.controls.coordinates.value ? 'parking.movePoint' : 'parking.setPoint') | transloco }}
+                  </ui-button>
                 </div>
                 @if (area.controls.coordinates.invalid) {
                   <p class="mt-1 text-xs text-red-600">{{ 'parking.pointRequired' | transloco }}</p>

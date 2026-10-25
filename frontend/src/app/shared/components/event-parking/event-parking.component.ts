@@ -1,8 +1,9 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { ParkingArea } from '@shared/models';
 import { appleMapsDirectionsUrl, googleMapsDirectionsUrl } from '@shared/utils/map-links';
+import { parkingLabel } from '@shared/utils/parking-markers';
 
 /** Icon per parking kind (Material Symbols); `icon:` fields are picked up by scripts/subset-icons.py. */
 const KIND_ICONS: { kind: string; icon: string }[] = [
@@ -48,9 +49,9 @@ const KIND_ICONS: { kind: string; icon: string }[] = [
             <div class="min-w-0">
               <p class="flex items-center gap-2 font-medium text-[var(--color-text)]">
                 <span
-                  class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded bg-blue-700 text-xs font-bold text-white"
+                  class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded bg-blue-700 px-1 text-xs font-bold text-white"
                   aria-hidden="true"
-                  >P</span
+                  >{{ label($index) }}</span
                 >
                 <span class="break-words">{{ area.name }}</span>
               </p>
@@ -90,7 +91,17 @@ const KIND_ICONS: { kind: string; icon: string }[] = [
                 <p class="mt-0.5 break-words text-xs text-[var(--color-text)]">{{ area.note }}</p>
               }
             </div>
-            <div class="flex shrink-0 gap-2 text-xs">
+            <div class="flex shrink-0 flex-wrap gap-2 text-xs">
+              @if (canShowOnMap()) {
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] px-3 py-1 font-medium text-[var(--color-primary)] hover:bg-[var(--color-bg-alt)]"
+                  (click)="showOnMap.emit($index)"
+                >
+                  <span class="material-symbols-outlined text-[14px]" aria-hidden="true">map</span>
+                  {{ 'parking.showOnMap' | transloco }}
+                </button>
+              }
               <a
                 class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] px-3 py-1 font-medium text-[var(--color-primary)] hover:bg-[var(--color-bg-alt)]"
                 [href]="google(area)"
@@ -117,12 +128,19 @@ const KIND_ICONS: { kind: string; icon: string }[] = [
 })
 export class EventParkingComponent {
   readonly areas = input.required<ParkingArea[]>();
+  /** The event has a map the areas can be shown on. */
+  readonly canShowOnMap = input(false);
+  readonly showOnMap = output<number>();
 
   /** The hint also opens on tap, since touch screens have no hover. */
   protected readonly hintOpen = signal(false);
 
   protected icon(kind: string): string {
     return (KIND_ICONS.find((k) => k.kind === kind) ?? KIND_ICONS[0]).icon;
+  }
+
+  protected label(index: number): string {
+    return parkingLabel(index, this.areas().length);
   }
 
   protected google(area: ParkingArea): string {

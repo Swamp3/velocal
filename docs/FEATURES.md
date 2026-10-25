@@ -13,7 +13,8 @@
 ## Event detail (`/events/:id`)
 
 - Full event info (dates, location, status, discipline, registration deadline)
-- Mini-map showing event location (if coordinates available)
+- One map for the venue and its parking areas, loaded only when the visitor opens it (no map
+  code or tiles before); full screen enlarges the same map
 - External link to source (e.g. rad-net.de, my.raceresult.com); public list of sources
 - Rating classes or, for touring events, routes with length and climbing; classes the viewer may
   start in are marked
