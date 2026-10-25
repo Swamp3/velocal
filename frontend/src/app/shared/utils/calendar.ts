@@ -1,3 +1,4 @@
+import { googleMapsDirectionsUrl } from './map-links';
 import { CyclingEvent } from '@shared/models';
 import { hasTime } from './event-date';
 
@@ -5,9 +6,9 @@ function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
 
-function formatIcsDate(iso: string): string {
+function formatIcsDate(iso: string, allDay = !hasTime(iso)): string {
   const d = new Date(iso);
-  if (!hasTime(iso)) {
+  if (allDay) {
     return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
   }
   return (
@@ -21,13 +22,22 @@ function escapeIcs(text: string | undefined | null): string {
   return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
 
+/** The description plus one line per parking area with a navigation link. */
+function descriptionWithParking(event: CyclingEvent): string {
+  const lines = (event.parkingAreas ?? []).map(
+    (area) =>
+      `P ${area.name}: ${googleMapsDirectionsUrl(`${area.coordinates.lat},${area.coordinates.lng}`)}`,
+  );
+  return [event.description ?? '', ...lines].filter(Boolean).join('\n\n');
+}
+
 export function generateIcs(event: CyclingEvent): string {
-  const allDay = !hasTime(event.startDate);
+  const allDay = event.startTimeKnown === false || !hasTime(event.startDate);
   const dtStart = allDay
-    ? `DTSTART;VALUE=DATE:${formatIcsDate(event.startDate)}`
+    ? `DTSTART;VALUE=DATE:${formatIcsDate(event.startDate, true)}`
     : `DTSTART:${formatIcsDate(event.startDate)}`;
   const dtEnd = allDay
-    ? `DTEND;VALUE=DATE:${formatIcsDate(event.endDate || event.startDate)}`
+    ? `DTEND;VALUE=DATE:${formatIcsDate(event.endDate || event.startDate, true)}`
     : `DTEND:${formatIcsDate(event.endDate || event.startDate)}`;
 
   return [
@@ -40,7 +50,7 @@ export function generateIcs(event: CyclingEvent): string {
     dtStart,
     dtEnd,
     `SUMMARY:${escapeIcs(event.name)}`,
-    `DESCRIPTION:${escapeIcs(event.description)}`,
+    `DESCRIPTION:${escapeIcs(descriptionWithParking(event))}`,
     `LOCATION:${escapeIcs([event.locationName, event.address].filter(Boolean).join(', '))}`,
     `URL:https://velocal.cc/events/${event.id}`,
     `UID:${event.id}@velocal.cc`,

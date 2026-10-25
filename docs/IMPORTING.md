@@ -138,6 +138,26 @@ curl http://localhost:3000/api/import/jobs/b3f1a2c8-... \
 
 Only the most recent 20 jobs are retained in memory; older job ids return `404`.
 
+## Importing your own data (JSON file)
+
+Events collected outside the app are imported as JSON files: **Admin → Imports → Import file**.
+The file is checked first (nothing is written), the admin sees errors and warnings per event,
+confirms the warnings and imports. Every run keeps a report. The format, the rules and how to
+create such a file are described in [IMPORT-FILE-FORMAT.md](IMPORT-FILE-FORMAT.md).
+
+Command line alternative:
+
+```bash
+API_BASE=https://velocal.cc/api ./scripts/import-file.sh events.json
+```
+
+It checks the file, prints errors and warnings, asks for confirmation and imports.
+
+API: `POST /api/import/events/check?fileName=…` (dry run, returns the report) and
+`POST /api/import/events?fileName=…&acceptWarnings=true` (starts a job; refused with the report when
+the file has errors, or warnings without `acceptWarnings`). The report of a run:
+`GET /api/import/jobs/:id/report`.
+
 ## Scheduling automatic imports
 
 `scripts/setup-import-cron.sh` installs a scheduled job that runs `scripts/import-cron.sh` (default: **every Saturday at 23:00 local time**). It supports three backends and auto-detects the best one available:

@@ -58,8 +58,23 @@
     }
 
     <div class="mt-6">
+      <app-member-filters
+        [roleOptions]="roleOptions"
+        [role]="role()"
+        (searched)="onSearch($event)"
+        (roleChange)="onRoleFilter($event)"
+      />
+      <p class="mt-3 text-sm text-[var(--color-text-muted)]" aria-live="polite">
+        {{ (total() === 1 ? 'communities.members.countOne' : 'communities.members.count') | transloco: { count: total() } }}
+      </p>
+    </div>
+
+    <div class="mt-3 transition-opacity" [class.opacity-60]="listLoading()">
       @if (memberItems().length === 0) {
-        <app-empty-state icon="group" [title]="'communities.members.empty' | transloco" />
+        <app-empty-state
+          icon="group"
+          [title]="(filtered() ? 'communities.members.noResults' : 'communities.members.empty') | transloco"
+        />
       } @else {
         <app-member-list
           [items]="memberItems()"
@@ -68,6 +83,12 @@
         />
       }
     </div>
+
+    @if (total() > pageSize) {
+      <div class="mt-4 flex justify-center">
+        <ui-pagination [total]="total()" [page]="page()" [limit]="pageSize" (pageChange)="onPage($event)" />
+      </div>
+    }
 
     @if (promoteCandidate(); as candidate) {
       <app-confirm-dialog

@@ -21,6 +21,8 @@ export interface SerializedSeries {
   slug: string;
   description?: string;
   year?: number;
+  kind: 'series' | 'cup' | 'league';
+  season?: string;
   discipline?: unknown;
   imageUrl?: string;
   externalUrl?: string;
@@ -324,6 +326,8 @@ export class SeriesService {
       slug: series.slug,
       description: series.description ?? undefined,
       year: series.year ?? undefined,
+      kind: series.kind,
+      season: series.season ?? undefined,
       discipline: series.discipline ?? undefined,
       imageUrl: series.imageUrl ?? undefined,
       externalUrl: series.externalUrl ?? undefined,

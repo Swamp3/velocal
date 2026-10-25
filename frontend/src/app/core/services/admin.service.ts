@@ -14,6 +14,63 @@ export interface ImportJob {
   result: { created: number; updated: number; skipped: number } | null;
   error: string | null;
   triggeredBy: string | null;
+  /** Set for file imports. */
+  fileName?: string | null;
+}
+
+export type ImportIssueSeverity = 'error' | 'warning' | 'info';
+
+export interface ImportIssue {
+  severity: ImportIssueSeverity;
+  code: string;
+  index?: number;
+  externalId?: string;
+  field?: string;
+  params?: Record<string, string | number>;
+  /** English fallback text from the server. */
+  message: string;
+}
+
+export type ImportAction = 'create' | 'update' | 'unchanged' | 'skip' | 'invalid';
+
+export interface ImportReportEntry {
+  index: number;
+  externalId: string | null;
+  name: string | null;
+  startDate: string | null;
+  action: ImportAction;
+  eventId?: string;
+  changes?: { field: string; before: unknown; after: unknown }[];
+  issues: ImportIssue[];
+}
+
+export interface ImportReport {
+  sourceName: string | null;
+  complete: boolean;
+  fileName: string | null;
+  summary: Record<ImportAction, number> & { errors: number; warnings: number };
+  fileIssues: ImportIssue[];
+  entries: ImportReportEntry[];
+}
+
+export interface ImportCheck {
+  report: ImportReport;
+  canImport: boolean;
+  needsConfirmation: boolean;
+}
+
+/** Admin view of where an imported event came from. */
+export interface EventImportInfo {
+  source: string;
+  sourceName: string | null;
+  externalId: string | null;
+  sourceUrl: string | null;
+  lastSeenAt: string | null;
+  missingSince: string | null;
+  sources: { name: string; url: string; checkedAt?: string; updatedAt?: string }[];
+  conflicts: { field: string; values?: unknown[]; selectedSource?: string; reason?: string }[];
+  editedFields: string[];
+  importRun: { id: string; fileName: string | null; startedAt: string; triggeredBy: string | null } | null;
 }
 
 export interface AdminUser {
@@ -185,6 +242,27 @@ export class AdminService {
 
   triggerImport(source?: string): Observable<ImportJob> {
     return this.api.post<ImportJob>('/import/trigger', { source });
+  }
+
+  /** Dry run: what importing this file would do. Writes nothing. */
+  checkImportFile(file: unknown, fileName: string): Observable<ImportCheck> {
+    return this.api.post<ImportCheck>(
+      `/import/events/check?fileName=${encodeURIComponent(fileName)}`,
+      file,
+    );
+  }
+
+  importFile(file: unknown, fileName: string, acceptWarnings: boolean): Observable<ImportJob> {
+    const query = `fileName=${encodeURIComponent(fileName)}&acceptWarnings=${acceptWarnings}`;
+    return this.api.post<ImportJob>(`/import/events?${query}`, file);
+  }
+
+  getImportReport(id: string): Observable<{ report: ImportReport | null }> {
+    return this.api.get<{ report: ImportReport | null }>(`/import/jobs/${id}/report`);
+  }
+
+  getEventImportInfo(eventId: string): Observable<EventImportInfo> {
+    return this.api.get<EventImportInfo>(`/admin/events/${eventId}/import-info`);
   }
 
   getImportSources(): Observable<string[]> {

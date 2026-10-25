@@ -12,6 +12,8 @@ import { UploadedFile, UploadsService } from '../uploads/uploads.service';
 import { AuditService } from '../audit/audit.service';
 import { CommunityCleanupService } from './community-cleanup.service';
 import { isLastAdminRemoval } from './community-admin.policy';
+import { MEMBER_PAGE_SIZE, likePattern } from './member-search';
+import { MemberSearchDto, Paged } from './dto/member-search.dto';
 import { pickSlug, RESERVED_COMMUNITY_SLUGS, slugBase } from './community-slug';
 import {
   assertCommunityActive,
@@ -442,26 +444,54 @@ export class CommunitiesService {
     });
   }
 
-  async listMembers(id: string, userId: string): Promise<SerializedMember[]> {
+  async listMembers(
+    id: string,
+    userId: string,
+    search: MemberSearchDto = {},
+  ): Promise<Paged<SerializedMember>> {
     await this.findCommunity(id);
     await this.assertMember(id, userId);
 
-    const rows = await this.members.find({
-      where: { communityId: id },
-      relations: { user: true },
-    });
-
-    rows.sort((left, right) => {
-      if (left.role !== right.role) {
-        return left.role === CommunityMemberRole.ADMIN ? -1 : 1;
-      }
-      return this.compareDisplayName(
-        left.user?.displayName,
-        right.user?.displayName,
+    const page = search.page ?? 1;
+    const limit = search.limit ?? MEMBER_PAGE_SIZE;
+    const qb = this.members
+      .createQueryBuilder('member')
+      .innerJoinAndSelect('member.user', 'user')
+      .where('member.communityId = :id', { id });
+    if (search.q) {
+      qb.andWhere('user.displayName ILIKE :q', { q: likePattern(search.q) });
+    }
+    if (search.role === 'admin') {
+      qb.andWhere('member.role = :role', { role: CommunityMemberRole.ADMIN });
+    } else if (search.role === 'member') {
+      qb.andWhere('member.role = :role', { role: CommunityMemberRole.MEMBER });
+    }
+    if (search.excludeSubgroup) {
+      qb.andWhere(
+        `NOT EXISTS (SELECT 1 FROM "subgroup_members" sm
+                      WHERE sm."subgroup_id" = :excludeSubgroup AND sm."user_id" = member.userId)`,
+        { excludeSubgroup: search.excludeSubgroup },
       );
-    });
+    }
+    const total = await qb.getCount();
+    const rows = await qb
+      .addSelect(
+        `CASE WHEN member.role = '${CommunityMemberRole.ADMIN}' THEN 0 ELSE 1 END`,
+        'role_rank',
+      )
+      .orderBy('role_rank', 'ASC')
+      .addOrderBy('LOWER("user"."displayName")', 'ASC', 'NULLS LAST')
+      .addOrderBy('member.id', 'ASC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getMany();
 
-    return rows.map((member) => this.serializeMember(member));
+    return {
+      items: rows.map((member) => this.serializeMember(member)),
+      total,
+      page,
+      limit,
+    };
   }
 
   async updateMemberRole(

@@ -1,6 +1,17 @@
+import {
+  CHAMPIONSHIP_LEVELS,
+  type ChampionshipLevel,
+  EVENT_FORMAT_KEYS,
+  type EventFormat,
+} from '../racing';
+import { EventClassDto } from './event-class.dto';
+import { ParkingAreaDto } from './parking-area.dto';
+import { MAX_PARKING_AREAS } from '../parking';
 import { Type } from 'class-transformer';
 import { PaceGroupDto, StravaLinkDto } from './pace-groups.dto';
 import {
+  IsIn,
+  IsBoolean,
   ArrayMaxSize,
   IsArray,
   IsEnum,
@@ -66,6 +77,37 @@ export class CreateEventDto {
   @IsOptional()
   @IsISO8601()
   endDate?: string;
+
+  /** False when only the day is known (no time shown). Derived from the start time when missing. */
+  @IsOptional()
+  @IsBoolean()
+  startTimeKnown?: boolean;
+
+  /** Championship level of the whole event, or null for none. */
+  @IsOptional()
+  @IsIn([...CHAMPIONSHIP_LEVELS, null])
+  championship?: ChampionshipLevel | null;
+
+  /** Licence race, Jedermann or touring format; null when unknown. */
+  @IsOptional()
+  @IsIn([...EVENT_FORMAT_KEYS, null])
+  format?: EventFormat | null;
+
+  /** Rating classes; replaces the stored list when given. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(60)
+  @ValidateNested({ each: true })
+  @Type(() => EventClassDto)
+  classes?: EventClassDto[];
+
+  /** Parking areas; replaces the stored list when given. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_PARKING_AREAS)
+  @ValidateNested({ each: true })
+  @Type(() => ParkingAreaDto)
+  parkingAreas?: ParkingAreaDto[];
 
   @IsOptional()
   @IsEnum(EventStatus)

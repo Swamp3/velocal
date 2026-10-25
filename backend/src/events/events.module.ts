@@ -1,3 +1,5 @@
+import { EventParkingArea } from './entities/event-parking-area.entity';
+import { ParkingService } from './parking.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventsController } from './events.controller';
@@ -18,6 +20,7 @@ import { RouteFile } from '../routes/entities/route-file.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRsvp } from './entities/event-rsvp.entity';
 import { Event } from './entities/event.entity';
+import { EventClass } from './entities/event-class.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { UploadsModule } from '../uploads/uploads.module';
 import { User } from '../users/entities/user.entity';
@@ -26,6 +29,8 @@ import { User } from '../users/entities/user.entity';
   imports: [
     TypeOrmModule.forFeature([
       Event,
+      EventClass,
+      EventParkingArea,
       EventRsvp,
       EventComment,
       EventShare,
@@ -44,7 +49,12 @@ import { User } from '../users/entities/user.entity';
     UploadsModule,
   ],
   controllers: [EventsController, AdminEventsController],
-  providers: [EventsService, EventDuplicatesService, GeocodingService],
-  exports: [EventsService, GeocodingService],
+  providers: [
+    EventsService,
+    EventDuplicatesService,
+    GeocodingService,
+    ParkingService,
+  ],
+  exports: [EventsService, GeocodingService, ParkingService],
 })
 export class EventsModule {}

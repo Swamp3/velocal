@@ -5,10 +5,12 @@ import {
   inject,
   OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin, of, switchMap } from 'rxjs';
+import { forkJoin, of, startWith, switchMap } from 'rxjs';
 import { ApiError } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { DisciplineService } from '@core/services/discipline.service';
@@ -20,7 +22,8 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { RichTextComponent } from '@shared/components/rich-text/rich-text.component';
 import { CountrySelectorComponent } from '@shared/components/country-selector/country-selector.component';
 import { ImageUploadComponent } from '@shared/components/image-upload/image-upload.component';
-import { LocationPickerComponent } from '@shared/components/location-picker/location-picker.component';
+import { PlacesPickerComponent, type PickerPoint } from '@shared/components/places-picker/places-picker.component';
+import { parkingLabel } from '@shared/utils/parking-markers';
 import {
   CyclingEvent,
   Discipline,
@@ -28,7 +31,12 @@ import {
   PaceGroupInput,
   RecurrenceDto,
   Route,
+  EventClass,
+  LicenseClass,
+  EventFormat,
+  ParkingArea,
 } from '@shared/models';
+import { RacingService } from '@core/services/racing.service';
 import { ButtonComponent, IconButtonComponent, ToastService } from '@shared/ui';
 import {
   toDisplayDate as toDisplayDateUtil,
@@ -47,7 +55,7 @@ import { LocaleService } from '@core/services/locale.service';
     TranslocoPipe,
     ButtonComponent,
     CountrySelectorComponent,
-    LocationPickerComponent,
+    PlacesPickerComponent,
     ImageUploadComponent,
     RichTextComponent,
   ],
@@ -75,6 +83,9 @@ export class EventFormComponent implements OnInit {
   protected readonly eventId = signal<string | null>(null);
   protected readonly isEdit = computed(() => this.eventId() !== null);
   protected readonly mapCoordinates = signal<{ lat: number; lng: number } | null>(null);
+  /** The form's one map and the point a tap on it sets. */
+  protected readonly placesPicker = viewChild(PlacesPickerComponent);
+  protected readonly mapTarget = signal('venue');
   protected readonly imageUrl = signal<string | null>(null);
 
   protected readonly uploadImageFn = (file: File) =>
@@ -149,6 +160,10 @@ export class EventFormComponent implements OnInit {
     routeId: new FormControl('', { nonNullable: true }),
     stravaLinksText: new FormControl('', { nonNullable: true }),
     paceGroups: new FormArray<ReturnType<EventFormComponent['newPaceGroup']>>([]),
+    championship: new FormControl<string>('', { nonNullable: true }),
+    format: new FormControl<string>('', { nonNullable: true }),
+    classes: new FormArray<ReturnType<EventFormComponent['newClass']>>([]),
+    parkingAreas: new FormArray<ReturnType<EventFormComponent['newParkingArea']>>([]),
     stravaUrl: new FormControl('', { nonNullable: true }),
     meetupPlace: new FormControl('', { nonNullable: true }),
     meetupDate: new FormControl('', { nonNullable: true }),
@@ -196,6 +211,154 @@ export class EventFormComponent implements OnInit {
       routeId: new FormControl(init?.routeId ?? '', { nonNullable: true }),
       stravaText: new FormControl(init?.stravaText ?? '', { nonNullable: true }),
     });
+  }
+
+  private readonly racing = inject(RacingService);
+  protected readonly championshipLevels = this.racing.championshipLevels;
+  protected readonly categories = this.racing.categories;
+  protected readonly formats = this.racing.formats;
+  protected readonly classLicenses = this.racing.classLicenses;
+  protected readonly licenseClassOptions = this.racing.licenseClasses;
+  /** Classes are only sent when changed, so an imported event keeps its imported classes. */
+  private classesChanged = false;
+
+  protected newClass(init?: Partial<EventClass>) {
+    return new FormGroup({
+      name: new FormControl(init?.name ?? '', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(120)],
+      }),
+      gender: new FormControl<EventClass['gender']>(init?.gender ?? 'open', { nonNullable: true }),
+      ageMin: new FormControl<number | null>(init?.ageMin ?? null, [Validators.min(0), Validators.max(120)]),
+      ageMax: new FormControl<number | null>(init?.ageMax ?? null, [Validators.min(0), Validators.max(120)]),
+      category: new FormControl<string>(init?.category ?? '', { nonNullable: true }),
+      license: new FormControl<EventClass['license']>(init?.license ?? 'open', { nonNullable: true }),
+      dayLicense: new FormControl(!!init?.dayLicense, { nonNullable: true }),
+      licenseClasses: new FormControl<LicenseClass[]>(init?.licenseClasses ?? [], { nonNullable: true }),
+      startTime: new FormControl(init?.startTime ? this.toTimeString(init.startTime) : '', {
+        nonNullable: true,
+        validators: [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)],
+      }),
+      distanceKm: new FormControl<number | null>(init?.distanceKm ?? null, [Validators.min(0), Validators.max(9999)]),
+      elevationM: new FormControl<number | null>(init?.elevationM ?? null, [Validators.min(0), Validators.max(99999)]),
+      championship: new FormControl<string>(init?.championship ?? '', { nonNullable: true }),
+      note: new FormControl(init?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+    });
+  }
+
+  /** Touring events (RTF, CTF …) list their routes instead of rating classes. */
+  protected isTouring(): boolean {
+    return this.racing.isTouring(this.form.controls.format.value);
+  }
+
+  /** Choosing a category fills its ages (and the name when empty). */
+  protected onCategoryChange(index: number): void {
+    const group = this.form.controls.classes.at(index);
+    const preset = this.categories().find((c) => c.key === group.controls.category.value);
+    if (!preset) return;
+    group.patchValue({ ageMin: preset.ageMin, ageMax: preset.ageMax });
+    if (!group.controls.name.value.trim()) {
+      group.controls.name.setValue(this.transloco.translate('classes.category.' + preset.key));
+    }
+  }
+
+  protected toggleLicenseClass(index: number, value: LicenseClass, checked: boolean): void {
+    const control = this.form.controls.classes.at(index).controls.licenseClasses;
+    const next = control.value.filter((v) => v !== value);
+    control.setValue(checked ? [...next, value] : next);
+    control.markAsDirty();
+  }
+
+  /** Parking areas are only sent when changed, so an imported event keeps its imported ones. */
+  private parkingChanged = false;
+  protected readonly parkingKinds = this.racing.parkingKinds;
+  protected readonly parkingFees = this.racing.parkingFees;
+  protected readonly maxParkingAreas = this.racing.maxParkingAreas;
+
+  protected newParkingArea(init?: Partial<ParkingArea>) {
+    const time = [Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/)];
+    return new FormGroup({
+      name: new FormControl(init?.name ?? '', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(80)],
+      }),
+      kinds: new FormControl<string[]>(init?.kinds ?? ['participants'], {
+        nonNullable: true,
+        validators: [Validators.required, (c) => (c.value?.length ? null : { required: true })],
+      }),
+      coordinates: new FormControl<{ lat: number; lng: number } | null>(init?.coordinates ?? null, [
+        Validators.required,
+      ]),
+      address: new FormControl(init?.address ?? '', { nonNullable: true, validators: [Validators.maxLength(255)] }),
+      capacity: new FormControl<number | null>(init?.capacity ?? null, [Validators.min(1), Validators.max(100000)]),
+      fee: new FormControl<string>(init?.fee ?? '', { nonNullable: true }),
+      feeNote: new FormControl(init?.feeNote ?? '', { nonNullable: true, validators: [Validators.maxLength(80)] }),
+      openFrom: new FormControl(init?.openFrom ?? '', { nonNullable: true, validators: time }),
+      openUntil: new FormControl(init?.openUntil ?? '', { nonNullable: true, validators: time }),
+      note: new FormControl(init?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+    });
+  }
+
+  protected addParkingArea(): void {
+    this.form.controls.parkingAreas.push(this.newParkingArea());
+    this.parkingChanged = true;
+  }
+
+  protected removeParkingArea(index: number): void {
+    this.form.controls.parkingAreas.removeAt(index);
+    this.parkingChanged = true;
+  }
+
+  private readonly parkingValues = toSignal(
+    this.form.controls.parkingAreas.valueChanges.pipe(startWith(this.form.controls.parkingAreas.value)),
+    { initialValue: this.form.controls.parkingAreas.value },
+  );
+
+  /** Venue and parking areas as points of the one map. */
+  protected readonly mapPoints = computed<PickerPoint[]>(() => {
+    const areas = this.parkingValues();
+    return [
+      {
+        key: 'venue',
+        label: String(this.transloco.translate('event.form.mapVenue')),
+        marker: null,
+        coords: this.mapCoordinates(),
+      },
+      ...areas.map((area, i) => ({
+        key: `parking-${i}`,
+        label: area.name?.trim() || String(this.transloco.translate('parking.unnamed')),
+        marker: parkingLabel(i, areas.length),
+        coords: area.coordinates ?? null,
+      })),
+    ];
+  });
+
+  protected onMapPoint({ key, coords }: { key: string; coords: { lat: number; lng: number } }): void {
+    if (key === 'venue') this.onCoordinatesChange(coords);
+    else this.setParkingPoint(Number(key.replace('parking-', '')), coords);
+  }
+
+  protected toggleParkingKind(index: number, kind: string, checked: boolean): void {
+    const control = this.form.controls.parkingAreas.at(index).controls.kinds;
+    const next = control.value.filter((k) => k !== kind);
+    control.setValue(checked ? [...next, kind] : next);
+    control.markAsDirty();
+  }
+
+  protected setParkingPoint(index: number, coords: { lat: number; lng: number }): void {
+    const control = this.form.controls.parkingAreas.at(index).controls.coordinates;
+    control.setValue(coords);
+    control.markAsDirty();
+  }
+
+  protected addClass(): void {
+    this.form.controls.classes.push(this.newClass());
+    this.classesChanged = true;
+  }
+
+  protected removeClass(index: number): void {
+    this.form.controls.classes.removeAt(index);
+    this.classesChanged = true;
   }
 
   protected addPaceGroup(): void {
@@ -299,8 +462,14 @@ export class EventFormComponent implements OnInit {
       name: raw.name,
       description: raw.description || undefined,
       disciplineSlug: raw.disciplineSlug,
-      startDate: this.combineDatetime(raw.startDate, raw.startTime),
-      endDate: raw.endDate ? this.combineDatetime(raw.endDate, raw.endTime) : undefined,
+      // Without a time only the day is sent; the server stores it as midnight in Germany.
+      startDate: raw.startTime ? this.combineDatetime(raw.startDate, raw.startTime) : this.parseDate(raw.startDate),
+      startTimeKnown: !!raw.startTime,
+      endDate: raw.endDate
+        ? raw.endTime || raw.startTime
+          ? this.combineDatetime(raw.endDate, raw.endTime)
+          : this.parseDate(raw.endDate)
+        : undefined,
       locationName: raw.locationName,
       address: raw.address || undefined,
       country: raw.country || undefined,
@@ -316,6 +485,43 @@ export class EventFormComponent implements OnInit {
           ? null
           : undefined,
       externalUrl: raw.externalUrl || undefined,
+      championship: raw.championship || null,
+      format: (raw.format || null) as EventFormat | null,
+      ...(this.classesChanged || this.form.controls.classes.dirty || !this.isEdit()
+        ? {
+            classes: raw.classes.map((c) => ({
+              name: c.name.trim(),
+              gender: c.gender,
+              ageMin: c.ageMin ?? null,
+              ageMax: c.ageMax ?? null,
+              category: c.category || null,
+              license: c.license,
+              dayLicense: c.license === 'license' && c.dayLicense,
+              licenseClasses: c.license === 'unlicensed' ? [] : c.licenseClasses,
+              distanceKm: c.distanceKm ?? null,
+              elevationM: c.elevationM ?? null,
+              startTime: c.startTime ? this.combineDatetime(raw.startDate, c.startTime) : null,
+              championship: c.championship || null,
+              note: c.note.trim() || null,
+            })),
+          }
+        : {}),
+      ...(this.parkingChanged || this.form.controls.parkingAreas.dirty || !this.isEdit()
+        ? {
+            parkingAreas: raw.parkingAreas.map((p) => ({
+              name: p.name.trim(),
+              kinds: p.kinds,
+              coordinates: p.coordinates!,
+              address: p.address.trim() || null,
+              capacity: p.capacity ?? null,
+              fee: p.fee || null,
+              feeNote: p.feeNote.trim() || null,
+              openFrom: p.openFrom || null,
+              openUntil: p.openUntil || null,
+              note: p.note.trim() || null,
+            })),
+          }
+        : {}),
       recurrence: undefined as RecurrenceDto | undefined,
       status: this.isEdit() ? (raw.status as 'published' | 'cancelled' | 'completed') : undefined,
       ...(this.hosted()
@@ -461,7 +667,17 @@ export class EventFormComponent implements OnInit {
       meetupNote: event.meetupNote ?? '',
       routeId: event.routeId ?? '',
       stravaLinksText: this.linksToText(event.stravaLinks),
+      championship: event.championship ?? '',
+      format: event.format ?? '',
     });
+    this.form.controls.classes.clear();
+    for (const cls of event.classes ?? []) this.form.controls.classes.push(this.newClass(cls));
+    this.classesChanged = false;
+    this.form.controls.parkingAreas.clear();
+    for (const area of event.parkingAreas ?? []) {
+      this.form.controls.parkingAreas.push(this.newParkingArea(area));
+    }
+    this.parkingChanged = false;
     this.usedRoutes.set(
       [event.route, ...(event.paceGroups ?? []).map((group) => group.route)].filter(
         (route): route is Route => !!route,

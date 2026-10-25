@@ -16,11 +16,18 @@ import {
   ConfirmDialogComponent,
   EmptyStateComponent,
   InviteByEmailComponent,
+  MemberFiltersComponent,
   MemberListComponent,
   MemberListItem,
 } from '@shared/components';
-import { CommunityMember, Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
-import { ButtonStyleDirective, SkeletonComponent, ToastService } from '@shared/ui';
+import { Subgroup, SubgroupMember, SubgroupRole } from '@shared/models';
+import {
+  ButtonStyleDirective,
+  PaginationComponent,
+  SegmentedOption,
+  SkeletonComponent,
+  ToastService,
+} from '@shared/ui';
 import { communityErrorKey } from '../community-error';
 
 @Component({
@@ -33,6 +40,8 @@ import { communityErrorKey } from '../community-error';
     SkeletonComponent,
     EmptyStateComponent,
     MemberListComponent,
+    MemberFiltersComponent,
+    PaginationComponent,
     ButtonStyleDirective,
     InviteByEmailComponent,
   ],
@@ -56,21 +65,26 @@ export class SubgroupMembersComponent implements OnInit {
   protected readonly mutating = signal(false);
   private readonly members = signal<SubgroupMember[]>([]);
   protected readonly promoteCandidate = signal<SubgroupMember | null>(null);
-  private readonly communityMembers = signal<CommunityMember[]>([]);
   protected readonly query = signal('');
+  protected readonly total = signal(0);
+  protected readonly page = signal(1);
+  protected readonly pageSize = 30;
+  protected readonly role = signal<string>('all');
+  /** True while a filter or page change is loading; the list stays on screen meanwhile. */
+  protected readonly listLoading = signal(false);
+  protected readonly roleOptions: SegmentedOption<string>[] = [
+    { value: 'all', labelKey: 'communities.members.filterAll' },
+    { value: 'moderator', labelKey: 'communities.members.filterModerators' },
+    { value: 'member', labelKey: 'communities.members.filterMembers' },
+  ];
+  protected readonly filtered = computed(
+    () => this.filterText() !== '' || this.role() !== 'all',
+  );
+  private readonly filterText = signal('');
 
-  /** Community members who are not in the subgroup yet, narrowed by the typed text. */
-  protected readonly suggestions = computed(() => {
-    const inGroup = new Set(this.members().map((member) => member.userId));
-    const needle = this.query().trim().toLowerCase();
-    if (!needle) return [];
-    const unnamed = this.transloco.translate('communities.members.unnamed');
-    return this.communityMembers()
-      .filter((member) => !inGroup.has(member.userId))
-      .map((member) => ({ userId: member.userId, name: member.displayName ?? unnamed }))
-      .filter((member) => member.name.toLowerCase().includes(needle))
-      .slice(0, 8);
-  });
+  /** Club members who are not in the subgroup yet, found by the server for the typed text. */
+  protected readonly suggestions = signal<{ userId: string; name: string }[]>([]);
+  private suggestTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected readonly canManage = computed(() => {
     const subgroup = this.subgroup();
@@ -127,13 +141,34 @@ export class SubgroupMembersComponent implements OnInit {
           }
           this.subgroup.set(subgroup);
           this.loadPeople(subgroup);
-          this.loadCommunityMembers(subgroup);
         },
         error: () => {
           this.notFound.set(true);
           this.loading.set(false);
         },
       });
+  }
+
+  protected onFilterSearch(text: string): void {
+    this.filterText.set(text);
+    this.page.set(1);
+    this.reloadPeople();
+  }
+
+  protected onRoleFilter(role: string): void {
+    this.role.set(role);
+    this.page.set(1);
+    this.reloadPeople();
+  }
+
+  protected onPage(page: number): void {
+    this.page.set(page);
+    this.reloadPeople();
+  }
+
+  private reloadPeople(): void {
+    const subgroup = this.subgroup();
+    if (subgroup) this.loadPeople(subgroup);
   }
 
   protected onRoleToggle(userId: string): void {
@@ -188,6 +223,7 @@ export class SubgroupMembersComponent implements OnInit {
       .subscribe({
         next: () => {
           this.query.set('');
+          this.suggestions.set([]);
           this.toast.success(this.transloco.translate('communities.invite.sent'));
           this.refresh(subgroup);
         },
@@ -205,6 +241,7 @@ export class SubgroupMembersComponent implements OnInit {
       .subscribe({
         next: () => {
           this.query.set('');
+          this.suggestions.set([]);
           this.toast.success(this.transloco.translate('communities.invite.sent'));
           this.refresh(subgroup);
         },
@@ -213,7 +250,35 @@ export class SubgroupMembersComponent implements OnInit {
   }
 
   protected onQuery(event: Event): void {
-    this.query.set((event.target as HTMLInputElement).value);
+    const text = (event.target as HTMLInputElement).value;
+    this.query.set(text);
+    clearTimeout(this.suggestTimer);
+    const subgroup = this.subgroup();
+    if (!text.trim() || !subgroup) {
+      this.suggestions.set([]);
+      return;
+    }
+    this.suggestTimer = setTimeout(() => this.loadSuggestions(subgroup, text.trim()), 250);
+  }
+
+  private loadSuggestions(subgroup: Subgroup, text: string): void {
+    const unnamed = this.transloco.translate('communities.members.unnamed');
+    this.communityService
+      .members(subgroup.communityId, { q: text, limit: 8, excludeSubgroup: subgroup.id })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        // Ignore an answer for text that is no longer in the box.
+        next: (result) => {
+          if (this.query().trim() !== text) return;
+          this.suggestions.set(
+            result.items.map((member) => ({
+              userId: member.userId,
+              name: member.displayName ?? unnamed,
+            })),
+          );
+        },
+        error: () => this.suggestions.set([]),
+      });
   }
 
   private refresh(subgroup: Subgroup): void {
@@ -231,33 +296,33 @@ export class SubgroupMembersComponent implements OnInit {
       });
   }
 
-  private loadCommunityMembers(subgroup: Subgroup): void {
-    if (!this.canManageFor(subgroup)) return;
-    this.communityService
-      .members(subgroup.communityId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (members) => this.communityMembers.set(members),
-        error: () => this.communityMembers.set([]),
-      });
-  }
-
-  private canManageFor(subgroup: Subgroup): boolean {
-    return subgroup.viewerIsCommunityAdmin || subgroup.myRole === 'moderator';
-  }
-
   private loadPeople(subgroup: Subgroup): void {
+    this.listLoading.set(true);
     this.communityService
-      .subgroupMembers(subgroup.communitySlug, subgroup.slug)
+      .subgroupMembers(subgroup.communitySlug, subgroup.slug, {
+        q: this.filterText(),
+        role: this.role() as 'all' | 'moderator' | 'member',
+        page: this.page(),
+        limit: this.pageSize,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (members) => {
-          this.members.set(members);
+        next: (result) => {
+          // The last row of a page was removed: show the page before it.
+          if (result.items.length === 0 && this.page() > 1) {
+            this.page.set(Math.max(1, Math.ceil(result.total / this.pageSize)));
+            this.loadPeople(subgroup);
+            return;
+          }
+          this.members.set(result.items);
+          this.total.set(result.total);
           this.loading.set(false);
+          this.listLoading.set(false);
           this.mutating.set(false);
         },
         error: (err: ApiError) => {
           this.loading.set(false);
+          this.listLoading.set(false);
           this.mutating.set(false);
           this.fail(err);
         },

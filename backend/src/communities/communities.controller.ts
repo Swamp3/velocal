@@ -1,3 +1,4 @@
+import { MemberSearchDto, Paged } from './dto/member-search.dto';
 import {
   Body,
   Controller,
@@ -171,9 +172,10 @@ export class CommunitiesController {
   @UseGuards(JwtAuthGuard)
   listMembers(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() search: MemberSearchDto,
     @CurrentUser() user: { id: string },
-  ): Promise<SerializedMember[]> {
-    return this.communitiesService.listMembers(id, user.id);
+  ): Promise<Paged<SerializedMember>> {
+    return this.communitiesService.listMembers(id, user.id, search);
   }
 
   @Patch(':id/members/:userId')

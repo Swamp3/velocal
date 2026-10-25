@@ -9,6 +9,22 @@ import { notInSuspendedCommunitySql } from '../communities/community-suspension'
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import { EventComment } from './entities/event-comment.entity';
+import { EventClass } from './entities/event-class.entity';
+import {
+  EVENT_FORMAT_KEYS,
+  KIDS_MAX_AGE,
+  TOURING_DISCIPLINE,
+  TOURING_FORMATS,
+  classAges,
+  classFitCondition,
+  disciplineFor,
+  eventFitsSql,
+  hasRiderData,
+  type EventFormat,
+  type RiderProfile,
+} from './racing';
+import { EventClassDto } from './dto/event-class.dto';
+import { ParkingService } from './parking.service';
 import { EventRsvp, EventRsvpStatus } from './entities/event-rsvp.entity';
 import { EventShare } from './entities/event-share.entity';
 import { EventRecurrence } from './entities/event-recurrence.entity';
@@ -16,6 +32,8 @@ import { EventPaceGroup } from './entities/event-pace-group.entity';
 import { EventStravaLink } from './entities/event-strava-link.entity';
 import { Route } from '../routes/entities/route.entity';
 import { serializeRoute } from '../routes/serialize';
+import { berlinTimeOfDay, parseEventDate } from '../import/dates';
+import { IMPORT_FIELDS } from '../import/import-diff';
 import {
   PaceGroupDto,
   SetPaceGroupsDto,
@@ -73,6 +91,35 @@ export interface SerializedEvent {
   coordinates?: { lat: number; lng: number } | null;
   distance?: number;
   [key: string]: any;
+}
+
+export interface SerializedEventClass {
+  id: string;
+  name: string;
+  gender: string;
+  ageMin: number | null;
+  ageMax: number | null;
+  category: string | null;
+  license: string;
+  dayLicense: boolean;
+  licenseClasses: string[] | null;
+  distanceKm: number | null;
+  elevationM: number | null;
+  startTime: Date | null;
+  championship: string | null;
+  note: string | null;
+  /** Only for a viewer who stated rider data: whether they may start in this class. */
+  fitsYou?: boolean;
+}
+
+export interface SerializedEventSeries {
+  id: string;
+  slug: string;
+  name: string;
+  kind: string;
+  season: string | null;
+  round: number | null;
+  label: string | null;
 }
 
 export interface HostQuery {
@@ -140,12 +187,15 @@ export class EventsService {
     private readonly subgroupMembers: Repository<SubgroupMember>,
     @InjectRepository(User)
     private readonly users: Repository<User>,
+    @InjectRepository(EventClass)
+    private readonly eventClasses: Repository<EventClass>,
     private readonly geocoding: GeocodingService,
     private readonly uploads: UploadsService,
     private readonly imageAccess: ImageAccessService,
     private readonly notifications: NotificationsService,
     private readonly dataSource: DataSource,
     private readonly badWords: BadWordService,
+    private readonly parking: ParkingService,
   ) {}
 
   async findAll(
@@ -190,10 +240,50 @@ export class EventsService {
     }
 
     if (params.discipline) {
+      // "Breitensport" stands for all touring events, whatever their bike type.
       const slugs = params.discipline.split(',').map((s) => s.trim());
-      qb.andWhere('event.disciplineSlug IN (:...slugs)', { slugs });
+      const touring = slugs.includes(TOURING_DISCIPLINE)
+        ? ' OR event.format IN (:...touringFormats)'
+        : '';
+      qb.andWhere(`(event.disciplineSlug IN (:...slugs)${touring})`, {
+        slugs,
+        touringFormats: TOURING_FORMATS,
+      });
     }
 
+    if (params.fitsMe && userId) {
+      const rider = await this.riderProfile(userId);
+      if (rider) {
+        const fit = eventFitsSql(rider);
+        qb.andWhere(fit.sql, fit.params);
+      }
+    }
+    if (params.format) {
+      const formats = params.format
+        .split(',')
+        .filter((f): f is EventFormat =>
+          (EVENT_FORMAT_KEYS as string[]).includes(f),
+        );
+      // Kids' races also include events with a class for children (Fette-Reifen-Rennen at an RTF).
+      const kids = formats.includes('kids')
+        ? ` OR EXISTS (SELECT 1 FROM "event_classes" kc WHERE kc.event_id = event.id AND kc.age_max <= :kidsMaxAge)`
+        : '';
+      if (formats.length)
+        qb.andWhere(`(event.format IN (:...formats)${kids})`, {
+          formats,
+          kidsMaxAge: KIDS_MAX_AGE,
+        });
+    }
+    if (params.championship) {
+      qb.andWhere(
+        `(event.championship IS NOT NULL OR EXISTS (SELECT 1 FROM "event_classes" cc WHERE cc.event_id = event.id AND cc.championship IS NOT NULL))`,
+      );
+    }
+    if (params.hideLeagues) {
+      qb.andWhere(
+        `NOT EXISTS (SELECT 1 FROM "race_series_events" lse JOIN "race_series" ls ON ls.id = lse.series_id WHERE lse.event_id = event.id AND ls.kind = 'league')`,
+      );
+    }
     if (params.from) {
       qb.andWhere('event.startDate >= :from', { from: params.from });
     }
@@ -236,6 +326,9 @@ export class EventsService {
       const { entities, raw } = await qb.getRawAndEntities();
       const total = await qb.getCount();
       const access = marker ? null : await this.accessMap(entities, userId);
+      const racing = marker
+        ? null
+        : await this.racingDetails(entities.map((e) => e.id));
 
       const data = entities.map((entity, i) =>
         this.toListEvent(entity, marker, {
@@ -243,6 +336,7 @@ export class EventsService {
             ? Math.round((parseFloat(raw[i].distance_m) / 1000) * 100) / 100
             : undefined,
           includeCommunityFields: access?.get(entity.id)?.member ?? false,
+          ...(racing ? racing(entity.id) : {}),
         }),
       );
 
@@ -257,10 +351,14 @@ export class EventsService {
 
     const [rows, total] = await qb.getManyAndCount();
     const access = marker ? null : await this.accessMap(rows, userId);
+    const racing = marker
+      ? null
+      : await this.racingDetails(rows.map((e) => e.id));
     return {
       data: rows.map((event) =>
         this.toListEvent(event, marker, {
           includeCommunityFields: access?.get(event.id)?.member ?? false,
+          ...(racing ? racing(event.id) : {}),
         }),
       ),
       total,
@@ -307,11 +405,21 @@ export class EventsService {
     const user = { id: userId ?? '', isAdmin: false };
     if (dto.paceGroups?.length)
       await this.validatePaceGroups(dto.paceGroups, user);
+    if (dto.parkingAreas?.length) this.parking.assertClean(dto.parkingAreas);
     return this.dataSource.transaction(async (manager) => {
       const saved = dto.recurrence
         ? await this.saveSeries(manager, first, dto.recurrence, userId)
         : await manager.save(first);
       await this.writeRideDetails(manager, saved, dto);
+      if (dto.classes?.length)
+        await this.writeClasses(manager, saved.id, dto.classes);
+      if (dto.parkingAreas?.length) {
+        await this.parking.write(
+          manager,
+          await this.occurrenceIds(manager, saved),
+          dto.parkingAreas,
+        );
+      }
       return saved;
     });
   }
@@ -323,14 +431,7 @@ export class EventsService {
     dto: Pick<CreateEventDto, 'paceGroups' | 'stravaLinks'>,
   ): Promise<void> {
     if (!dto.paceGroups?.length && !dto.stravaLinks?.length) return;
-    const ids = saved.recurrenceId
-      ? (
-          await manager.find(Event, {
-            where: { recurrenceId: saved.recurrenceId },
-            select: { id: true },
-          })
-        ).map((row) => row.id)
-      : [saved.id];
+    const ids = await this.occurrenceIds(manager, saved);
     await this.writePaceGroups(manager, ids, dto.paceGroups ?? []);
     for (const eventId of ids) {
       await this.writeStravaLinks(
@@ -340,6 +441,19 @@ export class EventsService {
         dto.stravaLinks ?? [],
       );
     }
+  }
+
+  /** Ids of every occurrence of the event's series, or just the event. */
+  private async occurrenceIds(
+    manager: EntityManager,
+    saved: Event,
+  ): Promise<string[]> {
+    if (!saved.recurrenceId) return [saved.id];
+    const rows = await manager.find(Event, {
+      where: { recurrenceId: saved.recurrenceId },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
   }
 
   /**
@@ -662,9 +776,11 @@ export class EventsService {
     const entity = this.repo.create({
       ...eventFields,
       source: userId ? EventSource.MANUAL : (dto.source ?? EventSource.MANUAL),
+      disciplineSlug: disciplineFor(dto.disciplineSlug, dto.format),
       createdById: userId ?? undefined,
-      startDate: new Date(dto.startDate),
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      startDate: toEventDate(dto.startDate).date,
+      endDate: dto.endDate ? toEventDate(dto.endDate).date : undefined,
+      startTimeKnown: dto.startTimeKnown ?? timeGiven(dto.startDate),
       registrationStart: dto.registrationStart
         ? new Date(dto.registrationStart)
         : undefined,
@@ -699,6 +815,17 @@ export class EventsService {
     await this.assertCanMutate(event, user);
 
     const partial: Partial<Event> = { ...dto } as Partial<Event>;
+    // A "Breitensport" event of a known format gets its bike type (RTF on the road …).
+    const discipline = disciplineFor(
+      dto.disciplineSlug ?? event.disciplineSlug,
+      dto.format !== undefined ? dto.format : event.format,
+    );
+    if (
+      discipline !== event.disciplineSlug ||
+      dto.disciplineSlug !== undefined
+    ) {
+      partial.disciplineSlug = discipline;
+    }
     if (!event.communityId) {
       delete partial.listing;
       delete partial.stravaUrl;
@@ -726,8 +853,13 @@ export class EventsService {
       partial.routeId = dto.routeId || null;
     }
 
-    if (dto.startDate) partial.startDate = new Date(dto.startDate);
-    if (dto.endDate) partial.endDate = new Date(dto.endDate);
+    if (dto.startDate) {
+      partial.startDate = toEventDate(dto.startDate).date;
+      partial.startTimeKnown = dto.startTimeKnown ?? timeGiven(dto.startDate);
+    } else if (dto.startTimeKnown !== undefined) {
+      partial.startTimeKnown = dto.startTimeKnown;
+    }
+    if (dto.endDate) partial.endDate = toEventDate(dto.endDate).date;
     if (dto.registrationStart !== undefined) {
       partial.registrationStart = dto.registrationStart
         ? new Date(dto.registrationStart)
@@ -768,9 +900,144 @@ export class EventsService {
       };
     }
 
+    delete (partial as Record<string, unknown>)['classes'];
+    delete (partial as Record<string, unknown>)['parkingAreas'];
+    if (dto.parkingAreas?.length) this.parking.assertClean(dto.parkingAreas);
+    // Corrections to an imported event survive the next import (see ImportService).
+    if (event.source === EventSource.IMPORTED) {
+      const edited = editedImportFields(event, partial);
+      if (
+        dto.classes !== undefined &&
+        (await this.classesDiffer(event.id, dto.classes))
+      ) {
+        edited.push('classes');
+      }
+      if (
+        dto.parkingAreas !== undefined &&
+        (await this.parking.differ(event.id, dto.parkingAreas))
+      ) {
+        edited.push('parkingAreas');
+      }
+      if (edited.length) {
+        partial.editedFields = [
+          ...new Set([...(event.editedFields ?? []), ...edited]),
+        ];
+      }
+    }
+
     Object.assign(event, partial);
-    const saved = await this.repo.save(event);
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const row = await manager.save(event);
+      if (dto.classes !== undefined)
+        await this.writeClasses(manager, row.id, dto.classes);
+      if (dto.parkingAreas !== undefined)
+        await this.parking.write(manager, [row.id], dto.parkingAreas);
+      return row;
+    });
     return this.present(saved, user?.id);
+  }
+
+  private async classesDiffer(
+    eventId: string,
+    next: EventClassDto[],
+  ): Promise<boolean> {
+    const current = await this.eventClasses.find({
+      where: { eventId },
+      order: { position: 'ASC' },
+    });
+    const norm = (c: {
+      name: string;
+      gender?: string | null;
+      ageMin?: number | null;
+      ageMax?: number | null;
+      category?: string | null;
+      license?: string | null;
+      dayLicense?: boolean | null;
+      licenseClasses?: string[] | null;
+      distanceKm?: number | null;
+      elevationM?: number | null;
+      startTime?: Date | string | null;
+      championship?: string | null;
+      note?: string | null;
+    }) => {
+      const ages = classAges(c.category, c.ageMin, c.ageMax);
+      return JSON.stringify([
+        c.name.trim(),
+        c.gender ?? 'open',
+        ages.ageMin,
+        ages.ageMax,
+        c.category ?? null,
+        c.license ?? 'open',
+        !!c.dayLicense,
+        c.licenseClasses?.length ? [...c.licenseClasses].sort() : null,
+        c.distanceKm ?? null,
+        c.elevationM ?? null,
+        c.startTime ? new Date(c.startTime).getTime() : null,
+        c.championship ?? null,
+        c.note?.trim() || null,
+      ]);
+    };
+    return current.map(norm).join('|') !== next.map(norm).join('|');
+  }
+
+  /** Replaces the rating classes of an event. */
+  private async writeClasses(
+    manager: EntityManager,
+    eventId: string,
+    classes: EventClassDto[],
+  ): Promise<void> {
+    await manager.delete(EventClass, { eventId });
+    if (!classes.length) return;
+    await manager.save(
+      classes.map((c, position) =>
+        manager.create(EventClass, {
+          eventId,
+          position,
+          name: c.name.trim(),
+          gender: c.gender ?? 'open',
+          ...classAges(c.category, c.ageMin, c.ageMax),
+          category: c.category ?? null,
+          license: c.license ?? 'open',
+          dayLicense: !!c.dayLicense,
+          licenseClasses: c.licenseClasses?.length ? c.licenseClasses : null,
+          distanceKm: c.distanceKm ?? null,
+          elevationM: c.elevationM ?? null,
+          startTime: c.startTime ? new Date(c.startTime) : null,
+          championship: c.championship ?? null,
+          note: c.note?.trim() || null,
+        }),
+      ),
+    );
+  }
+
+  /** Admins only: the import bookkeeping of an event. */
+  async getImportInfo(id: string) {
+    const event = await this.findEntity(id);
+    const run = event.importRunId
+      ? await this.dataSource.query<
+          {
+            id: string;
+            fileName: string | null;
+            startedAt: Date;
+            triggeredBy: string | null;
+          }[]
+        >(
+          `SELECT "id", "file_name" AS "fileName", "startedAt", "triggeredBy" FROM "import_runs" WHERE "id" = $1`,
+          [event.importRunId],
+        )
+      : [];
+    return {
+      source: event.source,
+      sourceName: event.sourceName,
+      externalId: event.externalId,
+      sourceUrl: event.sourceUrl,
+      lastSeenAt: event.lastSeenAt,
+      missingSince: event.missingSince,
+      sources: event.sources ?? [],
+      conflicts: event.importConflicts ?? [],
+      editedFields: event.editedFields ?? [],
+      importRun: run[0] ?? null,
+    };
   }
 
   async remove(
@@ -1692,8 +1959,18 @@ export class EventsService {
       ? await this.recurrences.findOne({ where: { id: event.recurrenceId } })
       : null;
     const ride = await this.rideDetails(event, userId);
+    const racing = await this.racingDetails(
+      [event.id],
+      userId ? await this.riderProfile(userId) : null,
+    );
+    const parkingAreas = await this.parking.forEvent(
+      event.id,
+      event.coordinates,
+    );
     return this.serializeEvent(event, {
       ...ride,
+      ...racing(event.id),
+      parkingAreas,
       recurrence: recurrence
         ? { id: recurrence.id, frequency: recurrence.frequency }
         : null,
@@ -1709,6 +1986,95 @@ export class EventsService {
       hostCommunity,
       ...(audience?.share ? this.shareFields(audience.share, isMember) : {}),
       includeCommunityFields: access.member || isMember,
+    });
+  }
+
+  /** Classes and series memberships of events, loaded once for a page of events. */
+  /** The viewer's rider data for the class rule, or null when they stated none. */
+  private async riderProfile(userId: string): Promise<RiderProfile | null> {
+    const rider = await this.users.findOne({
+      where: { id: userId },
+      select: {
+        id: true,
+        birthYear: true,
+        gender: true,
+        licenseType: true,
+        licenseClass: true,
+      },
+    });
+    return rider && hasRiderData(rider) ? rider : null;
+  }
+
+  /** Ids of the classes (of these events) the rider may start in. */
+  private async fittingClassIds(
+    ids: string[],
+    rider: RiderProfile,
+  ): Promise<Set<string>> {
+    const fit = classFitCondition(rider);
+    const rows = await this.eventClasses
+      .createQueryBuilder('fc')
+      .select('fc.id', 'id')
+      .innerJoin(Event, 'event', 'event.id = fc.event_id')
+      .where('fc.event_id IN (:...fitIds)', { fitIds: ids })
+      .andWhere(fit.sql, fit.params)
+      .getRawMany<{ id: string }>();
+    return new Set(rows.map((r) => r.id));
+  }
+
+  private async racingDetails(
+    ids: string[],
+    rider: RiderProfile | null = null,
+  ): Promise<
+    (id: string) => {
+      classes: SerializedEventClass[];
+      series: SerializedEventSeries[];
+    }
+  > {
+    if (ids.length === 0) return () => ({ classes: [], series: [] });
+    const classes = await this.eventClasses.find({
+      where: { eventId: In(ids) },
+      order: { position: 'ASC' },
+    });
+    const series = await this.dataSource.query<
+      (SerializedEventSeries & { eventId: string })[]
+    >(
+      `SELECT rse."event_id" AS "eventId", s."id", s."slug", s."name", s."kind", s."season",
+              rse."stageNumber" AS "round", rse."label"
+         FROM "race_series_events" rse
+         JOIN "race_series" s ON s."id" = rse."series_id"
+        WHERE rse."event_id" = ANY($1::uuid[])
+        ORDER BY s."name"`,
+      [ids],
+    );
+    const fitting =
+      rider && classes.length ? await this.fittingClassIds(ids, rider) : null;
+    return (id) => ({
+      classes: classes
+        .filter((c) => c.eventId === id)
+        .map((c) => ({
+          id: c.id,
+          name: c.name,
+          gender: c.gender,
+          ageMin: c.ageMin,
+          ageMax: c.ageMax,
+          category: c.category,
+          license: c.license,
+          dayLicense: c.dayLicense,
+          licenseClasses: c.licenseClasses,
+          distanceKm: c.distanceKm,
+          elevationM: c.elevationM,
+          startTime: c.startTime,
+          championship: c.championship,
+          note: c.note,
+          ...(fitting ? { fitsYou: fitting.has(c.id) } : {}),
+        })),
+      series: series
+        .filter((row) => row.eventId === id)
+        .map((row) => {
+          const { eventId, ...rest } = row;
+          void eventId;
+          return rest;
+        }),
     });
   }
 
@@ -1962,6 +2328,15 @@ export class EventsService {
           : null,
       ...rest,
     };
+    // Who checked a source when, the sources' conflicts and the import bookkeeping are for
+    // admins only (`GET admin/events/:id/import-info`).
+    serialized.sources = (event.sources ?? []).map(({ name, url }) => ({
+      name,
+      url,
+    }));
+    delete serialized.importConflicts;
+    delete serialized.editedFields;
+    delete serialized.importRunId;
     if (!includeCommunityFields) {
       serialized.meetupPlace = null;
       serialized.meetupAt = null;
@@ -1976,6 +2351,35 @@ export class EventsService {
     if (event.listing !== EventListing.MEMBERS) return event.imageUrl;
     return this.imageAccess.sign(event.imageUrl, true);
   }
+}
+
+/** `YYYY-MM-DD` (day only) is Berlin midnight of that day; anything else an instant. */
+function toEventDate(value: string): { date: Date; dayOnly: boolean } {
+  const parsed = parseEventDate(value);
+  return parsed.kind === 'date'
+    ? { date: parsed.date, dayOnly: true }
+    : { date: new Date(value), dayOnly: false };
+}
+
+/** A time was given: not a plain day, and not midnight in Europe/Berlin. */
+function timeGiven(value: string): boolean {
+  const { date, dayOnly } = toEventDate(value);
+  return !dayOnly && berlinTimeOfDay(date) !== '00:00';
+}
+
+/** Fields of an imported event that this edit actually changes. */
+function editedImportFields(event: Event, partial: Partial<Event>): string[] {
+  const fields: string[] = [];
+  const current = event as unknown as Record<string, unknown>;
+  const next = partial as unknown as Record<string, unknown>;
+  const same = (a: unknown, b: unknown) =>
+    JSON.stringify(a instanceof Date ? a.getTime() : (a ?? null)) ===
+    JSON.stringify(b instanceof Date ? b.getTime() : (b ?? null));
+  for (const field of [...IMPORT_FIELDS, 'coordinates']) {
+    if (!(field in next) || next[field] === undefined) continue;
+    if (!same(current[field], next[field])) fields.push(field);
+  }
+  return fields;
 }
 
 /** Sign-up cannot open after it closes. */

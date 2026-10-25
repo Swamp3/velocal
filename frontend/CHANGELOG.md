@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-25
+
+### Added
+
+- Admin file import page with check report, confirmation and run reports; event import info for admins
+- Event classes and routes component (with the server's fits-you mark), format badge, series chips, championship badges; class editor with category presets in the event form; rider section in the profile; format and racing filters in the event list
+- Parking areas: section on the event page with navigation links and a disclaimer hint, editor in the event form, lines in the calendar export
+- `RacingService` loads the value lists from `GET /api/events/meta`; no copies of them in the app
+- Member pages: `app-member-filters` (search + role), `ui-pagination`, server-side subgroup suggestions
+
+### Changed
+
+- `app-event-map`: one map for venue and parking, loaded only when opened, full screen on the same map (replaces mini map and map dialog); `app-places-picker`: one on-demand picker map for the venue and all parking areas (replaces `app-location-picker`); Leaflet loaded once via `shared/utils/leaflet.ts`
+- Unit tests run in CI; `src/test-setup.ts` provides `matchMedia` for the test DOM
+
+### Fixed
+
+- Day-only dates show the German calendar day in every time zone (`eventDatesInterceptor`); the event form sends a plain day without a time
+
 ## [0.17.3] - 2026-10-22
 
 ### Fixed

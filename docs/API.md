@@ -5,7 +5,9 @@
 | POST   | `/api/auth/register`               | No       | Create account                 |
 | POST   | `/api/auth/login`                  | No       | Log in, receive JWT            |
 | GET    | `/api/events`                      | Optional | List/search/filter events. Members-only events are included only when the caller can see the host |
-| GET    | `/api/events/:id`                  | Optional | Event detail, including the going count. Members-only events are 404 for outsiders |
+|        |                                    |          | Filters: `q`, `discipline` (comma list; `breitensport` also finds every touring format), `format` (comma list; `kids` also finds events with a class up to age 12), `fitsMe` (signed in), `championship`, `hideLeagues`, `from`, `to`, geo `zip`/`lat`/`lng`/`radius` |
+| GET    | `/api/events/meta`                 | No       | Value lists for forms and filters: racing model (classes, licences, licence classes, age categories, championship levels, series kinds, formats; `backend/src/events/racing.ts`) and parking (kinds, fees; `backend/src/events/parking.ts`) |
+| GET    | `/api/events/:id`                  | Optional | Event detail (with public `parkingAreas` and the straight-line `distanceM` to the venue), including the going count. Members-only events are 404 for outsiders | Classes carry `fitsYou` for a viewer with rider data |
 | POST   | `/api/events/:id/invites`          | JWT      | Invite a host member by email. Host admins and moderators. Returns `outcome`, `emailed`, `emailSkipped` |
 | POST   | `/api/events/:id/rsvp`             | JWT      | Set `going`, `maybe`, or `declined` |
 | GET    | `/api/events/:id/rsvps`            | JWT      | RSVP names. Host admins and moderators, or the creator of an unhosted event |
@@ -28,6 +30,9 @@
 | GET    | `/api/import/jobs?limit=&offset=`  | Admin    | List import runs (persisted)   |
 | GET    | `/api/import/jobs/:id`             | Admin    | Poll import job status         |
 | GET    | `/api/import/sources`              | Admin    | List registered import sources |
+| POST   | `/api/import/events/check?fileName=` | Admin  | Check an import file (JSON body) without writing; returns the report |
+| POST   | `/api/import/events?fileName=&acceptWarnings=` | Admin | Import a file as a job; refused with the report on errors, or on warnings without `acceptWarnings=true` |
+| GET    | `/api/import/jobs/:id/report`      | Admin    | Report of an import run |
 | POST   | `/api/communities`                 | JWT      | Create a community; creator is admin |
 | GET    | `/api/communities`                 | Optional | List public and request communities |
 | GET    | `/api/communities/mine`            | JWT      | Communities the current user belongs to |

@@ -1,3 +1,5 @@
+import type { LicenseClass, RiderGender, RiderLicense } from './racing.model';
+
 export interface User {
   id: string;
   email: string;
@@ -12,4 +14,10 @@ export interface User {
   isAdmin?: boolean;
   emailVerified?: boolean;
   hasPassword?: boolean;
+  /** Rider data, only used for the "fits me" class filter. */
+  birthYear?: number | null;
+  gender?: RiderGender | null;
+  licenseType?: RiderLicense | null;
+  licenseClass?: LicenseClass | null;
 }
+

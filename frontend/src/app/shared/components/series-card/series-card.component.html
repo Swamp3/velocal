@@ -18,10 +18,16 @@
       </h3>
 
       <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[var(--color-text-muted)]">
-        @if (series().year) {
+        @if (series().season || series().year) {
           <span class="inline-flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[16px]">date_range</span>
-            {{ series().year }}
+            {{ series().season ?? series().year }}
+          </span>
+        }
+        @if (series().kind && series().kind !== 'series') {
+          <span class="inline-flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">{{ series().kind === 'league' ? 'groups' : 'emoji_events' }}</span>
+            {{ 'series.kind.' + series().kind | transloco }}
           </span>
         }
 

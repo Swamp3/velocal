@@ -1,0 +1,100 @@
+<a
+  routerLink="/admin/imports"
+  class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+>
+  <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_back</span>
+  {{ 'admin.imports.title' | transloco }}
+</a>
+
+<div class="mt-4">
+  <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'admin.imports.file.title' | transloco }}</h1>
+  <p class="mt-1 max-w-2xl text-sm text-[var(--color-text-muted)]">{{ 'admin.imports.file.intro' | transloco }}</p>
+</div>
+
+<section class="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4">
+  <div class="flex flex-wrap items-center gap-3">
+    <label
+      for="import-file"
+      class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-bg-alt)]"
+    >
+      <span class="material-symbols-outlined text-[18px]" aria-hidden="true">upload_file</span>
+      {{ (fileName() ? 'admin.imports.file.other' : 'admin.imports.file.choose') | transloco }}
+    </label>
+    <input id="import-file" type="file" accept=".json,application/json" class="sr-only" (change)="onFile($event)" />
+    @if (fileName(); as name) {
+      <span class="min-w-0 break-all text-sm text-[var(--color-text)]">{{ name }}</span>
+    }
+    @if (check() && !importing()) {
+      <ui-button variant="ghost" size="sm" [loading]="checking()" (click)="runCheck()">
+        {{ 'admin.imports.file.recheck' | transloco }}
+      </ui-button>
+    }
+  </div>
+  <p class="mt-2 text-xs text-[var(--color-text-muted)]">{{ 'admin.imports.file.formatHint' | transloco }}</p>
+
+  @if (parseError(); as error) {
+    <p class="mt-3 text-sm text-[var(--color-danger)]">{{ error }}</p>
+  }
+  @if (checking()) {
+    <p class="mt-3 text-sm text-[var(--color-text-muted)]">{{ 'admin.imports.file.checking' | transloco }}</p>
+  }
+</section>
+
+@if (check(); as c) {
+  <section class="mt-6 space-y-4">
+    <div
+      class="rounded-xl border p-4 text-sm"
+      [class]="
+        !c.canImport
+          ? 'border-red-300 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200'
+          : c.needsConfirmation
+            ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200'
+            : 'border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200'
+      "
+      role="status"
+    >
+      <p class="font-medium">
+        @if (!c.canImport) {
+          {{ 'admin.imports.file.blocked' | transloco: { count: c.report.summary.errors } }}
+        } @else if (c.needsConfirmation) {
+          {{ 'admin.imports.file.confirmNeeded' | transloco: { count: c.report.summary.warnings } }}
+        } @else {
+          {{ 'admin.imports.file.ready' | transloco }}
+        }
+      </p>
+      <p class="mt-1">
+        {{
+          'admin.imports.file.sourceLine'
+            | transloco
+              : {
+                  source: c.report.sourceName ?? '—',
+                  complete: (c.report.complete ? 'admin.imports.file.completeYes' : 'admin.imports.file.completeNo') | transloco,
+                }
+        }}
+      </p>
+
+      @if (c.canImport) {
+        <div class="mt-3 flex flex-wrap items-center gap-4">
+          @if (c.needsConfirmation) {
+            <label class="flex items-center gap-2">
+              <input type="checkbox" [checked]="confirmed()" (change)="confirmed.set(!confirmed())" />
+              {{ 'admin.imports.file.confirm' | transloco: { count: c.report.summary.warnings } }}
+            </label>
+          }
+          <ui-button
+            [loading]="importing()"
+            [disabled]="importing() || (c.needsConfirmation && !confirmed())"
+            (click)="startImport()"
+          >
+            {{ 'admin.imports.file.import' | transloco: { count: c.report.summary.create + c.report.summary.update } }}
+          </ui-button>
+        </div>
+      }
+      @if (job(); as j) {
+        <p class="mt-2">{{ 'admin.imports.file.jobRunning' | transloco }}</p>
+      }
+    </div>
+
+    <app-import-report [report]="c.report" />
+  </section>
+}

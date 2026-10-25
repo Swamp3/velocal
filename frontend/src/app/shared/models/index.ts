@@ -7,3 +7,4 @@ export * from './post.model';
 export * from './changelog.model';
 export * from './community.model';
 export * from './route.model';
+export * from './racing.model';

@@ -121,12 +121,14 @@
       "map": {
         "title": "Veranstaltungsort",
         "dialogLabel": "Karte des Veranstaltungsorts",
-        "expand": "Karte vergrößern",
-        "tapToExplore": "Tippen zum Erkunden",
         "openGoogle": "In Google Maps öffnen",
         "openApple": "In Apple Maps öffnen",
         "openOsm": "In OpenStreetMap öffnen",
-        "showOnFullMap": "Auf Vollkarte anzeigen"
+        "showOnFullMap": "Auf Vollkarte anzeigen",
+        "show": "Karte anzeigen",
+        "withParking": "mit {{count}} Parkplätzen",
+        "fullscreen": "Vollbild",
+        "exitFullscreen": "Vollbild beenden"
       },
       "addToCalendar": {
         "button": "Zum Kalender hinzufügen",
@@ -142,12 +144,57 @@
       "meetupError": "Treffpunkt konnte nicht gespeichert werden",
       "membersOnly": "Nur für Mitglieder",
       "registrationStart": "Anmeldestart",
-      "registrationNotOpen": "Die Anmeldung ist noch nicht geöffnet."
+      "registrationNotOpen": "Die Anmeldung ist noch nicht geöffnet.",
+      "sources": "Quellen"
     },
     "status": {
       "published": "Ausgeschrieben",
       "cancelled": "Abgesagt",
       "completed": "Abgeschlossen"
+    },
+    "importInfo": {
+      "title": "Import (nur Admins)",
+      "origin": "Herkunft",
+      "run": "Import-Lauf",
+      "lastSeen": "Zuletzt gelistet",
+      "missingSince": "Nicht mehr gelistet seit",
+      "edited": "Von Hand bearbeitet (bleibt beim Import erhalten)",
+      "sources": "Quellen und Prüfungen",
+      "checkedAt": "geprüft {{date}}",
+      "updatedAt": "Quelle aktualisiert {{date}}",
+      "conflicts": "{{count}} Widersprüche zwischen Quellen"
+    },
+    "racing": {
+      "fitsMe": "Passt zu mir",
+      "fitsMeHint": "Nutzt Jahrgang, Geschlecht und Lizenz aus deinem Profil",
+      "championship": "Meisterschaften",
+      "hideLeagues": "Ligaspieltage ausblenden"
+    },
+    "format": {
+      "label": "Format",
+      "unknown": "Nicht angegeben",
+      "all": "Alle Formate",
+      "filterLabel": "Format filtern",
+      "race": "Lizenzrennen",
+      "jedermann": "Jedermannrennen",
+      "rtf": "RTF",
+      "ctf": "CTF",
+      "marathon": "Radmarathon",
+      "brevet": "Brevet",
+      "gravel_ride": "Gravel-Tour",
+      "tour": "Radtour",
+      "hint": {
+        "race": "Rennen nach Wettkampfbestimmungen; Start meist mit Lizenz oder Tageslizenz, Hobbyklassen ohne Lizenz.",
+        "jedermann": "Rennen mit Zeitnahme für alle ohne Lizenz (auch Gran Fondo). Lizenzfahrer oft nur bestimmter Klassen oder getrennt gewertet.",
+        "rtf": "Radtourenfahrt auf ausgeschilderten Straßenstrecken (20–199 km), mit Kontrollen und Verpflegung, ohne Zeitnahme und Platzierung.",
+        "ctf": "Country-Tourenfahrt im Gelände für MTB und Crossräder, ohne Zeitnahme und Platzierung.",
+        "marathon": "Radmarathon: lange Straßenstrecken ab 200 km, ohne Zeitnahme und Platzierung.",
+        "brevet": "Langstreckenfahrt der Randonneure (200/300/400/600 km) mit Zeitlimit, ohne Platzierung; zählt z. B. für Paris–Brest–Paris.",
+        "gravel_ride": "Gravel-Tour auf Schotter und Feldwegen, ohne Zeitnahme und Platzierung.",
+        "tour": "Radwandern, Volksradfahren oder Vereinstour für alle.",
+        "kids": "Rennen für Kinder ohne Lizenz mit dem eigenen Rad (Fette-Reifen-Rennen: Reifen ab 30 mm, keine Rennräder) oder Laufrad; meist Helmpflicht und Einverständnis der Eltern. Im Filter auch Events mit einer Kinderklasse (bis 12 Jahre)."
+      },
+      "kids": "Kinderrennen (Fette Reifen, Laufrad)"
     }
   },
   "event": {
@@ -212,7 +259,11 @@
         "addGroup": "Pace-Gruppe hinzufügen",
         "removeGroup": "Gruppe entfernen"
       },
-      "registrationStart": "Anmeldestart"
+      "registrationStart": "Anmeldestart",
+      "openMap": "Karte öffnen, um Punkte zu setzen",
+      "mapTarget": "Punkt setzen für:",
+      "mapHint": "Auf die Karte tippen, um „{{target}}“ zu setzen; Pins lassen sich verschieben.",
+      "mapVenue": "Veranstaltungsort"
     },
     "actions": {
       "create": "Veranstaltung erstellen",
@@ -317,7 +368,9 @@
       "personal": "Persönliche Daten",
       "personalHint": "Dein Name und wie andere dich sehen.",
       "region": "Region und Sprache",
-      "regionHint": "Heimatort für Event-Vorschläge, Sprache und Zahlenformate."
+      "regionHint": "Heimatort für Event-Vorschläge, Sprache und Zahlenformate.",
+      "rider": "Rennsport",
+      "riderHint": "Finde Wertungsklassen, in denen du starten darfst."
     },
     "disciplinesHint": "Wähle die Arten von Events, die dich interessieren. Sie dienen als Standardfilter.",
     "title": "Profil",
@@ -416,7 +469,23 @@
       "error": "Deine Events konnten nicht geladen werden.",
       "cancelled": "Abgesagt",
       "subtitle": "Events, für die du dich angemeldet hast und die noch anstehen."
-    }
+    },
+    "birthYear": "Jahrgang",
+    "birthYearPlaceholder": "z. B. 1990",
+    "birthYearInvalid": "Vier Ziffern, z. B. 1990",
+    "gender": "Geschlecht",
+    "genderFemale": "Weiblich",
+    "genderMale": "Männlich",
+    "genderDiverse": "Divers",
+    "notSpecified": "Keine Angabe",
+    "license": "Lizenz",
+    "riderPrivacy": "Wird nur für den Filter „Passt zu mir“ und die Hinweise bei Wertungsklassen verwendet. Niemand sonst sieht diese Angaben.",
+    "licenseNone": "Keine Lizenz (Hobby/Jedermann)",
+    "licenseFederation": "Verbandslizenz (z. B. BDR)",
+    "licenseUci": "UCI-Lizenz (Profi-/Kontinentalteam)",
+    "licenseClass": "Lizenzklasse",
+    "category": "Deine Altersklasse {{year}}: {{category}}",
+    "mastersChoice": " – mit Lizenz kannst du auch Elite Amateure oder Amateure wählen."
   },
   "series": {
     "title": "Rennserien",
@@ -445,7 +514,19 @@
     "notFoundMessage": "Diese Rennserie existiert nicht oder wurde entfernt.",
     "image": "Titelbild",
     "externalUrl": "Externe Seite",
-    "externalUrlLabel": "Externe URL"
+    "externalUrlLabel": "Externe URL",
+    "kindLabel": "Format",
+    "kind": {
+      "series": "Serie",
+      "cup": "Cup (Läufe)",
+      "league": "Liga (Spieltage)"
+    },
+    "season": "Saison",
+    "round": {
+      "series": "Runde {{n}}",
+      "cup": "{{n}}. Lauf",
+      "league": "{{n}}. Spieltag"
+    }
   },
   "validation": {
     "required": "Pflichtfeld",
@@ -582,6 +663,113 @@
         "updated": "Aktualisiert",
         "skipped": "Übersprungen",
         "total": "Gesamt"
+      },
+      "file": {
+        "title": "Datei importieren",
+        "intro": "Wähle eine JSON-Datei mit Events. Sie wird zuerst geprüft; gespeichert wird erst beim Import. Fehler verhindern den Import, Warnungen musst du bestätigen.",
+        "choose": "Datei wählen",
+        "other": "Andere Datei wählen",
+        "recheck": "Erneut prüfen",
+        "formatHint": "Format: docs/IMPORT-FILE-FORMAT.md im Repository. Eine Datei pro Quelle, bis 5000 Events, max. 10 MB.",
+        "tooLarge": "Die Datei ist größer als 10 MB. Teile sie auf mehrere Dateien auf.",
+        "notJson": "Die Datei ist kein gültiges JSON: {{detail}}",
+        "checking": "Wird geprüft…",
+        "blocked": "{{count}} Fehler: Die Datei kann nicht importiert werden. Korrigiere sie in der Datei und prüfe erneut.",
+        "confirmNeeded": "Keine Fehler, aber {{count}} Warnungen. Sieh sie dir vor dem Import an.",
+        "ready": "Keine Fehler oder Warnungen. Die Datei kann importiert werden.",
+        "sourceLine": "Quelle: {{source}} · {{complete}}",
+        "completeYes": "vollständige Liste (fehlende kommende Events dieser Quelle werden als nicht mehr gelistet markiert)",
+        "completeNo": "Teilliste (nichts wird als fehlend markiert)",
+        "confirm": "Ich habe die {{count}} Warnungen geprüft",
+        "import": "Importieren ({{count}} neu oder geändert)",
+        "refused": "Der Server hat den Import abgelehnt. Siehe Bericht.",
+        "jobRunning": "Wird importiert…",
+        "done": "Import abgeschlossen"
+      },
+      "report": {
+        "errors": "Fehler",
+        "warnings": "Warnungen",
+        "search": "Name oder ID suchen",
+        "filter": {
+          "all": "Alle",
+          "errors": "Mit Fehlern",
+          "warnings": "Mit Warnungen"
+        },
+        "none": "Keine Einträge",
+        "more": "{{count}} weitere anzeigen",
+        "changes": "{{count}} geänderte Felder",
+        "openEvent": "Event öffnen",
+        "noCoordinates": "{{count}} Events haben keine Koordinaten; ihr Ort wird beim Import nachgeschlagen.",
+        "open": "Bericht",
+        "missing": "Für diesen Lauf gibt es keinen Bericht (Läufe vor dieser Funktion).",
+        "notFound": "Import-Lauf nicht gefunden"
+      },
+      "action": {
+        "create": "Neu",
+        "update": "Geändert",
+        "unchanged": "Unverändert",
+        "skip": "Übersprungen",
+        "invalid": "Ungültig"
+      },
+      "issue": {
+        "fileNotObject": "Die Datei muss ein JSON-Objekt mit sourceName und events sein.",
+        "sourceNameInvalid": "sourceName muss 3-40 Zeichen haben: Kleinbuchstaben, Ziffern und Bindestriche.",
+        "eventsMissing": "events muss eine nicht leere Liste sein.",
+        "tooManyEvents": "Höchstens {{max}} Events pro Datei.",
+        "eventNotObject": "Das Event muss ein JSON-Objekt sein.",
+        "unknownField": "Unbekanntes Feld „{{field}}“ wird ignoriert.",
+        "required": "{{field}} fehlt.",
+        "type": "{{field}} muss vom Typ {{expected}} sein.",
+        "tooShort": "{{field}} braucht mindestens {{min}} Zeichen.",
+        "tooLong": "{{field}} darf höchstens {{max}} Zeichen haben.",
+        "duplicateExternalId": "externalId wird schon von Event #{{other}} verwendet.",
+        "locationPlaceholder": "„{{value}}“ ist kein echter Ort.",
+        "locationVague": "„{{value}}“ nennt den Ort, aber nicht die Halle bzw. den Austragungsort.",
+        "disciplineUnknown": "Unbekannte Disziplin „{{value}}“.",
+        "statusUnknown": "Unbekannter Status „{{value}}“ (published, cancelled, completed).",
+        "countryInvalid": "Land „{{value}}“ muss ein Zwei-Buchstaben-Code wie DE sein.",
+        "urlInvalid": "{{field}} muss ein vollständiger http(s)-Link sein.",
+        "dateInvalid": "{{field}} „{{value}}“ ist kein gültiges Datum (JJJJ-MM-TT oder ISO 8601 mit Zeitzone).",
+        "dateNeedsOffset": "{{field}} „{{value}}“ braucht eine Zeitzone wie +01:00.",
+        "startTimeKnownMismatch": "startTimeKnown ist true, aber startDate hat keine Uhrzeit.",
+        "timeIgnored": "startDate hat eine Uhrzeit, aber startTimeKnown ist false: nur der Tag wird gezeigt.",
+        "endBeforeStart": "Das Ende liegt vor dem Beginn.",
+        "pastEvent": "Das Event liegt in der Vergangenheit ({{value}}).",
+        "farFuture": "Das Event liegt mehr als zwei Jahre in der Zukunft ({{value}}).",
+        "deadlineAfterStart": "Der Meldeschluss liegt nach dem Event.",
+        "sameNameSameDay": "Gleicher Name am gleichen Tag wie Event #{{other}}.",
+        "coordinatesIncomplete": "Gib lat und lng an, oder keins von beiden.",
+        "coordinateInvalid": "{{field}} ist keine gültige Koordinate.",
+        "noCoordinates": "Keine Koordinaten: Der Ort wird nachgeschlagen.",
+        "sourceInvalid": "{{field}} fehlt.",
+        "conflictInvalid": "{{field}} muss ein Text oder ein Objekt mit „field“ sein.",
+        "hasConflicts": "{{count}} dokumentierte Widersprüche zwischen Quellen. Admins sehen sie am Event.",
+        "possibleDuplicate": "Sieht aus wie das bestehende Event „{{name}}“ ({{source}}): wird nicht importiert, nichts wird geändert.",
+        "protectedFields": "Von Hand bearbeitet, bleibt erhalten: {{fields}}.",
+        "otherSource": "Gehört zu einer anderen Quelle ({{source}}) oder wurde von Hand angelegt: wird nicht geändert.",
+        "markedMissing": "{{count}} kommende Events dieser Quelle fehlen in der Datei und werden als nicht mehr gelistet markiert.",
+        "geocodeFailed": "Der Ort wurde nicht gefunden: Das Event erscheint nicht auf der Karte.",
+        "saveFailed": "Konnte nicht gespeichert werden: {{message}}",
+        "championshipUnknown": "Unbekannte Meisterschaftsebene {{value}}.",
+        "classInvalid": "{{field}} muss ein Objekt sein.",
+        "classGenderUnknown": "Unbekanntes Geschlecht {{value}} (open, male, female).",
+        "classLicenseUnknown": "Unbekannte Lizenz {{value}} (open, unlicensed, license, uci).",
+        "ageInvalid": "{{field}} muss eine ganze Zahl (Jahre) sein.",
+        "ageRange": "Das Höchstalter ist kleiner als das Mindestalter.",
+        "seriesInvalid": "{{field}} muss ein Objekt sein.",
+        "seriesKindUnknown": "Unbekanntes Serienformat {{value}} (series, cup, league).",
+        "roundInvalid": "{{field}} muss eine ganze Zahl ab 1 sein.",
+        "seriesSummary": "{{total}} Serien in der Datei, davon {{created}} neu.",
+        "classLicenseClassUnknown": "Unbekannte Lizenzklassen {{value}} (elite_amateur, amateur, master).",
+        "classCategoryUnknown": "Unbekannte Altersklasse {{value}} (u11 … u23, elite, masters1 … masters4).",
+        "formatUnknown": "Unbekanntes Format {{value}} (race, jedermann, rtf, ctf, marathon, brevet, gravel_ride, tour, kids).",
+        "numberInvalid": "Muss eine Zahl von 0 bis {{max}} sein.",
+        "parkingTooMany": "Höchstens {{max}} Parkplätze.",
+        "parkingInvalid": "Ein Parkplatz muss ein Objekt sein.",
+        "parkingKindUnknown": "Unbekannte Parkplatz-Gruppen {{value}}; mindestens eine angeben.",
+        "parkingFeeUnknown": "Unbekannte Gebühr {{value}} (free, paid).",
+        "parkingFar": "Parkplatz ist {{km}} km vom Veranstaltungsort entfernt.",
+        "timeInvalid": "Uhrzeit {{value}} muss HH:mm sein."
       }
     },
     "users": {
@@ -897,7 +1085,7 @@
       "pushServicesTitle": "Push-Zustellung (Hersteller von Browser und Betriebssystem)",
       "pushServicesBody": "Push-Nachrichten werden über den Push-Dienst des Herstellers Ihres Browsers oder Geräts zugestellt (zum Beispiel Google, Mozilla, Apple oder Microsoft). Unser Server übermittelt die für Ihr Gerät verschlüsselte Nachricht zusammen mit der Abonnement-Adresse an diesen Dienst; der Hersteller sieht, dass eine Nachricht an Ihr Gerät zugestellt wurde, kann den Inhalt aber nicht lesen. Je nach Hersteller kann eine Verarbeitung außerhalb der EU stattfinden; die Hersteller stützen sich dafür auf eigene Garantien nach Kapitel V DSGVO.",
       "profileTitle": "Profil und Mitgliedschaften",
-      "profileBody": "In Ihrem Profil können Sie freiwillig Vor- und Nachnamen (sichtbar nur für Sie und Administratoren), Postleitzahl und Land Ihres Wohnorts (für die Umkreissuche), einen Link oder eine ID Ihres Strava-Profils (für Mitglieder Ihrer Communities sichtbar), Sprach- und Formateinstellungen, bevorzugte Disziplinen und Favoriten hinterlegen. Ihre Mitgliedschaften und Rollen in Communities und Untergruppen werden gespeichert. Diese Daten verarbeiten wir zur Bereitstellung der von Ihnen gewählten Funktionen (Art. 6 Abs. 1 lit. b DSGVO); die freiwilligen Angaben können Sie jederzeit ändern oder entfernen.",
+      "profileBody": "In Ihrem Profil können Sie freiwillig Vor- und Nachnamen (sichtbar nur für Sie und Administratoren), Postleitzahl und Land Ihres Wohnorts (für die Umkreissuche), einen Link oder eine ID Ihres Strava-Profils (für Mitglieder Ihrer Communities sichtbar), Sprach- und Formateinstellungen, bevorzugte Disziplinen und Favoriten sowie Jahrgang, Geschlecht und Lizenzart (nur für den Filter passender Wertungsklassen, für niemanden sonst sichtbar) hinterlegen. Ihre Mitgliedschaften und Rollen in Communities und Untergruppen werden gespeichert. Diese Daten verarbeiten wir zur Bereitstellung der von Ihnen gewählten Funktionen (Art. 6 Abs. 1 lit. b DSGVO); die freiwilligen Angaben können Sie jederzeit ändern oder entfernen.",
       "moderationTitle": "Meldungen und Moderation",
       "moderationBody": "Mitglieder können Inhalte melden. Meldungen mit Grund, Anmerkung und Melder sowie Maßnahmen der Administratoren (z. B. Entfernen von Inhalten, Sperren von Communities oder Konten mit Begründung) werden in einem Protokoll gespeichert, um Missbrauch zu verfolgen und die Plattform zu schützen (Art. 6 Abs. 1 lit. f DSGVO). Die Protokolle sind nur für Administratoren einsehbar.",
       "analyticsTitle": "Reichweitenmessung",
@@ -997,7 +1185,16 @@
       "searchPlaceholder": "Namen eingeben…",
       "noMatches": "Keine passenden Community-Mitglieder",
       "stravaProfile": "Strava-Profil von {{name}}",
-      "byEmailHint": "Nutze die E-Mail-Adresse, wenn mehrere Mitglieder denselben Anzeigenamen haben. Die Person muss schon Mitglied der Community sein."
+      "byEmailHint": "Nutze die E-Mail-Adresse, wenn mehrere Mitglieder denselben Anzeigenamen haben. Die Person muss schon Mitglied der Community sein.",
+      "filterPlaceholder": "Mitglieder suchen…",
+      "filterRole": "Nach Rolle filtern",
+      "filterAll": "Alle",
+      "filterAdmins": "Admins",
+      "filterModerators": "Moderatoren",
+      "filterMembers": "Mitglieder",
+      "count": "{{count}} Mitglieder",
+      "noResults": "Keine passenden Mitglieder",
+      "countOne": "1 Mitglied"
     },
     "requests": {
       "title": "Beitrittsanfragen",
@@ -1242,5 +1439,129 @@
       "post": "Beitrag melden",
       "comment": "Kommentar melden"
     }
+  },
+  "classes": {
+    "title": "Wertungsklassen",
+    "fitCount": "{{count}} von {{total}} passen zu dir",
+    "setProfile": "Jahrgang und Lizenz im Profil angeben, um passende Klassen zu sehen",
+    "fitsYou": "Passt zu dir",
+    "years": "Jahrgang {{from}}–{{to}}",
+    "yearsAndOlder": "Jahrgang {{year}} und älter",
+    "yearsAndYounger": "Jahrgang {{year}} und jünger",
+    "allAges": "Alle Altersklassen",
+    "start": "Start",
+    "count": "{{count}} Wertungsklassen",
+    "championshipAny": "Meisterschaft",
+    "championship": {
+      "club": "Vereinsmeisterschaft",
+      "district": "Bezirksmeisterschaft",
+      "state": "Landesmeisterschaft",
+      "regional": "Regionalmeisterschaft",
+      "national": "Deutsche Meisterschaft",
+      "continental": "Kontinentalmeisterschaft",
+      "world": "Weltmeisterschaft"
+    },
+    "gender": {
+      "open": "offen",
+      "male": "männlich",
+      "female": "weiblich"
+    },
+    "license": {
+      "open": "offen für alle",
+      "unlicensed": "Hobby (ohne Lizenz)",
+      "license": "mit Lizenz",
+      "uci": "UCI-Lizenz"
+    },
+    "formTitle": "Meisterschaft und Wertungsklassen",
+    "championshipLabel": "Meisterschaft (ganzes Event)",
+    "noChampionship": "Keine Meisterschaft",
+    "formHint": "Ein Eintrag pro Wertungsklasse. Eine Altersklasse füllt das Alter vor. Das Alter zählt nach Jahrgang: das Alter, das man im Jahr des Events erreicht (U15 = 13 und 14).",
+    "name": "Klasse",
+    "namePlaceholder": "z. B. U15 männlich, Elite Frauen, Hobby",
+    "genderLabel": "Wer",
+    "licenseLabel": "Lizenz",
+    "ageMin": "Alter ab",
+    "ageMax": "Alter bis",
+    "championshipShort": "Meisterschaft",
+    "note": "Hinweis",
+    "remove": "Klasse entfernen",
+    "add": "Klasse hinzufügen",
+    "dayLicense": "Tageslizenz möglich",
+    "dayLicenseLabel": "Tageslizenz möglich",
+    "licenseClassesLabel": "Mit Lizenz nur:",
+    "licenseClass": {
+      "elite_amateur": "Elite Amateure",
+      "amateur": "Amateure",
+      "master": "Masters"
+    },
+    "categoryLabel": "Altersklasse",
+    "category": {
+      "u7": "U7 (Laufrad, bis 6)",
+      "u9": "U9 (7–8)",
+      "u11": "U11 (9–10)",
+      "u13": "U13",
+      "u15": "U15",
+      "u17": "U17",
+      "u19": "U19 (Junioren)",
+      "u23": "U23",
+      "elite": "Elite",
+      "masters1": "Masters 1 (30–39)",
+      "masters2": "Masters 2 (40–49)",
+      "masters3": "Masters 3 (50–59)",
+      "masters4": "Masters 4 (60+)"
+    },
+    "routesTitle": "Strecken",
+    "addRoute": "Strecke hinzufügen",
+    "distanceKm": "Länge (km)",
+    "elevationM": "Höhenmeter",
+    "km": "{{value}} km",
+    "hm": "{{value}} hm",
+    "formHintTouring": "Ein Eintrag pro Strecke mit Länge und Höhenmetern. Mindestalter oder Hinweise (z. B. „unter 18 nur mit Einverständnis der Eltern“) bei Bedarf angeben.",
+    "routeCount": "{{count}} Strecken",
+    "removeRoute": "Strecke entfernen"
+  },
+  "parking": {
+    "title": "Parken",
+    "disclaimerLabel": "Hinweis zu den Parkangaben",
+    "disclaimer": "Angaben ohne Gewähr: Parkplätze können sich kurzfristig ändern oder falsch eingetragen sein. Bitte die Beschilderung und Hinweise vor Ort beachten.",
+    "distance": "≈ {{meters}} m Luftlinie zum Veranstaltungsort",
+    "capacity": "ca. {{count}} Plätze",
+    "open": "geöffnet {{from}}–{{until}} Uhr",
+    "kind": {
+      "participants": "Teilnehmende",
+      "teams": "Teams/Busse",
+      "spectators": "Zuschauer",
+      "accessible": "Barrierefrei",
+      "bikes": "Fahrräder",
+      "camper": "Wohnmobile"
+    },
+    "fee": {
+      "free": "kostenlos",
+      "paid": "kostenpflichtig"
+    },
+    "formTitle": "Parken",
+    "formHint": "Wo sollen Teilnehmende, Teams oder Zuschauer parken? Setze den Punkt auf die Einfahrt (oder die Mitte eines kleinen Parkplatzes); dorthin führt die Navigation. Große Flächen im Hinweis beschreiben. Parkplätze sind öffentlich sichtbar.",
+    "name": "Bezeichnung",
+    "namePlaceholder": "z. B. Parkplatz Sporthalle Nord",
+    "kindsLabel": "Für wen",
+    "kindsRequired": "Mindestens eine Gruppe wählen.",
+    "pointLabel": "Einfahrt auf der Karte",
+    "pointRequired": "Bitte einen Punkt auf der Karte setzen.",
+    "address": "Adresse",
+    "capacityLabel": "Plätze (ca.)",
+    "feeLabel": "Gebühr",
+    "feeNote": "Gebühr-Hinweis",
+    "feeNotePlaceholder": "z. B. 5 € pro Tag",
+    "openFrom": "Geöffnet ab",
+    "openUntil": "Geöffnet bis",
+    "note": "Hinweis",
+    "notePlaceholder": "z. B. Zufahrt über die Lindenstraße, Beschilderung folgen",
+    "remove": "Parkplatz entfernen",
+    "add": "Parkplatz hinzufügen",
+    "showOnMap": "Auf Karte zeigen",
+    "unnamed": "Parkplatz",
+    "pointSet": "Punkt gesetzt",
+    "setPoint": "Auf der Karte setzen",
+    "movePoint": "Auf der Karte ändern"
   }
 }
