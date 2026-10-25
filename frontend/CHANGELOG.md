@@ -4,6 +4,9 @@
 
 ### Added
 
+- Admin file import page with check report, confirmation and run reports; event import info for admins
+- Event classes component, series chips, championship badges; class editor in the event form; rider section in the profile; racing filters in the event list; series format and season
+- Times follow `startTimeKnown`
 - Member pages: `app-member-filters` (search + role), `ui-pagination`, server-side subgroup suggestions
 
 ## [0.17.3] - 2026-10-22

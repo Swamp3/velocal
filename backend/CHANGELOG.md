@@ -4,6 +4,11 @@
 
 ### Added
 
+- Migrations `AddEventImportData` (events: `start_time_known`, `sources`, `import_conflicts`, `import_run_id`, `edited_fields`; import_runs: `report`, `file_name`; repairs scraped UTC-midnight dates) and `AddEventClasses` (`event_classes`, `events.championship`, race_series `kind`/`season`/`source_name`/`external_key`, users `birth_year`/`gender`/`license_type`)
+- `POST import/events/check` (dry run with report), `POST import/events?acceptWarnings=` (refuses errors; warnings need confirmation), `GET import/jobs/:id/report`, `GET admin/events/:id/import-info`
+- Import validator with error/warning/info codes; file imports update only own events (sourceName + externalId), skip look-alikes, protect `edited_fields`, never clear or delete; events, classes and series links saved in one transaction
+- `GET /events`: `fitsMe`, `championship`, `hideLeagues`; events carry `classes`, `series`, `sources` (name/url), `startTimeKnown`
+- `POST import/events` (admin): validated file import (`ImportEventsDto`, max 5000 events, JSON body limit 10 MB) that runs as a job like the scrapers, without cooldown; `complete: true` marks missing upcoming events of that source
 - `GET communities/:id/members` and `GET communities/:slug/subgroups/:slug/members` now return `{ items, total, page, limit }` and accept `q`, `role`, `page`, `limit` (and `excludeSubgroup` for the club list); admins/moderators are listed first, then by name
 
 ## [0.17.3] - 2026-10-22
